@@ -15,7 +15,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Serve static files from parent directory (your website files)
 app.use(express.static(path.join(__dirname, '..')));
-// Serve admin files from current directory (admin.html)
+// Serve admin files from current directory (admin-enhanced.html)
 app.use(express.static(__dirname));
 
 // Create directories for storing orders and images

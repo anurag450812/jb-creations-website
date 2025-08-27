@@ -19,7 +19,7 @@ echo.
 echo To start with auto-reload (development):
 echo   npm run dev
 echo.
-echo Admin Panel will be available at: http://localhost:3001/admin.html
+echo Admin Panel will be available at: http://localhost:3001/admin-enhanced.html
 echo API will be available at: http://localhost:3001/api/
 echo.
 pause

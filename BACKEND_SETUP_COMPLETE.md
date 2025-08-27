@@ -26,11 +26,11 @@
    - Open: http://localhost:3001
    - Place a test order
    - Check your email for order notification
-   - Check admin panel: http://localhost:3001/admin.html
+   - Check admin panel: http://localhost:3001/admin-enhanced.html
 
 ## 🎯 **Your Website URLs:**
 - **Main Site**: http://localhost:3001
-- **Admin Panel**: http://localhost:3001/admin.html
+- **Admin Panel**: http://localhost:3001/admin-enhanced.html
 - **Health Check**: http://localhost:3001/health
 
 ## 📧 **What Happens When Someone Orders:**

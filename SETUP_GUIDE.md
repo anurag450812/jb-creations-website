@@ -65,7 +65,7 @@ Update the `checkout.js` file to point to your backend:
 ## Admin Panel Access
 
 Once the backend is running, access the admin panel at:
-http://localhost:3001/admin.html
+ http://localhost:3001/admin-enhanced.html
 
 ## What You'll Receive for Each Order
 

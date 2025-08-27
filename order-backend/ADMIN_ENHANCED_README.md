@@ -136,7 +136,7 @@ EMAIL_PASS=your-app-password
 order-backend/
 ├── admin-server.js          # Enhanced admin server
 ├── admin-enhanced.html      # Enhanced admin panel
-├── admin.html              # Legacy admin panel
+├── admin-enhanced.html    # Enhanced admin panel (admin.html removed)
 ├── order-receiver.js       # Original order processing server
 ├── package.json            # Dependencies and scripts
 ├── start-admin.bat         # Windows startup script

@@ -633,7 +633,7 @@ app.get('/admin', (req, res) => {
 
 // Serve the original admin panel
 app.get('/admin-legacy', (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin.html'));
+    res.sendFile(path.join(__dirname, 'admin-enhanced.html'));
 });
 
 // Error handler

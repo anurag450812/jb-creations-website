@@ -52,7 +52,7 @@ npm run dev
 ```
 
 ### 4. Access Admin Panel
-Open your browser and go to: `http://localhost:3001/admin.html`
+Open your browser and go to: `http://localhost:3001/admin-enhanced.html`
 
 ## Admin Panel Usage
 
@@ -138,7 +138,7 @@ The admin panel uses these backend API endpoints:
 
 ```
 order-backend/
-├── admin.html              # Admin panel interface
+├── admin-enhanced.html    # Admin panel interface
 ├── order-receiver.js       # Main server file
 ├── package.json            # Dependencies
 ├── setup.bat              # Windows setup script
