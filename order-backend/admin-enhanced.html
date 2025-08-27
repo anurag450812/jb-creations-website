@@ -1120,7 +1120,9 @@
                 // Try to load from backend first
                 const response = await fetch(`${API_BASE}/orders`);
                 if (response.ok) {
-                    allOrders = await response.json();
+                    const data = await response.json();
+                    // backend may return { orders: [...] } or an array directly
+                    allOrders = Array.isArray(data) ? data : (Array.isArray(data.orders) ? data.orders : []);
                 } else {
                     throw new Error('Backend not available');
                 }
@@ -1182,7 +1184,7 @@
                     <thead>
                         <tr>
                             <th width="50">
-                                <input type="checkbox" id="selectAllTable" onchange="toggleSelectAll()">
+                                <input type="checkbox" id="selectAllTable">
                             </th>
                             <th>Order #</th>
                             <th>Customer</th>
@@ -1198,12 +1200,10 @@
                         ${orders.map(order => `
                             <tr data-order="${order.orderNumber}">
                                 <td>
-                                    <input type="checkbox" class="order-select" 
-                                           value="${order.orderNumber}" 
-                                           onchange="updateSelection()">
+                                    <input type="checkbox" class="order-select" value="${order.orderNumber}">
                                 </td>
                                 <td>
-                                    <span class="order-number" onclick="viewOrder('${order.orderNumber}')">
+                                    <span class="order-number" role="button" tabindex="0" onclick="viewOrder('${order.orderNumber}')">
                                         ${order.orderNumber}
                                     </span>
                                 </td>
@@ -1211,12 +1211,12 @@
                                     <div>
                                         <strong>${order.customerName}</strong>
                                         <br>
-                                        <small class="text-muted">${order.customerEmail}</small>
+                                        <small class="text-muted">${order.customerEmail || ''}</small>
                                     </div>
                                 </td>
                                 <td>
                                     <span class="customer-type customer-${order.customerType}">
-                                        ${order.customerType}
+                                        ${order.customerType || ''}
                                     </span>
                                 </td>
                                 <td>
@@ -1226,8 +1226,8 @@
                                         <small class="text-muted">${new Date(order.orderDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>
                                     </div>
                                 </td>
-                                <td>${order.itemCount}</td>
-                                <td><strong>₹${order.total}</strong></td>
+                                <td>${order.itemCount || 0}</td>
+                                <td><strong>${order.total || 0}</strong></td>
                                 <td>
                                     <span class="status-badge status-${order.status}">${order.status}</span>
                                 </td>
@@ -1254,6 +1254,33 @@
             `;
             
             container.innerHTML = tableHTML;
+
+            // Attach listeners to newly added checkboxes
+            const selectAllTable = document.getElementById('selectAllTable');
+            if (selectAllTable) {
+                selectAllTable.addEventListener('change', () => {
+                    const checked = selectAllTable.checked;
+                    document.querySelectorAll('.order-select').forEach(cb => cb.checked = checked);
+                    // keep the top-level select in sync
+                    const topSelect = document.getElementById('selectAll');
+                    if (topSelect) topSelect.checked = checked;
+                    updateSelection();
+                });
+            }
+
+            // Individual checkboxes
+            document.querySelectorAll('.order-select').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    // if any checkbox is unchecked, clear select-all boxes
+                    const all = Array.from(document.querySelectorAll('.order-select'));
+                    const allChecked = all.length > 0 && all.every(c => c.checked);
+                    const topSelect = document.getElementById('selectAll');
+                    const tableSelect = document.getElementById('selectAllTable');
+                    if (topSelect) topSelect.checked = allChecked;
+                    if (tableSelect) tableSelect.checked = allChecked;
+                    updateSelection();
+                });
+            });
         }
 
         // Update statistics
