@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart Data Inspector</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .data-item { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .image-preview { max-width: 200px; max-height: 200px; border: 1px solid #ddd; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Cart Data Inspector</h1>
+    <div id="cartData"></div>
+    
+    <script>
+        function inspectCart() {
+            const cart = JSON.parse(localStorage.getItem('photoFramingCart') || '[]');
+            const container = document.getElementById('cartData');
+            
+            if (cart.length === 0) {
+                container.innerHTML = '<p>Cart is empty</p>';
+                return;
+            }
+            
+            container.innerHTML = cart.map((item, index) => {
+                const hasImage = item.printImage && item.printImage.startsWith('data:image/');
+                const hasOriginalImage = item.image && item.image.startsWith('data:image/');
+                
+                return `
+                    <div class="data-item">
+                        <h3>Item ${index + 1}</h3>
+                        <p><strong>Has printImage:</strong> ${hasImage ? 'YES' : 'NO'}</p>
+                        <p><strong>Has image:</strong> ${hasOriginalImage ? 'YES' : 'NO'}</p>
+                        <p><strong>printImage type:</strong> ${item.printImage ? typeof item.printImage : 'undefined'}</p>
+                        <p><strong>printImage starts with data:image:</strong> ${item.printImage && item.printImage.startsWith('data:image/') ? 'YES' : 'NO'}</p>
+                        
+                        ${hasImage ? `
+                            <p><strong>Image Preview:</strong></p>
+                            <img src="${item.printImage}" class="image-preview" alt="Print Image Preview">
+                        ` : ''}
+                        
+                        ${hasOriginalImage ? `
+                            <p><strong>Original Image Preview:</strong></p>
+                            <img src="${item.image}" class="image-preview" alt="Original Image Preview">
+                        ` : ''}
+                        
+                        <details>
+                            <summary>Raw Data</summary>
+                            <pre>${JSON.stringify(item, null, 2).substring(0, 1000)}${JSON.stringify(item, null, 2).length > 1000 ? '...' : ''}</pre>
+                        </details>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        inspectCart();
+        
+        // Auto refresh every 2 seconds
+        setInterval(inspectCart, 2000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Cart</title>
+</head>
+<body>
+    <h1>Cart Management</h1>
+    <button onclick="clearCart()">Clear Cart</button>
+    <button onclick="checkCart()">Check Cart</button>
+    <div id="result"></div>
+    
+    <script>
+        function clearCart() {
+            localStorage.removeItem('photoFramingCart');
+            document.getElementById('result').innerHTML = 'Cart cleared!';
+        }
+        
+        function checkCart() {
+            const cart = JSON.parse(localStorage.getItem('photoFramingCart') || '[]');
+            document.getElementById('result').innerHTML = `
+                <h3>Cart Contents:</h3>
+                <p>Number of items: ${cart.length}</p>
+                <pre>${JSON.stringify(cart, null, 2)}</pre>
+            `;
+        }
+    </script>
+</body>
+</html>

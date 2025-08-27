@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customize Your Frame - JB Creations</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Authentication styles for header */
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .auth-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .guest-buttons {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .auth-link {
+            color: white;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.2);
+            transition: left 0.5s;
+        }
+
+        .auth-link:hover::before {
+            left: 100%;
+        }
+
+        .signin-link {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .signin-link:hover {
+            background: #82C0CC;
+            border-color: #82C0CC;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(130, 192, 204, 0.3);
+        }
+
+        .signup-link {
+            background: #82C0CC;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #16697A;
+            font-weight: 700;
+        }
+
+        .signup-link:hover {
+            background: #EDE7E3;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(237, 231, 227, 0.4);
+            color: #16697A;
+        }
+
+        .user-dropdown {
+            position: relative;
+        }
+
+        .user-avatar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .user-avatar:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            min-width: 180px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s;
+            margin-top: 8px;
+        }
+
+        .user-dropdown.active .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            transition: background 0.3s;
+            font-size: 14px;
+        }
+
+        .dropdown-item:hover {
+            background: #f8f9fa;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e9ecef;
+            margin: 8px 0;
+        }
+
+        .back-to-home {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-1px);
+        }
+
+        /* Profile Dropdown Styles */
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-icon-btn {
+            background: transparent;
+            border: none;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            box-shadow: none;
+            color: #16697A;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 22px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .profile-icon-btn:hover {
+            background: rgba(22, 105, 122, 0.25);
+            border: 1px solid rgba(22, 105, 122, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            color: white;
+        }
+
+        .profile-icon-btn i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .profile-icon-btn .button-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1;
+            margin: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Back to Home Button Styles */
+        .back-home-btn {
+            background: transparent;
+            border: none;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            box-shadow: none;
+            color: #16697A;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 22px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            min-width: 50px;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .back-home-btn:hover {
+            background: rgba(22, 105, 122, 0.25);
+            border: 1px solid rgba(22, 105, 122, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            color: white;
+        }
+
+        .back-home-btn i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin: 0;
+            line-height: 1;
+            font-size: 20px;
+        }
+
+        .back-home-btn .button-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1;
+            margin: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        .profile-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            min-width: 220px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            padding: 8px 0;
+        }
+
+        .profile-dropdown:hover .profile-dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .profile-dropdown-menu .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            margin: 2px 8px;
+        }
+
+        .profile-dropdown-menu .dropdown-item:hover {
+            background: linear-gradient(135deg, rgba(72, 159, 181, 0.1), rgba(72, 159, 181, 0.05));
+            color: #489FB5;
+            transform: translateX(5px);
+        }
+
+        .profile-dropdown-menu .dropdown-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(72, 159, 181, 0.3), transparent);
+            margin: 8px 16px;
+        }
+
+        @media (max-width: 600px) {
+            .header-right {
+                gap: 10px;
+            }
+
+            .guest-buttons {
+                gap: 8px;
+            }
+
+            .auth-link {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .auth-link i {
+                display: none;
+            }
+
+            .user-avatar {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+
+            .user-avatar span {
+                display: none;
+            }
+
+            .back-home-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .back-home-btn .button-label {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="site-header">
+        <div class="header-content">
+            <div class="header-left">
+                <!-- Back to Home Button -->
+                <div class="header-back">
+                    <a href="index.html" class="back-home-btn" id="backHomeBtn">
+                        <i class="fas fa-home"></i>
+                        <span class="button-label">Home</span>
+                    </a>
+                </div>
+            </div>
+            <div class="header-brand">
+                <h1 class="brand-name">JB Creations</h1>
+            </div>
+            <div class="header-right">
+                <div class="auth-section" id="authSection">
+                    <!-- Profile dropdown button (always visible) -->
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <button class="profile-icon-btn" id="profileBtn">
+                            <i class="fas fa-user-alt"></i>
+                            <span class="button-label">Profile</span>
+                        </button>
+                        <div class="profile-dropdown-menu" id="profileDropdownMenu">
+                            <!-- Guest user options -->
+                            <div class="guest-options" id="guestOptions">
+                                <a href="auth.html" class="dropdown-item">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    Sign In
+                                </a>
+                                <a href="auth.html" class="dropdown-item">
+                                    <i class="fas fa-user-plus"></i>
+                                    Sign Up
+                                </a>
+                                <div class="dropdown-divider"></div>
+                            </div>
+                            
+                            <!-- Authenticated user options (hidden by default) -->
+                            <div class="authenticated-options" id="authenticatedOptions" style="display: none;">
+                                <a href="#" class="dropdown-item" onclick="viewProfile()">
+                                    <i class="fas fa-user-circle"></i>
+                                    My Profile
+                                </a>
+                                <a href="#" class="dropdown-item" onclick="viewOrders()">
+                                    <i class="fas fa-box"></i>
+                                    My Orders
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a href="#" class="dropdown-item" onclick="authUtils.logout()">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Sign Out
+                                </a>
+                                <div class="dropdown-divider"></div>
+                            </div>
+                            
+                            <!-- Common options for all users -->
+                            <a href="#" class="dropdown-item" onclick="contactUs()">
+                                <i class="fas fa-envelope"></i>
+                                Contact Us
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="aboutUs()">
+                                <i class="fas fa-info-circle"></i>
+                                About Us
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="header-cart">
+                    <button class="cart-icon-btn" id="headerCartBtn" onclick="window.location.href='cart.html'">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" id="cartCount">0</span>
+                        <span class="button-label">Cart</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Left Side: Upload and Preview Section -->
+        <div class="left-section">
+            <!-- Upload Section -->
+            <div class="upload-section" id="uploadSection">
+                <div class="rain-glass">
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="water-droplet"></div>
+                    <div class="water-droplet"></div>
+                    <div class="water-droplet"></div>
+                    <div class="water-droplet"></div>
+                </div>
+                <div class="upload-header">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h2>Upload Your Image</h2>
+                </div>
+                <div class="frame" id="frame" data-size="13x19" data-orientation="portrait">
+                    <div class="image-container" id="imageContainer">
+                        <input type="file" id="imageUpload" accept="image/*" class="hidden-upload">
+                        <div class="upload-overlay" id="uploadOverlay">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Click here to upload your image</p>
+                            <span class="upload-hint">or drag and drop</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Section (Initially Hidden) -->
+            <div class="preview-section hidden" id="previewSection">
+                <div class="rain-glass">
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="water-droplet"></div>
+                    <div class="water-droplet"></div>
+                    <div class="water-droplet"></div>
+                    <div class="water-droplet"></div>
+                </div>
+                <div class="preview-header">
+                    <div class="preview-header-left">
+                        <i class="fas fa-eye"></i>
+                        <h2>Live Preview</h2>
+                    </div>
+                    <button id="changeImage" class="change-image-btn">
+                        Change Image
+                    </button>
+                    <button id="updateRoomPreviews" class="change-image-btn" style="background: #82C0CC; margin-left: 10px;">
+                        Update Room Previews
+                    </button>
+                </div>
+                <div class="frame-preview" data-size="13x19" data-orientation="portrait">
+                    <div class="frame-aspect-wrapper" data-size="13x19" data-orientation="portrait">
+                        <div class="frame" data-size="13x19" data-orientation="portrait">
+                            <div class="image-container">
+                                <img id="previewImage" class="preview-image">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="preview-controls">
+                    <div class="control-buttons">
+                        <div class="zoom-controls">
+                            <button id="zoomOut" title="Zoom Out (Large Step)"><i class="fas fa-minus"></i></button>
+                            <button id="precisionZoomOut" class="precision-zoom" title="Precision Zoom Out (Fine Step)"><i class="fas fa-minus"></i></button>
+                            <button id="precisionZoomIn" class="precision-zoom" title="Precision Zoom In (Fine Step)"><i class="fas fa-plus"></i></button>
+                            <button id="zoomIn" title="Zoom In (Large Step)"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <!-- Mobile buttons for touch devices -->
+                    <div class="mobile-controls">
+                        <button class="mobile-zoom-btn mobile-zoom-out" title="Zoom Out">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <button class="mobile-zoom-btn mobile-precision-zoom-out" title="Precision Zoom Out">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <button class="mobile-zoom-btn mobile-precision-zoom-in" title="Precision Zoom In">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button class="mobile-zoom-btn mobile-zoom-in" title="Zoom In">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button class="mobile-change-btn" onclick="document.getElementById('imageUpload').click()" title="Change Image">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Middle Section: Customization Cards -->
+        <div class="middle-section">
+            <div class="desktop-customization-section">
+                <div class="desktop-customization-header">
+                    <i class="fas fa-palette"></i>
+                    <h2>Customize Your Frame</h2>
+                </div>
+                
+                <!-- Desktop Compact Customization Cards -->
+                <div class="desktop-customization-cards">
+                    <div class="cards-container" id="cardsContainer">
+                        <!-- Size Card -->
+                        <div class="desktop-card active" data-type="size">
+                            <div class="desktop-card-header">
+                                <i class="fas fa-ruler-combined"></i>
+                                <span>Size</span>
+                            </div>
+                            <div class="desktop-card-content">
+                                <div class="desktop-size-grid">
+                                    <button class="desktop-size-btn" data-size="13x19" data-orientation="portrait" data-price="349">
+                                        <i class="fas fa-portrait"></i>
+                                        <div class="size-info">
+                                            <span class="size-text">13×19"</span>
+                                            <span class="orientation">Portrait</span>
+                                            <span class="price">₹349</span>
+                                        </div>
+                                    </button>
+                                    <button class="desktop-size-btn" data-size="13x19" data-orientation="landscape" data-price="349">
+                                        <i class="fas fa-image"></i>
+                                        <div class="size-info">
+                                            <span class="size-text">13×19"</span>
+                                            <span class="orientation">Landscape</span>
+                                            <span class="price">₹349</span>
+                                        </div>
+                                    </button>
+                                    <button class="desktop-size-btn" data-size="13x10" data-orientation="portrait" data-price="249">
+                                        <i class="fas fa-portrait"></i>
+                                        <div class="size-info">
+                                            <span class="size-text">13×10"</span>
+                                            <span class="orientation">Portrait</span>
+                                            <span class="price">₹249</span>
+                                        </div>
+                                    </button>
+                                    <button class="desktop-size-btn" data-size="13x10" data-orientation="landscape" data-price="249">
+                                        <i class="fas fa-image"></i>
+                                        <div class="size-info">
+                                            <span class="size-text">13×10"</span>
+                                            <span class="orientation">Landscape</span>
+                                            <span class="price">₹249</span>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Color Card -->
+                        <div class="desktop-card" data-type="color">
+                            <div class="desktop-card-header">
+                                <i class="fas fa-fill-drip"></i>
+                                <span>Color</span>
+                            </div>
+                            <div class="desktop-card-content">
+                                <div class="desktop-color-grid">
+                                    <button class="desktop-color-btn" data-color="black">
+                                        <div class="color-preview black-preview"></div>
+                                        <span>Black</span>
+                                    </button>
+                                    <button class="desktop-color-btn" data-color="white">
+                                        <div class="color-preview white-preview"></div>
+                                        <span>White</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Texture Card -->
+                        <div class="desktop-card" data-type="texture">
+                            <div class="desktop-card-header">
+                                <i class="fas fa-texture"></i>
+                                <span>Texture</span>
+                            </div>
+                            <div class="desktop-card-content">
+                                <div class="desktop-texture-grid">
+                                    <button class="desktop-texture-btn" data-texture="smooth">
+                                        <i class="fas fa-grip-lines"></i>
+                                        <span>Smooth</span>
+                                    </button>
+                                    <button class="desktop-texture-btn" data-texture="rough">
+                                        <i class="fas fa-grip-lines-vertical"></i>
+                                        <span>Rough</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Adjustments Card -->
+                        <div class="desktop-card" data-type="adjustments">
+                            <div class="desktop-card-header">
+                                <i class="fas fa-sliders-h"></i>
+                                <span>Adjust</span>
+                            </div>
+                            <div class="desktop-card-content">
+                                <div class="desktop-adjustments-container">
+                                    <div class="desktop-adjustment-item">
+                                        <i class="fas fa-sun"></i>
+                                        <span>Brightness</span>
+                                        <input type="range" id="brightness" min="0" max="200" value="100">
+                                    </div>
+                                    <div class="desktop-adjustment-item">
+                                        <i class="fas fa-adjust"></i>
+                                        <span>Contrast</span>
+                                        <input type="range" id="contrast" min="0" max="200" value="100">
+                                    </div>
+                                    <div class="desktop-adjustment-item">
+                                        <i class="fas fa-lightbulb"></i>
+                                        <span>Highlights</span>
+                                        <input type="range" id="highlights" min="0" max="200" value="100">
+                                    </div>
+                                    <div class="desktop-adjustment-item">
+                                        <i class="fas fa-moon"></i>
+                                        <span>Shadows</span>
+                                        <input type="range" id="shadows" min="0" max="200" value="100">
+                                    </div>
+                                    <div class="desktop-adjustment-item">
+                                        <i class="fas fa-paint-brush"></i>
+                                        <span>Vibrance</span>
+                                        <input type="range" id="vibrance" min="0" max="200" value="100">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation Bar -->
+            <div class="navigation-bar">
+                <div class="card-indicators-section">
+                    <button class="card-nav-btn prev-card-btn" id="prevCardBtn" disabled>
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    
+                    <div class="card-indicators">
+                        <div class="card-dot active" data-card="0"></div>
+                        <div class="card-dot" data-card="1"></div>
+                        <div class="card-dot" data-card="2"></div>
+                        <div class="card-dot" data-card="3"></div>
+                    </div>
+                    
+                    <button class="card-nav-btn next-card-btn" id="nextCardBtn">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Total Price Bar -->
+            <div class="total-price-bar">
+                <div class="bottom-bar-content">
+                    <div class="price-and-cart">
+                        <div class="total-price-section">
+                            <i class="fas fa-tag"></i>
+                            <span class="price-label">Total:</span>
+                            <span class="price-value" id="totalPrice">₹0</span>
+                        </div>
+                        <button id="addToCart" class="floating-cart-btn" disabled>
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Add to Cart</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Section: Room Preview Section -->
+        <div class="right-section">
+            <div class="room-preview-section">
+                <div class="rain-glass">
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="raindrop"></div>
+                    <div class="water-droplet"></div>
+                    <div class="water-droplet"></div>
+                    <div class="water-droplet"></div>
+                    <div class="water-droplet"></div>
+                </div>
+                <div class="preview-header">
+                    <div class="preview-header-left">
+                        <i class="fas fa-home"></i>
+                        <h2>Room Preview</h2>
+                    </div>
+                </div>
+                <div class="room-preview-container">
+                    <!-- Default room preview image (shown when no frame size is selected) -->
+                    <img src="Room-previewbackground.png" alt="Room Preview" class="room-preview-image default-preview" id="defaultRoomPreview">
+                    
+                    <!-- Frame-specific room preview slider (hidden by default) -->
+                    <div class="room-slider-container" id="roomSliderContainer" style="display: none;">
+                        <div class="room-slider" id="roomSlider">
+                            <!-- Images will be dynamically loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Room Preview Navigation Bar -->
+                <div class="room-navigation-bar">
+                    <div class="room-indicators-section">
+                        <button class="room-nav-btn prev" id="roomSliderPrev" title="Previous image">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        
+                        <div class="room-indicators" id="sliderIndicators">
+                            <!-- Dots will be dynamically added here -->
+                        </div>
+                        
+                        <button class="room-nav-btn next" id="roomSliderNext" title="Next image">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- Mobile Customization Section -->
+        <div class="mobile-customization-section" id="mobileCustomizationSection">
+            <div class="mobile-customization-header">
+                <i class="fas fa-palette"></i>
+                <h2>Customize Your Frame</h2>
+            </div>
+            
+            <!-- Mobile Compact Customization Cards -->
+            <div class="mobile-customization-cards" id="mobileCustomizationCards">
+                <!-- Size Card -->
+                <div class="mobile-card" data-type="size">
+                    <div class="mobile-card-header">
+                        <i class="fas fa-ruler-combined"></i>
+                        <span>Size</span>
+                    </div>
+                    <div class="mobile-card-content">
+                        <div class="mobile-size-grid">
+                            <button class="mobile-size-btn" data-size="13x19" data-orientation="portrait" data-price="349">
+                                <i class="fas fa-portrait"></i>
+                                <div class="size-info">
+                                    <span class="size-text">13×19"</span>
+                                    <span class="orientation">Portrait</span>
+                                    <span class="price">₹349</span>
+                                </div>
+                            </button>
+                            <button class="mobile-size-btn" data-size="13x19" data-orientation="landscape" data-price="349">
+                                <i class="fas fa-image"></i>
+                                <div class="size-info">
+                                    <span class="size-text">13×19"</span>
+                                    <span class="orientation">Landscape</span>
+                                    <span class="price">₹349</span>
+                                </div>
+                            </button>
+                            <button class="mobile-size-btn" data-size="13x10" data-orientation="portrait" data-price="249">
+                                <i class="fas fa-portrait"></i>
+                                <div class="size-info">
+                                    <span class="size-text">13×10"</span>
+                                    <span class="orientation">Portrait</span>
+                                    <span class="price">₹249</span>
+                                </div>
+                            </button>
+                            <button class="mobile-size-btn" data-size="13x10" data-orientation="landscape" data-price="249">
+                                <i class="fas fa-image"></i>
+                                <div class="size-info">
+                                    <span class="size-text">13×10"</span>
+                                    <span class="orientation">Landscape</span>
+                                    <span class="price">₹249</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Color Card -->
+                <div class="mobile-card" data-type="color">
+                    <div class="mobile-card-header">
+                        <i class="fas fa-fill-drip"></i>
+                        <span>Color</span>
+                    </div>
+                    <div class="mobile-card-content">
+                        <div class="mobile-color-grid">
+                            <button class="mobile-color-btn" data-color="black">
+                                <div class="color-preview black-preview"></div>
+                                <span>Black</span>
+                            </button>
+                            <button class="mobile-color-btn" data-color="white">
+                                <div class="color-preview white-preview"></div>
+                                <span>White</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Texture Card -->
+                <div class="mobile-card" data-type="texture">
+                    <div class="mobile-card-header">
+                        <i class="fas fa-texture"></i>
+                        <span>Texture</span>
+                    </div>
+                    <div class="mobile-card-content">
+                        <div class="mobile-texture-grid">
+                            <button class="mobile-texture-btn" data-texture="smooth">
+                                <i class="fas fa-grip-lines"></i>
+                                <span>Smooth</span>
+                            </button>
+                            <button class="mobile-texture-btn" data-texture="rough">
+                                <i class="fas fa-grip-lines-vertical"></i>
+                                <span>Rough</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Adjustments Card -->
+                <div class="mobile-card" data-type="adjustments">
+                    <div class="mobile-card-header">
+                        <i class="fas fa-sliders-h"></i>
+                        <span>Adjust</span>
+                    </div>
+                    <div class="mobile-card-content">
+                        <div class="mobile-adjustments-container">
+                            <div class="mobile-adjustment-item">
+                                <i class="fas fa-sun"></i>
+                                <input type="range" id="mobileBrightness" min="0" max="200" value="100">
+                            </div>
+                            <div class="mobile-adjustment-item">
+                                <i class="fas fa-adjust"></i>
+                                <input type="range" id="mobileContrast" min="0" max="200" value="100">
+                            </div>
+                            <div class="mobile-adjustment-item">
+                                <i class="fas fa-lightbulb"></i>
+                                <input type="range" id="mobileHighlights" min="0" max="200" value="100">
+                            </div>
+                            <div class="mobile-adjustment-item">
+                                <i class="fas fa-moon"></i>
+                                <input type="range" id="mobileShadows" min="0" max="200" value="100">
+                            </div>
+                            <div class="mobile-adjustment-item">
+                                <i class="fas fa-paint-brush"></i>
+                                <input type="range" id="mobileVibrance" min="0" max="200" value="100">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Initialize authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthUI();
+            setupUserDropdown();
+        });
+
+        // Update authentication UI based on login status
+        function updateAuthUI() {
+            const user = authUtils.getCurrentUser();
+            const guestButtons = document.getElementById('guestButtons');
+            const userDropdown = document.getElementById('userDropdown');
+            const userName = document.getElementById('userName');
+
+            if (user) {
+                // User is logged in
+                guestButtons.style.display = 'none';
+                userDropdown.style.display = 'block';
+                userName.textContent = user.name;
+            } else {
+                // User is not logged in
+                guestButtons.style.display = 'flex';
+                userDropdown.style.display = 'none';
+            }
+        }
+
+        // Setup user dropdown functionality
+        function setupUserDropdown() {
+            const userAvatar = document.getElementById('userAvatar');
+            const userDropdown = document.getElementById('userDropdown');
+
+            if (userAvatar) {
+                userAvatar.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('active');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function() {
+                    userDropdown.classList.remove('active');
+                });
+            }
+        }
+
+        // View user profile
+        function viewProfile() {
+            const user = authUtils.getCurrentUser();
+            if (user) {
+                alert(`Profile for ${user.name}\nEmail: ${user.email}\nPhone: ${user.phone}\nMember since: ${new Date(user.registrationDate).toLocaleDateString()}`);
+            }
+        }
+
+        // View user orders
+        function viewOrders() {
+            window.location.href = 'my-orders.html';
+        }
+    </script>
+</body>
+</html>

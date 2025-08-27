@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Basic Functionality</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Test Basic Functionality</h1>
+        
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+            <div id="imageContainer" class="image-container-test" style="border: 2px dashed #ccc; padding: 50px; text-align: center; cursor: pointer;">
+                <p>Click here to upload an image</p>
+            </div>
+        </div>
+        
+        <!-- Frame Size Selection -->
+        <div class="size-options">
+            <h3>Frame Size Selection Test</h3>
+            <button data-size="13x10" data-orientation="portrait" data-price="249">
+                13x10 Portrait - ₹249
+            </button>
+            <button data-size="13x10" data-orientation="landscape" data-price="249">
+                13x10 Landscape - ₹249
+            </button>
+            <button data-size="13x19" data-orientation="portrait" data-price="349" class="selected">
+                13x19 Portrait - ₹349
+            </button>
+            <button data-size="13x19" data-orientation="landscape" data-price="349">
+                13x19 Landscape - ₹349
+            </button>
+        </div>
+        
+        <div class="test-results">
+            <h3>Test Results:</h3>
+            <p>Check console for detailed logs. Click buttons and try uploading to test functionality.</p>
+        </div>
+    </div>
+    
+    <script src="test-basic-functionality.js"></script>
+</body>
+</html>

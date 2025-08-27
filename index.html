@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JB Creations - Custom Photo Framing</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Landing Page Styles */
+        .landing-page {
+            min-height: 100vh;
+            background: var(--background-color);
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .landing-content {
+            position: relative;
+            z-index: 2;
+            padding: 0 20px 60px;
+            max-width: 100%;
+            width: 100%;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
+        /* Glass Hero Image */
+        .hero-section {
+            position: relative;
+            background: url('room-preview-images/13X19 LANDSCAPE/1.jpg') center/cover;
+            border-radius: 20px;
+            overflow: hidden;
+            padding: 4rem 2rem;
+            margin-bottom: 1rem;
+            margin-top: 0;
+            text-align: center;
+            color: white;
+            box-shadow: 0 20px 60px rgba(130, 192, 204, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .hero-section:hover {
+            transform: translateY(-5px);
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(130, 192, 204, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1;
+        }
+
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(130, 192, 204, 0.6) 0%, rgba(130, 192, 204, 0.3) 100%);
+            z-index: 2;
+        }
+
+        /* Rain on Glass Effect */
+        .rain-glass {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .raindrop {
+            position: absolute;
+            background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 40%, transparent 70%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: droplet-stick-slide linear infinite;
+            opacity: 0;
+            filter: blur(0.5px);
+        }
+
+        .raindrop:nth-child(1) {
+            left: 10%;
+            width: 8px;
+            height: 12px;
+            animation-duration: 6s;
+            animation-delay: 0s;
+        }
+
+        .raindrop:nth-child(2) {
+            left: 20%;
+            width: 12px;
+            height: 18px;
+            animation-duration: 8s;
+            animation-delay: 1s;
+        }
+
+        .raindrop:nth-child(3) {
+            left: 35%;
+            width: 6px;
+            height: 10px;
+            animation-duration: 7s;
+            animation-delay: 2s;
+        }
+
+        .raindrop:nth-child(4) {
+            left: 50%;
+            width: 10px;
+            height: 15px;
+            animation-duration: 9s;
+            animation-delay: 3s;
+        }
+
+        .raindrop:nth-child(5) {
+            left: 65%;
+            width: 7px;
+            height: 11px;
+            animation-duration: 6.5s;
+            animation-delay: 4s;
+        }
+
+        .raindrop:nth-child(6) {
+            left: 80%;
+            width: 14px;
+            height: 20px;
+            animation-duration: 8.5s;
+            animation-delay: 1.5s;
+        }
+
+        .raindrop:nth-child(7) {
+            left: 15%;
+            width: 5px;
+            height: 8px;
+            animation-duration: 7.5s;
+            animation-delay: 2.5s;
+        }
+
+        .raindrop:nth-child(8) {
+            left: 45%;
+            width: 9px;
+            height: 14px;
+            animation-duration: 6.8s;
+            animation-delay: 0.8s;
+        }
+
+        .raindrop:nth-child(9) {
+            left: 75%;
+            width: 6px;
+            height: 9px;
+            animation-duration: 8.2s;
+            animation-delay: 3.5s;
+        }
+
+        .raindrop:nth-child(10) {
+            left: 90%;
+            width: 11px;
+            height: 16px;
+            animation-duration: 7.8s;
+            animation-delay: 4.5s;
+        }
+
+        @keyframes droplet-stick-slide {
+            0% {
+                top: 5%;
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            5% {
+                opacity: 0.8;
+                transform: scale(1);
+            }
+            15% {
+                top: 8%;
+                opacity: 0.9;
+                transform: scale(1.1);
+            }
+            25% {
+                top: 12%;
+                opacity: 1;
+                transform: scale(1);
+            }
+            35% {
+                top: 25%;
+                opacity: 0.9;
+                transform: scale(0.9) scaleY(1.3);
+            }
+            50% {
+                top: 45%;
+                opacity: 0.8;
+                transform: scale(0.8) scaleY(1.5);
+            }
+            70% {
+                top: 70%;
+                opacity: 0.7;
+                transform: scale(0.7) scaleY(1.8);
+            }
+            85% {
+                top: 85%;
+                opacity: 0.5;
+                transform: scale(0.6) scaleY(2);
+            }
+            100% {
+                top: 100%;
+                opacity: 0;
+                transform: scale(0.4) scaleY(2.5);
+            }
+        }
+
+        /* Additional water droplets for clustering effect */
+        .water-droplet {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.5) 60%, transparent 80%);
+            border-radius: 50%;
+            animation: small-droplet-slide linear infinite;
+            opacity: 0;
+            filter: blur(0.3px);
+        }
+
+        .water-droplet:nth-child(11) {
+            left: 25%;
+            width: 4px;
+            height: 4px;
+            animation-duration: 5s;
+            animation-delay: 1.2s;
+        }
+
+        .water-droplet:nth-child(12) {
+            left: 60%;
+            width: 3px;
+            height: 3px;
+            animation-duration: 6.5s;
+            animation-delay: 2.8s;
+        }
+
+        .water-droplet:nth-child(13) {
+            left: 40%;
+            width: 5px;
+            height: 5px;
+            animation-duration: 4.8s;
+            animation-delay: 3.7s;
+        }
+
+        .water-droplet:nth-child(14) {
+            left: 85%;
+            width: 3px;
+            height: 3px;
+            animation-duration: 7.2s;
+            animation-delay: 0.5s;
+        }
+
+        @keyframes small-droplet-slide {
+            0% {
+                top: 10%;
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            10% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            20% {
+                top: 15%;
+                opacity: 1;
+            }
+            40% {
+                top: 35%;
+                opacity: 0.9;
+            }
+            60% {
+                top: 60%;
+                opacity: 0.7;
+            }
+            80% {
+                top: 85%;
+                opacity: 0.4;
+            }
+            100% {
+                top: 105%;
+                opacity: 0;
+                transform: scale(0.3);
+            }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 3;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.95;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            margin-bottom: 2.5rem;
+            max-width: min(600px, 90%);
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.7;
+            opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-section .cta-button {
+            background: rgba(255, 166, 43, 0.9);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            text-shadow: none;
+        }
+
+        .hero-section .cta-button:hover {
+            background: rgba(255, 166, 43, 1);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            text-decoration: none;
+            color: white;
+        }
+
+        /* CTA Sub-section with glass effect */
+        .cta-sub-section {
+            position: relative;
+            background: url('room-preview-images/13X19 PORTRAIT/2.jpg') center/cover;
+            border-radius: 25px;
+            overflow: hidden;
+            color: white;
+            box-shadow: 0 20px 60px rgba(130, 192, 204, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .cta-sub-section:hover {
+            transform: translateY(-5px);
+        }
+
+        .cta-sub-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(130, 192, 204, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1;
+        }
+
+        .cta-sub-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(130, 192, 204, 0.6) 0%, rgba(130, 192, 204, 0.3) 100%);
+            z-index: 2;
+        }
+
+        .cta-sub-section .sub-section-content {
+            position: relative;
+            z-index: 3;
+        }
+
+        .cta-sub-section .sub-section-title,
+        .cta-sub-section .sub-section-subtitle {
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .cta-sub-section .cta-button {
+            background: rgba(255, 166, 43, 0.9);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            text-shadow: none;
+        }
+
+        .cta-sub-section .cta-button:hover {
+            background: rgba(255, 166, 43, 1);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Sub-section containers */
+        .sub-section {
+            background: linear-gradient(135deg, #82C0CC 0%, #489FB5 50%, #82C0CC 100%);
+            border-radius: 25px;
+            padding: 3rem 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 
+                0 20px 60px rgba(130, 192, 204, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .sub-section:hover {
+            transform: translateY(-8px);
+            box-shadow: 
+                0 30px 80px rgba(130, 192, 204, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .sub-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0.05) 100%
+            );
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1;
+        }
+
+        .sub-section::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 45%,
+                rgba(255, 255, 255, 0.05) 50%,
+                transparent 55%
+            );
+            transform: translateX(-100%);
+            animation: shimmer 8s infinite;
+            z-index: 3;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .sub-section-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .sub-section-title {
+            text-align: center;
+            color: white;
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 4;
+            transition: all 0.3s ease;
+        }
+
+        .sub-section:hover .sub-section-title {
+            transform: scale(1.05);
+        }
+
+        .sub-section-subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Services section - transparent background */
+        #services-section {
+            background: transparent;
+            box-shadow: none;
+            border: none;
+            padding: 3rem 2rem;
+            margin-bottom: 4rem;
+            margin-top: 2rem;
+        }
+
+        #services-section:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        #services-section::before {
+            display: none;
+        }
+
+        #services-section::after {
+            display: none;
+        }
+
+        #services-section .sub-section-title {
+            color: #333;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+            margin-bottom: 1rem;
+        }
+
+        #services-section .sub-section-subtitle {
+            color: rgba(51, 51, 51, 0.8);
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.6);
+            margin-bottom: 2.5rem;
+        }
+
+        /* Services section feature cards with #82C0CC color */
+        #services-section .feature-card {
+            background: linear-gradient(145deg, #82C0CC, #6BA8B5);
+            border: 2px solid rgba(130, 192, 204, 0.6);
+            color: white;
+            box-shadow: 
+                0 8px 32px rgba(130, 192, 204, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        #services-section .feature-card:hover {
+            background: linear-gradient(145deg, #8FC7D1, #82C0CC);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 
+                0 20px 60px rgba(130, 192, 204, 0.4),
+                0 0 0 1px rgba(130, 192, 204, 0.8),
+                inset 0 1px 0 rgba(255, 255, 255, 0.7),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+            border-color: rgba(130, 192, 204, 0.8);
+        }
+
+        #services-section .feature-card::before {
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.15),
+                transparent
+            );
+        }
+
+        /* How It Works section - transparent background */
+        #how-it-works-section {
+            background: transparent;
+            box-shadow: none;
+            border: none;
+            padding: 3rem 2rem;
+            margin-bottom: 4rem;
+            margin-top: 2rem;
+        }
+
+        #how-it-works-section:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        #how-it-works-section::before {
+            display: none;
+        }
+
+        #how-it-works-section::after {
+            display: none;
+        }
+
+        #how-it-works-section .sub-section-title {
+            color: #333;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+            margin-bottom: 1rem;
+        }
+
+        #how-it-works-section .sub-section-subtitle {
+            color: rgba(51, 51, 51, 0.8);
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.6);
+            margin-bottom: 2.5rem;
+        }
+
+        /* How It Works section step cards with #82C0CC color */
+        #how-it-works-section .step-card {
+            background: linear-gradient(145deg, #82C0CC, #6BA8B5);
+            border: 2px solid rgba(130, 192, 204, 0.6);
+            color: white;
+            box-shadow: 
+                0 8px 32px rgba(130, 192, 204, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        #how-it-works-section .step-card:hover {
+            background: linear-gradient(145deg, #8FC7D1, #82C0CC);
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 
+                0 20px 60px rgba(130, 192, 204, 0.4),
+                0 0 0 1px rgba(130, 192, 204, 0.8),
+                inset 0 1px 0 rgba(255, 255, 255, 0.7),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+            border-color: rgba(130, 192, 204, 0.8);
+        }
+
+        #how-it-works-section .step-card::before {
+            background: radial-gradient(
+                circle,
+                rgba(255, 255, 255, 0.06) 0%,
+                transparent 70%
+            );
+        }
+
+        /* Profile Dropdown Styles */
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-icon-btn {
+            background: transparent;
+            border: none;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            box-shadow: none;
+            color: #16697A;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 22px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .profile-icon-btn:hover {
+            background: rgba(22, 105, 122, 0.25);
+            border: 1px solid rgba(22, 105, 122, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            color: white;
+        }
+
+        .profile-icon-btn i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .profile-icon-btn .button-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1;
+            margin: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        .profile-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            min-width: 220px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            padding: 8px 0;
+        }
+
+        .profile-dropdown:hover .profile-dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .profile-dropdown-menu .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            margin: 2px 8px;
+        }
+
+        .profile-dropdown-menu .dropdown-item:hover {
+            background: linear-gradient(135deg, rgba(72, 159, 181, 0.1), rgba(72, 159, 181, 0.05));
+            color: #489FB5;
+            transform: translateX(5px);
+        }
+
+        .profile-dropdown-menu .dropdown-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(72, 159, 181, 0.3), transparent);
+            margin: 8px 16px;
+        }
+
+        /* Authentication styles for header */
+        .auth-section {
+            display: flex;
+            align-items: center;
+        }
+
+
+
+        /* Hero Section */
+        .hero-section {
+            text-align: center;
+            margin: 60px 0;
+            color: white;
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            font-weight: 400;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            margin-bottom: 50px;
+            max-width: min(600px, 90%);
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0.85;
+            line-height: 1.6;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #489FB5, #82C0CC, #489FB5);
+            color: #FFFFFF;
+            padding: 20px 45px;
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 
+                0 12px 35px rgba(72, 159, 181, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                transparent
+            );
+            transition: left 1s;
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 
+                0 20px 50px rgba(255, 166, 43, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #FFA62B, #82C0CC, #FFA62B);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .cta-button:active {
+            transform: translateY(-1px);
+        }
+
+        /* Features Section */
+        .features-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+            gap: 40px;
+            margin: 80px 0;
+            width: 100%;
+        }
+
+        .feature-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05));
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 8px 32px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.08),
+                transparent
+            );
+            transition: left 1.2s;
+        }
+
+        .feature-card:hover::before {
+            left: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            background: linear-gradient(145deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1));
+            box-shadow: 
+                0 20px 60px rgba(255, 255, 255, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.7),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #16697A;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1) rotateY(15deg);
+            color: #FFA62B;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .feature-description {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+            gap: 30px;
+            margin: 80px 0;
+            text-align: center;
+            width: 100%;
+        }
+
+        .stat-card {
+            color: white;
+            background: linear-gradient(145deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            padding: 40px 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 8px 25px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 140px;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.06),
+                transparent
+            );
+            transition: left 1s;
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px) scale(1.05);
+            background: linear-gradient(145deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1));
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 
+                0 15px 40px rgba(255, 255, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+
+        .stat-number {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #FFA62B;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+
+        .stat-card:hover .stat-number {
+            transform: scale(1.1);
+            color: #489FB5;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.2;
+            word-wrap: break-word;
+            max-width: 100%;
+        }
+
+        /* How it Works Section */
+        .how-it-works {
+            margin: 80px 0;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 50px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .steps-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+            gap: 40px;
+            margin-top: 60px;
+            padding-top: 30px;
+            width: 100%;
+        }
+
+        .step-card {
+            position: relative;
+            background: linear-gradient(145deg, rgba(255,255,255,0.25), rgba(255,255,255,0.05));
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 20px;
+            padding: 45px 25px 35px;
+            color: white;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: visible;
+            box-shadow: 
+                0 8px 32px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .step-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(
+                circle,
+                rgba(255, 255, 255, 0.03) 0%,
+                transparent 70%
+            );
+            transform: translateX(-100%) translateY(-100%);
+            transition: transform 1s ease;
+        }
+
+        .step-card:hover::before {
+            transform: translateX(0) translateY(0);
+        }
+
+        .step-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            background: linear-gradient(145deg, rgba(255,255,255,0.35), rgba(255,255,255,0.1));
+            box-shadow: 
+                0 20px 60px rgba(255, 255, 255, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.7),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #489FB5, #82C0CC);
+            color: #FFFFFF;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.3rem;
+            box-shadow: 
+                0 8px 25px rgba(72, 159, 181, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .step-card:hover .step-number {
+            transform: translateX(-50%) scale(1.1) rotateY(180deg);
+            background: linear-gradient(135deg, #FFA62B, #82C0CC);
+            box-shadow: 
+                0 12px 35px rgba(255, 166, 43, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .step-icon {
+            font-size: 2.8rem;
+            margin: 15px 0 20px;
+            color: #16697A;
+            transition: all 0.3s ease;
+        }
+
+        .step-card:hover .step-icon {
+            transform: scale(1.15) rotateZ(5deg);
+            color: #FFA62B;
+        }
+
+        .step-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .step-description {
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .landing-content {
+                padding: 60px 15px 40px;
+            }
+
+            .sub-section {
+                padding: 2rem 1.5rem;
+                margin-bottom: 2rem;
+                border-radius: 20px;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+
+            .hero-description {
+                font-size: 1rem;
+                max-width: 95%;
+            }
+
+            .cta-button {
+                padding: 15px 30px;
+                font-size: 1rem;
+            }
+
+            .features-section {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                margin: 60px 0;
+            }
+
+            .feature-card {
+                padding: 30px 20px;
+            }
+
+            .stats-section {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+                margin: 60px 0;
+            }
+
+            .stat-number {
+                font-size: 2.2rem;
+            }
+
+            .stat-label {
+                font-size: 0.9rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .steps-container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+        }
+
+        /* Large screens */
+        @media (min-width: 1400px) {
+            .landing-content {
+                padding: 0 40px 60px;
+            }
+
+            .sub-section {
+                padding: 4rem 3rem;
+            }
+
+            .features-section {
+                gap: 50px;
+            }
+
+            .stats-section {
+                gap: 40px;
+            }
+
+            .steps-container {
+                gap: 50px;
+            }
+        }
+
+        /* Ultra-wide screens */
+        @media (min-width: 1800px) {
+            .landing-content {
+                padding: 0 60px 60px;
+            }
+
+            .sub-section {
+                padding: 5rem 4rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header-right {
+                gap: 10px;
+            }
+
+            .profile-icon-btn {
+                min-width: 40px;
+                font-size: 18px;
+                padding: 6px 8px;
+                gap: 2px;
+            }
+
+            .profile-icon-btn .button-label {
+                font-size: 9px;
+            }
+
+            .cart-icon-btn {
+                min-width: 40px;
+                font-size: 16px;
+                padding: 6px 8px;
+                gap: 2px;
+            }
+
+            .cart-icon-btn .button-label {
+                font-size: 9px;
+            }
+
+            .profile-dropdown-menu {
+                min-width: 200px;
+                right: -10px;
+            }
+
+            .profile-dropdown-menu .dropdown-item {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="landing-page">
+    <!-- Header -->
+    <header class="site-header">
+        <div class="header-content">
+            <div class="header-left"></div>
+            <div class="header-brand">
+                <h1 class="brand-name">JB Creations</h1>
+            </div>
+            <div class="header-right">
+                <div class="auth-section" id="authSection">
+                    <!-- Profile dropdown button (always visible) -->
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <button class="profile-icon-btn" id="profileBtn">
+                            <i class="fas fa-user-alt"></i>
+                            <span class="button-label">Profile</span>
+                        </button>
+                        <div class="profile-dropdown-menu" id="profileDropdownMenu">
+                            <!-- Guest user options -->
+                            <div class="guest-options" id="guestOptions">
+                                <a href="auth.html" class="dropdown-item">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    Sign In
+                                </a>
+                                <a href="auth.html" class="dropdown-item">
+                                    <i class="fas fa-user-plus"></i>
+                                    Sign Up
+                                </a>
+                                <div class="dropdown-divider"></div>
+                            </div>
+                            
+                            <!-- Authenticated user options (hidden by default) -->
+                            <div class="authenticated-options" id="authenticatedOptions" style="display: none;">
+                                <a href="#" class="dropdown-item" onclick="viewProfile()">
+                                    <i class="fas fa-user-circle"></i>
+                                    My Profile
+                                </a>
+                                <a href="#" class="dropdown-item" onclick="viewOrders()">
+                                    <i class="fas fa-box"></i>
+                                    My Orders
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a href="#" class="dropdown-item" onclick="authUtils.logout()">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Sign Out
+                                </a>
+                                <div class="dropdown-divider"></div>
+                            </div>
+                            
+                            <!-- Common options for all users -->
+                            <a href="track-order.html" class="dropdown-item">
+                                <i class="fas fa-search"></i>
+                                Track Order
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="contactUs()">
+                                <i class="fas fa-envelope"></i>
+                                Contact Us
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="aboutUs()">
+                                <i class="fas fa-info-circle"></i>
+                                About Us
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="header-cart">
+                    <button class="cart-icon-btn" id="headerCartBtn" onclick="window.location.href='cart.html'">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" id="cartCount">0</span>
+                        <span class="button-label">Cart</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Landing Page Content -->
+    <div class="landing-content">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="rain-glass">
+                <div class="raindrop"></div>
+                <div class="raindrop"></div>
+                <div class="raindrop"></div>
+                <div class="raindrop"></div>
+                <div class="raindrop"></div>
+                <div class="raindrop"></div>
+                <div class="raindrop"></div>
+                <div class="raindrop"></div>
+                <div class="raindrop"></div>
+                <div class="raindrop"></div>
+                <div class="water-droplet"></div>
+                <div class="water-droplet"></div>
+                <div class="water-droplet"></div>
+                <div class="water-droplet"></div>
+            </div>
+            <div class="hero-content">
+                <h1 class="hero-title">Transform Your Memories</h1>
+                <p class="hero-subtitle">Beautiful Memories Deserve a Frame</p>
+                <p class="hero-description">
+                    Turn your precious moments into stunning wall art with our professional custom framing service. 
+                    High-quality materials, perfect craftsmanship, and delivered to your doorstep.
+                </p>
+                <a href="customize.html" class="cta-button">
+                    <i class="fas fa-palette"></i>
+                    Get Custom Frame
+                </a>
+            </div>
+        </section>
+
+        <!-- Features Sub-Section -->
+        <div class="sub-section" id="services-section">
+            <div class="sub-section-content">
+                <h2 class="sub-section-title">Our Services</h2>
+                <p class="sub-section-subtitle">Everything you need for perfect custom framing</p>
+                
+                <section class="features-section">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-upload"></i>
+                        </div>
+                        <h3 class="feature-title">Easy Upload</h3>
+                        <p class="feature-description">
+                            Simply upload your favorite photo and see it come to life in our intuitive frame customizer.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-palette"></i>
+                        </div>
+                        <h3 class="feature-title">Custom Design</h3>
+                        <p class="feature-description">
+                            Choose from multiple sizes, colors, and textures to create the perfect frame for your space.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <h3 class="feature-title">Live Preview</h3>
+                        <p class="feature-description">
+                            See exactly how your framed photo will look in a real room setting before you order.
+                        </p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shipping-fast"></i>
+                        </div>
+                        <h3 class="feature-title">Fast Delivery</h3>
+                        <p class="feature-description">
+                            Professional printing and framing with quick delivery right to your doorstep.
+                        </p>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Stats Sub-Section -->
+        <div class="sub-section">
+            <div class="sub-section-content">
+                <h2 class="sub-section-title">Our Track Record</h2>
+                <p class="sub-section-subtitle">Numbers that speak for our quality and service</p>
+                
+                <section class="stats-section">
+                    <div class="stat-card">
+                        <span class="stat-number">5000+</span>
+                        <span class="stat-label">Happy Customers</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">10,000+</span>
+                        <span class="stat-label">Photos Framed</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">99%</span>
+                        <span class="stat-label">Satisfaction Rate</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">24h</span>
+                        <span class="stat-label">Processing Time</span>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- How it Works Sub-Section -->
+        <div class="sub-section" id="how-it-works-section">
+            <div class="sub-section-content">
+                <h2 class="sub-section-title">How It Works</h2>
+                <p class="sub-section-subtitle">Simple steps to get your perfect custom frame</p>
+                
+                <section class="how-it-works">
+                    <div class="steps-container">
+                        <div class="step-card">
+                            <div class="step-number">1</div>
+                            <div class="step-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <h3 class="step-title">Upload Your Photo</h3>
+                            <p class="step-description">
+                                Choose your favorite high-resolution image from your device or cloud storage.
+                            </p>
+                        </div>
+
+                        <div class="step-card">
+                            <div class="step-number">2</div>
+                            <div class="step-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <h3 class="step-title">Customize Frame</h3>
+                            <p class="step-description">
+                                Select size, color, texture, and adjust your photo to perfection with our tools.
+                            </p>
+                        </div>
+
+                        <div class="step-card">
+                            <div class="step-number">3</div>
+                            <div class="step-icon">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <h3 class="step-title">Place Order</h3>
+                            <p class="step-description">
+                                Review your design, add to cart, and securely checkout with multiple payment options.
+                            </p>
+                        </div>
+
+                        <div class="step-card">
+                            <div class="step-number">4</div>
+                            <div class="step-icon">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <h3 class="step-title">Receive & Enjoy</h3>
+                            <p class="step-description">
+                                Your professionally framed photo will be delivered ready to hang and enjoy.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Call to Action Sub-Section -->
+        <div class="sub-section cta-sub-section">
+            <div class="rain-glass">
+                <div class="raindrop"></div>
+                <div class="raindrop"></div>
+                <div class="raindrop"></div>
+                <div class="raindrop"></div>
+                <div class="raindrop"></div>
+                <div class="raindrop"></div>
+                <div class="raindrop"></div>
+                <div class="raindrop"></div>
+                <div class="raindrop"></div>
+                <div class="raindrop"></div>
+                <div class="water-droplet"></div>
+                <div class="water-droplet"></div>
+                <div class="water-droplet"></div>
+                <div class="water-droplet"></div>
+            </div>
+            <div class="sub-section-content">
+                <h2 class="sub-section-title">Ready to Frame Your Memories?</h2>
+                <p class="sub-section-subtitle">Join thousands of satisfied customers who have transformed their photos into beautiful wall art.</p>
+                
+                <div style="text-align: center; margin-top: 2rem;">
+                    <a href="customize.html" class="cta-button">
+                        <i class="fas fa-arrow-right"></i>
+                        Start Customizing Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Initialize authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthUI();
+        });
+
+        // Update authentication UI based on login status
+        function updateAuthUI() {
+            const user = authUtils.getCurrentUser();
+            const guestOptions = document.getElementById('guestOptions');
+            const authenticatedOptions = document.getElementById('authenticatedOptions');
+
+            if (user) {
+                // User is logged in - show authenticated options, hide guest options
+                guestOptions.style.display = 'none';
+                authenticatedOptions.style.display = 'block';
+            } else {
+                // User is not logged in - show guest options, hide authenticated options
+                guestOptions.style.display = 'block';
+                authenticatedOptions.style.display = 'none';
+            }
+        }
+
+        // View user profile
+        function viewProfile() {
+            const user = authUtils.getCurrentUser();
+            if (user) {
+                alert(`Profile for ${user.name}\nEmail: ${user.email}\nPhone: ${user.phone}\nMember since: ${new Date(user.registrationDate).toLocaleDateString()}`);
+            }
+        }
+
+        // View user orders
+        function viewOrders() {
+            window.location.href = 'my-orders.html';
+        }
+
+        // Contact us function
+        function contactUs() {
+            alert('Contact Us\n\nEmail: contact@jbcreations.com\nPhone: +91 12345 67890\nAddress: 123 Art Street, Creative City, India\n\nWe\'d love to hear from you!');
+        }
+
+        // About us function
+        function aboutUs() {
+            alert('About JB Creations\n\nWe are passionate about turning your precious memories into beautiful wall art. With years of experience in custom photo framing, we use premium materials and professional craftsmanship to create frames that last a lifetime.\n\nOur mission is to help you showcase your most cherished moments in style.');
+        }
+    </script>
+</body>
+</html>
