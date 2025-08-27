@@ -1,0 +1,28 @@
+{
+  "name": "jb-creations-order-backend",
+  "version": "1.0.0",
+  "description": "Backend server for receiving photo framing orders",
+  "main": "order-receiver.js",
+  "scripts": {
+    "start": "node order-receiver.js",
+    "dev": "nodemon order-receiver.js",
+    "admin": "node admin-server.js",
+    "admin-dev": "nodemon admin-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.7",
+    "fs-extra": "^11.1.1",
+    "path": "^0.12.7",
+    "dotenv": "^16.3.1",
+    "archiver": "^6.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["photo", "framing", "orders", "backend"],
+  "author": "JB Creations",
+  "license": "ISC"
+}

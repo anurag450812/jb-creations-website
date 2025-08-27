@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aspect Ratio Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .test-frame {
+            width: 100%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: 8px solid #333;
+            margin: 15px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .test-frame::before {
+            content: attr(data-size) " " attr(data-orientation);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        /* Apply the same aspect ratio rules as the main site */
+        .test-frame[data-size="13x19"][data-orientation="landscape"] {
+            aspect-ratio: 19/13 !important;
+        }
+        
+        .test-frame[data-size="13x10"][data-orientation="landscape"] {
+            aspect-ratio: 13/10 !important;
+        }
+        
+        .test-frame[data-size="13x19"][data-orientation="portrait"] {
+            aspect-ratio: 13/19 !important;
+        }
+        
+        .test-frame[data-size="13x10"][data-orientation="portrait"] {
+            aspect-ratio: 10/13 !important;
+        }
+        
+        .info {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .resize-note {
+            background: #fffbf0;
+            border: 1px solid #ffd700;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .dimensions {
+            font-size: 11px;
+            color: #888;
+            text-align: center;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Frame Aspect Ratio Test</h2>
+        
+        <div class="resize-note">
+            📏 <strong>Resize Test:</strong> Drag the browser window smaller/larger to verify aspect ratios are maintained.
+        </div>
+        
+        <div class="info">Expected: 19:13 ≈ 1.46 (wider than tall)</div>
+        <div class="test-frame" data-size="13x19" data-orientation="landscape"></div>
+        <div class="dimensions" id="dim1"></div>
+        
+        <div class="info">Expected: 13:10 ≈ 1.30 (moderately wider than tall)</div>
+        <div class="test-frame" data-size="13x10" data-orientation="landscape"></div>
+        <div class="dimensions" id="dim2"></div>
+        
+        <div class="info">Expected: 13:19 ≈ 0.68 (taller than wide)</div>
+        <div class="test-frame" data-size="13x19" data-orientation="portrait"></div>
+        <div class="dimensions" id="dim3"></div>
+        
+        <div class="info">Expected: 10:13 ≈ 0.77 (moderately taller than wide)</div>
+        <div class="test-frame" data-size="13x10" data-orientation="portrait"></div>
+        <div class="dimensions" id="dim4"></div>
+    </div>
+    
+    <script>
+        function updateDimensions() {
+            const frames = document.querySelectorAll('.test-frame');
+            frames.forEach((frame, index) => {
+                const rect = frame.getBoundingClientRect();
+                const ratio = (rect.width / rect.height).toFixed(3);
+                const dimElement = document.getElementById(`dim${index + 1}`);
+                if (dimElement) {
+                    dimElement.textContent = `Actual: ${rect.width.toFixed(0)}×${rect.height.toFixed(0)} = ${ratio}`;
+                }
+            });
+        }
+        
+        // Update dimensions on load and resize
+        window.addEventListener('load', updateDimensions);
+        window.addEventListener('resize', updateDimensions);
+        
+        // Update every 100ms for real-time feedback during resize
+        setInterval(updateDimensions, 100);
+    </script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Cart</title>
+</head>
+<body>
+    <h1>Cart Debug</h1>
+    <button onclick="showCartData()">Show Cart Data</button>
+    <button onclick="clearCart()">Clear Cart</button>
+    <div id="output"></div>
+
+    <script>
+        function showCartData() {
+            const cart = JSON.parse(localStorage.getItem('photoFramingCart') || '[]');
+            const output = document.getElementById('output');
+            
+            if (cart.length === 0) {
+                output.innerHTML = '<p>Cart is empty</p>';
+                return;
+            }
+            
+            output.innerHTML = '<h2>Cart Contents:</h2>';
+            cart.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.style.border = '1px solid #ccc';
+                div.style.margin = '10px';
+                div.style.padding = '10px';
+                
+                div.innerHTML = `
+                    <h3>Item ${index + 1}</h3>
+                    <p><strong>ID:</strong> ${item.id}</p>
+                    <p><strong>Price:</strong> ₹${item.price}</p>
+                    <p><strong>Frame Size:</strong> ${item.frameSize ? JSON.stringify(item.frameSize) : 'N/A'}</p>
+                    <p><strong>Frame Color:</strong> ${item.frameColor}</p>
+                    <p><strong>Frame Texture:</strong> ${item.frameTexture}</p>
+                    <p><strong>Timestamp:</strong> ${item.timestamp}</p>
+                    <p><strong>Has Image:</strong> ${item.image ? 'Yes' : 'No'}</p>
+                    <p><strong>Image Type:</strong> ${item.image ? typeof item.image : 'N/A'}</p>
+                    <p><strong>Image Length:</strong> ${item.image ? item.image.length : 'N/A'}</p>
+                    <p><strong>Image Preview:</strong></p>
+                    ${item.image ? `<img src="${item.image}" style="max-width: 200px; max-height: 200px; border: 1px solid #000;">` : '<p>No image data</p>'}
+                `;
+                
+                output.appendChild(div);
+            });
+        }
+        
+        function clearCart() {
+            localStorage.removeItem('photoFramingCart');
+            document.getElementById('output').innerHTML = '<p>Cart cleared!</p>';
+        }
+    </script>
+</body>
+</html>

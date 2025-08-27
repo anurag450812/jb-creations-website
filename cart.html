@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - JB Creations</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* Authentication styles for header */
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .auth-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .guest-buttons {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .auth-link {
+            color: white;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.2);
+            transition: left 0.5s;
+        }
+
+        .auth-link:hover::before {
+            left: 100%;
+        }
+
+        .signin-link {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .signin-link:hover {
+            background: #82C0CC;
+            border-color: #82C0CC;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(130, 192, 204, 0.3);
+        }
+
+        .signup-link {
+            background: #82C0CC;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #16697A;
+            font-weight: 700;
+        }
+
+        .signup-link:hover {
+            background: #EDE7E3;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(237, 231, 227, 0.4);
+            color: #16697A;
+        }
+
+        .user-dropdown {
+            position: relative;
+        }
+
+        .user-avatar {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .user-avatar:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            min-width: 180px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s;
+            margin-top: 8px;
+        }
+
+        .user-dropdown.active .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            transition: background 0.3s;
+            font-size: 14px;
+        }
+
+        .dropdown-item:hover {
+            background: #f8f9fa;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e9ecef;
+            margin: 8px 0;
+        }
+
+        .back-to-home {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-1px);
+        }
+
+        /* Profile Dropdown Styles */
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-icon-btn {
+            background: transparent;
+            border: none;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            box-shadow: none;
+            color: #16697A;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 22px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .profile-icon-btn:hover {
+            background: rgba(22, 105, 122, 0.25);
+            border: 1px solid rgba(22, 105, 122, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            color: white;
+        }
+
+        .profile-icon-btn i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .profile-icon-btn .button-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1;
+            margin: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        .profile-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            min-width: 220px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            padding: 8px 0;
+        }
+
+        .profile-dropdown:hover .profile-dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .profile-dropdown-menu .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            margin: 2px 8px;
+        }
+
+        .profile-dropdown-menu .dropdown-item:hover {
+            background: linear-gradient(135deg, rgba(72, 159, 181, 0.1), rgba(72, 159, 181, 0.05));
+            color: #489FB5;
+            transform: translateX(5px);
+        }
+
+        .profile-dropdown-menu .dropdown-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(72, 159, 181, 0.3), transparent);
+            margin: 8px 16px;
+        }
+
+        /* Cart Button Styles */
+        .header-cart {
+            display: flex;
+            align-items: center;
+        }
+
+        .cart-icon-btn {
+            background: transparent;
+            border: none;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            box-shadow: none;
+            color: #16697A;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 22px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .cart-icon-btn:hover {
+            background: rgba(22, 105, 122, 0.25);
+            border: 1px solid rgba(22, 105, 122, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            color: white;
+        }
+
+        .cart-icon-btn i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .cart-icon-btn .button-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1;
+            margin: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--highlight-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            border: 2px solid white;
+        }
+
+        @media (max-width: 600px) {
+            .header-right {
+                gap: 10px;
+            }
+
+            .guest-buttons {
+                gap: 8px;
+            }
+
+            .auth-link {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .auth-link i {
+                display: none;
+            }
+
+            .user-avatar {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+
+            .user-avatar span {
+                display: none;
+            }
+
+            .back-home-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .back-home-btn .button-label {
+                display: none;
+            }
+        }
+        .cart-page {
+            min-height: 100vh;
+            background: #EDE7E3;
+            padding-top: 80px;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #2d3436;
+            line-height: 1.6;
+        }
+
+        .cart-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 48px 30px;
+        }
+
+        .cart-header {
+            margin-bottom: 40px;
+            padding: 0;
+            text-align: left;
+        }
+
+        .cart-title {
+            font-size: 2.5rem;
+            color: #2d3436;
+            margin-bottom: 16px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1.1;
+        }
+
+        .cart-subtitle {
+            color: #74b9ff;
+            font-size: 1rem;
+            font-weight: 400;
+            margin: 0;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .cart-content {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .cart-items-section {
+            background: white;
+            border-radius: 12px;
+            padding: 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+        }
+
+        .cart-summary {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+            position: sticky;
+            top: 100px;
+        }
+
+        .cart-empty {
+            text-align: center;
+            padding: 80px 40px;
+            color: #636e72;
+        }
+
+        .cart-empty i {
+            font-size: 4rem;
+            color: #b2bec3;
+            margin-bottom: 24px;
+        }
+
+        .cart-empty h3 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+            color: #2d3436;
+            font-weight: 600;
+        }
+
+        .cart-empty p {
+            margin-bottom: 32px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 24px;
+            border-bottom: 1px solid #f1f3f4;
+            transition: background-color 0.2s ease;
+        }
+
+        .cart-item:hover {
+            background-color: #fafbfc;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            flex-shrink: 0;
+            border: 1px solid #e9ecef;
+            padding: 2px; /* Add small padding to prevent frame from touching edges */
+        }
+
+        .cart-item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 8px; /* Slightly smaller radius to account for padding */
+        }
+
+        .cart-item-image i {
+            font-size: 2rem;
+            color: #b2bec3;
+        }
+
+        .cart-item-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .cart-item-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #2d3436;
+            margin: 0;
+            line-height: 1.4;
+            letter-spacing: -0.01em;
+        }
+
+        .cart-item-specs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 12px 0;
+        }
+
+        .cart-item-spec {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            color: #636e72;
+            background: #f8f9fa;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            font-weight: 500;
+        }
+
+        .cart-item-spec i {
+            font-size: 0.8rem;
+            color: var(--accent-color);
+        }
+
+        .cart-item-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 16px;
+            margin-left: 24px;
+        }
+
+        .cart-item-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #16697A;
+            letter-spacing: -0.02em;
+        }
+
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fafbfc;
+            border-radius: 8px;
+            padding: 6px 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .quantity-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .quantity-btn:hover {
+            background: var(--accent-color);
+            transform: scale(1.05);
+        }
+
+        .quantity-display {
+            min-width: 32px;
+            text-align: center;
+            font-weight: 600;
+            color: #2d3436;
+            font-size: 1rem;
+        }
+
+        .remove-item-btn {
+            background: #e17055;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .remove-item-btn:hover {
+            background: #d63031;
+            transform: translateY(-1px);
+        }
+
+        .summary-title {
+            font-size: 1.25rem;
+            color: #2d3436;
+            margin-bottom: 24px;
+            font-weight: 700;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 2px solid #e9ecef;
+            font-weight: 700;
+        }
+
+        .summary-label {
+            color: #636e72;
+            font-weight: 500;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .summary-value {
+            color: #2d3436;
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: -0.01em;
+        }
+
+        .summary-total .summary-label,
+        .summary-total .summary-value {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #2d3436;
+            letter-spacing: -0.02em;
+        }
+
+        .cart-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .action-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            letter-spacing: -0.01em;
+            line-height: 1.4;
+        }
+
+        .checkout-btn {
+            background: #16697A;
+            color: white;
+            box-shadow: 0 3px 12px rgba(22, 105, 122, 0.25);
+            font-weight: 700;
+        }
+
+        .checkout-btn:hover {
+            background: #134e5a;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 16px rgba(22, 105, 122, 0.35);
+        }
+
+        .continue-shopping-btn {
+            background: transparent;
+            color: #636e72;
+            border: 2px solid #e9ecef;
+        }
+
+        .continue-shopping-btn:hover {
+            background: #f8f9fa;
+            border-color: #ddd;
+            color: #2d3436;
+        }
+
+        .clear-cart-btn {
+            background: #636e72;
+            color: white;
+        }
+
+        .clear-cart-btn:hover {
+            background: #2d3436;
+            transform: translateY(-1px);
+        }
+
+        .promo-section {
+            background: #fafbfc;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            border: 1px solid #e9ecef;
+        }
+
+        .promo-title {
+            font-size: 0.875rem;
+            color: #2d3436;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .promo-input {
+            display: flex;
+            gap: 12px;
+            align-items: stretch;
+        }
+
+        .promo-code-input {
+            flex: 1;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .promo-code-input:focus {
+            outline: none;
+            border-color: #16697A;
+            box-shadow: 0 0 0 3px rgba(22, 105, 122, 0.1);
+        }
+
+        .apply-coupon-btn {
+            color: #16697A;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .apply-coupon-btn:hover {
+            background: rgba(22, 105, 122, 0.1);
+            color: #134e5a;
+        }
+
+        .apply-promo-btn {
+            background: #16697A;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 24px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(22, 105, 122, 0.2);
+        }
+
+        .apply-promo-btn:hover {
+            background: #134e5a;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(22, 105, 122, 0.3);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .cart-container {
+                padding: 15px;
+            }
+
+            .cart-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .cart-summary {
+                position: static;
+                order: -1;
+            }
+
+            .cart-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .cart-item-image {
+                margin-right: 0;
+                align-self: center;
+            }
+
+            .cart-item-actions {
+                align-self: stretch;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                margin-left: 0;
+            }
+
+            .cart-item-specs {
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cart-title {
+                font-size: 1.5rem;
+            }
+
+            .cart-item-image {
+                width: 80px;
+                height: 80px;
+            }
+
+            .promo-input {
+                flex-direction: column;
+            }
+        }
+
+        /* Header Back Button Styles */
+        .header-back {
+            display: flex;
+            align-items: center;
+        }
+
+        .back-home-btn {
+            background: transparent;
+            border: none;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            box-shadow: none;
+            color: #16697A;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 22px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            min-width: 50px;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .back-home-btn:hover {
+            background: rgba(22, 105, 122, 0.25);
+            border: 1px solid rgba(22, 105, 122, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            color: white;
+        }
+
+        .back-home-btn i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin: 0;
+            line-height: 1;
+            font-size: 20px;
+        }
+
+        .back-home-btn .button-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1;
+            margin: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .back-home-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .back-home-btn .button-label {
+                display: none;
+            }
+        }
+
+        /* Selection header styles */
+        .selection-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            background: #fafbfc;
+            border-bottom: 1px solid #e9ecef;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .selection-count {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #e17055;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .selection-actions {
+            display: flex;
+            gap: 32px;
+        }
+
+        .action-link {
+            background: none;
+            border: none;
+            color: #636e72;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            padding: 8px 0;
+            letter-spacing: 0.5px;
+            transition: color 0.2s ease;
+            position: relative;
+        }
+
+        .action-link:hover {
+            color: #2d3436;
+        }
+
+        .action-link:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #e17055;
+            transition: width 0.2s ease;
+        }
+
+        .action-link:hover:after {
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="cart-page">
+    <!-- Header -->
+    <header class="site-header">
+        <div class="header-content">
+            <div class="header-left">
+                <!-- Back to Home Button -->
+                <div class="header-back">
+                    <a href="index.html" class="back-home-btn" id="backHomeBtn">
+                        <i class="fas fa-home"></i>
+                        <span class="button-label">Home</span>
+                    </a>
+                </div>
+            </div>
+            <div class="header-brand">
+                <h1 class="brand-name">JB Creations</h1>
+            </div>
+            <div class="header-right">
+                <div class="auth-section" id="authSection">
+                    <!-- Profile dropdown button (always visible) -->
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <button class="profile-icon-btn" id="profileBtn">
+                            <i class="fas fa-user-alt"></i>
+                            <span class="button-label">Profile</span>
+                        </button>
+                        <div class="profile-dropdown-menu" id="profileDropdownMenu">
+                            <!-- Guest user options -->
+                            <div class="guest-options" id="guestOptions">
+                                <a href="index.html" class="dropdown-item">
+                                    <i class="fas fa-home"></i>
+                                    Home
+                                </a>
+                                <a href="auth.html" class="dropdown-item">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    Sign In
+                                </a>
+                                <a href="auth.html" class="dropdown-item">
+                                    <i class="fas fa-user-plus"></i>
+                                    Sign Up
+                                </a>
+                                <div class="dropdown-divider"></div>
+                            </div>
+                            
+                            <!-- Authenticated user options (hidden by default) -->
+                            <div class="authenticated-options" id="authenticatedOptions" style="display: none;">
+                                <a href="index.html" class="dropdown-item">
+                                    <i class="fas fa-home"></i>
+                                    Home
+                                </a>
+                                <a href="#" class="dropdown-item" onclick="viewProfile()">
+                                    <i class="fas fa-user-circle"></i>
+                                    My Profile
+                                </a>
+                                <a href="#" class="dropdown-item" onclick="viewOrders()">
+                                    <i class="fas fa-box"></i>
+                                    My Orders
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a href="#" class="dropdown-item" onclick="authUtils.logout()">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Sign Out
+                                </a>
+                                <div class="dropdown-divider"></div>
+                            </div>
+                            
+                            <!-- Common options for all users -->
+                            <a href="track-order.html" class="dropdown-item">
+                                <i class="fas fa-search"></i>
+                                Track Order
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="contactUs()">
+                                <i class="fas fa-envelope"></i>
+                                Contact Us
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="aboutUs()">
+                                <i class="fas fa-info-circle"></i>
+                                About Us
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="header-cart">
+                    <button class="cart-icon-btn" id="headerCartBtn">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" id="cartCount">0</span>
+                        <span class="button-label">Cart</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="cart-container">
+        <div class="cart-header">
+            <h1 class="cart-title">Shopping Cart</h1>
+        </div>
+
+        <div class="cart-content">
+            <div class="cart-items-section">
+                <div class="cart-empty" id="cartEmpty" style="display: none;">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h3>Your cart is empty</h3>
+                    <p>Add some beautiful frames to get started!</p>
+                    <a href="customize.html" class="action-btn checkout-btn">
+                        <i class="fas fa-palette"></i>
+                        Start Customizing
+                    </a>
+                </div>
+                
+                <div class="cart-items" id="cartItems">
+                    <!-- Cart items will be dynamically populated here -->
+                </div>
+            </div>
+
+            <div class="cart-summary">
+                <h3 class="summary-title">PRICE DETAILS (<span id="itemCount">0</span> Item)</h3>
+                
+                <div class="summary-row">
+                    <span class="summary-label">Total MRP</span>
+                    <span class="summary-value">₹<span id="subtotalAmount">0</span></span>
+                </div>
+                
+                <div class="summary-row">
+                    <span class="summary-label">Discount on MRP</span>
+                    <span class="summary-value" style="color: #27ae60;">-₹<span id="discountAmount">0</span></span>
+                </div>
+                
+                <div class="summary-row" id="discountRow" style="display: none;">
+                    <span class="summary-label">Applied Discount</span>
+                    <span class="summary-value" style="color: #27ae60;">-₹<span id="appliedDiscountAmount">0</span></span>
+                </div>
+                
+                <div class="summary-row">
+                    <span class="summary-label">Coupon Discount</span>
+                    <button class="apply-coupon-btn" id="applyCouponBtn">Apply Coupon</button>
+                </div>
+
+                <div class="promo-section" id="promoSection" style="display: none;">
+                    <div class="promo-input">
+                        <input type="text" class="promo-code-input" id="promoCodeInput" placeholder="Enter coupon code">
+                        <button class="apply-promo-btn" id="applyPromoBtn">Apply</button>
+                    </div>
+                </div>
+                
+                <div class="summary-row">
+                    <span class="summary-label">Tax (18% GST)</span>
+                    <span class="summary-value">₹<span id="taxAmount">0</span></span>
+                </div>
+                
+                <div class="summary-row">
+                    <span class="summary-label">Shipping</span>
+                    <span class="summary-value" id="shippingAmount">₹0</span>
+                </div>
+                
+                <div class="summary-row">
+                    <span class="summary-label">Platform Fee</span>
+                    <span class="summary-value">₹<span id="platformFee">20</span></span>
+                </div>
+                
+                <div class="summary-row summary-total">
+                    <span class="summary-label">Total Amount</span>
+                    <span class="summary-value">₹<span id="totalAmount">0</span></span>
+                </div>
+
+                <div class="cart-actions">
+                    <a href="checkout.html" class="action-btn checkout-btn" id="checkoutBtn">
+                        PLACE ORDER
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="cart.js"></script>
+</body>
+</html>
