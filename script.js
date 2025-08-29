@@ -258,6 +258,8 @@ function initializeEventListeners() {
                     id: Date.now(),
                     printImage: printImageData,
                     previewImage: finalPreviewImage, // Use captured preview or fallback to print image
+                    displayImage: finalPreviewImage, // Add for backward compatibility
+                    originalImage: state.originalImage, // Add original uploaded image
                     frameSize: state.frameSize,
                     frameColor: state.frameColor || '#8B4513',
                     frameTexture: state.frameTexture || 'wood',
@@ -265,6 +267,7 @@ function initializeEventListeners() {
                     zoom: state.zoom,
                     position: { ...state.position },
                     price: state.price || 349,
+                    orderDate: new Date().toISOString(), // Add orderDate for checkout compatibility
                     timestamp: new Date().toISOString()
                 };
 
