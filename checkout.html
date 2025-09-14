@@ -7,6 +7,120 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        /* Professional Header Button Styling */
+        .back-home-btn {
+            background: transparent;
+            border: none;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            box-shadow: none;
+            color: #16697A;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 22px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            min-width: 50px;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .back-home-btn:hover {
+            background: rgba(22, 105, 122, 0.25);
+            border: 1px solid rgba(22, 105, 122, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            color: white;
+        }
+
+        .back-home-btn i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin: 0;
+            line-height: 1;
+            font-size: 20px;
+        }
+
+        .back-home-btn .button-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1;
+            margin: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        .profile-icon-btn {
+            background: transparent;
+            border: none;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            box-shadow: none;
+            color: #16697A;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 22px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .profile-icon-btn:hover {
+            background: rgba(22, 105, 122, 0.25);
+            border: 1px solid rgba(22, 105, 122, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            color: white;
+        }
+
+        .profile-icon-btn i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin: 0;
+            line-height: 1;
+            font-size: 20px;
+        }
+
+        .profile-icon-btn .button-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1;
+            margin: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
         :root {
             --primary-color: #16697A; /* Caribbean Current - Teal */
             --secondary-color: #EDE7E3; /* Isabelline - Light Beige */
@@ -1244,18 +1358,69 @@
     <header class="site-header">
         <div class="header-content">
             <div class="header-left">
-                <a href="index.html" class="back-to-home">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>Back to Home</span>
-                </a>
+                <!-- Back to Home Button -->
+                <div class="header-back">
+                    <a href="index.html" class="back-home-btn" id="backHomeBtn">
+                        <i class="fas fa-home"></i>
+                        <span class="button-label">Home</span>
+                    </a>
+                </div>
             </div>
             <div class="header-brand">
                 <h1 class="brand-name">JB Creations</h1>
             </div>
-            <div class="header-cart">
-                <a href="index.html" class="cart-icon-btn">
-                    <i class="fas fa-home"></i>
-                </a>
+            <div class="header-right">
+                <div class="header-cart">
+                    <button class="cart-icon-btn" onclick="window.location.href='cart.html'">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" id="cartCount">0</span>
+                        <span class="button-label">Cart</span>
+                    </button>
+                </div>
+                <div class="auth-section" id="authSection">
+                    <!-- Profile dropdown button (always visible) -->
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <button class="profile-icon-btn" id="profileBtn">
+                            <i class="fas fa-user-alt"></i>
+                            <span class="button-label">Profile</span>
+                        </button>
+                        <div class="profile-dropdown-menu" id="profileDropdownMenu">
+                            <!-- Guest user options -->
+                            <div class="guest-options" id="guestOptions">
+                                <a href="index.html" class="dropdown-item">
+                                    <i class="fas fa-home"></i>
+                                    Home
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a href="auth.html" class="dropdown-item">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    Sign In
+                                </a>
+                            </div>
+                            <!-- Logged in user options (hidden by default) -->
+                            <div class="user-options" id="userOptions" style="display: none;">
+                                <div class="user-info" id="userInfo">
+                                    <i class="fas fa-user-circle"></i>
+                                    <span id="userEmail">user@example.com</span>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <a href="my-orders.html" class="dropdown-item">
+                                    <i class="fas fa-box"></i>
+                                    My Orders
+                                </a>
+                                <a href="index.html" class="dropdown-item">
+                                    <i class="fas fa-home"></i>
+                                    Home
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <button class="dropdown-item sign-out-btn" id="signOutBtn">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Sign Out
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
