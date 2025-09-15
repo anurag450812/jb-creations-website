@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firebase Connection Test</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+</head>
+<body>
+    <h1>🔥 Firebase Connection Test</h1>
+    <div id="results"></div>
+    <button onclick="testFirebase()">Test Firebase Connection</button>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD0FgVzeo2P9rgNUqseQxIz_7oKA7hF6Tk",
+            authDomain: "jb-creations-auth.firebaseapp.com",
+            projectId: "jb-creations-auth",
+            storageBucket: "jb-creations-auth.firebasestorage.app",
+            messagingSenderId: "251713146803",
+            appId: "1:251713146803:web:b715d0da34f875aed205c6"
+        };
+
+        function log(message, isError = false) {
+            const div = document.createElement('div');
+            div.style.color = isError ? 'red' : 'green';
+            div.style.margin = '5px 0';
+            div.innerHTML = message;
+            document.getElementById('results').appendChild(div);
+            console.log(message);
+        }
+
+        function testFirebase() {
+            document.getElementById('results').innerHTML = '';
+            
+            // Test 1: Check if Firebase is loaded
+            log('🧪 Testing Firebase SDK loading...');
+            if (typeof firebase === 'undefined') {
+                log('❌ Firebase SDK not loaded! Check internet connection.', true);
+                return;
+            } else {
+                log('✅ Firebase SDK loaded successfully');
+            }
+            
+            // Test 2: Initialize Firebase
+            try {
+                log('🧪 Testing Firebase initialization...');
+                const app = firebase.initializeApp(firebaseConfig);
+                log('✅ Firebase initialized successfully');
+            } catch (error) {
+                log('❌ Firebase initialization failed: ' + error.message, true);
+                return;
+            }
+            
+            // Test 3: Check Auth
+            try {
+                log('🧪 Testing Firebase Auth...');
+                const auth = firebase.auth();
+                log('✅ Firebase Auth ready');
+            } catch (error) {
+                log('❌ Firebase Auth failed: ' + error.message, true);
+                return;
+            }
+            
+            // Test 4: Test reCAPTCHA
+            try {
+                log('🧪 Testing reCAPTCHA setup...');
+                const recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-test', {
+                    'size': 'invisible'
+                });
+                log('✅ reCAPTCHA initialized successfully');
+                
+                // Clean up
+                recaptchaVerifier.clear();
+            } catch (error) {
+                log('❌ reCAPTCHA failed: ' + error.message, true);
+            }
+            
+            log('🎉 All tests completed!');
+        }
+        
+        // Auto-run test when page loads
+        window.onload = function() {
+            setTimeout(testFirebase, 1000);
+        };
+    </script>
+    
+    <div id="recaptcha-test"></div>
+</body>
+</html>

@@ -18,11 +18,42 @@ document.addEventListener('DOMContentLoaded', function() {
     setupOtpInputs();
     setupPhoneValidation();
     
-    // Initialize reCAPTCHA after DOM is ready
+    // Don't initialize reCAPTCHA immediately to avoid conflicts
+    // It will be initialized when needed (when user tries to send OTP)
+    console.log('🔥 Auth system ready - reCAPTCHA will initialize on demand');
+});
+
+// Reset authentication state (useful for retrying)
+function resetAuthState() {
+    console.log('🔄 Resetting authentication state...');
+    
+    // Clear reCAPTCHA
+    if (recaptchaVerifier) {
+        try {
+            recaptchaVerifier.clear();
+            console.log('🧹 Cleared reCAPTCHA verifier');
+        } catch (error) {
+            console.log('🧹 reCAPTCHA clear error (safe to ignore):', error.message);
+        }
+        recaptchaVerifier = null;
+    }
+    
+    // Clear confirmation result
+    confirmationResult = null;
+    
+    // Remove all reCAPTCHA containers
+    const oldContainers = document.querySelectorAll('[id^="recaptcha-container"]');
+    oldContainers.forEach(container => {
+        container.remove();
+        console.log('🗑️ Removed old reCAPTCHA container during reset');
+    });
+    
+    // Re-initialize reCAPTCHA with fresh container
     setTimeout(() => {
         initializeRecaptcha();
-    }, 1000);
-});
+        console.log('✅ Authentication state reset complete');
+    }, 500);
+}
 
 // Check if user is already authenticated
 function checkAuthState() {
@@ -170,8 +201,8 @@ async function sendOtp(event) {
     showLoading(true);
     
     try {
-        // Use Firebase OTP sending
-        await simulateOtpSend(phone);
+        // Use MSG91 OTP sending
+        const result = await simulateOtpSend(phone);
         
         // Store phone number
         authState.currentPhone = '+91' + phone;
@@ -186,7 +217,7 @@ async function sendOtp(event) {
         showLoading(false);
         
         // Show user-friendly error message if available
-        const errorMessage = error.userMessage || 'Failed to send OTP. Please try again.';
+        const errorMessage = error.message || 'Failed to send OTP. Please try again.';
         showError('loginPhoneError', errorMessage);
         
         console.error('OTP send error:', error);
@@ -336,10 +367,10 @@ async function verifyOtp(event) {
     showLoading(true);
     
     try {
-        // Simulate OTP verification (replace with actual API call)
-        const isValid = await simulateOtpVerify(otp);
+        // Use MSG91 OTP verification
+        const result = await simulateOtpVerify(otp);
         
-        if (isValid) {
+        if (result && result.verified) {
             // Get or create user
             let user = getUserByPhone(authState.currentPhone.replace('+91', ''));
             
@@ -374,12 +405,14 @@ async function verifyOtp(event) {
             
         } else {
             showLoading(false);
-            showError('otpError', 'Invalid OTP. Please try again.');
+            const errorMsg = result && result.message ? result.message : 'Invalid OTP. Please try again.';
+            showError('otpError', errorMsg);
         }
         
     } catch (error) {
         showLoading(false);
-        showError('otpError', 'Failed to verify OTP. Please try again.');
+        const errorMsg = error.message || 'Failed to verify OTP. Please try again.';
+        showError('otpError', errorMsg);
         console.error('OTP verification error:', error);
     }
 }
@@ -399,10 +432,10 @@ async function verifySignupOtp(event) {
     showLoading(true);
     
     try {
-        // Simulate OTP verification (replace with actual API call)
-        const isValid = await simulateOtpVerify(otp);
+        // Use MSG91 OTP verification
+        const result = await simulateOtpVerify(otp);
         
-        if (isValid) {
+        if (result && result.verified) {
             // Create new user
             const user = {
                 id: generateUserId(),
@@ -533,23 +566,59 @@ function saveUser(user) {
 // Firebase Authentication Functions
 let recaptchaVerifier = null;
 let confirmationResult = null;
+let recaptchaContainerId = 'recaptcha-container';
+let recaptchaCounter = 0;
 
 // Initialize reCAPTCHA verifier (required for Firebase phone auth)
 function initializeRecaptcha() {
-    if (!recaptchaVerifier && window.firebase) {
+    // Always create a fresh container with unique ID
+    recaptchaCounter++;
+    recaptchaContainerId = `recaptcha-container-${recaptchaCounter}`;
+    
+    console.log(`🔧 Creating fresh reCAPTCHA container: ${recaptchaContainerId}`);
+    
+    // Remove any existing containers
+    const oldContainers = document.querySelectorAll('[id^="recaptcha-container"]');
+    oldContainers.forEach(container => {
+        container.remove();
+        console.log('🗑️ Removed old reCAPTCHA container');
+    });
+    
+    // Create new container
+    const newContainer = document.createElement('div');
+    newContainer.id = recaptchaContainerId;
+    newContainer.style.display = 'none';
+    document.body.appendChild(newContainer);
+    console.log(`✅ Created new reCAPTCHA container: ${recaptchaContainerId}`);
+    
+    // Clear any existing reCAPTCHA verifier
+    if (recaptchaVerifier) {
         try {
-            recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+            recaptchaVerifier.clear();
+            console.log('🧹 Cleared existing reCAPTCHA verifier');
+        } catch (error) {
+            console.log('🧹 reCAPTCHA clear error (safe to ignore):', error.message);
+        }
+        recaptchaVerifier = null;
+    }
+    
+    if (window.firebase) {
+        try {
+            console.log(`🔧 Initializing fresh reCAPTCHA on container: ${recaptchaContainerId}`);
+            recaptchaVerifier = new firebase.auth.RecaptchaVerifier(recaptchaContainerId, {
                 'size': 'invisible',
                 'callback': function (response) {
-                    console.log('reCAPTCHA solved');
+                    console.log('✅ reCAPTCHA solved successfully');
                 },
                 'expired-callback': function () {
-                    console.log('reCAPTCHA expired');
+                    console.log('⚠️ reCAPTCHA expired, will reinitialize');
+                    recaptchaVerifier = null;
                 }
             });
-            console.log('reCAPTCHA initialized');
+            console.log('✅ reCAPTCHA initialized successfully');
         } catch (error) {
-            console.error('reCAPTCHA initialization failed:', error);
+            console.error('❌ reCAPTCHA initialization failed:', error);
+            recaptchaVerifier = null;
         }
     }
 }
@@ -611,12 +680,23 @@ async function firebaseSendOtp(phoneNumber) {
             console.error('❌ Error code:', error.code);
             console.error('❌ Error message:', error.message);
             
-            // Reset reCAPTCHA on error
+            // Reset reCAPTCHA on error - create completely fresh instance
+            console.log('🔄 Resetting reCAPTCHA due to error...');
             if (recaptchaVerifier) {
-                console.log('🔄 Resetting reCAPTCHA due to error...');
-                recaptchaVerifier.clear();
+                try {
+                    recaptchaVerifier.clear();
+                } catch (clearError) {
+                    console.log('🧹 reCAPTCHA clear error (safe to ignore):', clearError.message);
+                }
                 recaptchaVerifier = null;
             }
+            
+            // Remove old containers and create fresh one for next attempt
+            const oldContainers = document.querySelectorAll('[id^="recaptcha-container"]');
+            oldContainers.forEach(container => {
+                container.remove();
+                console.log('🗑️ Removed old reCAPTCHA container after error');
+            });
             
             // Provide specific error messages
             let userFriendlyMessage = 'Failed to send OTP. ';
@@ -671,13 +751,13 @@ async function firebaseVerifyOtp(otp) {
     });
 }
 
-// Legacy functions for backward compatibility
+// Legacy functions for backward compatibility (now use MSG91)
 async function simulateOtpSend(phone) {
-    return await firebaseSendOtp(phone);
+    return await sendOTPViaMSG91(phone);
 }
 
 async function simulateOtpVerify(otp) {
-    return await firebaseVerifyOtp(otp);
+    return await verifyOTPViaMSG91(authState.currentPhone, otp);
 }
 
 // UI Helper functions

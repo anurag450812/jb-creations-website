@@ -1410,10 +1410,20 @@
         }
     </script>
 
-    <!-- Firebase Configuration -->
+    <!-- MSG91 SMS Configuration -->
+    <script src="msg91-config.js"></script>
+    
+    <!-- Firebase Configuration (keeping as backup) -->
     <script type="module" src="firebase-config.js"></script>
     
     <!-- reCAPTCHA Container (required for Firebase phone auth) -->
     <div id="recaptcha-container" style="display: none;"></div>
+    
+    <!-- Debug Reset Button (remove this in production) -->
+    <div style="position: fixed; top: 10px; right: 10px; z-index: 9999;">
+        <button onclick="resetAuthState()" style="background: #ff6b6b; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+            🔄 Reset Auth
+        </button>
+    </div>
 </body>
 </html>
