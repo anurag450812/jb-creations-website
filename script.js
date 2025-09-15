@@ -61,6 +61,21 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize default selections
     initializeDefaults();
+    
+    // Initialize cart count
+    updateCartCount();
+});
+
+// Also update cart count on window load as a fallback
+window.addEventListener('load', function() {
+    updateCartCount();
+});
+
+// Listen for storage changes to update cart count across tabs
+window.addEventListener('storage', function(e) {
+    if (e.key === 'photoFramingCart') {
+        updateCartCount();
+    }
 });
 
 // Function to initialize default selections
@@ -116,7 +131,29 @@ function initializeEventListeners() {
 
     // Frame Size Selection
     document.querySelectorAll('.size-options button, .desktop-size-btn').forEach(button => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', (event) => {
+            // Check if this is already a programmatic second click to avoid infinite loop
+            if (event.isTrusted === false && event.detail === 'second-click') {
+                console.log('Second click detected, processing normally');
+                processFrameSizeClick(button);
+                return;
+            }
+            
+            // This is the first click - process it and trigger second click
+            console.log('First click detected, triggering double-click sequence');
+            processFrameSizeClick(button);
+            
+            // Trigger second click after a brief delay
+            setTimeout(() => {
+                const secondClickEvent = new Event('click', { bubbles: true });
+                secondClickEvent.detail = 'second-click'; // Mark as second click
+                button.dispatchEvent(secondClickEvent);
+            }, 100); // 100ms delay between clicks
+        });
+    });
+
+    // Function to handle the actual frame size click processing
+    function processFrameSizeClick(button) {
             // Remove selected class from all buttons
             document.querySelectorAll('.size-options button, .desktop-size-btn').forEach(btn => {
                 btn.classList.remove('selected');
@@ -184,8 +221,7 @@ function initializeEventListeners() {
                     }
                 }, 300);
             }
-        });
-    });
+    }
 
     // Frame Color Selection
     document.querySelectorAll('.color-options button, .desktop-color-btn').forEach(button => {
@@ -1301,10 +1337,29 @@ window.testFrameCapture = async function() {
 
 // Cart Modal Functions
 function updateCartCount() {
-    const cart = JSON.parse(localStorage.getItem('photoFramingCart') || '[]');
-    const count = cart.length;
-    elements.cartCount.textContent = count;
-    elements.cartCount.style.display = count > 0 ? 'flex' : 'none';
+    try {
+        const cart = JSON.parse(localStorage.getItem('photoFramingCart') || '[]');
+        const count = cart.length;
+        
+        console.log('updateCartCount called:', {
+            cartData: localStorage.getItem('photoFramingCart'),
+            parsedCart: cart,
+            count: count
+        });
+        
+        // Handle both the elements object and direct DOM query
+        const cartCountElement = elements.cartCount || document.getElementById('cartCount');
+        
+        if (cartCountElement) {
+            cartCountElement.textContent = count;
+            cartCountElement.style.display = count > 0 ? 'flex' : 'none';
+            console.log('Cart count updated to:', count, 'Element:', cartCountElement);
+        } else {
+            console.warn('Cart count element not found - both elements.cartCount and getElementById failed');
+        }
+    } catch (error) {
+        console.error('Error in updateCartCount:', error);
+    }
 }
 
 function openCartModal() {
@@ -1453,9 +1508,6 @@ function clearCart() {
 // Cart functionality now handled in initializeEventListeners
 
 // Note: Other cart functionality moved to cart.js for the dedicated cart page
-
-// Initialize cart count on page load
-updateCartCount();
 
 // Add drag hint visibility toggle
 let dragTimeout;
@@ -2288,8 +2340,13 @@ document.addEventListener('DOMContentLoaded', function() {
             orientation: button.dataset.orientation
         };
         
-        // Initialize room preview slider for the selected frame size
-        initializeRoomSlider(button.dataset.size, button.dataset.orientation);
+        // Update frame size immediately to ensure state is consistent
+        updateFrameSize();
+        
+        // Delay room preview slider initialization by 1 second
+        setTimeout(() => {
+            initializeRoomSlider(button.dataset.size, button.dataset.orientation);
+        }, 1000);
         
         // Add animation classes for smooth transition
         const framePreview = document.querySelector('.frame-preview');
@@ -2306,11 +2363,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 frame.classList.add('frame-morphing');
             }
             
-            // Update frame attributes and size with a precise delay for smoother animation
-            setTimeout(() => {
-                updateFrameSize();
-            }, 100);
-            
             // Remove animation classes after animation completes
             setTimeout(() => {
                 framePreview.classList.remove('frame-transitioning');
@@ -2319,9 +2371,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     frame.classList.remove('frame-morphing');
                 }
             }, 600);
-        } else {
-            // Fallback if elements not found
-            updateFrameSize();
         }
     });
 
