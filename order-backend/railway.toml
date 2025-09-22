@@ -1,0 +1,33 @@
+# Railway Deployment Configuration
+version: 2
+
+build:
+  builder: nixpacks
+
+deploy:
+  startCommand: npm start
+  restartPolicyType: always
+  
+variables:
+  NODE_ENV: production
+  PORT: ${{RAILWAY_PORT}}
+  
+services:
+  - name: jb-creations-backend
+    source: 
+      repo: anurag450812/jb-creations-website
+      branch: main
+      rootDirectory: /order-backend
+    variables:
+      NODE_ENV: production
+      PORT: ${{RAILWAY_PORT}}
+      JWT_SECRET: ${{JWT_SECRET}}
+      EMAIL_USER: ${{EMAIL_USER}}
+      EMAIL_PASS: ${{EMAIL_PASS}}
+      MSG91_API_KEY: ${{MSG91_API_KEY}}
+      RAZORPAY_KEY_ID: ${{RAZORPAY_KEY_ID}}
+      RAZORPAY_KEY_SECRET: ${{RAZORPAY_KEY_SECRET}}
+
+networking:
+  serviceDomains:
+    - domain: your-app.railway.app

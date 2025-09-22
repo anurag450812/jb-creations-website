@@ -1,0 +1,11 @@
+[build]
+builder = "nixpacks"
+buildCommand = "cd order-backend && npm install"
+
+[deploy]
+startCommand = "cd order-backend && npm start"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[environments.production.variables]
+NODE_ENV = "production"

@@ -1885,110 +1885,6 @@
             </div>
         </div>
 
-        <!-- Shop Section with Razorpay Integration -->
-        <div class="sub-section" id="shop-section">
-            <div class="sub-section-content">
-                <h2 class="sub-section-title">Shop Custom Frames</h2>
-                <p class="sub-section-subtitle">Choose from our popular frame options and order instantly</p>
-                
-                <section class="shop-section">
-                    <div class="frame-options-grid">
-                        <div class="frame-option-card">
-                            <div class="frame-image">
-                                <i class="fas fa-image"></i>
-                            </div>
-                            <h3 class="frame-title">Premium Wooden Frame</h3>
-                            <div class="frame-features">
-                                <div class="feature">✓ High-quality wooden frame</div>
-                                <div class="feature">✓ Custom engraving included</div>
-                                <div class="feature">✓ Premium glass protection</div>
-                                <div class="feature">✓ Gift packaging</div>
-                            </div>
-                            <div class="frame-price">₹500.00</div>
-                            <button class="razorpay-payment-button" 
-                                    onclick="initiateFramePayment('premium', 50000)">
-                                <i class="fas fa-shopping-cart"></i>
-                                Order Premium Frame
-                            </button>
-                        </div>
-                        
-                        <div class="frame-option-card featured">
-                            <div class="featured-badge">Most Popular</div>
-                            <div class="frame-image">
-                                <i class="fas fa-images"></i>
-                            </div>
-                            <h3 class="frame-title">Standard Photo Frame</h3>
-                            <div class="frame-features">
-                                <div class="feature">✓ Durable plastic frame</div>
-                                <div class="feature">✓ Photo mounting service</div>
-                                <div class="feature">✓ Standard packaging</div>
-                                <div class="feature">✓ 1-year warranty</div>
-                            </div>
-                            <div class="frame-price">₹250.00</div>
-                            <button class="razorpay-payment-button" 
-                                    onclick="initiateFramePayment('standard', 25000)">
-                                <i class="fas fa-heart"></i>
-                                Order Standard Frame
-                            </button>
-                        </div>
-                        
-                        <div class="frame-option-card">
-                            <div class="frame-image">
-                                <i class="fas fa-layer-group"></i>
-                            </div>
-                            <h3 class="frame-title">Deluxe Frame Set</h3>
-                            <div class="frame-features">
-                                <div class="feature">✓ Set of 3 matching frames</div>
-                                <div class="feature">✓ Premium wood finish</div>
-                                <div class="feature">✓ Coordinated sizes</div>
-                                <div class="feature">✓ Professional installation guide</div>
-                            </div>
-                            <div class="frame-price">₹1,000.00</div>
-                            <button class="razorpay-payment-button" 
-                                    onclick="initiateFramePayment('deluxe', 100000)">
-                                <i class="fas fa-crown"></i>
-                                Order Deluxe Set
-                            </button>
-                        </div>
-                        
-                        <div class="frame-option-card">
-                            <div class="frame-image">
-                                <i class="fas fa-paint-brush"></i>
-                            </div>
-                            <h3 class="frame-title">Custom Canvas Print</h3>
-                            <div class="frame-features">
-                                <div class="feature">✓ Large format canvas</div>
-                                <div class="feature">✓ Museum-quality printing</div>
-                                <div class="feature">✓ Stretched on wooden frame</div>
-                                <div class="feature">✓ UV-resistant coating</div>
-                            </div>
-                            <div class="frame-price">₹750.00</div>
-                            <button class="razorpay-payment-button" 
-                                    onclick="initiateFramePayment('canvas', 75000)">
-                                <i class="fas fa-palette"></i>
-                                Order Canvas Print
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="shop-info">
-                        <div class="info-item">
-                            <i class="fas fa-shield-alt"></i>
-                            <span>Secure payments powered by Razorpay</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-truck"></i>
-                            <span>Free delivery across India</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-undo-alt"></i>
-                            <span>7-day return policy</span>
-                        </div>
-                    </div>
-                </section>
-            </div>
-        </div>
-
         <!-- Call to Action Sub-Section -->
         <div class="sub-section cta-sub-section">
             <div class="rain-glass">
@@ -2021,6 +1917,7 @@
         </div>
     </div>
 
+    <script src="api-client.js"></script>
     <script src="auth.js"></script>
     <script src="script.js"></script>
     <script>
