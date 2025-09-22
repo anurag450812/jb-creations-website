@@ -17,7 +17,7 @@ const winston = require('winston');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.AUTH_PORT || 3001;
+const PORT = process.env.PORT || process.env.AUTH_PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || 'change-this-in-production';
 const isProduction = process.env.NODE_ENV === 'production';
 
