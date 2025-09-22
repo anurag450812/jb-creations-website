@@ -1,0 +1,796 @@
+/**
+ * Razorpay Payment Interface Styles for JB Creations
+ * Complete styling for payment buttons, forms, popups, and responsive design
+ */
+
+/* ==============================================
+   PAYMENT POPUPS & OVERLAYS
+   ============================================== */
+.razorpay-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+
+.razorpay-success-popup,
+.razorpay-failure-popup,
+.razorpay-cancel-popup,
+.razorpay-error-popup {
+    background: white;
+    padding: 40px 30px;
+    border-radius: 16px;
+    text-align: center;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.4s ease;
+    position: relative;
+}
+
+.razorpay-success-popup::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border-radius: 18px;
+    z-index: -1;
+}
+
+.razorpay-failure-popup::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+    border-radius: 18px;
+    z-index: -1;
+}
+
+/* Popup Icons */
+.success-icon,
+.failure-icon,
+.cancel-icon,
+.error-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    display: block;
+    animation: bounceIn 0.6s ease;
+}
+
+.success-icon {
+    color: #28a745;
+}
+
+.failure-icon,
+.error-icon {
+    color: #dc3545;
+}
+
+.cancel-icon {
+    color: #ffc107;
+}
+
+/* Popup Headings */
+.razorpay-success-popup h3 {
+    color: #28a745;
+    margin-bottom: 25px;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.razorpay-failure-popup h3,
+.razorpay-error-popup h3 {
+    color: #dc3545;
+    margin-bottom: 25px;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.razorpay-cancel-popup h3 {
+    color: #f57c00;
+    margin-bottom: 25px;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+/* Payment Details */
+.payment-details,
+.failure-details,
+.cancel-details {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    text-align: left;
+}
+
+.payment-details p,
+.failure-details p,
+.cancel-details p {
+    margin: 8px 0;
+    color: #495057;
+    line-height: 1.6;
+}
+
+.payment-details strong,
+.failure-details strong,
+.cancel-details strong {
+    color: #343a40;
+    font-weight: 600;
+}
+
+/* Action Buttons */
+.success-actions,
+.failure-actions,
+.cancel-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 25px;
+    flex-wrap: wrap;
+}
+
+/* ==============================================
+   PAYMENT BUTTONS
+   ============================================== */
+.razorpay-payment-button {
+    background: linear-gradient(135deg, #16697A, #489FB5);
+    color: white;
+    border: none;
+    padding: 18px 36px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(22, 105, 122, 0.3);
+    position: relative;
+    overflow: hidden;
+    text-transform: none;
+    letter-spacing: 0.5px;
+}
+
+.razorpay-payment-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.razorpay-payment-button:hover::before {
+    left: 100%;
+}
+
+.razorpay-payment-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(22, 105, 122, 0.4);
+    background: linear-gradient(135deg, #1a7085, #52a8bd);
+}
+
+.razorpay-payment-button:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(22, 105, 122, 0.3);
+}
+
+.razorpay-payment-button:disabled {
+    background: linear-gradient(135deg, #6c757d, #adb5bd);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.razorpay-payment-button:disabled::before {
+    display: none;
+}
+
+/* Payment Button Variants */
+.razorpay-payment-button.btn-small {
+    padding: 12px 24px;
+    font-size: 14px;
+}
+
+.razorpay-payment-button.btn-large {
+    padding: 24px 48px;
+    font-size: 20px;
+}
+
+.razorpay-payment-button.btn-full-width {
+    width: 100%;
+    justify-content: center;
+}
+
+/* ==============================================
+   POPUP ACTION BUTTONS
+   ============================================== */
+.btn-primary,
+.btn-secondary {
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    min-width: 120px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #16697A, #489FB5);
+    color: white;
+    box-shadow: 0 4px 15px rgba(22, 105, 122, 0.3);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #1a7085, #52a8bd);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(22, 105, 122, 0.4);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+}
+
+/* ==============================================
+   PAYMENT FORMS
+   ============================================== */
+.razorpay-payment-form {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 20px auto;
+    border: 1px solid rgba(22, 105, 122, 0.1);
+}
+
+.razorpay-payment-form h2 {
+    color: #16697A;
+    text-align: center;
+    margin-bottom: 35px;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #343a40;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    background: #fff;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #16697A;
+    box-shadow: 0 0 0 3px rgba(22, 105, 122, 0.1);
+    transform: translateY(-1px);
+}
+
+.form-group input:invalid {
+    border-color: #dc3545;
+}
+
+.form-group .error-message {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 5px;
+    display: none;
+}
+
+/* ==============================================
+   AMOUNT DISPLAY
+   ============================================== */
+.razorpay-amount-display {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    margin: 25px 0;
+    border: 2px solid #16697A;
+    position: relative;
+    overflow: hidden;
+}
+
+.razorpay-amount-display::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #16697A, #489FB5, #16697A);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.razorpay-amount-display .price {
+    font-size: 42px;
+    font-weight: 800;
+    color: #16697A;
+    margin: 15px 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.razorpay-amount-display .description {
+    color: #6c757d;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.razorpay-amount-display .currency-note {
+    font-size: 12px;
+    color: #868e96;
+    font-style: italic;
+}
+
+/* ==============================================
+   ORDER SUMMARY
+   ============================================== */
+.razorpay-order-summary {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 12px;
+    margin: 25px 0;
+    border-left: 4px solid #16697A;
+}
+
+.razorpay-order-summary h3 {
+    color: #16697A;
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.order-item:last-child {
+    border-bottom: none;
+    font-weight: 700;
+    font-size: 18px;
+    color: #16697A;
+    margin-top: 10px;
+    padding-top: 20px;
+    border-top: 2px solid #16697A;
+}
+
+.order-item .item-name {
+    color: #495057;
+    font-weight: 500;
+}
+
+.order-item .item-price {
+    color: #28a745;
+    font-weight: 600;
+}
+
+/* ==============================================
+   PAYMENT HISTORY
+   ============================================== */
+.razorpay-payment-history {
+    margin: 30px 0;
+}
+
+.razorpay-payment-history h2 {
+    color: #16697A;
+    margin-bottom: 25px;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.payment-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    margin: 20px 0;
+    border-left: 5px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.payment-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: linear-gradient(45deg, #16697A, #489FB5);
+}
+
+.payment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.payment-card.success {
+    border-left-color: #28a745;
+}
+
+.payment-card.success::before {
+    background: linear-gradient(45deg, #28a745, #20c997);
+}
+
+.payment-card.failed {
+    border-left-color: #dc3545;
+}
+
+.payment-card.failed::before {
+    background: linear-gradient(45deg, #dc3545, #e74c3c);
+}
+
+.payment-card.cancelled {
+    border-left-color: #ffc107;
+}
+
+.payment-card.cancelled::before {
+    background: linear-gradient(45deg, #ffc107, #ffca2c);
+}
+
+.payment-card h4 {
+    margin: 0 0 15px 0;
+    color: #343a40;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.payment-card .payment-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    color: #6c757d;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.payment-status {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 25px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 10px;
+}
+
+.payment-status.success {
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.payment-status.failed {
+    background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.payment-status.cancelled {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.payment-status.pending {
+    background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* ==============================================
+   TEST CARD REFERENCE
+   ============================================== */
+.razorpay-test-cards {
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+    border-radius: 12px;
+    padding: 25px;
+    margin: 25px 0;
+}
+
+.razorpay-test-cards h3 {
+    color: #856404;
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+
+.test-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.test-card-info {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ffeaa7;
+}
+
+.test-card-info h4 {
+    color: #856404;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.test-card-info .card-details {
+    font-family: 'Courier New', monospace;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #495057;
+}
+
+/* ==============================================
+   RESPONSIVE DESIGN
+   ============================================== */
+@media (max-width: 768px) {
+    .razorpay-payment-form {
+        margin: 10px;
+        padding: 25px;
+    }
+    
+    .razorpay-payment-button {
+        width: 100%;
+        font-size: 16px;
+        padding: 16px;
+    }
+    
+    .razorpay-amount-display .price {
+        font-size: 32px;
+    }
+    
+    .success-actions,
+    .failure-actions,
+    .cancel-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+    }
+    
+    .razorpay-success-popup,
+    .razorpay-failure-popup,
+    .razorpay-cancel-popup,
+    .razorpay-error-popup {
+        margin: 20px;
+        padding: 30px 20px;
+    }
+    
+    .payment-card .payment-details {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .test-card-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .razorpay-payment-form {
+        padding: 20px 15px;
+    }
+    
+    .razorpay-amount-display .price {
+        font-size: 28px;
+    }
+    
+    .success-icon,
+    .failure-icon,
+    .cancel-icon,
+    .error-icon {
+        font-size: 48px;
+    }
+    
+    .razorpay-success-popup h3,
+    .razorpay-failure-popup h3,
+    .razorpay-cancel-popup h3 {
+        font-size: 22px;
+    }
+}
+
+/* ==============================================
+   ANIMATION KEYFRAMES
+   ============================================== */
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+    }
+    to { 
+        opacity: 1; 
+    }
+}
+
+@keyframes slideIn {
+    from { 
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ==============================================
+   LOADING STATES
+   ============================================== */
+.razorpay-loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.razorpay-loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255,255,255,0.4), 
+        transparent
+    );
+    animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.razorpay-payment-button.loading {
+    color: transparent;
+    pointer-events: none;
+}
+
+.razorpay-payment-button.loading::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ==============================================
+   ACCESSIBILITY
+   ============================================== */
+.razorpay-payment-button:focus,
+.btn-primary:focus,
+.btn-secondary:focus {
+    outline: 3px solid rgba(22, 105, 122, 0.5);
+    outline-offset: 2px;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(22, 105, 122, 0.2);
+}
+
+/* Screen reader only content */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ==============================================
+   PRINT STYLES
+   ============================================== */
+@media print {
+    .razorpay-popup-overlay,
+    .razorpay-payment-button {
+        display: none !important;
+    }
+    
+    .payment-card {
+        page-break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+}
