@@ -14,11 +14,10 @@
 4. Select **location** (choose closest to your users)
 5. Click **"Done"**
 
-## 📁 Step 3: Setup Storage
+## 📁 Step 3: Setup Storage (Optional - Can Skip if Billing Required)
 1. Go to **"Storage"** in Firebase console
-2. Click **"Get started"**
-3. Choose **"Start in test mode"**
-4. Click **"Done"**
+2. If it asks for billing upgrade, **skip this step for now**
+3. We can set up storage later or use alternative image handling
 
 ## 🌐 Step 4: Setup Web App
 1. In Firebase project overview, click **"Web"** icon (</>) 

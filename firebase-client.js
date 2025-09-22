@@ -3,14 +3,14 @@
  * Complete backend solution - Database, Storage, Authentication
  */
 
-// Firebase configuration - Update with your project details
+// Firebase configuration - Your actual project details
 const firebaseConfig = {
-    apiKey: "YOUR_FIREBASE_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com", 
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyC0j3MFVGeOMCKZnot8DmoXYkBYKlPjHsT",
+    authDomain: "jb-creations-backend.firebaseapp.com",
+    projectId: "jb-creations-backend",
+    storageBucket: "jb-creations-backend.firebasestorage.app",
+    messagingSenderId: "774184516486",
+    appId: "1:774128154860:web:c22384c401bd6838ab4d2f"
 };
 
 // Import Firebase modules from CDN
