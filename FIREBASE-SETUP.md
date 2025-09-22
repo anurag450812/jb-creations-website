@@ -14,10 +14,10 @@
 4. Select **location** (choose closest to your users)
 5. Click **"Done"**
 
-## 📁 Step 3: Setup Storage (Optional - Can Skip if Billing Required)
-1. Go to **"Storage"** in Firebase console
-2. If it asks for billing upgrade, **skip this step for now**
-3. We can set up storage later or use alternative image handling
+## 📁 Step 3: Setup Storage (Skip - Requires Billing)
+1. **Skip this step** - Storage requires billing upgrade
+2. We'll use Netlify Forms for image uploads instead
+3. No additional cost - works with your current Netlify plan
 
 ## 🌐 Step 4: Setup Web App
 1. In Firebase project overview, click **"Web"** icon (</>) 
@@ -73,20 +73,8 @@
    ```
 3. Click **"Publish"**
 
-### **Storage Rules:**
-1. Go to **Storage** → **Rules** tab
-2. Replace the rules with:
-   ```javascript
-   rules_version = '2';
-   service firebase.storage {
-     match /b/{bucket}/o {
-       match /orders/{allPaths=**} {
-         allow read, write: if true;
-       }
-     }
-   }
-   ```
-3. Click **"Publish"**
+### **Storage Rules (Skip - Requires Billing):**
+**Skip this section** - Firebase Storage requires billing upgrade. We'll handle images differently.
 
 ## 🧪 Step 7: Test Your Setup
 1. Your website will automatically update on Netlify
@@ -96,14 +84,14 @@
    - **Firestore Database** → Should see `customers` and `orders` collections
    - **Storage** → Should see uploaded images in `orders/` folder
 
-## ✅ What You Get with Firebase:
-- ✅ **Unlimited image uploads** (5GB free storage)
+## ✅ What You Get with Firebase (Free Tier):
 - ✅ **Real-time database** (Firestore)
 - ✅ **Automatic scaling** (handles millions of requests)
 - ✅ **Built-in admin panel** (Firebase console)
 - ✅ **Real-time data sync**
 - ✅ **Automatic backups**
 - ✅ **Google-level security**
+- ⚠️ **Image storage**: Using Netlify Forms (no extra cost)
 
 ## 🎯 Firebase vs Supabase Benefits:
 - **Faster setup** - 5 minutes vs 30+ minutes

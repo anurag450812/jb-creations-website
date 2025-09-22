@@ -27,25 +27,17 @@ import {
     where,
     serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js'
-import { 
-    getStorage, 
-    ref, 
-    uploadBytes, 
-    getDownloadURL 
-} from 'https://www.gstatic.com/firebasejs/10.5.0/firebase-storage.js'
 
-// Initialize Firebase
+// Initialize Firebase (Storage removed - requires billing upgrade)
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const storage = getStorage(app);
 
 console.log('🔥 Firebase initialized successfully');
 
-// JB Creations API Client powered by Firebase
+//JB Creations API Client powered by Firebase
 export class JBCreationsAPI {
     constructor() {
         this.db = db;
-        this.storage = storage;
         console.log('🚀 JB Creations API powered by Firebase initialized');
     }
 
@@ -71,33 +63,44 @@ export class JBCreationsAPI {
         }
     }
 
-    // Upload images to Firebase Storage
-    async uploadOrderImages(customerId, images) {
+    // Convert images to Base64 and prepare for Firestore storage
+    async processOrderImages(customerId, images) {
         try {
-            const imageUrls = [];
+            console.log('📸 Processing images for Firestore storage...');
+            const imageData = [];
             
             for (let i = 0; i < images.length; i++) {
                 const image = images[i];
-                const fileName = `${customerId}_${Date.now()}_${i}.jpg`;
-                const imageRef = ref(this.storage, `orders/${fileName}`);
+                const fileName = `${customerId}_item${i + 1}_${Date.now()}`;
                 
-                // Upload image
-                const uploadResult = await uploadBytes(imageRef, image);
-                const downloadURL = await getDownloadURL(uploadResult.ref);
+                // Convert image to Base64
+                const base64Data = await this.fileToBase64(image);
                 
-                imageUrls.push({
+                imageData.push({
                     fileName: fileName,
-                    url: downloadURL,
-                    path: uploadResult.ref.fullPath
+                    data: base64Data,
+                    type: image.type,
+                    size: image.size,
+                    uploadTime: new Date().toISOString()
                 });
             }
 
-            console.log('✅ Images uploaded successfully:', imageUrls.length);
-            return { success: true, images: imageUrls };
+            console.log('✅ Images processed successfully:', imageData.length);
+            return { success: true, images: imageData };
         } catch (error) {
-            console.error('❌ Error uploading images:', error);
+            console.error('❌ Error processing images:', error);
             return { success: false, error: error.message };
         }
+    }
+
+    // Helper function to convert File to Base64
+    fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
     }
 
     // Create complete order with customer and images
@@ -113,10 +116,10 @@ export class JBCreationsAPI {
 
             const customerId = customerResult.customer.id;
 
-            // 2. Upload images
-            const imageResult = await this.uploadOrderImages(customerId, orderData.images);
+            // 2. Process images (convert to Base64)
+            const imageResult = await this.processOrderImages(customerId, orderData.images);
             if (!imageResult.success) {
-                throw new Error('Failed to upload images: ' + imageResult.error);
+                throw new Error('Failed to process images: ' + imageResult.error);
             }
 
             // 3. Create order record

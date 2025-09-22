@@ -292,8 +292,8 @@
                         </td>
                         <td>
                             ${firstImage ? `
-                                <img src="${firstImage.url}" alt="Order" class="image-preview" 
-                                     onclick="window.open('${firstImage.url}', '_blank')">
+                                <img src="${firstImage.data}" alt="Order" class="image-preview" 
+                                     onclick="window.open('${firstImage.data}', '_blank')">
                                 <span style="font-size: 0.8em;">${order.images.length} images</span>
                             ` : 'No images'}
                         </td>
