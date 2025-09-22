@@ -1,6 +1,7 @@
 /*
- * Checkout Page JavaScript
+ * Checkout Page JavaScript - V2 (Guest Checkout Enabled)
  * Handles order processing and submission with Firebase integration
+ * Users can place orders without login requirement
  */
 
 // Initialize Firebase API instance

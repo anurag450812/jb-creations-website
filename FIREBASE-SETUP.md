@@ -91,7 +91,8 @@
 - ✅ **Real-time data sync**
 - ✅ **Automatic backups**
 - ✅ **Google-level security**
-- ⚠️ **Image storage**: Using Netlify Forms (no extra cost)
+- ✅ **Guest checkout** - No login required to place orders!
+- ⚠️ **Image storage**: Using Base64 in Firestore (no extra cost)
 
 ## 🎯 Firebase vs Supabase Benefits:
 - **Faster setup** - 5 minutes vs 30+ minutes

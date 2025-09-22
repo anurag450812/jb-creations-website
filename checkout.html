@@ -1778,8 +1778,9 @@
     <!-- Removed broken razorpay-config.js - using simple direct payment instead -->
     
     <!-- Firebase Backend Integration -->
-    <script type="module" src="firebase-client.js"></script>
+    <script type="module" src="firebase-client.js?v=2"></script>
     
-    <script src="checkout.js"></script>
+    <!-- Cache-busted checkout script to ensure latest version loads -->
+    <script src="checkout.js?v=2"></script>
 </body>
 </html>
