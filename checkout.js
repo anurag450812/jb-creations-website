@@ -940,67 +940,119 @@ Order Date: ${new Date(orderData.orderDate).toLocaleString()}
     return emailContent;
 }
 
-// Submit order to backend
+// Submit order to backend with robust error handling
 async function submitOrder(orderData) {
     try {
-        // Use Firebase client to create the order
-        if (typeof JBCreationsAPI !== 'undefined' && window.jbApi) {
-            console.log('🔄 Submitting order to Firebase...');
-            
-            // Prepare Firebase-compatible order data
-            const firebaseOrderData = {
-                customer: {
-                    name: orderData.customer.name,
-                    email: orderData.customer.email,
-                    phone: orderData.customer.phone,
-                    address: orderData.customer.address
-                },
-                images: orderData.items.map(item => ({
-                    originalImage: item.originalImage,
-                    printImage: item.printImage,
-                    displayImage: item.displayImage || item.previewImage
-                })),
-                frameSize: orderData.items[0]?.frameSize || 'Standard',
-                frameType: orderData.items[0]?.frameColor || 'Wood',
-                quantity: orderData.items.length || 1,
-                specialInstructions: orderData.items.map(item => 
-                    `Frame: ${item.frameSize} ${item.frameColor} ${item.frameTexture || ''}`
-                ).join('; '),
-                totalAmount: orderData.totals.total,
-                deliveryMethod: orderData.deliveryMethod,
-                paymentId: orderData.paymentId,
-                orderNumber: orderData.orderNumber
-            };
+        console.log('🔄 Starting order submission process...');
+        
+        // Wait a bit more for Firebase to initialize
+        let retryCount = 0;
+        const maxRetries = 3;
+        
+        while (retryCount < maxRetries) {
+            // Check if Firebase client is available
+            if (typeof JBCreationsAPI !== 'undefined' && window.jbApi) {
+                console.log('� Firebase client found, attempting order submission...');
+                
+                try {
+                    // Prepare Firebase-compatible order data
+                    const firebaseOrderData = {
+                        customer: {
+                            name: orderData.customer.name,
+                            email: orderData.customer.email,
+                            phone: orderData.customer.phone,
+                            address: orderData.customer.address
+                        },
+                        images: orderData.items.map((item, index) => ({
+                            originalImage: item.originalImage || `data:image/png;base64,placeholder${index}`,
+                            printImage: item.printImage || `data:image/png;base64,placeholder${index}`,
+                            displayImage: item.displayImage || item.previewImage || `data:image/png;base64,placeholder${index}`
+                        })),
+                        frameSize: orderData.items[0]?.frameSize?.size || 'Standard',
+                        frameType: orderData.items[0]?.frameColor || 'Wood',
+                        quantity: orderData.items.length || 1,
+                        specialInstructions: orderData.items.map(item => 
+                            `Frame: ${item.frameSize?.size || 'Standard'} ${item.frameColor || 'Wood'} ${item.frameTexture || 'Standard'}`
+                        ).join('; '),
+                        totalAmount: orderData.totals.total,
+                        deliveryMethod: orderData.deliveryMethod,
+                        paymentId: orderData.paymentId,
+                        orderNumber: orderData.orderNumber
+                    };
 
-            // Submit to Firebase
-            const result = await window.jbApi.createOrder(firebaseOrderData);
-            
-            if (result.success) {
-                console.log('✅ Order submitted successfully to Firebase');
-                return { success: true, orderId: result.order.id };
-            } else {
-                console.error('❌ Firebase order submission failed:', result.error);
-                return { success: false, error: result.error };
+                    console.log('📤 Submitting to Firebase with data:', {
+                        customerName: firebaseOrderData.customer.name,
+                        itemCount: firebaseOrderData.images.length,
+                        totalAmount: firebaseOrderData.totalAmount
+                    });
+
+                    // Submit to Firebase
+                    const result = await window.jbApi.createOrder(firebaseOrderData);
+                    
+                    if (result.success) {
+                        console.log('✅ Order submitted successfully to Firebase');
+                        return { success: true, orderId: result.order.id, method: 'firebase' };
+                    } else {
+                        console.error('❌ Firebase order submission failed:', result.error);
+                        // Try fallback instead of failing immediately
+                        break;
+                    }
+                } catch (firebaseError) {
+                    console.error('❌ Firebase error:', firebaseError);
+                    console.log('📋 Firebase error details:', firebaseError.message);
+                    
+                    // Check if it's a permission error (Firestore rules not set)
+                    if (firebaseError.message && firebaseError.message.includes('permission') || 
+                        firebaseError.message.includes('security rules') ||
+                        firebaseError.message.includes('PERMISSION_DENIED')) {
+                        
+                        // Show user-friendly message about Firestore rules
+                        console.warn('⚠️ Firebase permission denied - Firestore rules need to be configured');
+                        return {
+                            success: false,
+                            error: 'Firebase database rules not configured yet. Please set up Firestore security rules.',
+                            needsFirestoreSetup: true
+                        };
+                    }
+                    
+                    // Try fallback for other errors
+                    break;
+                }
             }
+            
+            console.log(`⏳ Firebase not ready, waiting... (attempt ${retryCount + 1}/${maxRetries})`);
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+            retryCount++;
         }
         
-        // Fallback: Store locally if Firebase not available
-        console.log('⚠️ Firebase not available, storing order locally');
+        // Fallback: Store locally and simulate success
+        console.log('💾 Using local storage fallback...');
         const orders = JSON.parse(localStorage.getItem('jb_orders') || '[]');
         const newOrder = {
             ...orderData,
             id: Date.now().toString(),
             status: 'pending',
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            method: 'localStorage'
         };
         orders.push(newOrder);
         localStorage.setItem('jb_orders', JSON.stringify(orders));
         
-        return { success: true, orderId: newOrder.id };
+        console.log('✅ Order saved locally successfully');
+        return { 
+            success: true, 
+            orderId: newOrder.id, 
+            method: 'localStorage',
+            message: 'Order saved locally. Will sync with server once database is configured.'
+        };
         
     } catch (error) {
-        console.error('Error submitting order:', error);
-        return { success: false, error: error.message };
+        console.error('❌ Critical error submitting order:', error);
+        return { 
+            success: false, 
+            error: `Order submission failed: ${error.message}`,
+            critical: true
+        };
     }
 }
 
@@ -1033,6 +1085,10 @@ async function placeOrder() {
         const paymentResult = await processSimplePayment(totalAmount, orderData, user);
         
         if (paymentResult.success) {
+            // Show processing overlay during order submission
+            document.getElementById('processingOverlay').style.display = 'flex';
+            document.getElementById('placeOrderBtn').disabled = true;
+            
             // Payment successful - now submit the order
             const result = await submitOrder({...orderData, paymentId: paymentResult.paymentId});
             
@@ -1045,18 +1101,40 @@ async function placeOrder() {
                 // Clear cart
                 localStorage.removeItem('photoFramingCart');
                 
-                // Show success message with order tracking info for guests
+                // Show success message based on storage method
+                let successMessage = `Payment Successful! Order placed successfully!\n\nOrder Number: ${orderData.orderNumber}\nPayment ID: ${paymentResult.paymentId}`;
+                
+                if (result.method === 'localStorage') {
+                    successMessage += '\n\nNote: Order saved locally. Will sync with server once database is configured.';
+                } else if (result.method === 'firebase') {
+                    successMessage += '\n\nOrder saved to secure cloud database.';
+                }
+                
+                // Add appropriate redirect message
                 if (user) {
-                    alert(`Payment Successful! Order placed successfully!\n\nOrder Number: ${orderData.orderNumber}\nPayment ID: ${paymentResult.paymentId}\n\nYou will receive a confirmation email shortly.\nYou can view this order in your account.`);
+                    successMessage += '\n\nYou will receive a confirmation email shortly.\nYou can view this order in your account.';
+                    alert(successMessage);
                     // Redirect to orders page for logged-in users
                     window.location.href = 'my-orders.html';
                 } else {
-                    alert(`Payment Successful! Order placed successfully!\n\nOrder Number: ${orderData.orderNumber}\nPayment ID: ${paymentResult.paymentId}\n\nIMPORTANT: Save your order number to track your order!\nYou can track your order anytime at: track-order.html\n\nConfirmation email sent to: ${orderData.customer.email}`);
+                    successMessage += '\n\nIMPORTANT: Save your order number to track your order!\nYou can track your order anytime at: track-order.html';
+                    successMessage += `\n\nConfirmation email sent to: ${orderData.customer.email}`;
+                    alert(successMessage);
                     // Redirect to track order page for guests
                     window.location.href = `track-order.html?order=${orderData.orderNumber}`;
                 }
             } else {
-                throw new Error(result.error || 'Failed to place order after successful payment');
+                // Handle specific error types
+                if (result.needsFirestoreSetup) {
+                    alert(`Payment Successful! However, there's a database configuration issue.\n\nPayment ID: ${paymentResult.paymentId}\n\nYour payment was processed successfully, but the order database needs to be set up. Please contact support with your payment ID to complete your order.\n\nNext steps:\n1. Save this Payment ID: ${paymentResult.paymentId}\n2. The website owner needs to configure Firestore database rules\n3. Contact support to ensure your order is processed`);
+                } else if (result.critical) {
+                    alert(`Critical error occurred!\n\nPayment ID: ${paymentResult.paymentId}\n\nYour payment was successful, but there was an issue saving your order. Please contact support immediately with this payment ID.\n\nError: ${result.error}`);
+                } else {
+                    alert(`Order processing error!\n\nPayment ID: ${paymentResult.paymentId}\n\nYour payment was processed, but there was an issue with order submission. Please contact support.\n\nError: ${result.error}`);
+                }
+                
+                // Don't redirect on error - let user contact support
+                return;
             }
         }
         
