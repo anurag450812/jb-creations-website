@@ -1,6 +1,6 @@
 [build]
-buildCommand = "cd order-backend && cp package-simple.json package.json && npm install"
+buildCommand = "cd order-backend && cp package-minimal.json package.json && npm install"
 
 [deploy]
-startCommand = "cd order-backend && node simple-server.js"
+startCommand = "cd order-backend && node minimal-server.js"
 NODE_ENV = "production"

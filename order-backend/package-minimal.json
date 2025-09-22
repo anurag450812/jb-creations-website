@@ -1,0 +1,11 @@
+{
+  "name": "jb-creations-minimal",
+  "version": "1.0.0",
+  "main": "minimal-server.js",
+  "scripts": {
+    "start": "node minimal-server.js"
+  },
+  "dependencies": {
+    "express": "4.18.2"
+  }
+}
