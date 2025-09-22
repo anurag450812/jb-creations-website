@@ -5,10 +5,8 @@
 
 // API Configuration
 const API_CONFIG = {
-    // Change this to your deployed backend URL
-    BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-        ? 'http://localhost:3001/api' 
-        : 'https://your-backend-url.railway.app/api', // Replace with your actual backend URL
+    // Use Netlify Functions - works automatically with your domain
+    BASE_URL: window.location.origin + '/api',
     
     ENDPOINTS: {
         AUTH: {
