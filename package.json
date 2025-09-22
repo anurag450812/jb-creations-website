@@ -1,10 +1,10 @@
 {
-  "name": "jb-creations-backend-wrapper",
+  "name": "jb-creations-minimal-wrapper",
   "version": "1.0.0",
-  "description": "Wrapper for JB Creations backend deployment",
+  "description": "Minimal wrapper for JB Creations backend deployment",
   "scripts": {
-    "start": "cd order-backend && npm start",
-    "install": "cd order-backend && npm install"
+    "start": "cd order-backend && node minimal-server.js",
+    "install": "cd order-backend && cp package-minimal.json package.json && npm install"
   },
   "engines": {
     "node": ">=18.0.0"
