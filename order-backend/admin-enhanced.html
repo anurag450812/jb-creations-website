@@ -1336,10 +1336,20 @@
         }
 
         // Action functions
-        function viewOrder(orderNumber) {
-            const order = orders.find(o => o.orderNumber === orderNumber);
-            if (order) {
-                showOrderModal(order);
+        async function viewOrder(orderNumber) {
+            try {
+                // Fetch detailed order data from the server
+                const response = await fetch(`/api/orders/${orderNumber}`);
+                const orderData = await response.json();
+                
+                if (response.ok) {
+                    showOrderModal(orderData);
+                } else {
+                    alert('Failed to load order details: ' + orderData.error);
+                }
+            } catch (error) {
+                console.error('Error fetching order details:', error);
+                alert('Error loading order details');
             }
         }
 
@@ -1347,50 +1357,170 @@
             const modal = document.getElementById('order-modal');
             const content = document.getElementById('order-details-content');
             
+            // Generate items HTML with images
+            const itemsHTML = order.items.map((item, index) => `
+                <div class="order-item-card" style="border: 1px solid var(--border-light); border-radius: 8px; padding: 20px; margin: 15px 0; background: var(--bg-secondary);">
+                    <h4 style="color: var(--primary); margin-bottom: 15px;">Item ${index + 1}</h4>
+                    
+                    <div class="item-details" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                        <div class="detail-row">
+                            <span class="detail-label">Frame Size:</span>
+                            <span class="detail-value">${item.frameSize.size} ${item.frameSize.orientation}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Frame Color:</span>
+                            <span class="detail-value">${item.frameColor}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Frame Texture:</span>
+                            <span class="detail-value">${item.frameTexture}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Price:</span>
+                            <span class="detail-value">₹${item.price}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="adjustments-section" style="margin-bottom: 20px;">
+                        <h5 style="color: var(--text-secondary); margin-bottom: 10px;">Image Adjustments:</h5>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; font-size: 0.85em;">
+                            <span>Brightness: ${item.adjustments.brightness}%</span>
+                            <span>Contrast: ${item.adjustments.contrast}%</span>
+                            <span>Highlights: ${item.adjustments.highlights}%</span>
+                            <span>Shadows: ${item.adjustments.shadows}%</span>
+                            <span>Vibrance: ${item.adjustments.vibrance}%</span>
+                            <span>Zoom: ${item.zoom}x</span>
+                        </div>
+                    </div>
+                    
+                    <div class="image-section">
+                        <h5 style="color: var(--text-secondary); margin-bottom: 15px;">Images:</h5>
+                        <div class="image-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                            ${item.originalImagePath ? `
+                                <div class="image-card" style="text-align: center;">
+                                    <img src="/images/${order.orderNumber}_item${index + 1}_original.jpg" 
+                                         alt="Original Image" 
+                                         style="max-width: 100%; height: 150px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-light);">
+                                    <p style="margin-top: 8px; font-size: 0.85em; color: var(--text-muted);">Original</p>
+                                    <a href="/images/${order.orderNumber}_item${index + 1}_original.jpg" 
+                                       download="${order.orderNumber}_item${index + 1}_original.jpg"
+                                       class="download-btn" 
+                                       style="display: inline-block; padding: 4px 8px; background: var(--primary); color: white; text-decoration: none; border-radius: 3px; font-size: 0.8em; margin-top: 5px;">
+                                       <i class="fas fa-download"></i> Download
+                                    </a>
+                                </div>
+                            ` : ''}
+                            ${item.enhancedPrintPath ? `
+                                <div class="image-card" style="text-align: center; border: 2px solid var(--success); border-radius: 6px;">
+                                    <img src="/images/${order.orderNumber}_item${index + 1}_enhanced_print.jpg" 
+                                         alt="Enhanced Print Ready" 
+                                         style="max-width: 100%; height: 150px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-light);">
+                                    <p style="margin-top: 8px; font-size: 0.85em; color: var(--success); font-weight: 600;">✨ Enhanced Print Ready</p>
+                                    <p style="font-size: 0.75em; color: var(--text-muted); margin: 2px 0;">Fitted in frame with color correction</p>
+                                    <a href="/images/${order.orderNumber}_item${index + 1}_enhanced_print.jpg" 
+                                       download="${order.orderNumber}_item${index + 1}_enhanced_print.jpg"
+                                       class="download-btn" 
+                                       style="display: inline-block; padding: 6px 12px; background: var(--success); color: white; text-decoration: none; border-radius: 3px; font-size: 0.8em; margin-top: 5px; font-weight: 600;">
+                                       <i class="fas fa-star"></i> Download Enhanced
+                                    </a>
+                                </div>
+                            ` : ''}
+                            ${item.printImagePath ? `
+                                <div class="image-card" style="text-align: center;">
+                                    <img src="/images/${order.orderNumber}_item${index + 1}_print.jpg" 
+                                         alt="Print Ready" 
+                                         style="max-width: 100%; height: 150px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-light);">
+                                    <p style="margin-top: 8px; font-size: 0.85em; color: var(--text-muted);">Print Ready</p>
+                                    <a href="/images/${order.orderNumber}_item${index + 1}_print.jpg" 
+                                       download="${order.orderNumber}_item${index + 1}_print.jpg"
+                                       class="download-btn" 
+                                       style="display: inline-block; padding: 4px 8px; background: var(--warning); color: white; text-decoration: none; border-radius: 3px; font-size: 0.8em; margin-top: 5px;">
+                                       <i class="fas fa-download"></i> Download
+                                    </a>
+                                </div>
+                            ` : ''}
+                            ${item.displayImagePath ? `
+                                <div class="image-card" style="text-align: center;">
+                                    <img src="/images/${order.orderNumber}_item${index + 1}_preview.jpg" 
+                                         alt="Preview" 
+                                         style="max-width: 100%; height: 150px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-light);">
+                                    <p style="margin-top: 8px; font-size: 0.85em; color: var(--text-muted);">Preview</p>
+                                    <a href="/images/${order.orderNumber}_item${index + 1}_preview.jpg" 
+                                       download="${order.orderNumber}_item${index + 1}_preview.jpg"
+                                       class="download-btn" 
+                                       style="display: inline-block; padding: 4px 8px; background: var(--info); color: white; text-decoration: none; border-radius: 3px; font-size: 0.8em; margin-top: 5px;">
+                                       <i class="fas fa-download"></i> Download
+                                    </a>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
             content.innerHTML = `
-                <div class="detail-row">
-                    <span class="detail-label">Order Number:</span>
-                    <span class="detail-value">#${order.orderNumber}</span>
+                <div class="order-header" style="border-bottom: 1px solid var(--border-light); padding-bottom: 20px; margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <div class="detail-row">
+                            <span class="detail-label">Order Number:</span>
+                            <span class="detail-value" style="font-weight: 600; color: var(--primary);">#${order.orderNumber}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Customer Name:</span>
+                            <span class="detail-value">${order.customer.name || 'N/A'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Email:</span>
+                            <span class="detail-value">${order.customer.email || 'N/A'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Phone:</span>
+                            <span class="detail-value">${order.customer.phone || 'N/A'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Date:</span>
+                            <span class="detail-value">${formatDate(order.orderDate)}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Status:</span>
+                            <span class="detail-value">${getStatusBadge(order.status)}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Total Amount:</span>
+                            <span class="detail-value" style="font-weight: 600; color: var(--success);">₹${order.totals.total}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Delivery Method:</span>
+                            <span class="detail-value">${order.deliveryMethod === 'express' ? 'Express (2-3 days)' : 'Standard (5-7 days)'}</span>
+                        </div>
+                    </div>
+                    
+                    ${order.customer.address ? `
+                        <div class="detail-row" style="margin-top: 15px;">
+                            <span class="detail-label">Address:</span>
+                            <span class="detail-value">${order.customer.address}</span>
+                        </div>
+                    ` : ''}
+                    
+                    ${order.customer.specialInstructions ? `
+                        <div class="detail-row" style="margin-top: 15px;">
+                            <span class="detail-label">Special Instructions:</span>
+                            <span class="detail-value">${order.customer.specialInstructions}</span>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="bulk-download" style="margin-top: 20px; text-align: center;">
+                        <a href="/api/orders/${order.orderNumber}/images" 
+                           class="download-all-btn" 
+                           style="display: inline-block; padding: 10px 20px; background: var(--primary); color: white; text-decoration: none; border-radius: 6px; font-weight: 500;">
+                           <i class="fas fa-download"></i> Download All Images (ZIP)
+                        </a>
+                    </div>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">Customer Name:</span>
-                    <span class="detail-value">${order.customerName || 'N/A'}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Email:</span>
-                    <span class="detail-value">${order.email || 'N/A'}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Phone:</span>
-                    <span class="detail-value">${order.phone || 'N/A'}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Address:</span>
-                    <span class="detail-value">${order.address || 'N/A'}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Date:</span>
-                    <span class="detail-value">${formatDate(order.orderDate)}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Status:</span>
-                    <span class="detail-value">${getStatusBadge(order.status)}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Total Amount:</span>
-                    <span class="detail-value">$${parseFloat(order.totalAmount || 0).toFixed(2)}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Frame Size:</span>
-                    <span class="detail-value">${order.frameSize || 'N/A'}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Frame Type:</span>
-                    <span class="detail-value">${order.frameType || 'N/A'}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Special Instructions:</span>
-                    <span class="detail-value">${order.specialInstructions || 'None'}</span>
+                
+                <div class="items-section">
+                    <h3 style="color: var(--text-primary); margin-bottom: 20px;">Order Items (${order.items.length})</h3>
+                    ${itemsHTML}
                 </div>
             `;
             

@@ -1,0 +1,53 @@
+{
+  "orderNumber": "JB859216811",
+  "customer": {
+    "userId": "user_1758436295732_g0e12grpd",
+    "isGuest": false,
+    "name": "User 9774",
+    "email": "anuragrajput200274@gmail.com",
+    "phone": "+91 8223800931",
+    "address": "sarkari school samne, near laltipara, goshala, morar, gwalior, Gwalior, Madhya Pradesh - 474006",
+    "addressDetails": {
+      "street": "sarkari school samne, near laltipara, goshala, morar, gwalior",
+      "city": "Gwalior",
+      "state": "Madhya Pradesh",
+      "landmark": "",
+      "pincode": "474006"
+    },
+    "specialInstructions": ""
+  },
+  "items": [
+    {
+      "frameSize": {
+        "size": "13x19",
+        "orientation": "portrait"
+      },
+      "frameColor": "black",
+      "frameTexture": "smooth",
+      "adjustments": {
+        "brightness": 100,
+        "contrast": 100,
+        "highlights": 100,
+        "shadows": 100,
+        "vibrance": 100
+      },
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "zoom": 1,
+      "price": 349,
+      "orderDate": "2025-09-21T13:54:08.818Z",
+      "printImagePath": "C:\\Users\\anura\\OneDrive\\Desktop\\jb-creations-website\\order-backend\\images\\JB859216811_item1_print.jpg",
+      "displayImagePath": "C:\\Users\\anura\\OneDrive\\Desktop\\jb-creations-website\\order-backend\\images\\JB859216811_item1_preview.jpg"
+    }
+  ],
+  "totals": {
+    "subtotal": 349,
+    "delivery": 0,
+    "total": 349
+  },
+  "deliveryMethod": "standard",
+  "orderDate": "2025-09-21T13:54:19.216Z",
+  "emailContent": "\nNEW ORDER RECEIVED - JB859216811\n============================================\n\nCUSTOMER INFORMATION:\n- Name: User 9774\n- Email: anuragrajput200274@gmail.com\n- Phone: +91 8223800931\n- Address: sarkari school samne, near laltipara, goshala, morar, gwalior, Gwalior, Madhya Pradesh - 474006\n- Customer Type: registered\n- Delivery Method: Standard (5-7 days)\n- Special Instructions: None\n\nORDER DETAILS:\n\nITEM 1:\n- Frame Size: 13x19 portrait\n- Frame Color: black\n- Frame Texture: smooth\n- Price: ₹349\n- Image Adjustments:\n  * Brightness: 100%\n  * Contrast: 100%\n  * Highlights: 100%\n  * Shadows: 100%\n  * Vibrance: 100%\n- Position & Zoom:\n  * Zoom Level: 1\n  * Position X: 0\n  * Position Y: 0\n\n\nORDER SUMMARY:\n- Subtotal: ₹349\n- Delivery: ₹0\n- TOTAL: ₹349\n\nOrder Date: 21/09/2025, 19:24:19\n"
+}

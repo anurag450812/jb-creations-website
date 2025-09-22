@@ -1,0 +1,42 @@
+{
+  "totals": {
+    "total": 30,
+    "subtotal": 25,
+    "shipping": 5
+  },
+  "orderNumber": "TEST20250921192332",
+  "deliveryMethod": "standard",
+  "customer": {
+    "name": "Test Customer",
+    "address": "123 Test Street",
+    "email": "test@example.com",
+    "userId": null,
+    "phone": "123-456-7890"
+  },
+  "orderDate": "2025-09-21T19:23:32.2936285+05:30",
+  "items": [
+    {
+      "frameColor": "black",
+      "price": 25,
+      "zoom": 1,
+      "adjustments": {
+        "highlights": 100,
+        "contrast": 100,
+        "vibrance": 100,
+        "brightness": 100,
+        "shadows": 100
+      },
+      "frameSize": {
+        "orientation": "portrait",
+        "size": "8x10"
+      },
+      "position": {
+        "y": 0,
+        "x": 0
+      },
+      "frameTexture": "smooth",
+      "originalImagePath": "C:\\Users\\anura\\OneDrive\\Desktop\\jb-creations-website\\order-backend\\images\\TEST20250921192332_item1_original.jpg",
+      "enhancedPrintPath": "C:\\Users\\anura\\OneDrive\\Desktop\\jb-creations-website\\order-backend\\images\\TEST20250921192332_item1_enhanced_print.jpg"
+    }
+  ]
+}

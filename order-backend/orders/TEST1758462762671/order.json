@@ -1,0 +1,42 @@
+{
+  "orderNumber": "TEST1758462762671",
+  "customer": {
+    "name": "Test Customer",
+    "email": "test@example.com",
+    "phone": "123-456-7890",
+    "address": "123 Test Street",
+    "userId": null
+  },
+  "items": [
+    {
+      "frameSize": {
+        "size": "8x10",
+        "orientation": "portrait"
+      },
+      "frameColor": "black",
+      "frameTexture": "smooth",
+      "price": 25,
+      "adjustments": {
+        "brightness": 100,
+        "contrast": 100,
+        "highlights": 100,
+        "shadows": 100,
+        "vibrance": 100
+      },
+      "zoom": 1,
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "originalImagePath": "C:\\Users\\anura\\OneDrive\\Desktop\\jb-creations-website\\order-backend\\images\\TEST1758462762671_item1_original.jpg",
+      "enhancedPrintPath": "C:\\Users\\anura\\OneDrive\\Desktop\\jb-creations-website\\order-backend\\images\\TEST1758462762671_item1_enhanced_print.jpg"
+    }
+  ],
+  "totals": {
+    "subtotal": 25,
+    "shipping": 5,
+    "total": 30
+  },
+  "deliveryMethod": "standard",
+  "orderDate": "2025-09-21T13:52:42.671Z"
+}
