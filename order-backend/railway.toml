@@ -5,7 +5,7 @@ build:
   builder: nixpacks
 
 deploy:
-  startCommand: node auth-server-production.js
+  startCommand: node simple-server.js
   restartPolicyType: always
 
 services:
