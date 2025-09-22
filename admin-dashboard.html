@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JB Creations - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .orders-section {
+            padding: 30px;
+        }
+        
+        .orders-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .orders-table th,
+        .orders-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .orders-table th {
+            background: #34495e;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .orders-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-processing {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .image-preview {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .refresh-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .refresh-btn:hover {
+            background: #2980b9;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #7f8c8d;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 20px;
+            color: #e74c3c;
+            background: #fdf2f2;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="header">
+            <h1>🎯 JB Creations Admin</h1>
+            <p>Powered by Supabase - Real-time Dashboard</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="total-orders">-</div>
+                <div class="stat-label">Total Orders</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pending-orders">-</div>
+                <div class="stat-label">Pending Orders</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completed-orders">-</div>
+                <div class="stat-label">Completed Orders</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="total-customers">-</div>
+                <div class="stat-label">Total Customers</div>
+            </div>
+        </div>
+        
+        <div class="orders-section">
+            <div class="orders-header">
+                <h2>📋 Recent Orders</h2>
+                <button class="refresh-btn" onclick="loadOrders()">
+                    🔄 Refresh
+                </button>
+            </div>
+            
+            <div id="orders-container">
+                <div class="loading">
+                    <h3>🔄 Loading orders...</h3>
+                    <p>Connecting to Supabase database...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase Integration -->
+    <script src="supabase-client.js" type="module"></script>
+    
+    <script type="module">
+        import { jbAPI } from './supabase-client.js';
+        
+        let orders = [];
+        
+        // Load orders and statistics
+        async function loadOrders() {
+            try {
+                console.log('🔄 Loading orders from Supabase...');
+                
+                const result = await jbAPI.getAllOrders();
+                
+                if (result.success) {
+                    orders = result.orders;
+                    displayOrders(orders);
+                    updateStatistics(orders);
+                    console.log(`✅ Loaded ${orders.length} orders`);
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.error('❌ Error loading orders:', error);
+                document.getElementById('orders-container').innerHTML = `
+                    <div class="error">
+                        <h3>❌ Error Loading Orders</h3>
+                        <p>${error.message}</p>
+                        <p>Make sure you've completed the Supabase setup in SUPABASE-SETUP.md</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Display orders in table
+        function displayOrders(orders) {
+            const container = document.getElementById('orders-container');
+            
+            if (orders.length === 0) {
+                container.innerHTML = `
+                    <div class="loading">
+                        <h3>📋 No orders yet</h3>
+                        <p>Orders will appear here when customers place them</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = `
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Images</th>
+                            <th>Frame Details</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            orders.forEach(order => {
+                const customer = order.customers || {};
+                const firstImage = order.images && order.images.length > 0 ? order.images[0] : null;
+                
+                html += `
+                    <tr>
+                        <td><strong>#${order.id.substring(0, 8)}</strong></td>
+                        <td>
+                            <div><strong>${customer.name || 'N/A'}</strong></div>
+                            <div style="font-size: 0.9em; color: #7f8c8d;">
+                                ${customer.phone || 'N/A'}
+                            </div>
+                        </td>
+                        <td>
+                            ${firstImage ? `
+                                <img src="${firstImage.url}" alt="Order" class="image-preview" 
+                                     onclick="window.open('${firstImage.url}', '_blank')">
+                                <span style="font-size: 0.8em;">${order.images.length} images</span>
+                            ` : 'No images'}
+                        </td>
+                        <td>
+                            <div>${order.frame_size || 'N/A'}</div>
+                            <div style="font-size: 0.9em; color: #7f8c8d;">
+                                ${order.frame_type || 'N/A'} (${order.quantity || 1}x)
+                            </div>
+                        </td>
+                        <td><strong>₹${order.total_amount || 'N/A'}</strong></td>
+                        <td>
+                            <span class="status-badge status-${order.status}">
+                                ${order.status}
+                            </span>
+                        </td>
+                        <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <select onchange="updateStatus('${order.id}', this.value)">
+                                <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
+                                <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Completed</option>
+                                <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                            </select>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+        
+        // Update statistics
+        function updateStatistics(orders) {
+            const stats = {
+                total: orders.length,
+                pending: orders.filter(o => o.status === 'pending').length,
+                completed: orders.filter(o => o.status === 'completed').length,
+                customers: new Set(orders.map(o => o.customer_id)).size
+            };
+            
+            document.getElementById('total-orders').textContent = stats.total;
+            document.getElementById('pending-orders').textContent = stats.pending;
+            document.getElementById('completed-orders').textContent = stats.completed;
+            document.getElementById('total-customers').textContent = stats.customers;
+        }
+        
+        // Update order status
+        window.updateStatus = async function(orderId, newStatus) {
+            try {
+                console.log(`🔄 Updating order ${orderId} to ${newStatus}`);
+                
+                const result = await jbAPI.updateOrderStatus(orderId, newStatus);
+                
+                if (result.success) {
+                    console.log('✅ Status updated successfully');
+                    // Refresh orders to show updated status
+                    await loadOrders();
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.error('❌ Error updating status:', error);
+                alert('Error updating order status: ' + error.message);
+            }
+        };
+        
+        // Make loadOrders available globally
+        window.loadOrders = loadOrders;
+        
+        // Load orders on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🎯 JB Creations Admin Dashboard loaded');
+            loadOrders();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(loadOrders, 30000);
+        });
+    </script>
+</body>
+</html>
