@@ -1,22 +1,30 @@
 /*
- * Checkout Page JavaScript - V2 (Guest Checkout Enabled)
+ * Checkout Page JavaScript - V3 (Firebase Module Integration Fixed)
  * Handles order processing and submission with Firebase integration
  * Users can place orders without login requirement
  */
 
-// Initialize Firebase API instance
+// Initialize Firebase API instance (will be loaded from window events)
 let jbApi = null;
 
-// Wait for Firebase client to load
+// Listen for Firebase API ready event
+window.addEventListener('firebaseReady', (event) => {
+    console.log('🔥 Firebase API ready event received');
+    jbApi = window.jbAPI || window.jbFirebaseAPI;
+    window.jbApi = jbApi; // Make it globally available
+    console.log('✅ Firebase API initialized for checkout:', jbApi);
+});
+
+// Fallback: Try to access Firebase API directly from window after delay
 setTimeout(() => {
-    if (typeof JBCreationsAPI !== 'undefined') {
-        jbApi = new JBCreationsAPI();
-        window.jbApi = jbApi; // Make it globally available
-        console.log('🔥 Firebase API initialized for checkout');
-    } else {
-        console.warn('⚠️ Firebase client not available, using local fallback');
+    if (!jbApi && (window.jbAPI || window.jbFirebaseAPI)) {
+        jbApi = window.jbAPI || window.jbFirebaseAPI;
+        window.jbApi = jbApi;
+        console.log('🔄 Firebase API loaded via window fallback:', jbApi);
+    } else if (!jbApi) {
+        console.warn('⚠️ Firebase client not available after timeout, using local fallback');
     }
-}, 1000);
+}, 2000);
 
 // Order management state
 let orderData = {
@@ -896,13 +904,13 @@ NEW ORDER RECEIVED - ${orderData.orderNumber}
 ============================================
 
 CUSTOMER INFORMATION:
-- Name: ${orderData.customer.name}
-- Email: ${orderData.customer.email}
-- Phone: ${orderData.customer.phone}
-- Address: ${orderData.customer.address}
-- Customer Type: ${orderData.customerType}
+- Name: ${orderData.customer?.name || 'Guest Customer'}
+- Email: ${orderData.customer?.email || 'No email provided'}
+- Phone: ${orderData.customer?.phone || 'No phone provided'}
+- Address: ${orderData.customer?.address || 'No address provided'}
+- Customer Type: ${orderData.customerType || 'guest'}
 - Delivery Method: ${orderData.deliveryMethod === 'express' ? 'Express (2-3 days)' : 'Standard (5-7 days)'}
-- Special Instructions: ${orderData.customer.specialInstructions || 'None'}
+- Special Instructions: ${orderData.customer?.specialInstructions || 'None'}
 
 ORDER DETAILS:
 `;
@@ -944,6 +952,13 @@ Order Date: ${new Date(orderData.orderDate).toLocaleString()}
 async function submitOrder(orderData) {
     try {
         console.log('🔄 Starting order submission process...');
+        console.log('🔍 Debug - Submit order data:', {
+            hasCustomer: !!orderData.customer,
+            customerName: orderData.customer?.name,
+            customerEmail: orderData.customer?.email,
+            hasItems: !!orderData.items && orderData.items.length > 0,
+            totalAmount: orderData.totals?.total
+        });
         
         // Wait a bit more for Firebase to initialize
         let retryCount = 0;
@@ -951,17 +966,23 @@ async function submitOrder(orderData) {
         
         while (retryCount < maxRetries) {
             // Check if Firebase client is available
-            if (typeof JBCreationsAPI !== 'undefined' && window.jbApi) {
+            if (window.jbApi || window.jbAPI || (typeof JBCreationsAPI !== 'undefined' && window.JBCreationsAPI)) {
+                console.log('🔥 Firebase client found, attempting order submission...');
+                
+                // Ensure we have the API instance
+                if (!window.jbApi) {
+                    window.jbApi = window.jbAPI || new window.JBCreationsAPI();
+                }
                 console.log('� Firebase client found, attempting order submission...');
                 
                 try {
                     // Prepare Firebase-compatible order data
                     const firebaseOrderData = {
                         customer: {
-                            name: orderData.customer.name,
-                            email: orderData.customer.email,
-                            phone: orderData.customer.phone,
-                            address: orderData.customer.address
+                            name: orderData.customer?.name || 'Guest Customer',
+                            email: orderData.customer?.email || 'guest@example.com',
+                            phone: orderData.customer?.phone || '0000000000',
+                            address: orderData.customer?.address || 'No address provided'
                         },
                         images: orderData.items.map((item, index) => ({
                             originalImage: item.originalImage || `data:image/png;base64,placeholder${index}`,
@@ -991,7 +1012,7 @@ async function submitOrder(orderData) {
                     
                     if (result.success) {
                         console.log('✅ Order submitted successfully to Firebase');
-                        return { success: true, orderId: result.order.id, method: 'firebase' };
+                        return { success: true, orderId: result.orderId, method: 'firebase' };
                     } else {
                         console.error('❌ Firebase order submission failed:', result.error);
                         // Try fallback instead of failing immediately
@@ -1073,6 +1094,13 @@ async function placeOrder() {
     try {
         // Prepare order data (includes guest customer information)
         const orderData = prepareOrderData();
+        
+        console.log('🔍 Debug - Order data prepared:', {
+            hasCustomer: !!orderData.customer,
+            customerName: orderData.customer?.name,
+            customerEmail: orderData.customer?.email,
+            customerType: orderData.customerType
+        });
         
         // Calculate total amount for Razorpay
         const totalAmount = orderData.totals.total;
@@ -1236,8 +1264,8 @@ function saveGuestOrderHistory(orderData) {
             total: orderData.totals.total,
             itemCount: orderData.items.length,
             deliveryMethod: orderData.deliveryMethod,
-            customerEmail: orderData.customer.email,
-            customerName: orderData.customer.name
+            customerEmail: orderData.customer?.email || 'guest@example.com',
+            customerName: orderData.customer?.name || 'Guest Customer'
         });
         
         // Keep only last 10 guest orders to avoid storage bloat
@@ -1294,9 +1322,9 @@ function processSimplePayment(amount, orderData, user) {
                 });
             },
             "prefill": {
-                "name": user.name || orderData.customer.name || 'Customer',
-                "email": user.email || orderData.customer.email || 'customer@example.com',
-                "contact": cleanPhone(user.phone || orderData.customer.phone)
+                "name": user?.name || orderData.customer?.name || 'Customer',
+                "email": user?.email || orderData.customer?.email || 'customer@example.com',
+                "contact": cleanPhone(user?.phone || orderData.customer?.phone || '')
             },
             "theme": {
                 "color": "#16697A"

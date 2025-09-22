@@ -257,3 +257,7 @@ window.JBCreationsAPI = JBCreationsAPI;
 window.jbAPI = jbAPI;
 
 console.log('🔥 JB Creations Firebase integration loaded successfully!');
+
+// Dispatch event to notify other scripts that Firebase client is ready
+window.dispatchEvent(new Event('firebaseReady'));
+console.log('✅ Firebase ready event dispatched');
