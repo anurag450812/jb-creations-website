@@ -1,7 +1,21 @@
 /*
  * Checkout Page JavaScript
- * Handles order processing and submission
+ * Handles order processing and submission with Firebase integration
  */
+
+// Initialize Firebase API instance
+let jbApi = null;
+
+// Wait for Firebase client to load
+setTimeout(() => {
+    if (typeof JBCreationsAPI !== 'undefined') {
+        jbApi = new JBCreationsAPI();
+        window.jbApi = jbApi; // Make it globally available
+        console.log('🔥 Firebase API initialized for checkout');
+    } else {
+        console.warn('⚠️ Firebase client not available, using local fallback');
+    }
+}, 1000);
 
 // Order management state
 let orderData = {
@@ -927,85 +941,65 @@ Order Date: ${new Date(orderData.orderDate).toLocaleString()}
 
 // Submit order to backend
 async function submitOrder(orderData) {
-    // Prepare the order payload
-    const orderPayload = {
-        orderNumber: orderData.orderNumber,
-        customer: orderData.customer,
-        items: orderData.items.map(item => ({
-            // Original uploaded image (base64)
-            originalImage: item.originalImage,
-            // Cropped and styled image ready for printing (base64)
-            printReadyImage: item.printImage,
-            // Preview image with frame for reference (base64)
-            displayImage: item.previewImage || item.displayImage, // Support both field names for backward compatibility
-            // Frame specifications
-            frameSize: item.frameSize,
-            frameColor: item.frameColor,
-            frameTexture: item.frameTexture,
-            // Image adjustments applied
-            adjustments: item.adjustments,
-            // Position and zoom for recreating the crop
-            position: item.position,
-            zoom: item.zoom,
-            price: item.price,
-            orderDate: item.orderDate
-        })),
-        totals: orderData.totals,
-        deliveryMethod: orderData.deliveryMethod,
-        orderDate: orderData.orderDate,
-        emailContent: formatOrderForEmail(orderData)
-    };
-
-    // Option 1: Send to your backend API
     try {
-        const response = await fetch('http://localhost:3001/api/submit-order', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(orderPayload)
-        });
-
-        if (response.ok) {
-            const result = await response.json();
-            return { success: true, data: result };
-        } else {
-            throw new Error('Failed to submit order');
-        }
-    } catch (error) {
-        console.error('API submission failed, trying email fallback:', error);
-        
-        // Option 2: Email fallback using EmailJS (free service)
-        try {
-            // You'll need to sign up at emailjs.com and get your service ID, template ID, and user ID
-            const emailParams = {
-                to_email: 'your-business-email@example.com', // Your business email
-                order_number: orderData.orderNumber,
-                customer_name: orderData.customer.name,
-                customer_email: orderData.customer.email,
-                customer_phone: orderData.customer.phone,
-                customer_address: orderData.customer.address,
-                order_details: formatOrderForEmail(orderData),
-                total_amount: orderData.totals.total
+        // Use Firebase client to create the order
+        if (typeof JBCreationsAPI !== 'undefined' && window.jbApi) {
+            console.log('🔄 Submitting order to Firebase...');
+            
+            // Prepare Firebase-compatible order data
+            const firebaseOrderData = {
+                customer: {
+                    name: orderData.customer.name,
+                    email: orderData.customer.email,
+                    phone: orderData.customer.phone,
+                    address: orderData.customer.address
+                },
+                images: orderData.items.map(item => ({
+                    originalImage: item.originalImage,
+                    printImage: item.printImage,
+                    displayImage: item.displayImage || item.previewImage
+                })),
+                frameSize: orderData.items[0]?.frameSize || 'Standard',
+                frameType: orderData.items[0]?.frameColor || 'Wood',
+                quantity: orderData.items.length || 1,
+                specialInstructions: orderData.items.map(item => 
+                    `Frame: ${item.frameSize} ${item.frameColor} ${item.frameTexture || ''}`
+                ).join('; '),
+                totalAmount: orderData.totals.total,
+                deliveryMethod: orderData.deliveryMethod,
+                paymentId: orderData.paymentId,
+                orderNumber: orderData.orderNumber
             };
 
-            // Uncomment and configure this when you set up EmailJS
-            /*
-            const emailResult = await emailjs.send(
-                'your_service_id',
-                'your_template_id',
-                emailParams,
-                'your_user_id'
-            );
-            */
-
-            // For now, store locally and show instructions
-            localStorage.setItem('pendingOrder', JSON.stringify(orderPayload));
-            return { success: true, method: 'local_storage' };
-        } catch (emailError) {
-            console.error('Email submission failed:', emailError);
-            return { success: false, error: emailError.message };
+            // Submit to Firebase
+            const result = await window.jbApi.createOrder(firebaseOrderData);
+            
+            if (result.success) {
+                console.log('✅ Order submitted successfully to Firebase');
+                return { success: true, orderId: result.order.id };
+            } else {
+                console.error('❌ Firebase order submission failed:', result.error);
+                return { success: false, error: result.error };
+            }
         }
+        
+        // Fallback: Store locally if Firebase not available
+        console.log('⚠️ Firebase not available, storing order locally');
+        const orders = JSON.parse(localStorage.getItem('jb_orders') || '[]');
+        const newOrder = {
+            ...orderData,
+            id: Date.now().toString(),
+            status: 'pending',
+            createdAt: new Date().toISOString()
+        };
+        orders.push(newOrder);
+        localStorage.setItem('jb_orders', JSON.stringify(orders));
+        
+        return { success: true, orderId: newOrder.id };
+        
+    } catch (error) {
+        console.error('Error submitting order:', error);
+        return { success: false, error: error.message };
     }
 }
 
@@ -1016,23 +1010,15 @@ async function placeOrder() {
         return;
     }
 
-    // Check if user is logged in (required for payment)
+    // Get user info (can be null for guest checkout)
     const user = getCurrentUser();
-    if (!user) {
-        if (confirm('You need to be logged in to place an order. Would you like to login now?')) {
-            window.location.href = 'auth.html';
-            return;
-        } else {
-            return;
-        }
-    }
-
+    
     // Show processing overlay
     document.getElementById('processingOverlay').style.display = 'flex';
     document.getElementById('placeOrderBtn').disabled = true;
 
     try {
-        // Prepare order data
+        // Prepare order data (includes guest customer information)
         const orderData = prepareOrderData();
         
         // Calculate total amount for Razorpay
@@ -1042,7 +1028,7 @@ async function placeOrder() {
         document.getElementById('processingOverlay').style.display = 'none';
         document.getElementById('placeOrderBtn').disabled = false;
 
-        // Simple direct payment (using the working approach)
+        // Simple direct payment (works for both guests and logged-in users)
         const paymentResult = await processSimplePayment(totalAmount, orderData, user);
         
         if (paymentResult.success) {
@@ -1050,17 +1036,24 @@ async function placeOrder() {
             const result = await submitOrder({...orderData, paymentId: paymentResult.paymentId});
             
             if (result.success) {
-                // Save order to user's order history
-                saveOrderToUserHistory(user.id, {...orderData, paymentId: paymentResult.paymentId});
+                // Save order to user's order history (only if user is logged in)
+                if (user) {
+                    saveOrderToUserHistory(user.id, {...orderData, paymentId: paymentResult.paymentId});
+                }
                 
                 // Clear cart
                 localStorage.removeItem('photoFramingCart');
                 
-                // Show success message
-                alert(`Payment Successful! Order placed successfully!\n\nOrder Number: ${orderData.orderNumber}\nPayment ID: ${paymentResult.paymentId}\n\nYou will receive a confirmation email shortly.\nYou can view this order in your account.`);
-                
-                // Redirect to orders page or home
-                window.location.href = 'my-orders.html';
+                // Show success message with order tracking info for guests
+                if (user) {
+                    alert(`Payment Successful! Order placed successfully!\n\nOrder Number: ${orderData.orderNumber}\nPayment ID: ${paymentResult.paymentId}\n\nYou will receive a confirmation email shortly.\nYou can view this order in your account.`);
+                    // Redirect to orders page for logged-in users
+                    window.location.href = 'my-orders.html';
+                } else {
+                    alert(`Payment Successful! Order placed successfully!\n\nOrder Number: ${orderData.orderNumber}\nPayment ID: ${paymentResult.paymentId}\n\nIMPORTANT: Save your order number to track your order!\nYou can track your order anytime at: track-order.html\n\nConfirmation email sent to: ${orderData.customer.email}`);
+                    // Redirect to track order page for guests
+                    window.location.href = `track-order.html?order=${orderData.orderNumber}`;
+                }
             } else {
                 throw new Error(result.error || 'Failed to place order after successful payment');
             }
