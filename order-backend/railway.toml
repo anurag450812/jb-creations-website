@@ -5,13 +5,9 @@ build:
   builder: nixpacks
 
 deploy:
-  startCommand: npm start
+  startCommand: node auth-server-production.js
   restartPolicyType: always
-  
-variables:
-  NODE_ENV: production
-  PORT: ${{RAILWAY_PORT}}
-  
+
 services:
   - name: jb-creations-backend
     source: 
