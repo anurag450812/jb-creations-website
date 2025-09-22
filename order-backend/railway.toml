@@ -1,20 +1,8 @@
-# Railway Deployment Configuration
-version: 2
+[build]
+buildCommand = "cp package-simple.json package.json && npm install"
 
-build:
-  builder: nixpacks
-  buildCommand: cp package-simple.json package.json && npm install
-
-deploy:
-  startCommand: node simple-server.js
-  restartPolicyType: always
-
-services:
-  - name: jb-creations-backend
-    source: 
-      repo: anurag450812/jb-creations-website
-      branch: main
-      rootDirectory: /order-backend
+[deploy]
+startCommand = "node simple-server.js"
     variables:
       NODE_ENV: production
       PORT: ${{RAILWAY_PORT}}
