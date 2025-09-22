@@ -172,8 +172,8 @@
 <body>
     <div class="admin-container">
         <div class="header">
-            <h1>🎯 JB Creations Admin</h1>
-            <p>Powered by Supabase - Real-time Dashboard</p>
+            <h1>🔥 JB Creations Admin</h1>
+            <p>Powered by Firebase - Real-time Dashboard</p>
         </div>
         
         <div class="stats-grid">
@@ -206,24 +206,24 @@
             <div id="orders-container">
                 <div class="loading">
                     <h3>🔄 Loading orders...</h3>
-                    <p>Connecting to Supabase database...</p>
+                    <p>Connecting to Firebase database...</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Supabase Integration -->
-    <script src="supabase-client.js" type="module"></script>
+    <!-- Firebase Integration -->
+    <script src="firebase-client.js" type="module"></script>
     
     <script type="module">
-        import { jbAPI } from './supabase-client.js';
+        import { jbAPI } from './firebase-client.js';
         
         let orders = [];
         
         // Load orders and statistics
         async function loadOrders() {
             try {
-                console.log('🔄 Loading orders from Supabase...');
+                console.log('🔄 Loading orders from Firebase...');
                 
                 const result = await jbAPI.getAllOrders();
                 
@@ -241,7 +241,7 @@
                     <div class="error">
                         <h3>❌ Error Loading Orders</h3>
                         <p>${error.message}</p>
-                        <p>Make sure you've completed the Supabase setup in SUPABASE-SETUP.md</p>
+                        <p>Make sure you've completed the Firebase setup in FIREBASE-SETUP.md</p>
                     </div>
                 `;
             }
@@ -279,16 +279,15 @@
             `;
             
             orders.forEach(order => {
-                const customer = order.customers || {};
                 const firstImage = order.images && order.images.length > 0 ? order.images[0] : null;
                 
                 html += `
                     <tr>
                         <td><strong>#${order.id.substring(0, 8)}</strong></td>
                         <td>
-                            <div><strong>${customer.name || 'N/A'}</strong></div>
+                            <div><strong>${order.customerName || 'N/A'}</strong></div>
                             <div style="font-size: 0.9em; color: #7f8c8d;">
-                                ${customer.phone || 'N/A'}
+                                ${order.customerPhone || 'N/A'}
                             </div>
                         </td>
                         <td>
@@ -299,18 +298,18 @@
                             ` : 'No images'}
                         </td>
                         <td>
-                            <div>${order.frame_size || 'N/A'}</div>
+                            <div>${order.frameSize || 'N/A'}</div>
                             <div style="font-size: 0.9em; color: #7f8c8d;">
-                                ${order.frame_type || 'N/A'} (${order.quantity || 1}x)
+                                ${order.frameType || 'N/A'} (${order.quantity || 1}x)
                             </div>
                         </td>
-                        <td><strong>₹${order.total_amount || 'N/A'}</strong></td>
+                        <td><strong>₹${order.totalAmount || 'N/A'}</strong></td>
                         <td>
                             <span class="status-badge status-${order.status}">
                                 ${order.status}
                             </span>
                         </td>
-                        <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                        <td>${new Date(order.createdAt).toLocaleDateString()}</td>
                         <td>
                             <select onchange="updateStatus('${order.id}', this.value)">
                                 <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
@@ -333,7 +332,7 @@
                 total: orders.length,
                 pending: orders.filter(o => o.status === 'pending').length,
                 completed: orders.filter(o => o.status === 'completed').length,
-                customers: new Set(orders.map(o => o.customer_id)).size
+                customers: new Set(orders.map(o => o.customerId)).size
             };
             
             document.getElementById('total-orders').textContent = stats.total;
