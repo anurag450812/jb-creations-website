@@ -3,6 +3,8 @@ const cors = require('cors');
 const fs = require('fs-extra');
 const path = require('path');
 const nodemailer = require('nodemailer');
+const sharp = require('sharp');
+const { createCanvas, loadImage, registerFont } = require('canvas');
 require('dotenv').config();
 
 const app = express();
@@ -51,6 +53,176 @@ function saveBase64Image(base64Data, filename) {
     } catch (error) {
         console.error('Error saving image:', error);
         return null;
+    }
+}
+
+// Enhanced image processing function for fitting images inside frames with color correction
+async function processImageWithFrame(base64Data, item, outputFilename) {
+    try {
+        // Remove data URL prefix if present
+        const base64Image = base64Data.replace(/^data:image\/[a-z]+;base64,/, '');
+        const imageBuffer = Buffer.from(base64Image, 'base64');
+        
+        // Parse frame dimensions (common photo sizes in mm)
+        const frameSizes = {
+            '4x6': { width: 1200, height: 1800 }, // 300 DPI
+            '5x7': { width: 1500, height: 2100 },
+            '8x10': { width: 2400, height: 3000 },
+            '8x12': { width: 2400, height: 3600 },
+            '11x14': { width: 3300, height: 4200 },
+            '12x18': { width: 3600, height: 5400 },
+            '16x20': { width: 4800, height: 6000 },
+            '16x24': { width: 4800, height: 7200 },
+            '20x30': { width: 6000, height: 9000 }
+        };
+        
+        const frameDimensions = frameSizes[item.frameSize.size] || { width: 2400, height: 3000 };
+        
+        // Adjust for orientation
+        if (item.frameSize.orientation === 'landscape') {
+            const temp = frameDimensions.width;
+            frameDimensions.width = frameDimensions.height;
+            frameDimensions.height = temp;
+        }
+        
+        // Create Sharp instance for the original image
+        let processedImage = sharp(imageBuffer);
+        
+        // Apply color corrections/adjustments
+        const adjustments = item.adjustments || {};
+        
+        // Calculate adjustment values (convert from percentage to actual values)
+        const brightness = (adjustments.brightness - 100) / 100; // -1 to 1
+        const contrast = adjustments.contrast / 100; // multiplier
+        const vibrance = (adjustments.vibrance - 100) / 100; // -1 to 1
+        
+        // Apply color adjustments
+        if (brightness !== 0 || contrast !== 1) {
+            processedImage = processedImage.modulate({
+                brightness: 1 + brightness,
+                saturation: 1 + (vibrance * 0.5)
+            });
+        }
+        
+        // Apply gamma correction for highlights/shadows
+        if (adjustments.highlights !== 100 || adjustments.shadows !== 100) {
+            const gamma = 1.0;
+            processedImage = processedImage.gamma(gamma);
+        }
+        
+        // Get original image dimensions
+        const metadata = await processedImage.metadata();
+        const originalWidth = metadata.width;
+        const originalHeight = metadata.height;
+        
+        // Apply zoom and position transformations
+        const zoom = item.zoom || 1;
+        const position = item.position || { x: 0, y: 0 };
+        
+        // Calculate cropping area based on zoom and position
+        let cropWidth = Math.round(originalWidth / zoom);
+        let cropHeight = Math.round(originalHeight / zoom);
+        
+        // Calculate crop position (position values are typically -1 to 1)
+        let cropX = Math.round((originalWidth - cropWidth) / 2 + (position.x * originalWidth / 2));
+        let cropY = Math.round((originalHeight - cropHeight) / 2 + (position.y * originalHeight / 2));
+        
+        // Ensure crop area stays within image bounds
+        cropX = Math.max(0, Math.min(cropX, originalWidth - cropWidth));
+        cropY = Math.max(0, Math.min(cropY, originalHeight - cropHeight));
+        
+        // Apply crop if needed
+        if (zoom > 1) {
+            processedImage = processedImage.extract({
+                left: cropX,
+                top: cropY,
+                width: cropWidth,
+                height: cropHeight
+            });
+        }
+        
+        // Resize to fit frame dimensions while maintaining aspect ratio
+        processedImage = processedImage.resize(frameDimensions.width, frameDimensions.height, {
+            fit: 'cover', // This ensures the image covers the entire frame
+            position: 'center'
+        });
+        
+        // Create frame overlay based on frame color and texture
+        const canvas = createCanvas(frameDimensions.width, frameDimensions.height);
+        const ctx = canvas.getContext('2d');
+        
+        // Get processed image as buffer
+        const processedImageBuffer = await processedImage.jpeg({ quality: 95 }).toBuffer();
+        const img = await loadImage(processedImageBuffer);
+        
+        // Draw the processed image
+        ctx.drawImage(img, 0, 0, frameDimensions.width, frameDimensions.height);
+        
+        // Add frame border based on frame color
+        const frameColors = {
+            'black': '#1a1a1a',
+            'white': '#ffffff',
+            'brown': '#8b4513',
+            'silver': '#c0c0c0',
+            'gold': '#ffd700',
+            'natural': '#deb887'
+        };
+        
+        const frameColor = frameColors[item.frameColor.toLowerCase()] || '#1a1a1a';
+        const borderWidth = Math.max(20, frameDimensions.width * 0.05); // 5% of width or minimum 20px
+        
+        // Draw frame border
+        ctx.strokeStyle = frameColor;
+        ctx.lineWidth = borderWidth;
+        ctx.strokeRect(borderWidth/2, borderWidth/2, frameDimensions.width - borderWidth, frameDimensions.height - borderWidth);
+        
+        // Add texture effect if specified
+        if (item.frameTexture && item.frameTexture !== 'smooth') {
+            ctx.globalAlpha = 0.1;
+            
+            // Create texture pattern based on type
+            switch(item.frameTexture.toLowerCase()) {
+                case 'wood':
+                    // Add wood grain effect
+                    for (let i = 0; i < frameDimensions.height; i += 3) {
+                        ctx.strokeStyle = frameColor;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(0, i);
+                        ctx.lineTo(frameDimensions.width, i + Math.sin(i * 0.1) * 2);
+                        ctx.stroke();
+                    }
+                    break;
+                    
+                case 'metal':
+                    // Add metallic reflection lines
+                    for (let i = borderWidth; i < frameDimensions.width - borderWidth; i += 20) {
+                        ctx.strokeStyle = '#ffffff';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(i, borderWidth);
+                        ctx.lineTo(i + 10, frameDimensions.height - borderWidth);
+                        ctx.stroke();
+                    }
+                    break;
+            }
+            
+            ctx.globalAlpha = 1;
+        }
+        
+        // Convert canvas to buffer
+        const canvasBuffer = canvas.toBuffer('image/jpeg', { quality: 0.95 });
+        
+        // Save the final processed image
+        const filepath = path.join(imagesDir, outputFilename);
+        fs.writeFileSync(filepath, canvasBuffer);
+        
+        return filepath;
+        
+    } catch (error) {
+        console.error('Error processing image with frame:', error);
+        // Fallback to basic save if processing fails
+        return saveBase64Image(base64Data, outputFilename);
     }
 }
 
@@ -194,11 +366,14 @@ app.post('/api/submit-order', async (req, res) => {
         const orderDir = path.join(ordersDir, orderData.orderNumber);
         fs.ensureDirSync(orderDir);
 
-        // Save images and collect file paths
+        // Save images and collect file paths with enhanced processing
         const imagePaths = [];
         
-        orderData.items.forEach((item, itemIndex) => {
-            // Save original image
+        // Process each item's images asynchronously
+        for (let itemIndex = 0; itemIndex < orderData.items.length; itemIndex++) {
+            const item = orderData.items[itemIndex];
+            
+            // Save original image (unchanged)
             if (item.originalImage) {
                 const originalPath = saveBase64Image(
                     item.originalImage, 
@@ -210,7 +385,24 @@ app.post('/api/submit-order', async (req, res) => {
                 }
             }
 
-            // Save print-ready image (this is what you'll use for production)
+            // Process and save enhanced print-ready image with frame fitting and color correction
+            if (item.originalImage) {
+                try {
+                    const enhancedPrintPath = await processImageWithFrame(
+                        item.originalImage,
+                        item,
+                        `${orderData.orderNumber}_item${itemIndex + 1}_enhanced_print.jpg`
+                    );
+                    if (enhancedPrintPath) {
+                        imagePaths.push(enhancedPrintPath);
+                        item.enhancedPrintPath = enhancedPrintPath;
+                    }
+                } catch (error) {
+                    console.error(`Error processing enhanced image for item ${itemIndex + 1}:`, error);
+                }
+            }
+
+            // Save print-ready image (original implementation as backup)
             if (item.printReadyImage) {
                 const printPath = saveBase64Image(
                     item.printReadyImage, 
@@ -238,7 +430,7 @@ app.post('/api/submit-order', async (req, res) => {
             delete item.originalImage;
             delete item.printReadyImage;
             delete item.displayImage;
-        });
+        }
 
         // Save order data as JSON
         const orderFilePath = path.join(orderDir, 'order.json');
@@ -302,10 +494,15 @@ app.get('/api/orders', (req, res) => {
                 orders.push({
                     orderNumber: orderData.orderNumber,
                     customerName: orderData.customer.name,
+                    email: orderData.customer.email,
+                    phone: orderData.customer.phone,
+                    address: orderData.customer.address,
                     customerType: orderData.customer.userId ? 'Registered' : 'Guest',
-                    total: orderData.totals.total,
+                    totalAmount: orderData.totals.total,
                     orderDate: orderData.orderDate,
-                    status: orderData.status || 'pending'
+                    status: orderData.status || 'pending',
+                    itemCount: orderData.items.length,
+                    deliveryMethod: orderData.deliveryMethod
                 });
             }
         });
@@ -313,9 +510,16 @@ app.get('/api/orders', (req, res) => {
         // Sort by date (newest first)
         orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
         
-        res.json(orders);
+        res.json({
+            success: true,
+            orders: orders
+        });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to retrieve orders' });
+        console.error('Error fetching orders:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Failed to retrieve orders' 
+        });
     }
 });
 
@@ -386,9 +590,15 @@ app.get('/api/orders/:orderNumber/images', async (req, res) => {
                     name: `item_${index + 1}_original.jpg` 
                 });
             }
+            // Prioritize enhanced print image if available
+            if (item.enhancedPrintPath && fs.existsSync(item.enhancedPrintPath)) {
+                archive.file(item.enhancedPrintPath, { 
+                    name: `item_${index + 1}_ENHANCED_print_ready.jpg` 
+                });
+            }
             if (item.printImagePath && fs.existsSync(item.printImagePath)) {
                 archive.file(item.printImagePath, { 
-                    name: `item_${index + 1}_print_ready.jpg` 
+                    name: `item_${index + 1}_print_ready_backup.jpg` 
                 });
             }
             if (item.displayImagePath && fs.existsSync(item.displayImagePath)) {

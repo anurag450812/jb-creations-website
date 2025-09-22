@@ -9,6 +9,7 @@
  */
 
 // State management
+console.log('🔄 script.js is loading...');
 const state = {
     image: null,
     frameSize: {
@@ -132,28 +133,8 @@ function initializeEventListeners() {
     // Frame Size Selection
     document.querySelectorAll('.size-options button, .desktop-size-btn').forEach(button => {
         button.addEventListener('click', (event) => {
-            // Check if this is already a programmatic second click to avoid infinite loop
-            if (event.isTrusted === false && event.detail === 'second-click') {
-                console.log('Second click detected, processing normally');
-                processFrameSizeClick(button);
-                return;
-            }
+            console.log('Frame size button clicked:', button.dataset.size, button.dataset.orientation);
             
-            // This is the first click - process it and trigger second click
-            console.log('First click detected, triggering double-click sequence');
-            processFrameSizeClick(button);
-            
-            // Trigger second click after a brief delay
-            setTimeout(() => {
-                const secondClickEvent = new Event('click', { bubbles: true });
-                secondClickEvent.detail = 'second-click'; // Mark as second click
-                button.dispatchEvent(secondClickEvent);
-            }, 100); // 100ms delay between clicks
-        });
-    });
-
-    // Function to handle the actual frame size click processing
-    function processFrameSizeClick(button) {
             // Remove selected class from all buttons
             document.querySelectorAll('.size-options button, .desktop-size-btn').forEach(btn => {
                 btn.classList.remove('selected');
@@ -221,11 +202,40 @@ function initializeEventListeners() {
                     }
                 }, 300);
             }
-    }
+            
+            // Automatically trigger "Update Room Previews" functionality after frame size change
+            setTimeout(() => {
+                console.log('🎯 Auto-triggering room preview update after frame size change...');
+                
+                // Check if conditions are met (same logic as updateRoomPreviewsClick)
+                const hasImage = !!(state.image);
+                const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
+                
+                if (hasImage && hasActiveRoomSlider) {
+                    console.log('✅ Auto-updating room previews with new frame size...');
+                    
+                    // Call the overlay function directly (same as updateRoomPreviewsClick but without UI feedback)
+                    if (typeof overlayFrameOnRoomImages === 'function') {
+                        overlayFrameOnRoomImages().then(() => {
+                            console.log('✅ Room previews auto-updated successfully after frame size change!');
+                        }).catch((error) => {
+                            console.error('❌ Error auto-updating room previews:', error);
+                        });
+                    } else {
+                        console.log('⚠️ overlayFrameOnRoomImages function not available for auto-update');
+                    }
+                } else {
+                    console.log('⚠️ Auto-update skipped - conditions not met (image:', hasImage, ', room slider:', hasActiveRoomSlider, ')');
+                }
+            }, 1000); // Wait 1 second for room slider to initialize
+        });
+    });
 
     // Frame Color Selection
     document.querySelectorAll('.color-options button, .desktop-color-btn').forEach(button => {
         button.addEventListener('click', () => {
+            console.log('Frame color button clicked:', button.dataset.color);
+            
             // Remove selected class from all buttons
             document.querySelectorAll('.color-options button, .desktop-color-btn').forEach(btn => {
                 btn.classList.remove('selected');
@@ -239,6 +249,32 @@ function initializeEventListeners() {
             
             // Update frame color
             updateFrameColor();
+            
+            // Automatically trigger "Update Room Previews" functionality after frame color change
+            setTimeout(() => {
+                console.log('🎯 Auto-triggering room preview update after frame color change...');
+                
+                // Check if conditions are met (same logic as updateRoomPreviewsClick)
+                const hasImage = !!(state.image);
+                const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
+                
+                if (hasImage && hasActiveRoomSlider) {
+                    console.log('✅ Auto-updating room previews with new frame color...');
+                    
+                    // Call the overlay function directly (same as updateRoomPreviewsClick but without UI feedback)
+                    if (typeof overlayFrameOnRoomImages === 'function') {
+                        overlayFrameOnRoomImages().then(() => {
+                            console.log('✅ Room previews auto-updated successfully after frame color change!');
+                        }).catch((error) => {
+                            console.error('❌ Error auto-updating room previews after color change:', error);
+                        });
+                    } else {
+                        console.log('⚠️ overlayFrameOnRoomImages function not available for color auto-update');
+                    }
+                } else {
+                    console.log('⚠️ Color auto-update skipped - conditions not met (image:', hasImage, ', room slider:', hasActiveRoomSlider, ')');
+                }
+            }, 500); // Wait 500ms for frame color update to complete
         });
     });
 
@@ -505,6 +541,40 @@ function initializeEventListeners() {
         // Fallback to default room preview if button not found
         showDefaultRoomPreview();
     }
+
+    // Handle change image button click (both desktop and mobile)
+    const changeImageBtn = document.getElementById('changeImage');
+    const mobileChangeImageBtn = document.getElementById('mobileChangeImage');
+    
+    function handleChangeImage() {
+        console.log('handleChangeImage called - about to reload page');
+        // Reload the page to start fresh with image upload
+        window.location.reload();
+    }
+    
+    if (changeImageBtn) {
+        console.log('Desktop change image button found and event listener added');
+        changeImageBtn.addEventListener('click', (e) => {
+            console.log('Desktop change image button clicked!');
+            e.preventDefault();
+            e.stopPropagation();
+            handleChangeImage();
+        });
+    } else {
+        console.log('Desktop change image button NOT found');
+    }
+    
+    if (mobileChangeImageBtn) {
+        console.log('Mobile change image button found and event listener added');
+        mobileChangeImageBtn.addEventListener('click', (e) => {
+            console.log('Mobile change image button clicked!');
+            e.preventDefault();
+            e.stopPropagation();
+            handleChangeImage();
+        });
+    } else {
+        console.log('Mobile change image button NOT found');
+    }
 }
 
 // Add imageContainer to the elements object
@@ -587,6 +657,11 @@ function handleImageUpload(file) {
                     elements.addToCartBtn.disabled = false;
                     elements.imageContainer.classList.add('has-image');
                     
+                    // Update room preview button state
+                    if (window.updateRoomPreviewButtonState) {
+                        window.updateRoomPreviewButtonState();
+                    }
+                    
                     // Set default frame color to black if not set
                     if (!state.frameColor) {
                         state.frameColor = 'black';
@@ -610,12 +685,32 @@ function handleImageUpload(file) {
                     // Update image transform
                     updateImageTransform();
                     
-                    // Update room preview overlays if room slider is active
-                    if (state.roomSlider && state.roomSlider.isActive) {
-                        setTimeout(() => {
-                            overlayFrameOnRoomImages();
-                        }, 500); // Give time for image to load
-                    }
+                    // Automatically trigger "Update Room Previews" functionality after image upload
+                    setTimeout(() => {
+                        console.log('🎯 Auto-triggering room preview update after image upload...');
+                        
+                        // Check if conditions are met (same logic as updateRoomPreviewsClick)
+                        const hasImage = !!(state.image);
+                        const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
+                        
+                        if (hasImage && hasActiveRoomSlider) {
+                            console.log('✅ Auto-updating room previews with uploaded image...');
+                            
+                            // Call the overlay function directly (same as updateRoomPreviewsClick but without UI feedback)
+                            if (typeof overlayFrameOnRoomImages === 'function') {
+                                overlayFrameOnRoomImages().then(() => {
+                                    console.log('✅ Room previews auto-updated successfully after image upload!');
+                                }).catch((error) => {
+                                    console.error('❌ Error auto-updating room previews after image upload:', error);
+                                });
+                            } else {
+                                console.log('⚠️ overlayFrameOnRoomImages function not available for image upload auto-update');
+                            }
+                        } else {
+                            console.log('⚠️ Image upload auto-update skipped - conditions not met (image:', hasImage, ', room slider:', hasActiveRoomSlider, ')');
+                            console.log('   Note: If room slider is not active, please select a frame size first');
+                        }
+                    }, 1200); // Wait 1.2 seconds for all initialization to complete
                 };
             };
             
@@ -666,6 +761,8 @@ sliders.forEach(({ id, element }) => {
     const label = element.previousElementSibling;
     
     element.addEventListener('input', (e) => {
+        console.log('Adjustment slider changed:', id, 'to', e.target.value);
+        
         state.adjustments[id] = e.target.value;
         updateImageFilters();
         
@@ -678,6 +775,33 @@ sliders.forEach(({ id, element }) => {
         if (mobileSlider) {
             mobileSlider.value = value;
         }
+        
+        // Automatically trigger "Update Room Previews" functionality after adjustment change
+        clearTimeout(window.adjustmentUpdateTimeout); // Clear any existing timeout to prevent multiple rapid updates
+        window.adjustmentUpdateTimeout = setTimeout(() => {
+            console.log('🎯 Auto-triggering room preview update after adjustment change:', id);
+            
+            // Check if conditions are met (same logic as updateRoomPreviewsClick)
+            const hasImage = !!(state.image);
+            const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
+            
+            if (hasImage && hasActiveRoomSlider) {
+                console.log('✅ Auto-updating room previews with new adjustment:', id);
+                
+                // Call the overlay function directly (same as updateRoomPreviewsClick but without UI feedback)
+                if (typeof overlayFrameOnRoomImages === 'function') {
+                    overlayFrameOnRoomImages().then(() => {
+                        console.log('✅ Room previews auto-updated successfully after adjustment change:', id);
+                    }).catch((error) => {
+                        console.error('❌ Error auto-updating room previews after adjustment change:', error);
+                    });
+                } else {
+                    console.log('⚠️ overlayFrameOnRoomImages function not available for adjustment auto-update');
+                }
+            } else {
+                console.log('⚠️ Adjustment auto-update skipped - conditions not met (image:', hasImage, ', room slider:', hasActiveRoomSlider, ')');
+            }
+        }, 800); // Wait 800ms after user stops adjusting to prevent too many rapid updates
     });
 });
 
@@ -694,14 +818,8 @@ function updateImageFilters() {
         saturate(${vibrance}%)
     `;
     
-    // Update room preview overlays if room slider is active
-    if (state.roomSlider && state.roomSlider.isActive) {
-        // Use debouncing to avoid too frequent updates during slider adjustments
-        clearTimeout(updateImageFilters.overlayTimeout);
-        updateImageFilters.overlayTimeout = setTimeout(() => {
-            overlayFrameOnRoomImages();
-        }, 200); // 200ms delay for filter updates
-    }
+    // Room preview overlays will only update when "Update Room Previews" button is clicked
+    // Removed automatic overlay update for filter changes to give users control
 }
 
 // Update frame aspect ratio based on selected size
@@ -740,14 +858,8 @@ function updateImageTransform() {
     elements.previewImage.style.maxWidth = 'none';
     elements.previewImage.style.maxHeight = 'none';
     
-    // Update room preview overlays if room slider is active
-    if (state.roomSlider && state.roomSlider.isActive) {
-        // Use debouncing to avoid too frequent updates during dragging/zooming
-        clearTimeout(updateImageTransform.overlayTimeout);
-        updateImageTransform.overlayTimeout = setTimeout(() => {
-            overlayFrameOnRoomImages();
-        }, 150); // 150ms delay to allow for smooth dragging
-    }
+    // Room preview overlays will only update when "Update Room Previews" button is clicked
+    // Removed automatic overlay update for zoom/pan changes to give users control
 }
 
 // Update drag functionality to work with centered positioning
@@ -901,6 +1013,32 @@ function initializeDragAndZoom() {
         
         // Snap back to boundaries if needed
         snapToBoundaries();
+        
+        // Automatically trigger "Update Room Previews" functionality after drag operation
+        setTimeout(() => {
+            console.log('🎯 Auto-triggering room preview update after drag operation...');
+            
+            // Check if conditions are met (same logic as updateRoomPreviewsClick)
+            const hasImage = !!(state.image);
+            const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
+            
+            if (hasImage && hasActiveRoomSlider) {
+                console.log('✅ Auto-updating room previews after drag...');
+                
+                // Call the overlay function directly (same as updateRoomPreviewsClick but without UI feedback)
+                if (typeof overlayFrameOnRoomImages === 'function') {
+                    overlayFrameOnRoomImages().then(() => {
+                        console.log('✅ Room previews auto-updated successfully after drag!');
+                    }).catch((error) => {
+                        console.error('❌ Error auto-updating room previews after drag:', error);
+                    });
+                } else {
+                    console.log('⚠️ overlayFrameOnRoomImages function not available for drag auto-update');
+                }
+            } else {
+                console.log('⚠️ Drag auto-update skipped - conditions not met (image:', hasImage, ', room slider:', hasActiveRoomSlider, ')');
+            }
+        }, 300); // Brief delay to let snap animation complete
     }
 
     // Snap to boundaries with smooth animation
@@ -1001,6 +1139,32 @@ function initializeDragAndZoom() {
         
         // Snap back to boundaries
         snapToBoundaries();
+        
+        // Automatically trigger "Update Room Previews" functionality after touch drag operation
+        setTimeout(() => {
+            console.log('🎯 Auto-triggering room preview update after touch drag operation...');
+            
+            // Check if conditions are met (same logic as updateRoomPreviewsClick)
+            const hasImage = !!(state.image);
+            const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
+            
+            if (hasImage && hasActiveRoomSlider) {
+                console.log('✅ Auto-updating room previews after touch drag...');
+                
+                // Call the overlay function directly (same as updateRoomPreviewsClick but without UI feedback)
+                if (typeof overlayFrameOnRoomImages === 'function') {
+                    overlayFrameOnRoomImages().then(() => {
+                        console.log('✅ Room previews auto-updated successfully after touch drag!');
+                    }).catch((error) => {
+                        console.error('❌ Error auto-updating room previews after touch drag:', error);
+                    });
+                } else {
+                    console.log('⚠️ overlayFrameOnRoomImages function not available for touch drag auto-update');
+                }
+            } else {
+                console.log('⚠️ Touch drag auto-update skipped - conditions not met (image:', hasImage, ', room slider:', hasActiveRoomSlider, ')');
+            }
+        }, 300); // Brief delay to let snap animation complete
     }
 
     // Add event listeners with improved options
@@ -1313,28 +1477,6 @@ function downloadPrintImages() {
     });
 }
 
-// Make functions globally accessible for testing
-window.getPrintReadyImages = getPrintReadyImages;
-window.downloadPrintImages = downloadPrintImages;
-window.testFrameCapture = async function() {
-    console.log('Testing frame capture...');
-    const previewImage = await captureFramePreview();
-    if (previewImage) {
-        console.log('Frame capture successful! Image size:', previewImage.length);
-        // Create a temporary image element to preview the captured frame
-        const img = document.createElement('img');
-        img.src = previewImage;
-        img.style.cssText = 'position: fixed; top: 10px; right: 10px; width: 200px; border: 2px solid red; z-index: 10000;';
-        img.title = 'Captured Frame Preview (click to remove)';
-        img.onclick = () => img.remove();
-        document.body.appendChild(img);
-        return previewImage;
-    } else {
-        console.error('Frame capture failed!');
-        return null;
-    }
-};
-
 // Cart Modal Functions
 function updateCartCount() {
     try {
@@ -1644,7 +1786,7 @@ function captureFramePreview() {
 
                     // Convert to data URL
                     const dataURL = canvas.toDataURL('image/png', 1.0);
-                    console.log('Frame preview captured successfully, size:', dataURL.length);
+                    // Remove the console.log statement
                     resolve(dataURL);
                     
                 } catch (error) {
@@ -1669,277 +1811,272 @@ function captureFramePreview() {
 }
 
 function overlayFrameOnRoomImages() {
-    console.log('overlayFrameOnRoomImages called', {
-        hasImage: !!state.image,
-        hasFrameSize: !!state.frameSize,
-        roomSliderActive: state.roomSlider?.isActive
-    });
-    
-    if (!state.image || !state.frameSize) {
-        console.log('Missing image or frame size, skipping overlay');
-        return;
-    }
-
-    // Capture the current frame preview
-    captureFramePreview().then(frameDataURL => {
-        if (!frameDataURL) {
-            console.log('No frame data captured');
+    return new Promise((resolve, reject) => {
+        if (!state.image || !state.frameSize) {
+            reject(new Error('No image or frame size selected'));
             return;
         }
 
-        console.log('Frame captured successfully, applying to room images');
+        // Capture the current frame preview
+        captureFramePreview().then(frameDataURL => {
+            if (!frameDataURL) {
+                reject(new Error('Failed to capture frame preview'));
+                return;
+            }
 
-        // Get all room slider images
-        const roomSlider = document.getElementById('roomSlider');
-        if (!roomSlider) {
-            console.log('Room slider not found');
-            return;
-        }
+            console.log('Frame preview captured successfully for room overlay');
 
-        const roomImages = roomSlider.querySelectorAll('img');
-        console.log(`Found ${roomImages.length} room images to process`);
+            // Get all room slider images
+            const roomSlider = document.getElementById('roomSlider');
+            if (!roomSlider) {
+                reject(new Error('Room slider not found'));
+                return;
+            }
+
+            const roomImages = roomSlider.querySelectorAll('img');
+            console.log(`Applying frame overlay to ${roomImages.length} room images`);
+            
+            let completedImages = 0;
+            const totalImages = roomImages.length;
+            
+            if (totalImages === 0) {
+                resolve();
+                return;
+            }
         
-        roomImages.forEach((roomImg, index) => {
-            // Skip the fifth image (index === 4) from having frame overlay for all cases
-            if (index === 4) {
-                console.log(`Skipping frame overlay on fifth image (index ${index})`);
-                return;
-            }
-
-            // Skip if image doesn't exist or is broken
-            if (!roomImg.src || roomImg.style.display === 'none') {
-                console.log(`Skipping room image ${index} - no src or hidden`);
-                return;
-            }
-
-            // Store original source for potential restoration
-            if (!roomImg.originalSrc) {
-                roomImg.originalSrc = roomImg.src;
-            }
-
-            // Create a canvas for each room image with the frame overlay
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-
-            // Wait for room image to load if it hasn't already
-            const processRoomImage = () => {
-                try {
-                    // Set canvas size to match room image
-                    canvas.width = roomImg.naturalWidth || roomImg.width || 800;
-                    canvas.height = roomImg.naturalHeight || roomImg.height || 600;
-
-                    console.log(`Processing room image ${index}, size: ${canvas.width}x${canvas.height}`);
-
-                    // Draw the room background image
-                    ctx.drawImage(roomImg, 0, 0, canvas.width, canvas.height);
-
-                    // Load and overlay the frame preview
-                    const frameImg = new Image();
-                    frameImg.onload = () => {
-                        try {
-                            // Position the frame in different locations for variety
-                            let frameX, frameY, frameWidth, frameHeight;
-                            
-                            // Special positioning for 13x19 portrait on first, second, third, and fourth room images
-                            if ((index === 0 || index === 1 || index === 2 || index === 3) && state.frameSize && 
-                                state.frameSize.size === '13x19' && 
-                                state.frameSize.orientation === 'portrait') {
-                                
-                                // Use specific coordinates for first, second, third, and fourth images
-                                // First image: coords="308,48,506,255", Second image: coords="288,61,486,268", Third image: coords="404,49,602,256", Fourth image: coords="190,63,401,285"
-                                // Scale coordinates based on actual canvas size vs original image size
-                                const originalImageWidth = 800; // Assuming original image reference width
-                                const originalImageHeight = 600; // Assuming original image reference height
-                                
-                                const scaleX = canvas.width / originalImageWidth;
-                                const scaleY = canvas.height / originalImageHeight;
-                                
-                                if (index === 0) {
-                                    // First image coordinates
-                                    frameX = 308 * scaleX;
-                                    frameY = 48 * scaleY;
-                                    frameWidth = (506 - 308) * scaleX;
-                                    frameHeight = (255 - 48) * scaleY;
-                                } else if (index === 1) {
-                                    // Second image coordinates
-                                    frameX = 288 * scaleX;
-                                    frameY = 61 * scaleY;
-                                    frameWidth = (486 - 288) * scaleX;
-                                    frameHeight = (268 - 61) * scaleY;
-                                } else if (index === 2) {
-                                    // Third image coordinates
-                                    frameX = 404 * scaleX;
-                                    frameY = 49 * scaleY;
-                                    frameWidth = (602 - 404) * scaleX;
-                                    frameHeight = (256 - 49) * scaleY;
-                                } else if (index === 3) {
-                                    // Fourth image coordinates
-                                    frameX = 190 * scaleX;
-                                    frameY = 63 * scaleY;
-                                    frameWidth = (401 - 190) * scaleX;
-                                    frameHeight = (285 - 63) * scaleY;
-                                }
-                                
-                                console.log(`Using specific coordinates for 13x19 portrait on image ${index + 1}: ${frameX}, ${frameY}, ${frameWidth}x${frameHeight}`);
-                            } else if ((index === 0 || index === 1 || index === 2 || index === 3) && state.frameSize && 
-                                state.frameSize.size === '13x19' && 
-                                state.frameSize.orientation === 'landscape') {
-                                
-                                // Use specific coordinates for first, second, third, and fourth images of 13x19 landscape
-                                // First image: coords="275,64,565,208", Second image: coords="239,66,547,218", Third image: coords="252,52,557,201", Fourth image: coords="76,68,416,236"
-                                // Scale coordinates based on actual canvas size vs original image size
-                                const originalImageWidth = 800; // Assuming original image reference width
-                                const originalImageHeight = 600; // Assuming original image reference height
-                                
-                                const scaleX = canvas.width / originalImageWidth;
-                                const scaleY = canvas.height / originalImageHeight;
-                                
-                                if (index === 0) {
-                                    // First image coordinates for landscape
-                                    frameX = 275 * scaleX;
-                                    frameY = 64 * scaleY;
-                                    frameWidth = (565 - 275) * scaleX;
-                                    frameHeight = (208 - 64) * scaleY;
-                                } else if (index === 1) {
-                                    // Second image coordinates for landscape
-                                    frameX = 239 * scaleX;
-                                    frameY = 66 * scaleY;
-                                    frameWidth = (547 - 239) * scaleX;
-                                    frameHeight = (218 - 66) * scaleY;
-                                } else if (index === 2) {
-                                    // Third image coordinates for landscape
-                                    frameX = 252 * scaleX;
-                                    frameY = 52 * scaleY;
-                                    frameWidth = (557 - 252) * scaleX;
-                                    frameHeight = (201 - 52) * scaleY;
-                                } else if (index === 3) {
-                                    // Fourth image coordinates for landscape
-                                    frameX = 76 * scaleX;
-                                    frameY = 68 * scaleY;
-                                    frameWidth = (416 - 76) * scaleX;
-                                    frameHeight = (236 - 68) * scaleY;
-                                }
-
-                                console.log(`Using specific coordinates for 13x19 landscape on image ${index + 1}: ${frameX}, ${frameY}, ${frameWidth}x${frameHeight}`);
-                            } else if ((index === 0 || index === 1 || index === 2 || index === 3) && state.frameSize && 
-                                state.frameSize.size === '13x10' && 
-                                state.frameSize.orientation === 'portrait') {
-                                
-                                // Use specific coordinates for first, second, third, and fourth images of 13x10 portrait
-                                // First image: coords="330,76,485,222", Fourth image: coords="205,65,450,296"
-                                // Scale coordinates based on actual canvas size vs original image size
-                                const originalImageWidth = 800; // Assuming original image reference width
-                                const originalImageHeight = 600; // Assuming original image reference height
-                                
-                                const scaleX = canvas.width / originalImageWidth;
-                                const scaleY = canvas.height / originalImageHeight;
-                                
-                                if (index === 0) {
-                                    // First image coordinates for 13x10 portrait
-                                    frameX = 330 * scaleX;
-                                    frameY = 76 * scaleY;
-                                    frameWidth = (485 - 330) * scaleX;
-                                    frameHeight = (222 - 76) * scaleY;
-                                } else if (index === 3) {
-                                    // Fourth image coordinates for 13x10 portrait
-                                    frameX = 205 * scaleX;
-                                    frameY = 65 * scaleY;
-                                    frameWidth = (450 - 205) * scaleX;
-                                    frameHeight = (296 - 65) * scaleY;
-                                }
-
-                                console.log(`Using specific coordinates for 13x10 portrait on image ${index + 1}: ${frameX}, ${frameY}, ${frameWidth}x${frameHeight}`);
-                            } else if ((index === 0 || index === 1 || index === 2 || index === 3) && state.frameSize && 
-                                state.frameSize.size === '13x10' && 
-                                state.frameSize.orientation === 'landscape') {
-                                
-                                // Use specific coordinates for first, second, third, and fourth images of 13x10 landscape
-                                // First image: coords="325,95,530,210", Fourth image: coords="179,121,490,292"
-                                // Scale coordinates based on actual canvas size vs original image size
-                                const originalImageWidth = 800; // Assuming original image reference width
-                                const originalImageHeight = 600; // Assuming original image reference height
-                                
-                                const scaleX = canvas.width / originalImageWidth;
-                                const scaleY = canvas.height / originalImageHeight;
-                                
-                                if (index === 0) {
-                                    // First image coordinates for 13x10 landscape
-                                    frameX = 325 * scaleX;
-                                    frameY = 95 * scaleY;
-                                    frameWidth = (530 - 325) * scaleX;
-                                    frameHeight = (210 - 95) * scaleY;
-                                } else if (index === 3) {
-                                    // Fourth image coordinates for 13x10 landscape
-                                    frameX = 179 * scaleX;
-                                    frameY = 121 * scaleY;
-                                    frameWidth = (490 - 179) * scaleX;
-                                    frameHeight = (292 - 121) * scaleY;
-                                }
-
-                                console.log(`Using specific coordinates for 13x10 landscape on image ${index + 1}: ${frameX}, ${frameY}, ${frameWidth}x${frameHeight}`);
-                            } else {
-                                // Use dynamic scaling for other cases
-                                const frameScale = Math.min(0.3, 350 / Math.min(canvas.width, canvas.height));
-                                frameWidth = canvas.width * frameScale;
-                                frameHeight = frameWidth * (frameImg.height / frameImg.width);
-                                
-                                // Use index to vary frame position across different room images
-                                switch (index % 3) {
-                                    case 0: // Center-right
-                                        frameX = canvas.width * 0.55;
-                                        frameY = canvas.height * 0.25;
-                                        break;
-                                    case 1: // Center-left
-                                        frameX = canvas.width * 0.15;
-                                        frameY = canvas.height * 0.3;
-                                        break;
-                                    case 2: // Center
-                                        frameX = canvas.width * 0.35;
-                                        frameY = canvas.height * 0.2;
-                                        break;
-                                    default:
-                                        frameX = canvas.width * 0.4;
-                                        frameY = canvas.height * 0.3;
-                                }
-                                
-                                console.log(`Using dynamic positioning for frame ${index}: ${frameX}, ${frameY}, ${frameWidth}x${frameHeight}`);
-                            }
-
-                            // Draw the frame without shadow
-                            ctx.drawImage(frameImg, frameX, frameY, frameWidth, frameHeight);
-
-                            // Convert the composite image to data URL and update the room image
-                            const compositeDataURL = canvas.toDataURL('image/jpeg', 0.9);
-                            
-                            // Update the room image source
-                            roomImg.src = compositeDataURL;
-                            
-                            console.log(`Successfully updated room image ${index}`);
-                            
-                        } catch (error) {
-                            console.error('Error overlaying frame on room image:', error);
-                        }
-                    };
-
-                    frameImg.onerror = () => {
-                        console.error('Error loading frame image for overlay');
-                    };
-
-                    frameImg.src = frameDataURL;
-                    
-                } catch (error) {
-                    console.error('Error processing room image:', error);
+            roomImages.forEach((roomImg, index) => {
+                // Skip the fifth image (index === 4) from having frame overlay for all cases
+                if (index === 4) {
+                    completedImages++;
+                    if (completedImages === totalImages) {
+                        resolve();
+                    }
+                    return;
                 }
-            };
 
-            if (roomImg.complete && roomImg.naturalWidth > 0) {
-                processRoomImage();
-            } else {
-                roomImg.onload = processRoomImage;
-            }
+                // Skip if image doesn't exist or is broken
+                if (!roomImg.src || roomImg.style.display === 'none') {
+                    completedImages++;
+                    if (completedImages === totalImages) {
+                        resolve();
+                    }
+                    return;
+                }
+
+                // Store original source for potential restoration
+                if (!roomImg.originalSrc) {
+                    roomImg.originalSrc = roomImg.src;
+                }
+
+                // Create a canvas for each room image with the frame overlay
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                // Wait for room image to load if it hasn't already
+                const processRoomImage = () => {
+                    try {
+                        // Set canvas size to match room image
+                        canvas.width = roomImg.naturalWidth || roomImg.width || 800;
+                        canvas.height = roomImg.naturalHeight || roomImg.height || 600;
+
+                        // Draw the room background image
+                        ctx.drawImage(roomImg, 0, 0, canvas.width, canvas.height);
+
+                        // Load and overlay the frame preview
+                        const frameImg = new Image();
+                        frameImg.onload = () => {
+                            try {
+                                // Position the frame in different locations for variety
+                                let frameX, frameY, frameWidth, frameHeight;
+                                
+                                // Special positioning for 13x19 portrait on first, second, third, and fourth room images
+                                if ((index === 0 || index === 1 || index === 2 || index === 3) && state.frameSize && 
+                                    state.frameSize.size === '13x19' && 
+                                    state.frameSize.orientation === 'portrait') {
+                                    
+                                    // Use specific coordinates for first, second, third, and fourth images
+                                    // Scale coordinates based on actual canvas size vs original image size
+                                    const originalImageWidth = 800;
+                                    const originalImageHeight = 600;
+                                    
+                                    const scaleX = canvas.width / originalImageWidth;
+                                    const scaleY = canvas.height / originalImageHeight;
+                                    
+                                    if (index === 0) {
+                                        frameX = 308 * scaleX;
+                                        frameY = 48 * scaleY;
+                                        frameWidth = (506 - 308) * scaleX;
+                                        frameHeight = (255 - 48) * scaleY;
+                                    } else if (index === 1) {
+                                        frameX = 288 * scaleX;
+                                        frameY = 61 * scaleY;
+                                        frameWidth = (486 - 288) * scaleX;
+                                        frameHeight = (268 - 61) * scaleY;
+                                    } else if (index === 2) {
+                                        frameX = 404 * scaleX;
+                                        frameY = 49 * scaleY;
+                                        frameWidth = (602 - 404) * scaleX;
+                                        frameHeight = (256 - 49) * scaleY;
+                                    } else if (index === 3) {
+                                        frameX = 190 * scaleX;
+                                        frameY = 63 * scaleY;
+                                        frameWidth = (401 - 190) * scaleX;
+                                        frameHeight = (285 - 63) * scaleY;
+                                    }
+                                    
+                                } else if ((index === 0 || index === 1 || index === 2 || index === 3) && state.frameSize && 
+                                    state.frameSize.size === '13x19' && 
+                                    state.frameSize.orientation === 'landscape') {
+                                    
+                                    const originalImageWidth = 800;
+                                    const originalImageHeight = 600;
+                                    
+                                    const scaleX = canvas.width / originalImageWidth;
+                                    const scaleY = canvas.height / originalImageHeight;
+                                    
+                                    if (index === 0) {
+                                        frameX = 275 * scaleX;
+                                        frameY = 64 * scaleY;
+                                        frameWidth = (565 - 275) * scaleX;
+                                        frameHeight = (208 - 64) * scaleY;
+                                    } else if (index === 1) {
+                                        frameX = 239 * scaleX;
+                                        frameY = 66 * scaleY;
+                                        frameWidth = (547 - 239) * scaleX;
+                                        frameHeight = (218 - 66) * scaleY;
+                                    } else if (index === 2) {
+                                        frameX = 252 * scaleX;
+                                        frameY = 52 * scaleY;
+                                        frameWidth = (557 - 252) * scaleX;
+                                        frameHeight = (201 - 52) * scaleY;
+                                    } else if (index === 3) {
+                                        frameX = 76 * scaleX;
+                                        frameY = 68 * scaleY;
+                                        frameWidth = (416 - 76) * scaleX;
+                                        frameHeight = (236 - 68) * scaleY;
+                                    }
+                                    
+                                } else if ((index === 0 || index === 1 || index === 2 || index === 3) && state.frameSize && 
+                                    state.frameSize.size === '13x10' && 
+                                    state.frameSize.orientation === 'portrait') {
+                                    
+                                    const originalImageWidth = 800;
+                                    const originalImageHeight = 600;
+                                    
+                                    const scaleX = canvas.width / originalImageWidth;
+                                    const scaleY = canvas.height / originalImageHeight;
+                                    
+                                    if (index === 0) {
+                                        frameX = 330 * scaleX;
+                                        frameY = 76 * scaleY;
+                                        frameWidth = (485 - 330) * scaleX;
+                                        frameHeight = (222 - 76) * scaleY;
+                                    } else if (index === 3) {
+                                        frameX = 205 * scaleX;
+                                        frameY = 65 * scaleY;
+                                        frameWidth = (450 - 205) * scaleX;
+                                        frameHeight = (296 - 65) * scaleY;
+                                    }
+                                    
+                                } else if ((index === 0 || index === 1 || index === 2 || index === 3) && state.frameSize && 
+                                    state.frameSize.size === '13x10' && 
+                                    state.frameSize.orientation === 'landscape') {
+                                    
+                                    const originalImageWidth = 800;
+                                    const originalImageHeight = 600;
+                                    
+                                    const scaleX = canvas.width / originalImageWidth;
+                                    const scaleY = canvas.height / originalImageHeight;
+                                    
+                                    if (index === 0) {
+                                        frameX = 325 * scaleX;
+                                        frameY = 95 * scaleY;
+                                        frameWidth = (530 - 325) * scaleX;
+                                        frameHeight = (210 - 95) * scaleY;
+                                    } else if (index === 3) {
+                                        frameX = 179 * scaleX;
+                                        frameY = 121 * scaleY;
+                                        frameWidth = (490 - 179) * scaleX;
+                                        frameHeight = (292 - 121) * scaleY;
+                                    }
+                                    
+                                } else {
+                                    // Use dynamic scaling for other cases
+                                    const frameScale = Math.min(0.3, 350 / Math.min(canvas.width, canvas.height));
+                                    frameWidth = canvas.width * frameScale;
+                                    frameHeight = frameWidth * (frameImg.height / frameImg.width);
+                                    
+                                    // Use index to vary frame position across different room images
+                                    switch (index % 3) {
+                                        case 0:
+                                            frameX = canvas.width * 0.55;
+                                            frameY = canvas.height * 0.25;
+                                            break;
+                                        case 1:
+                                            frameX = canvas.width * 0.15;
+                                            frameY = canvas.height * 0.3;
+                                            break;
+                                        case 2:
+                                            frameX = canvas.width * 0.35;
+                                            frameY = canvas.height * 0.2;
+                                            break;
+                                        default:
+                                            frameX = canvas.width * 0.4;
+                                            frameY = canvas.height * 0.3;
+                                    }
+                                }
+
+                                // Draw the frame
+                                ctx.drawImage(frameImg, frameX, frameY, frameWidth, frameHeight);
+
+                                // Convert the composite image to data URL and update the room image
+                                const compositeDataURL = canvas.toDataURL('image/jpeg', 0.9);
+                                roomImg.src = compositeDataURL;
+                                
+                                // Track completion
+                                completedImages++;
+                                if (completedImages === totalImages) {
+                                    resolve();
+                                }
+                                
+                            } catch (error) {
+                                console.error('Error overlaying frame on room image:', error);
+                                completedImages++;
+                                if (completedImages === totalImages) {
+                                    resolve();
+                                }
+                            }
+                        };
+
+                        frameImg.onerror = () => {
+                            console.error('Error loading frame image for overlay');
+                            completedImages++;
+                            if (completedImages === totalImages) {
+                                resolve();
+                            }
+                        };
+
+                        frameImg.src = frameDataURL;
+                        
+                    } catch (error) {
+                        console.error('Error processing room image:', error);
+                        completedImages++;
+                        if (completedImages === totalImages) {
+                            resolve();
+                        }
+                    }
+                };
+
+                if (roomImg.complete && roomImg.naturalWidth > 0) {
+                    processRoomImage();
+                } else {
+                    roomImg.onload = processRoomImage;
+                }
+            });
+        }).catch(error => {
+            console.error('Error capturing frame preview:', error);
+            reject(error);
         });
-    }).catch(error => {
-        console.error('Error in overlayFrameOnRoomImages:', error);
     });
 }
 
@@ -2003,6 +2140,11 @@ function initializeRoomSlider(frameSize, orientation) {
         isActive: true
     };
     
+    // Update room preview button state since room slider is now active
+    if (window.updateRoomPreviewButtonState) {
+        setTimeout(() => window.updateRoomPreviewButtonState(), 100);
+    }
+    
     // Clear existing content
     slider.innerHTML = '';
     indicators.innerHTML = '';
@@ -2051,10 +2193,8 @@ function initializeRoomSlider(frameSize, orientation) {
             // If this is the last image loading, trigger the overlay function
             const loadedImages = slider.querySelectorAll('img[src]');
             if (loadedImages.length === imagePaths.length) {
-                // Small delay to ensure all images are properly loaded
-                setTimeout(() => {
-                    overlayFrameOnRoomImages();
-                }, 100);
+                // Room images are loaded, but overlays will only update when "Update Room Previews" button is clicked
+                console.log('Room slider images loaded. Click "Update Room Previews" to apply frame overlay.');
             }
         };
         
@@ -2529,12 +2669,8 @@ function updateFrameColor() {
     });
     
     // Update room preview overlays if room slider is active
-    if (state.roomSlider && state.roomSlider.isActive) {
-        // Immediate update for frame color changes since they're less frequent
-        setTimeout(() => {
-            overlayFrameOnRoomImages();
-        }, 100);
-    }
+    // Room preview overlays will only update when "Update Room Previews" button is clicked
+    // Removed automatic overlay update for frame color changes to give users control
 }
 
 // Function to initialize mobile customization features
@@ -2870,56 +3006,6 @@ function updateFrameColor() {
         }
     });
 
-    // Handle change image button click
-    const changeImageBtn = document.getElementById('changeImage');
-    if (changeImageBtn) {
-        changeImageBtn.addEventListener('click', () => {
-            // Reset the file input
-            elements.imageUpload.value = '';
-            // Show upload section and hide preview section
-            document.getElementById('uploadSection').classList.remove('hidden');
-            document.getElementById('previewSection').classList.add('hidden');
-            
-            // Hide mobile customization section
-            const mobileSection = document.getElementById('mobileCustomizationSection');
-            if (mobileSection) {
-                mobileSection.style.display = 'none';
-            }
-            
-            // Reset state
-            state.image = null;
-            state.zoom = 1;
-            state.position = { x: 0, y: 0 };
-            elements.addToCartBtn.disabled = true;
-            elements.imageContainer.classList.remove('has-image');
-            // Trigger file upload dialog
-            elements.imageUpload.click();
-        });
-    }
-
-    // Handle update room previews button click
-    const updateRoomPreviewsBtn = document.getElementById('updateRoomPreviews');
-    if (updateRoomPreviewsBtn) {
-        updateRoomPreviewsBtn.addEventListener('click', () => {
-            if (state.image && state.roomSlider && state.roomSlider.isActive) {
-                // Show loading feedback
-                updateRoomPreviewsBtn.textContent = 'Updating...';
-                updateRoomPreviewsBtn.disabled = true;
-                
-                // Update room previews
-                overlayFrameOnRoomImages();
-                
-                // Reset button after delay
-                setTimeout(() => {
-                    updateRoomPreviewsBtn.textContent = 'Update Room Previews';
-                    updateRoomPreviewsBtn.disabled = false;
-                }, 2000);
-            } else {
-                alert('Please upload an image and select a frame size first!');
-            }
-        });
-    }
-
 // Add window resize handler to update frame size calculations
 let resizeTimeout;
 window.addEventListener('resize', () => {
@@ -3076,6 +3162,100 @@ window.handlePrecisionZoomOutClick = function() {
 document.addEventListener('DOMContentLoaded', function() {
     initializeMobileCustomization();
     
+    // Initialize Update Room Previews button
+    const updateRoomPreviewsBtn = document.getElementById('updateRoomPreviews');
+    if (updateRoomPreviewsBtn) {
+        console.log('✅ Update Room Previews button found and initializing...');
+        
+        // Function to update button state based on conditions
+        function updateButtonState() {
+            const hasImage = !!(state.image);
+            const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
+            const isReady = hasImage && hasActiveRoomSlider;
+            
+            if (isReady) {
+                updateRoomPreviewsBtn.style.opacity = '1';
+                updateRoomPreviewsBtn.style.cursor = 'pointer';
+                updateRoomPreviewsBtn.title = 'Click to update room preview images with current live preview';
+            } else {
+                updateRoomPreviewsBtn.style.opacity = '0.6';
+                updateRoomPreviewsBtn.style.cursor = 'not-allowed';
+                const reasons = [];
+                if (!hasImage) reasons.push('upload an image');
+                if (!hasActiveRoomSlider) reasons.push('select a frame size');
+                updateRoomPreviewsBtn.title = `Please ${reasons.join(' and ')} first`;
+            }
+        }
+        
+        // Make the button state update function globally accessible
+        window.updateRoomPreviewButtonState = updateButtonState;
+        
+        // Update button state initially
+        updateButtonState();
+        
+        // Add click event listener
+        updateRoomPreviewsBtn.addEventListener('click', () => {
+            console.log('🎯 Update Room Previews button clicked!');
+            
+            if (state.image && state.roomSlider && state.roomSlider.isActive) {
+                console.log('✅ Conditions met, starting room preview update...');
+                
+                // Show loading feedback with better styling
+                const originalText = updateRoomPreviewsBtn.textContent;
+                updateRoomPreviewsBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Updating...';
+                updateRoomPreviewsBtn.disabled = true;
+                updateRoomPreviewsBtn.style.background = '#6c757d';
+                updateRoomPreviewsBtn.style.opacity = '1';
+                
+                console.log('Updating room previews with current live preview...');
+                
+                // Capture and apply the current live preview to all room images
+                overlayFrameOnRoomImages().then(() => {
+                    console.log('✅ Room previews updated successfully!');
+                    // Reset button with success feedback
+                    setTimeout(() => {
+                        updateRoomPreviewsBtn.innerHTML = '<i class="fas fa-check"></i> Updated!';
+                        updateRoomPreviewsBtn.style.background = '#28a745';
+                        
+                        // Reset to original state after showing success
+                        setTimeout(() => {
+                            updateRoomPreviewsBtn.innerHTML = originalText;
+                            updateRoomPreviewsBtn.style.background = '#82C0CC';
+                            updateRoomPreviewsBtn.disabled = false;
+                            updateButtonState(); // Restore proper state
+                        }, 1500);
+                    }, 500);
+                }).catch((error) => {
+                    console.error('❌ Error updating room previews:', error);
+                    // Reset button with error feedback
+                    updateRoomPreviewsBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                    updateRoomPreviewsBtn.style.background = '#dc3545';
+                    
+                    setTimeout(() => {
+                        updateRoomPreviewsBtn.innerHTML = originalText;
+                        updateRoomPreviewsBtn.style.background = '#82C0CC';
+                        updateRoomPreviewsBtn.disabled = false;
+                        updateButtonState(); // Restore proper state
+                    }, 2000);
+                });
+            } else {
+                // Show helpful message for when button can't be used
+                const reasons = [];
+                if (!state.image) reasons.push('upload an image');
+                if (!state.roomSlider || !state.roomSlider.isActive) reasons.push('select a frame size');
+                
+                console.log(`⚠️ Button clicked but conditions not met. Missing: ${reasons.join(', ')}`);
+                
+                // Enhanced alert with more helpful information
+                alert(`Update Room Previews Button\n\nTo use this button, you need to:\n\n${reasons.map(r => `• ${r.charAt(0).toUpperCase() + r.slice(1)}`).join('\n')}\n\nOnce you've completed these steps, the button will capture your current live preview (with all your customizations) and apply it to all room preview images.`);
+            }
+        });
+        
+        console.log('✅ Update Room Previews button event listener attached');
+    } else {
+        console.error('❌ Update Room Previews button not found in DOM!');
+    }
+    
     // Handle window resize to show/hide mobile section appropriately
     window.addEventListener('resize', () => {
         const mobileSection = document.getElementById('mobileCustomizationSection');
@@ -3119,12 +3299,40 @@ function initializeMobileCustomization() {
             
             // Sync with desktop options
             syncMobileToDesktop('size', button);
+            
+            // Automatically trigger "Update Room Previews" functionality after frame size change
+            setTimeout(() => {
+                console.log('🎯 Auto-triggering room preview update after mobile frame size change...');
+                
+                // Check if conditions are met (same logic as updateRoomPreviewsClick)
+                const hasImage = !!(state.image);
+                const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
+                
+                if (hasImage && hasActiveRoomSlider) {
+                    console.log('✅ Auto-updating room previews with new frame size (mobile)...');
+                    
+                    // Call the overlay function directly (same as updateRoomPreviewsClick but without UI feedback)
+                    if (typeof overlayFrameOnRoomImages === 'function') {
+                        overlayFrameOnRoomImages().then(() => {
+                            console.log('✅ Room previews auto-updated successfully after mobile frame size change!');
+                        }).catch((error) => {
+                            console.error('❌ Error auto-updating room previews (mobile):', error);
+                        });
+                    } else {
+                        console.log('⚠️ overlayFrameOnRoomImages function not available for mobile auto-update');
+                    }
+                } else {
+                    console.log('⚠️ Mobile auto-update skipped - conditions not met (image:', hasImage, ', room slider:', hasActiveRoomSlider, ')');
+                }
+            }, 1000); // Wait 1 second for room slider to initialize
         });
     });
 
     // Mobile Color Options
     document.querySelectorAll('.mobile-color-btn').forEach(button => {
         button.addEventListener('click', () => {
+            console.log('Mobile frame color button clicked:', button.dataset.color);
+            
             // Remove active class from all mobile color buttons
             document.querySelectorAll('.mobile-color-btn').forEach(btn => {
                 btn.classList.remove('active');
@@ -3141,6 +3349,32 @@ function initializeMobileCustomization() {
             
             // Sync with desktop options
             syncMobileToDesktop('color', button);
+            
+            // Automatically trigger "Update Room Previews" functionality after mobile frame color change
+            setTimeout(() => {
+                console.log('🎯 Auto-triggering room preview update after mobile frame color change...');
+                
+                // Check if conditions are met (same logic as updateRoomPreviewsClick)
+                const hasImage = !!(state.image);
+                const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
+                
+                if (hasImage && hasActiveRoomSlider) {
+                    console.log('✅ Auto-updating room previews with new frame color (mobile)...');
+                    
+                    // Call the overlay function directly (same as updateRoomPreviewsClick but without UI feedback)
+                    if (typeof overlayFrameOnRoomImages === 'function') {
+                        overlayFrameOnRoomImages().then(() => {
+                            console.log('✅ Room previews auto-updated successfully after mobile frame color change!');
+                        }).catch((error) => {
+                            console.error('❌ Error auto-updating room previews after mobile color change:', error);
+                        });
+                    } else {
+                        console.log('⚠️ overlayFrameOnRoomImages function not available for mobile color auto-update');
+                    }
+                } else {
+                    console.log('⚠️ Mobile color auto-update skipped - conditions not met (image:', hasImage, ', room slider:', hasActiveRoomSlider, ')');
+                }
+            }, 500); // Wait 500ms for frame color update to complete
         });
     });
 
@@ -3170,6 +3404,8 @@ function initializeMobileCustomization() {
         if (slider) {
             slider.addEventListener('input', (e) => {
                 const adjustmentType = sliderId.replace('mobile', '').toLowerCase();
+                console.log('Mobile adjustment slider changed:', adjustmentType, 'to', e.target.value);
+                
                 state.adjustments[adjustmentType] = parseInt(e.target.value);
                 updateImageFilters();
                 
@@ -3178,6 +3414,33 @@ function initializeMobileCustomization() {
                 if (desktopSlider) {
                     desktopSlider.value = e.target.value;
                 }
+                
+                // Automatically trigger "Update Room Previews" functionality after mobile adjustment change
+                clearTimeout(window.mobileAdjustmentUpdateTimeout); // Clear any existing timeout to prevent multiple rapid updates
+                window.mobileAdjustmentUpdateTimeout = setTimeout(() => {
+                    console.log('🎯 Auto-triggering room preview update after mobile adjustment change:', adjustmentType);
+                    
+                    // Check if conditions are met (same logic as updateRoomPreviewsClick)
+                    const hasImage = !!(state.image);
+                    const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
+                    
+                    if (hasImage && hasActiveRoomSlider) {
+                        console.log('✅ Auto-updating room previews with new mobile adjustment:', adjustmentType);
+                        
+                        // Call the overlay function directly (same as updateRoomPreviewsClick but without UI feedback)
+                        if (typeof overlayFrameOnRoomImages === 'function') {
+                            overlayFrameOnRoomImages().then(() => {
+                                console.log('✅ Room previews auto-updated successfully after mobile adjustment change:', adjustmentType);
+                            }).catch((error) => {
+                                console.error('❌ Error auto-updating room previews after mobile adjustment change:', error);
+                            });
+                        } else {
+                            console.log('⚠️ overlayFrameOnRoomImages function not available for mobile adjustment auto-update');
+                        }
+                    } else {
+                        console.log('⚠️ Mobile adjustment auto-update skipped - conditions not met (image:', hasImage, ', room slider:', hasActiveRoomSlider, ')');
+                    }
+                }, 800); // Wait 800ms after user stops adjusting to prevent too many rapid updates
             });
         }
     });
@@ -3409,4 +3672,207 @@ function syncMobileSlidersWithState() {
             header.classList.remove('hidden');
         }
     });
+    
+    // Make necessary objects globally accessible for debugging and button functionality
+    window.state = state;
+    window.captureFramePreview = captureFramePreview;
+    window.overlayFrameOnRoomImages = overlayFrameOnRoomImages;
+    
+    // Initialize Update Room Previews button with multiple attempts
+    function initUpdateRoomPreviewsButton() {
+        console.log('🔍 Looking for Update Room Previews button...');
+        const updateRoomPreviewsBtn = document.getElementById('updateRoomPreviews');
+        
+        if (updateRoomPreviewsBtn) {
+            console.log('✅ Update Room Previews button found! Attaching event listener...');
+            
+            // Function to update button state based on conditions
+            function updateButtonState() {
+                const hasImage = !!(state.image);
+                const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
+                const isReady = hasImage && hasActiveRoomSlider;
+                
+                if (isReady) {
+                    updateRoomPreviewsBtn.style.opacity = '1';
+                    updateRoomPreviewsBtn.style.cursor = 'pointer';
+                    updateRoomPreviewsBtn.title = 'Click to update room preview images with current live preview';
+                } else {
+                    updateRoomPreviewsBtn.style.opacity = '0.6';
+                    updateRoomPreviewsBtn.style.cursor = 'not-allowed';
+                    const reasons = [];
+                    if (!hasImage) reasons.push('upload an image');
+                    if (!hasActiveRoomSlider) reasons.push('select a frame size');
+                    updateRoomPreviewsBtn.title = `Please ${reasons.join(' and ')} first`;
+                }
+            }
+            
+            // Make the button state update function globally accessible
+            window.updateRoomPreviewButtonState = updateButtonState;
+            
+            // Update button state initially
+            updateButtonState();
+            
+            // Remove any existing listeners to avoid duplicates
+            const newBtn = updateRoomPreviewsBtn.cloneNode(true);
+            updateRoomPreviewsBtn.parentNode.replaceChild(newBtn, updateRoomPreviewsBtn);
+            
+            // Add click event listener to the new button
+            newBtn.addEventListener('click', function(e) {
+                // Add alert to ensure we see the click
+                alert('Button clicked! Check console for details.');
+                console.log('🎯 Update Room Previews button clicked!');
+                console.log('Event details:', e);
+                
+                if (state.image && state.roomSlider && state.roomSlider.isActive) {
+                    console.log('✅ Conditions met, starting room preview update...');
+                    
+                    // Show loading feedback with better styling
+                    const originalText = newBtn.textContent;
+                    newBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Updating...';
+                    newBtn.disabled = true;
+                    newBtn.style.background = '#6c757d';
+                    newBtn.style.opacity = '1';
+                    
+                    console.log('📸 Capturing current live preview...');
+                    console.log('🏠 Applying to room preview images...');
+                    
+                    // Capture and apply the current live preview to all room images
+                    overlayFrameOnRoomImages().then(() => {
+                        console.log('✅ Room previews updated successfully!');
+                        // Reset button with success feedback
+                        setTimeout(() => {
+                            newBtn.innerHTML = '<i class="fas fa-check"></i> Updated!';
+                            newBtn.style.background = '#28a745';
+                            
+                            // Reset to original state after showing success
+                            setTimeout(() => {
+                                newBtn.innerHTML = originalText;
+                                newBtn.style.background = '#82C0CC';
+                                newBtn.disabled = false;
+                                updateButtonState(); // Restore proper state
+                            }, 1500);
+                        }, 500);
+                    }).catch((error) => {
+                        console.error('❌ Error updating room previews:', error);
+                        // Reset button with error feedback
+                        newBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                        newBtn.style.background = '#dc3545';
+                        
+                        setTimeout(() => {
+                            newBtn.innerHTML = originalText;
+                            newBtn.style.background = '#82C0CC';
+                            newBtn.disabled = false;
+                            updateButtonState(); // Restore proper state
+                        }, 2000);
+                    });
+                } else {
+                    // Show helpful message for when button can't be used
+                    const reasons = [];
+                    if (!state.image) reasons.push('upload an image');
+                    if (!state.roomSlider || !state.roomSlider.isActive) reasons.push('select a frame size');
+                    
+                    console.log(`⚠️ Button clicked but conditions not met. Missing: ${reasons.join(', ')}`);
+                    console.log('Current state:', {
+                        hasImage: !!state.image,
+                        hasRoomSlider: !!state.roomSlider,
+                        roomSliderActive: state.roomSlider?.isActive
+                    });
+                    
+                    // Enhanced alert with more helpful information
+                    alert(`Update Room Previews Button\n\nTo use this button, you need to:\n\n${reasons.map(r => `• ${r.charAt(0).toUpperCase() + r.slice(1)}`).join('\n')}\n\nOnce you've completed these steps, the button will capture your current live preview (with all your customizations) and apply it to all room preview images.`);
+                }
+            });
+            
+            console.log('✅ Update Room Previews button event listener attached successfully!');
+            return true;
+        } else {
+            console.log('❌ Update Room Previews button not found in DOM yet...');
+            return false;
+        }
+    }
+    
+    // Try to initialize immediately
+    if (!initUpdateRoomPreviewsButton()) {
+        // If button not found, try again after DOM is loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log('📄 DOM loaded, trying to initialize button again...');
+                if (!initUpdateRoomPreviewsButton()) {
+                    // Try one more time after a delay
+                    setTimeout(() => {
+                        console.log('⏰ Final attempt to initialize button...');
+                        initUpdateRoomPreviewsButton();
+                    }, 1000);
+                }
+            });
+        } else {
+            // DOM already loaded, try after a short delay
+            setTimeout(() => {
+                console.log('⏰ Delayed attempt to initialize button...');
+                initUpdateRoomPreviewsButton();
+            }, 500);
+        }
+    }
+    
 })();
+
+// 🎯 UPDATE ROOM PREVIEWS BUTTON - Direct onclick handler (working solution)
+function updateRoomPreviewsClick() {
+    console.log('🎯 Update Room Previews button clicked!');
+    
+    // Check if conditions are met
+    const hasImage = !!(state.image);
+    const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
+    
+    if (hasImage && hasActiveRoomSlider) {
+        console.log('✅ Conditions met, starting room preview update...');
+        
+        const updateBtn = document.getElementById('updateRoomPreviews');
+        if (updateBtn) {
+            // Show loading feedback
+            const originalText = updateBtn.textContent;
+            updateBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Updating...';
+            updateBtn.disabled = true;
+            updateBtn.style.background = '#6c757d';
+            updateBtn.style.opacity = '1';
+            
+            console.log('Updating room previews with current live preview...');
+            
+            // Call the overlay function
+            overlayFrameOnRoomImages().then(() => {
+                console.log('✅ Room previews updated successfully!');
+                // Show success feedback
+                updateBtn.innerHTML = '<i class="fas fa-check"></i> Updated!';
+                updateBtn.style.background = '#28a745';
+                
+                // Reset to original state after showing success
+                setTimeout(() => {
+                    updateBtn.innerHTML = originalText;
+                    updateBtn.style.background = '#82C0CC';
+                    updateBtn.disabled = false;
+                    updateBtn.style.opacity = '1';
+                }, 1500);
+            }).catch((error) => {
+                console.error('❌ Error updating room previews:', error);
+                // Show error feedback
+                updateBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                updateBtn.style.background = '#dc3545';
+                
+                setTimeout(() => {
+                    updateBtn.innerHTML = originalText;
+                    updateBtn.style.background = '#82C0CC';
+                    updateBtn.disabled = false;
+                    updateBtn.style.opacity = '1';
+                }, 2000);
+            });
+        }
+    } else {
+        // Show helpful message for when button can't be used
+        const reasons = [];
+        if (!hasImage) reasons.push('upload an image');
+        if (!hasActiveRoomSlider) reasons.push('select a frame size');
+        
+        console.log(`⚠️ Button clicked but conditions not met. Missing: ${reasons.join(', ')}`);
+        alert(`Please ${reasons.join(' and ')} first to update room previews.`);
+    }
+}

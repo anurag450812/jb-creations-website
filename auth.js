@@ -63,18 +63,160 @@ function checkAuthState() {
             authState.user = JSON.parse(storedUser);
             authState.isAuthenticated = true;
             
-            // Only redirect if we're on auth.html and there's a redirect URL
+            // Only redirect if we're on auth.html AND there's a specific redirect URL
             const currentPage = window.location.pathname.split('/').pop() || 'index.html';
             if (currentPage === 'auth.html') {
-                // If coming from a specific page, redirect back
-                const redirectUrl = sessionStorage.getItem('auth_redirect') || 'index.html';
-                sessionStorage.removeItem('auth_redirect');
-                window.location.href = redirectUrl;
+                const redirectUrl = sessionStorage.getItem('auth_redirect');
+                if (redirectUrl && redirectUrl !== 'auth.html') {
+                    // Only redirect if there's a specific redirect URL and it's not auth.html
+                    sessionStorage.removeItem('auth_redirect');
+                    window.location.href = redirectUrl;
+                } else {
+                    // User is authenticated but staying on auth page - show appropriate state
+                    updateUIForAuthenticatedUser();
+                }
             }
         } catch (error) {
             console.error('Error parsing stored user data:', error);
             clearAuthData();
         }
+    }
+}
+
+// Update UI for authenticated users on auth page
+function updateUIForAuthenticatedUser() {
+    const user = authState.user;
+    if (!user) return;
+    
+    // Hide the auth forms
+    document.getElementById('signinForm').style.display = 'none';
+    document.getElementById('signupForm').style.display = 'none';
+    
+    // Show authenticated user interface
+    const authContent = document.querySelector('.auth-content');
+    
+    // Create authenticated user UI
+    const authenticatedUI = document.createElement('div');
+    authenticatedUI.className = 'authenticated-user-ui';
+    authenticatedUI.innerHTML = `
+        <div class="user-welcome">
+            <div class="user-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <h2>Welcome back, ${user.name}!</h2>
+            <p class="user-phone">${user.phone}</p>
+            <p class="auth-success-message">You are successfully signed in to JB Creations</p>
+        </div>
+        
+        <div class="user-actions">
+            <button class="auth-button primary" onclick="goToHomePage()">
+                <i class="fas fa-home"></i> Go to Homepage
+            </button>
+            <button class="auth-button secondary" onclick="goToProfile()">
+                <i class="fas fa-user"></i> View Profile
+            </button>
+            <button class="auth-button secondary" onclick="goToOrders()">
+                <i class="fas fa-shopping-bag"></i> My Orders
+            </button>
+            <button class="auth-button logout" onclick="handleLogout()">
+                <i class="fas fa-sign-out-alt"></i> Sign Out
+            </button>
+        </div>
+        
+        <style>
+            .authenticated-user-ui {
+                text-align: center;
+                padding: 30px 20px;
+                max-width: 400px;
+                margin: 0 auto;
+            }
+            
+            .user-welcome {
+                margin-bottom: 30px;
+            }
+            
+            .user-avatar {
+                font-size: 80px;
+                color: var(--primary-color);
+                margin-bottom: 20px;
+            }
+            
+            .user-welcome h2 {
+                color: var(--primary-color);
+                margin: 10px 0;
+                font-size: 24px;
+            }
+            
+            .user-phone {
+                color: #666;
+                font-size: 16px;
+                margin: 5px 0;
+            }
+            
+            .auth-success-message {
+                color: #28a745;
+                font-size: 14px;
+                margin: 15px 0;
+                padding: 10px;
+                background: rgba(40, 167, 69, 0.1);
+                border-radius: 8px;
+            }
+            
+            .user-actions {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .auth-button.secondary {
+                background: transparent;
+                color: var(--primary-color);
+                border: 2px solid var(--primary-color);
+            }
+            
+            .auth-button.secondary:hover {
+                background: var(--primary-color);
+                color: white;
+            }
+            
+            .auth-button.logout {
+                background: #dc3545;
+                border-color: #dc3545;
+                margin-top: 10px;
+            }
+            
+            .auth-button.logout:hover {
+                background: #c82333;
+                border-color: #c82333;
+            }
+        </style>
+    `;
+    
+    // Remove any existing authenticated UI and add the new one
+    const existingUI = authContent.querySelector('.authenticated-user-ui');
+    if (existingUI) {
+        existingUI.remove();
+    }
+    
+    authContent.appendChild(authenticatedUI);
+}
+
+// Helper functions for authenticated user actions
+function goToHomePage() {
+    window.location.href = 'index.html';
+}
+
+function goToProfile() {
+    window.location.href = 'profile.html'; // Adjust as needed
+}
+
+function goToOrders() {
+    window.location.href = 'my-orders.html';
+}
+
+function handleLogout() {
+    if (confirm('Are you sure you want to sign out?')) {
+        authUtils.logout();
     }
 }
 
@@ -101,6 +243,18 @@ function switchTab(tab) {
     
     // Clear any errors
     clearAllErrors();
+}
+
+// Helper function to switch to signup tab
+function showSignupStep() {
+    // Click the signup tab to switch to signup form
+    const signupTab = document.querySelector('.auth-tab:nth-child(2)');
+    if (signupTab) {
+        signupTab.click();
+    } else {
+        // Fallback - manually switch to signup
+        switchTab('signup');
+    }
 }
 
 // Setup OTP input functionality
@@ -201,8 +355,8 @@ async function sendOtp(event) {
     showLoading(true);
     
     try {
-        // Use MSG91 OTP sending
-        const result = await simulateOtpSend(phone);
+        // Use server API to send OTP
+        const result = await window.authAPI.sendOTP('+91' + phone, 'login');
         
         // Store phone number
         authState.currentPhone = '+91' + phone;
@@ -216,9 +370,21 @@ async function sendOtp(event) {
     } catch (error) {
         showLoading(false);
         
-        // Show user-friendly error message if available
-        const errorMessage = error.message || 'Failed to send OTP. Please try again.';
-        showError('loginPhoneError', errorMessage);
+        if (error.message.includes('not found') || error.message.includes('not registered')) {
+            showError('loginPhoneError', 'This phone number is not registered. Please sign up first.');
+            
+            // Show signup option after a delay
+            setTimeout(() => {
+                if (confirm('Would you like to create a new account with this phone number?')) {
+                    showSignupStep();
+                    // Pre-fill the phone number in signup form
+                    document.getElementById('signupPhone').value = phone;
+                }
+            }, 500);
+        } else {
+            const errorMessage = error.message || 'Failed to send OTP. Please try again.';
+            showError('loginPhoneError', errorMessage);
+        }
         
         console.error('OTP send error:', error);
     }
@@ -254,19 +420,12 @@ async function sendSignupOtp(event) {
         return;
     }
     
-    // Check if user already exists
-    const existingUser = getUserByPhone(phone);
-    if (existingUser) {
-        showError('signupPhoneError', 'An account with this mobile number already exists. Please login instead.');
-        return;
-    }
-    
     // Show loading
     showLoading(true);
     
     try {
-        // Use Firebase OTP sending
-        await simulateOtpSend(phone);
+        // Use server API to send OTP
+        const result = await window.authAPI.sendOTP('+91' + phone, 'register');
         
         // Store signup data
         authState.signupData = {
@@ -284,9 +443,12 @@ async function sendSignupOtp(event) {
     } catch (error) {
         showLoading(false);
         
-        // Show user-friendly error message if available
-        const errorMessage = error.userMessage || 'Failed to send OTP. Please try again.';
-        showError('signupPhoneError', errorMessage);
+        if (error.message.includes('already exists')) {
+            showError('signupPhoneError', 'An account with this mobile number already exists. Please login instead.');
+        } else {
+            const errorMessage = error.message || 'Failed to send OTP. Please try again.';
+            showError('signupPhoneError', errorMessage);
+        }
         
         console.error('OTP send error:', error);
     }
@@ -367,41 +529,32 @@ async function verifyOtp(event) {
     showLoading(true);
     
     try {
-        // Use MSG91 OTP verification
-        const result = await simulateOtpVerify(otp);
+        // Use server API to verify OTP and login
+        const result = await window.authAPI.loginUser(authState.currentPhone, otp);
         
-        if (result && result.verified) {
-            // Get or create user
-            let user = getUserByPhone(authState.currentPhone.replace('+91', ''));
-            
-            if (!user) {
-                // Create new user with minimal info for login
-                user = {
-                    id: generateUserId(),
-                    phone: authState.currentPhone,
-                    name: `User ${authState.currentPhone.slice(-4)}`,
-                    email: null,
-                    signInMethod: 'phone'
-                };
-                saveUser(user);
-            }
-            
+        if (result && result.success) {
             // Set authentication state
-            authState.user = user;
+            authState.user = result.user;
             authState.isAuthenticated = true;
             
-            // Store in localStorage
-            localStorage.setItem('jb_user', JSON.stringify(user));
-            
             showLoading(false);
-            showSuccess('Login successful! Redirecting...');
+            showSuccess(`Welcome back, ${result.user.name}! Login successful.`);
             
-            // Redirect after short delay
-            setTimeout(() => {
-                const redirectUrl = sessionStorage.getItem('auth_redirect') || 'index.html';
-                sessionStorage.removeItem('auth_redirect');
-                window.location.href = redirectUrl;
-            }, 1500);
+            // Check if there's a specific redirect URL
+            const redirectUrl = sessionStorage.getItem('auth_redirect');
+            
+            if (redirectUrl && redirectUrl !== 'auth.html') {
+                // Redirect after short delay if coming from specific page
+                setTimeout(() => {
+                    sessionStorage.removeItem('auth_redirect');
+                    window.location.href = redirectUrl;
+                }, 1500);
+            } else {
+                // Stay on auth page and update UI
+                setTimeout(() => {
+                    updateUIForAuthenticatedUser();
+                }, 1500);
+            }
             
         } else {
             showLoading(false);
@@ -432,39 +585,39 @@ async function verifySignupOtp(event) {
     showLoading(true);
     
     try {
-        // Use MSG91 OTP verification
-        const result = await simulateOtpVerify(otp);
+        // Use server API to register user
+        const userData = {
+            name: authState.signupData.name,
+            phone: authState.signupData.phone,
+            email: authState.signupData.email,
+            otp: otp
+        };
         
-        if (result && result.verified) {
-            // Create new user
-            const user = {
-                id: generateUserId(),
-                name: authState.signupData.name,
-                phone: authState.signupData.phone,
-                email: authState.signupData.email,
-                signInMethod: 'phone',
-                createdAt: new Date().toISOString()
-            };
-            
-            // Save user
-            saveUser(user);
-            
+        const result = await window.authAPI.registerUser(userData);
+        
+        if (result && result.success) {
             // Set authentication state
-            authState.user = user;
+            authState.user = result.user;
             authState.isAuthenticated = true;
-            
-            // Store in localStorage
-            localStorage.setItem('jb_user', JSON.stringify(user));
             
             showLoading(false);
             showSuccess('Account created successfully! Welcome to JB Creations!');
             
-            // Redirect after short delay
-            setTimeout(() => {
-                const redirectUrl = sessionStorage.getItem('auth_redirect') || 'index.html';
-                sessionStorage.removeItem('auth_redirect');
-                window.location.href = redirectUrl;
-            }, 2000);
+            // Check if there's a specific redirect URL
+            const redirectUrl = sessionStorage.getItem('auth_redirect');
+            
+            if (redirectUrl && redirectUrl !== 'auth.html') {
+                // Redirect after short delay if coming from specific page
+                setTimeout(() => {
+                    sessionStorage.removeItem('auth_redirect');
+                    window.location.href = redirectUrl;
+                }, 2000);
+            } else {
+                // Stay on auth page and update UI
+                setTimeout(() => {
+                    updateUIForAuthenticatedUser();
+                }, 2000);
+            }
             
         } else {
             showLoading(false);
@@ -473,7 +626,14 @@ async function verifySignupOtp(event) {
         
     } catch (error) {
         showLoading(false);
-        showError('signupOtpError', 'Failed to verify OTP. Please try again.');
+        
+        if (error.message.includes('already exists')) {
+            showError('signupOtpError', 'An account with this phone number already exists. Please login instead.');
+        } else {
+            const errorMessage = error.message || 'Failed to verify OTP. Please try again.';
+            showError('signupOtpError', errorMessage);
+        }
+        
         console.error('OTP verification error:', error);
     }
 }
@@ -751,13 +911,18 @@ async function firebaseVerifyOtp(otp) {
     });
 }
 
-// Legacy functions for backward compatibility (now use MSG91)
+// Legacy functions for backward compatibility (now use Demo OTP)
 async function simulateOtpSend(phone) {
-    return await sendOTPViaMSG91(phone);
+    return await sendDemoOTP(phone);
 }
 
 async function simulateOtpVerify(otp) {
-    return await verifyOTPViaMSG91(authState.currentPhone, otp);
+    // Use the appropriate phone number based on context
+    const phoneNumber = authState.currentPhone || authState.signupData?.phone;
+    if (!phoneNumber) {
+        throw new Error('No phone number found for OTP verification');
+    }
+    return await verifyDemoOTP(phoneNumber, otp);
 }
 
 // UI Helper functions
@@ -804,8 +969,56 @@ function clearAllErrors() {
 }
 
 function clearAuthData() {
+    // Use API logout to clear server-side session
+    if (window.authAPI) {
+        window.authAPI.logout().catch(err => console.error('Logout error:', err));
+    }
+    
+    // Clear local data
     localStorage.removeItem('jb_user');
     sessionStorage.removeItem('jb_user');
     authState.user = null;
     authState.isAuthenticated = false;
 }
+
+// Utility object for authentication functions (used by other pages)
+window.authUtils = {
+    getCurrentUser() {
+        return authState.user;
+    },
+    
+    isAuthenticated() {
+        return authState.isAuthenticated;
+    },
+    
+    logout() {
+        clearAuthData();
+        // If on auth page, show logged out state instead of redirecting
+        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        if (currentPage === 'auth.html') {
+            // Hide authenticated UI and show login forms
+            const authenticatedUI = document.querySelector('.authenticated-user-ui');
+            if (authenticatedUI) {
+                authenticatedUI.remove();
+            }
+            
+            // Show the signin form again
+            document.getElementById('signinForm').style.display = 'block';
+            document.getElementById('signupForm').style.display = 'none';
+            
+            // Clear any form data
+            document.getElementById('loginPhone').value = '';
+            document.querySelectorAll('.otp-input').forEach(input => input.value = '');
+            
+            // Reset to phone step
+            document.getElementById('phoneStep').style.display = 'block';
+            document.getElementById('otpStep').style.display = 'none';
+            
+            // Show success message
+            showSuccess('You have been successfully logged out.');
+        } else {
+            // On other pages, redirect to home
+            window.location.href = 'index.html';
+        }
+    }
+};

@@ -958,7 +958,7 @@ async function submitOrder(orderData) {
 
     // Option 1: Send to your backend API
     try {
-        const response = await fetch('/api/submit-order', {
+        const response = await fetch('http://localhost:3001/api/submit-order', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1016,6 +1016,17 @@ async function placeOrder() {
         return;
     }
 
+    // Check if user is logged in (required for payment)
+    const user = getCurrentUser();
+    if (!user) {
+        if (confirm('You need to be logged in to place an order. Would you like to login now?')) {
+            window.location.href = 'auth.html';
+            return;
+        } else {
+            return;
+        }
+    }
+
     // Show processing overlay
     document.getElementById('processingOverlay').style.display = 'flex';
     document.getElementById('placeOrderBtn').disabled = true;
@@ -1024,39 +1035,49 @@ async function placeOrder() {
         // Prepare order data
         const orderData = prepareOrderData();
         
-        // Submit order
-        const result = await submitOrder(orderData);
+        // Calculate total amount for Razorpay
+        const totalAmount = orderData.totals.total;
         
-        if (result.success) {
-            // Save order to user's order history (only for registered users)
-            const user = getCurrentUser();
-            if (user) {
-                saveOrderToUserHistory(user.id, orderData);
+        // Hide processing overlay before showing Razorpay
+        document.getElementById('processingOverlay').style.display = 'none';
+        document.getElementById('placeOrderBtn').disabled = false;
+
+        // Simple direct payment (using the working approach)
+        const paymentResult = await processSimplePayment(totalAmount, orderData, user);
+        
+        if (paymentResult.success) {
+            // Payment successful - now submit the order
+            const result = await submitOrder({...orderData, paymentId: paymentResult.paymentId});
+            
+            if (result.success) {
+                // Save order to user's order history
+                saveOrderToUserHistory(user.id, {...orderData, paymentId: paymentResult.paymentId});
+                
+                // Clear cart
+                localStorage.removeItem('photoFramingCart');
+                
+                // Show success message
+                alert(`Payment Successful! Order placed successfully!\n\nOrder Number: ${orderData.orderNumber}\nPayment ID: ${paymentResult.paymentId}\n\nYou will receive a confirmation email shortly.\nYou can view this order in your account.`);
+                
+                // Redirect to orders page or home
+                window.location.href = 'my-orders.html';
             } else {
-                // For guest users, save order to local storage for reference
-                saveGuestOrderHistory(orderData);
+                throw new Error(result.error || 'Failed to place order after successful payment');
             }
-            
-            // Clear cart
-            localStorage.removeItem('photoFramingCart');
-            
-            // Show appropriate success message
-            const successMessage = user 
-                ? `Order placed successfully! Order Number: ${orderData.orderNumber}\n\nYou will receive a confirmation email shortly.\nYou can view this order in your account.`
-                : `Order placed successfully! Order Number: ${orderData.orderNumber}\n\nYou will receive a confirmation email shortly.\n\nPlease save your order number: ${orderData.orderNumber} for future reference.`;
-            
-            alert(successMessage);
-            
-            // Redirect to a thank you page or back to home
-            window.location.href = 'index.html';
-        } else {
-            throw new Error(result.error || 'Failed to place order');
         }
         
     } catch (error) {
         console.error('Order placement error:', error);
-        alert('Sorry, there was an error placing your order. Please try again or contact us directly.');
-    } finally {
+        
+        // Show appropriate error message
+        if (error.message && error.message.includes('Razorpay')) {
+            alert('Payment system error: ' + error.message);
+        } else if (error.message && error.message.includes('Payment cancelled')) {
+            alert('Payment was cancelled. Your order was not placed.');
+        } else {
+            alert('Sorry, there was an error processing your payment. Please try again or contact us directly.');
+        }
+        
         // Hide processing overlay
         document.getElementById('processingOverlay').style.display = 'none';
         document.getElementById('placeOrderBtn').disabled = false;
@@ -1156,4 +1177,81 @@ function saveGuestOrderHistory(orderData) {
     } catch (error) {
         console.error('Error saving guest order history:', error);
     }
+}
+
+/**
+ * Simple direct payment function (using the working approach)
+ */
+function processSimplePayment(amount, orderData, user) {
+    return new Promise((resolve, reject) => {
+        console.log('🔄 Starting simple direct payment...');
+        
+        // Validate Razorpay SDK
+        if (typeof Razorpay === 'undefined') {
+            reject(new Error('Razorpay SDK not loaded. Please refresh the page and try again.'));
+            return;
+        }
+
+        // Clean phone number
+        function cleanPhone(phone) {
+            if (!phone) return '9999999999';
+            const cleaned = phone.replace(/[\+\s\-\(\)]/g, '');
+            if (cleaned.startsWith('91') && cleaned.length === 12) {
+                return cleaned.substring(2);
+            }
+            return cleaned.length === 10 ? cleaned : '9999999999';
+        }
+
+        // Direct Razorpay options (exactly like the working test)
+        const options = {
+            "key": "rzp_test_1DP5mmOlF5G5ag", // Working test key
+            "amount": (amount * 100).toString(), // Convert to paise
+            "currency": "INR",
+            "name": "JB Creations",
+            "description": `Photo Frame Order - ${orderData.items.length} item(s)`,
+            "handler": function (response) {
+                console.log('✅ Simple payment success:', response.razorpay_payment_id);
+                resolve({
+                    success: true,
+                    paymentId: response.razorpay_payment_id,
+                    orderId: orderData.orderNumber,
+                    amount: amount,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature
+                });
+            },
+            "prefill": {
+                "name": user.name || orderData.customer.name || 'Customer',
+                "email": user.email || orderData.customer.email || 'customer@example.com',
+                "contact": cleanPhone(user.phone || orderData.customer.phone)
+            },
+            "theme": {
+                "color": "#16697A"
+            },
+            "modal": {
+                "ondismiss": function(){
+                    console.log('⚠️ Payment cancelled by user');
+                    reject(new Error('Payment was cancelled by user'));
+                }
+            }
+        };
+
+        try {
+            const rzp = new Razorpay(options);
+            
+            rzp.on('payment.failed', function (response) {
+                console.error('❌ Simple payment failed:', response.error);
+                reject(new Error(response.error.description || 'Payment failed'));
+            });
+
+            console.log('🔄 Opening simple payment modal...');
+            rzp.open();
+            console.log('✅ Simple payment modal opened');
+            
+        } catch (error) {
+            console.error('❌ Error in simple payment:', error);
+            reject(new Error('Failed to open payment modal: ' + error.message));
+        }
+    });
 }

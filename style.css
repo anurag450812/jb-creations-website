@@ -3488,49 +3488,51 @@ button i {
         align-items: center; /* Ensure vertical alignment */
     }
 
-    /* Create change image button using ::after pseudo-element */
+    /* Create change image button using ::after pseudo-element - DISABLED */
     .zoom-controls::after {
-        content: "\f021"; /* FontAwesome sync/refresh icon */
-        font-family: "Font Awesome 6 Free";
-        font-weight: 900;
+        display: none; /* Hide pseudo-element in favor of real button */
+    }
+
+    /* Mobile change image button - real button that replaces pseudo-element */
+    .mobile-change-image-btn {
         position: absolute;
         top: 0;
         left: calc(100% + 0.75rem);
         width: 40px;
         height: 40px;
         border-radius: 50%;
+        border: none;
         background: var(--secondary-color);
         color: var(--text-color);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        display: flex;
+        display: flex; /* Show on mobile */
         align-items: center;
         justify-content: center;
         font-size: 1rem;
         cursor: pointer;
         transition: all 0.3s ease;
         z-index: 100;
-        pointer-events: auto;
-        line-height: 0; /* Prevent text baseline issues */
+        line-height: 0;
     }
 
-    .zoom-controls:hover::after {
+    .mobile-change-image-btn:hover {
         background: var(--primary-color);
         color: white;
         transform: translateY(-2px);
     }
 
-    /* Hide the original change image button but keep its functionality */
+    /* Change image button - make visible for testing */
     .preview-section .change-image-btn {
         position: absolute;
         top: 1rem;
         left: calc(50% + 150px);
         width: 40px;
         height: 40px;
-        opacity: 0;
+        opacity: 1; /* Made visible for testing */
         z-index: 101;
         border-radius: 50%;
-        border: none;
-        background: transparent;
+        border: 2px solid red; /* Added red border for visibility */
+        background: yellow; /* Added yellow background for visibility */
         cursor: pointer;
     }
 
@@ -4109,6 +4111,27 @@ button i {
     margin: 0;
     line-height: 1;
     box-shadow: none;
+}
+
+.mobile-change-image-btn {
+    display: block !important; /* Temporarily show on all devices for testing */
+    position: absolute;
+    top: 0;
+    left: calc(100% + 0.75rem);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: var(--secondary-color);
+    color: var(--text-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 100;
+    line-height: 0;
 }
 
 .zoom-controls button:hover,

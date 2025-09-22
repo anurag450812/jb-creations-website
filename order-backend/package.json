@@ -7,22 +7,51 @@
     "start": "node order-receiver.js",
     "dev": "nodemon order-receiver.js",
     "admin": "node admin-server.js",
-    "admin-dev": "nodemon admin-server.js"
+    "admin-dev": "nodemon admin-server.js",
+    "auth": "node auth-server.js",
+    "auth-dev": "nodemon auth-server.js",
+    "auth-prod": "NODE_ENV=production node auth-server-production.js",
+    "auth-prod-dev": "NODE_ENV=production nodemon auth-server-production.js",
+    "backup-db": "node scripts/backup-database.js",
+    "list-backups": "node scripts/backup-database.js list",
+    "generate-secret": "node -e \"console.log('JWT_SECRET=' + require('crypto').randomBytes(64).toString('hex'))\"",
+    "pm2-start": "pm2 start auth-server-production.js --name jb-auth --env production",
+    "pm2-stop": "pm2 stop jb-auth",
+    "pm2-restart": "pm2 restart jb-auth",
+    "pm2-logs": "pm2 logs jb-auth",
+    "pm2-delete": "pm2 delete jb-auth"
   },
   "dependencies": {
-    "express": "^4.18.2",
+    "archiver": "^6.0.1",
+    "bcrypt": "^5.1.1",
+    "canvas": "^3.2.0",
+    "compression": "^1.8.1",
     "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.5.1",
+    "fs-extra": "^11.1.1",
+    "helmet": "^7.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.7",
-    "fs-extra": "^11.1.1",
     "path": "^0.12.7",
-    "dotenv": "^16.3.1",
-    "archiver": "^6.0.1"
+    "sharp": "^0.34.4",
+    "sqlite3": "^5.1.7",
+    "twilio": "^4.23.0",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "pm2": "^5.4.3"
   },
-  "keywords": ["photo", "framing", "orders", "backend"],
+  "keywords": [
+    "photo",
+    "framing",
+    "orders",
+    "backend"
+  ],
   "author": "JB Creations",
   "license": "ISC"
 }

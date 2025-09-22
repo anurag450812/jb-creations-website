@@ -515,7 +515,7 @@
                     <button id="changeImage" class="change-image-btn">
                         Change Image
                     </button>
-                    <button id="updateRoomPreviews" class="change-image-btn" style="background: #82C0CC; margin-left: 10px;">
+                    <button id="updateRoomPreviews" class="change-image-btn" style="background: #82C0CC; margin-left: 10px;" onclick="updateRoomPreviewsClick()">
                         Update Room Previews
                     </button>
                 </div>
@@ -535,6 +535,10 @@
                             <button id="precisionZoomOut" class="precision-zoom" title="Precision Zoom Out (Fine Step)"><i class="fas fa-minus"></i></button>
                             <button id="precisionZoomIn" class="precision-zoom" title="Precision Zoom In (Fine Step)"><i class="fas fa-plus"></i></button>
                             <button id="zoomIn" title="Zoom In (Large Step)"><i class="fas fa-plus"></i></button>
+                            <!-- Mobile-only change image button that overlays the pseudo-element -->
+                            <button id="mobileChangeImage" class="mobile-change-image-btn" title="Change Image">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
                         </div>
                     </div>
                     <!-- Mobile buttons for touch devices -->
