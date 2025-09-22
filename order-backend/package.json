@@ -4,8 +4,9 @@
   "description": "Backend server for receiving photo framing orders",
   "main": "order-receiver.js",
   "scripts": {
-    "start": "node order-receiver.js",
-    "dev": "nodemon order-receiver.js",
+    "start": "node auth-server-production.js",
+    "dev": "nodemon auth-server-production.js",
+    "legacy": "node order-receiver.js",
     "admin": "node admin-server.js",
     "admin-dev": "nodemon admin-server.js",
     "auth": "node auth-server.js",
