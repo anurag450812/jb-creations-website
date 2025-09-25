@@ -1,11 +1,11 @@
 // Netlify Function for Cloudinary uploads
-const cloudinary = require('cloudinary').v2;
+const { v2: cloudinary } = require('cloudinary');
 
 // Configure Cloudinary (these would be environment variables in Netlify)
 cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dfhxnpp9m',
+    api_key: process.env.CLOUDINARY_API_KEY || '629699618349166',
+    api_secret: process.env.CLOUDINARY_API_SECRET || '-8gGXZCe-4ORvEQSPcdajA38yQQ'
 });
 
 exports.handler = async (event, context) => {
