@@ -96,6 +96,12 @@ function initializeDefaults() {
 
 // Function to initialize all event listeners
 function initializeEventListeners() {
+    // Check if required elements exist (they might not exist on all pages)
+    if (!elements.imageContainer) {
+        console.log('Image container not found, skipping image-related event listeners');
+        return;
+    }
+    
     // Drop zone functionality
     elements.imageContainer.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -295,6 +301,13 @@ function initializeEventListeners() {
         elements.addToCartBtn.addEventListener('click', async () => {
             console.log('Add to Cart button clicked!');
             
+            // Check if we're on the right page
+            if (typeof state === 'undefined' || !state) {
+                console.error('State object not found - might not be on customize page');
+                alert('Please go to the customize page to add items to cart.');
+                return;
+            }
+            
             if (!state.image) {
                 alert('Please upload an image first');
                 return;
@@ -310,56 +323,99 @@ function initializeEventListeners() {
                 elements.addToCartBtn.disabled = true;
                 elements.addToCartBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
                 
-                // Capture both the print image and live preview screenshot
-                console.log('Starting image capture...');
-                const [printImageData, previewImageData] = await Promise.all([
-                    getCanvasImageData(),
-                    captureFramePreview() // Use the exact live preview capture function
-                ]);
-                console.log('Image capture completed:', {
-                    printImageCaptured: !!printImageData,
-                    previewImageCaptured: !!previewImageData,
-                    printImageSize: printImageData ? printImageData.length : 0,
-                    previewImageSize: previewImageData ? previewImageData.length : 0
-                });
-                
-                // If preview capture failed, use the print image as fallback
-                const finalPreviewImage = previewImageData || printImageData;
-                
+                // Prepare cart item with basic data first
                 const cartItem = {
                     id: Date.now(),
-                    printImage: printImageData,
-                    previewImage: finalPreviewImage, // Use captured preview or fallback to print image
-                    displayImage: finalPreviewImage, // Add for backward compatibility
-                    originalImage: state.originalImage, // Add original uploaded image
+                    originalImage: state.originalImage || state.image, // Use original uploaded image
                     frameSize: state.frameSize,
                     frameColor: state.frameColor || '#8B4513',
                     frameTexture: state.frameTexture || 'wood',
                     adjustments: { ...state.adjustments },
-                    zoom: state.zoom,
+                    zoom: state.zoom || 1,
                     position: { ...state.position },
                     price: state.price || 349,
-                    orderDate: new Date().toISOString(), // Add orderDate for checkout compatibility
+                    orderDate: new Date().toISOString(),
                     timestamp: new Date().toISOString()
                 };
 
-                addToCart(cartItem);
+                // Try to capture images, but don't fail if it doesn't work
+                console.log('Attempting to capture images...');
+                console.log('Current state:', {
+                    hasImage: !!state.image,
+                    hasOriginalImage: !!state.originalImage,
+                    hasFrameSize: !!state.frameSize,
+                    imageLength: state.image ? state.image.length : 0
+                });
                 
-                // Reset button state
-                elements.addToCartBtn.disabled = false;
-                elements.addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
+                try {
+                    const [printImageData, previewImageData] = await Promise.all([
+                        getCanvasImageData().catch(err => {
+                            console.warn('Print image capture failed:', err);
+                            return null;
+                        }),
+                        captureFramePreview().catch(err => {
+                            console.warn('Preview image capture failed:', err);
+                            return null;
+                        })
+                    ]);
+                    
+                    console.log('Image capture results:', {
+                        printImageCaptured: !!printImageData,
+                        previewImageCaptured: !!previewImageData,
+                        printImageSize: printImageData ? printImageData.length : 0,
+                        previewImageSize: previewImageData ? previewImageData.length : 0
+                    });
+                    
+                    // Add captured images if available
+                    if (printImageData) {
+                        cartItem.printImage = printImageData;
+                        console.log('✅ Print image captured successfully');
+                    } else {
+                        console.warn('⚠️ Print image not captured, using original image as fallback');
+                        cartItem.printImage = state.originalImage || state.image;
+                    }
+                    
+                    if (previewImageData) {
+                        cartItem.previewImage = previewImageData;
+                        cartItem.displayImage = previewImageData;
+                        console.log('✅ Preview image captured successfully');
+                    } else {
+                        console.warn('⚠️ Preview image not captured, using original image as fallback');
+                        cartItem.previewImage = state.originalImage || state.image;
+                        cartItem.displayImage = state.originalImage || state.image;
+                    }
+                    
+                } catch (imageError) {
+                    console.warn('Image capture failed, using original image as fallback:', imageError);
+                    cartItem.printImage = state.originalImage || state.image;
+                    cartItem.previewImage = state.originalImage || state.image;
+                    cartItem.displayImage = state.originalImage || state.image;
+                }
+
+                console.log('Adding item to cart:', cartItem);
+                const success = addToCart(cartItem);
                 
-                // Show success feedback
-                const originalText = elements.addToCartBtn.innerHTML;
-                elements.addToCartBtn.innerHTML = '<i class="fas fa-check"></i> Added!';
-                elements.addToCartBtn.style.background = '#27ae60';
-                setTimeout(() => {
-                    elements.addToCartBtn.innerHTML = originalText;
-                    elements.addToCartBtn.style.background = '';
-                }, 2000);
+                if (success) {
+                    // Reset button state
+                    elements.addToCartBtn.disabled = false;
+                    elements.addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
+                    
+                    // Show success feedback
+                    const originalText = elements.addToCartBtn.innerHTML;
+                    elements.addToCartBtn.innerHTML = '<i class="fas fa-check"></i> Added!';
+                    elements.addToCartBtn.style.background = '#27ae60';
+                    setTimeout(() => {
+                        elements.addToCartBtn.innerHTML = originalText;
+                        elements.addToCartBtn.style.background = '';
+                    }, 2000);
+                } else {
+                    // Reset button state on failure
+                    elements.addToCartBtn.disabled = false;
+                    elements.addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
+                }
                 
             } catch (error) {
-                console.error('Error adding to cart:', error);
+                console.error('Error in add to cart process:', error);
                 alert('Error adding item to cart. Please try again.');
                 
                 // Reset button state
@@ -367,6 +423,8 @@ function initializeEventListeners() {
                 elements.addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
             }
         });
+    } else {
+        console.warn('Add to Cart button not found - might not be on customize page');
     }
 
     // Cart modal functionality
@@ -397,6 +455,25 @@ function initializeEventListeners() {
             elements.previewImage.classList.add('smooth-transition');
             updateImageTransform();
             setTimeout(() => elements.previewImage.classList.remove('smooth-transition'), 200);
+            
+            // Auto-update room previews when zoom changes (simulation)
+            setTimeout(() => {
+                const hasImage = !!(state.image);
+                const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
+                
+                if (hasImage && hasActiveRoomSlider) {
+                    console.log('🔄 Auto-updating room previews after zoom in...');
+                    if (typeof overlayFrameOnRoomImages === 'function') {
+                        overlayFrameOnRoomImages().then(() => {
+                            console.log('✅ Room previews auto-updated after zoom in');
+                        }).catch((error) => {
+                            console.log('⚠️ Error in auto-update after zoom in:', error);
+                        });
+                    } else {
+                        console.log('⚠️ overlayFrameOnRoomImages function not available for zoom auto-update');
+                    }
+                }
+            }, 300); // Small delay to allow zoom transition to complete
         });
     }
     if (elements.zoomOut) {
@@ -419,6 +496,25 @@ function initializeEventListeners() {
             elements.previewImage.classList.add('smooth-transition');
             updateImageTransform();
             setTimeout(() => elements.previewImage.classList.remove('smooth-transition'), 200);
+            
+            // Auto-update room previews when zoom changes (simulation)
+            setTimeout(() => {
+                const hasImage = !!(state.image);
+                const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
+                
+                if (hasImage && hasActiveRoomSlider) {
+                    console.log('🔄 Auto-updating room previews after zoom out...');
+                    if (typeof overlayFrameOnRoomImages === 'function') {
+                        overlayFrameOnRoomImages().then(() => {
+                            console.log('✅ Room previews auto-updated after zoom out');
+                        }).catch((error) => {
+                            console.log('⚠️ Error in auto-update after zoom out:', error);
+                        });
+                    } else {
+                        console.log('⚠️ overlayFrameOnRoomImages function not available for zoom auto-update');
+                    }
+                }
+            }, 300); // Small delay to allow zoom transition to complete
         });
     }
     if (elements.precisionZoomIn) {
@@ -430,6 +526,25 @@ function initializeEventListeners() {
             elements.previewImage.classList.add('smooth-transition');
             updateImageTransform();
             setTimeout(() => elements.previewImage.classList.remove('smooth-transition'), 150);
+            
+            // Auto-update room previews when precision zoom changes (simulation)
+            setTimeout(() => {
+                const hasImage = !!(state.image);
+                const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
+                
+                if (hasImage && hasActiveRoomSlider) {
+                    console.log('🔄 Auto-updating room previews after precision zoom in...');
+                    if (typeof overlayFrameOnRoomImages === 'function') {
+                        overlayFrameOnRoomImages().then(() => {
+                            console.log('✅ Room previews auto-updated after precision zoom in');
+                        }).catch((error) => {
+                            console.log('⚠️ Error in auto-update after precision zoom in:', error);
+                        });
+                    } else {
+                        console.log('⚠️ overlayFrameOnRoomImages function not available for precision zoom auto-update');
+                    }
+                }
+            }, 200); // Smaller delay for precision zoom
         });
     }
     if (elements.precisionZoomOut) {
@@ -448,6 +563,25 @@ function initializeEventListeners() {
             elements.previewImage.classList.add('smooth-transition');
             updateImageTransform();
             setTimeout(() => elements.previewImage.classList.remove('smooth-transition'), 150);
+            
+            // Auto-update room previews when precision zoom changes (simulation)
+            setTimeout(() => {
+                const hasImage = !!(state.image);
+                const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
+                
+                if (hasImage && hasActiveRoomSlider) {
+                    console.log('🔄 Auto-updating room previews after precision zoom out...');
+                    if (typeof overlayFrameOnRoomImages === 'function') {
+                        overlayFrameOnRoomImages().then(() => {
+                            console.log('✅ Room previews auto-updated after precision zoom out');
+                        }).catch((error) => {
+                            console.log('⚠️ Error in auto-update after precision zoom out:', error);
+                        });
+                    } else {
+                        console.log('⚠️ overlayFrameOnRoomImages function not available for precision zoom auto-update');
+                    }
+                }
+            }, 200); // Smaller delay for precision zoom
         });
     }
 
@@ -758,7 +892,13 @@ document.querySelectorAll('button').forEach(button => {
 
 // Enhance slider interaction
 sliders.forEach(({ id, element }) => {
-    const label = element.previousElementSibling;
+    // Check if element exists
+    if (!element) {
+        console.warn(`Slider element for ${id} not found`);
+        return;
+    }
+    
+    const label = element?.previousElementSibling;
     
     element.addEventListener('input', (e) => {
         console.log('Adjustment slider changed:', id, 'to', e.target.value);
@@ -858,8 +998,8 @@ function updateImageTransform() {
     elements.previewImage.style.maxWidth = 'none';
     elements.previewImage.style.maxHeight = 'none';
     
-    // Room preview overlays will only update when "Update Room Previews" button is clicked
-    // Removed automatic overlay update for zoom/pan changes to give users control
+    // Room preview overlays are now automatically updated when zoom changes
+    // Users can still manually trigger updates via the "Update Room Previews" button
 }
 
 // Update drag functionality to work with centered positioning
@@ -911,6 +1051,7 @@ function initializeDragAndZoom() {
         const minZoom = calculateRequiredZoom(imgWidth, imgHeight, frameWidth, frameHeight);
 
         // Update zoom based on wheel direction
+        const previousZoom = state.zoom;
         if (e.deltaY > 0) {
             // Zoom out
             state.zoom = Math.max(state.zoom - zoomSpeed, minZoom);
@@ -925,6 +1066,28 @@ function initializeDragAndZoom() {
 
         // Update transform to reflect new zoom
         updateImageTransform();
+        
+        // Auto-update room previews when mouse wheel zoom changes (simulation)
+        if (Math.abs(state.zoom - previousZoom) > 0.001) { // Only update if zoom actually changed
+            setTimeout(() => {
+                const hasImage = !!(state.image);
+                const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
+                
+                if (hasImage && hasActiveRoomSlider) {
+                    const zoomDirection = e.deltaY > 0 ? 'out' : 'in';
+                    console.log(`🔄 Auto-updating room previews after wheel zoom ${zoomDirection}...`);
+                    if (typeof overlayFrameOnRoomImages === 'function') {
+                        overlayFrameOnRoomImages().then(() => {
+                            console.log(`✅ Room previews auto-updated after wheel zoom ${zoomDirection}`);
+                        }).catch((error) => {
+                            console.log(`⚠️ Error in auto-update after wheel zoom ${zoomDirection}:`, error);
+                        });
+                    } else {
+                        console.log('⚠️ overlayFrameOnRoomImages function not available for wheel zoom auto-update');
+                    }
+                }
+            }, 300); // Small delay to allow zoom transition to complete
+        }
     }
 
     // Mouse down handler with improved responsiveness
@@ -1187,30 +1350,44 @@ function initializeDragAndZoom() {
 function captureFramedImage() {
     return new Promise((resolve) => {
         const previewImage = document.getElementById('previewImage');
+        const frameContainer = document.querySelector('.frame-preview');
         
-        if (!previewImage.src || !state.frameSize) {
-            console.log('No image or frame size, using original image');
+        if (!previewImage.src || !state.frameSize || !frameContainer) {
+            console.log('No image, frame size, or frame container, using original image');
             resolve(state.image);
             return;
         }
         
         try {
+            console.log('🖼️ Capturing exactly what is visible in frame preview...');
+            
+            // Get the frame container dimensions (this is the visible area)
+            const frameRect = frameContainer.getBoundingClientRect();
+            const frameInnerPadding = 20; // Frame border thickness
+            
+            // Calculate the actual visible area inside the frame borders
+            const visibleWidth = frameRect.width - (frameInnerPadding * 2);
+            const visibleHeight = frameRect.height - (frameInnerPadding * 2);
+            
+            // Create high-resolution canvas for print quality
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
-            // Get frame aspect ratio to determine crop dimensions
-            const [width, height] = state.frameSize.size.split('x').map(Number);
-            const isLandscape = state.frameSize.orientation === 'landscape';
-            const frameAspectWidth = isLandscape ? Math.max(width, height) : Math.min(width, height);
-            const frameAspectHeight = isLandscape ? Math.min(width, height) : Math.max(width, height);
+            // Set high resolution for printing (maintain aspect ratio)
+            const printResolution = 1200; // High resolution for printing
+            const aspectRatio = visibleWidth / visibleHeight;
             
-            // Set canvas size to match the frame's inner dimensions (what will be printed)
-            // Using high resolution for printing quality
-            const printWidth = 1200; // High resolution for printing
-            const printHeight = Math.round(printWidth * (frameAspectHeight / frameAspectWidth));
+            if (aspectRatio > 1) {
+                // Landscape
+                canvas.width = printResolution;
+                canvas.height = Math.round(printResolution / aspectRatio);
+            } else {
+                // Portrait
+                canvas.width = Math.round(printResolution * aspectRatio);
+                canvas.height = printResolution;
+            }
             
-            canvas.width = printWidth;
-            canvas.height = printHeight;
+            console.log('Canvas dimensions:', { width: canvas.width, height: canvas.height });
             
             // Create image element
             const img = new Image();
@@ -1220,70 +1397,76 @@ function captureFramedImage() {
                     ctx.fillStyle = '#ffffff';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     
-                    // Calculate image dimensions and position based on user's adjustments
-                    const imgAspectRatio = img.naturalWidth / img.naturalHeight;
-                    const canvasAspectRatio = canvas.width / canvas.height;
+                    // Calculate scale factor from preview to canvas
+                    const scaleX = canvas.width / visibleWidth;
+                    const scaleY = canvas.height / visibleHeight;
                     
-                    // Calculate the base size to fill the frame
-                    let baseWidth, baseHeight;
-                    if (imgAspectRatio > canvasAspectRatio) {
-                        baseHeight = canvas.height;
-                        baseWidth = baseHeight * imgAspectRatio;
-                    } else {
-                        baseWidth = canvas.width;
-                        baseHeight = baseWidth / imgAspectRatio;
-                    }
+                    // Get the preview image's current computed style
+                    const previewRect = previewImage.getBoundingClientRect();
+                    const frameContainerRect = frameContainer.getBoundingClientRect();
                     
-                    // Apply user's zoom
-                    const zoomLevel = state.zoom || 1;
-                    const scaledWidth = baseWidth * zoomLevel;
-                    const scaledHeight = baseHeight * zoomLevel;
+                    // Calculate the image's position relative to the frame container
+                    const imgLeft = previewRect.left - frameContainerRect.left - frameInnerPadding;
+                    const imgTop = previewRect.top - frameContainerRect.top - frameInnerPadding;
+                    const imgWidth = previewRect.width;
+                    const imgHeight = previewRect.height;
                     
-                    // Calculate position with user's pan adjustments
-                    const centerX = canvas.width / 2;
-                    const centerY = canvas.height / 2;
+                    console.log('Preview positioning:', {
+                        frameVisible: { width: visibleWidth, height: visibleHeight },
+                        imagePos: { left: imgLeft, top: imgTop, width: imgWidth, height: imgHeight },
+                        scale: { x: scaleX, y: scaleY }
+                    });
                     
-                    // Apply user's position adjustments (convert from percentage to pixels)
-                    const positionX = state.position ? (state.position.x * canvas.width * 0.01) : 0;
-                    const positionY = state.position ? (state.position.y * canvas.height * 0.01) : 0;
-                    
-                    const drawX = centerX - (scaledWidth / 2) + positionX;
-                    const drawY = centerY - (scaledHeight / 2) + positionY;
-                    
-                    // Apply all the color adjustments/filters
+                    // Apply color adjustments/filters to match preview
                     if (state.adjustments) {
                         const { brightness, contrast, highlights, shadows, vibrance } = state.adjustments;
-                        // Calculate combined brightness from base brightness, highlights, and shadows
-                        const combinedBrightness = Math.max(1, (brightness / 100) * (highlights / 100) * (shadows / 100));
+                        const combinedBrightness = Math.max(0.1, Math.min(3, 
+                            (brightness / 100) * 
+                            (1 + (highlights - 100) / 200) * 
+                            (1 + (shadows - 100) / 200)
+                        ));
                         
                         ctx.filter = `
                             brightness(${combinedBrightness})
                             contrast(${contrast}%)
                             saturate(${vibrance}%)
-                        `;
+                        `.replace(/\s+/g, ' ').trim();
+                        
+                        console.log('Applied filters:', ctx.filter);
                     }
                     
-                    // Draw the image with all transformations applied
-                    ctx.drawImage(img, drawX, drawY, scaledWidth, scaledHeight);
+                    // Draw the image exactly as it appears in the preview frame
+                    // Scale positions from preview to canvas coordinates
+                    const canvasX = imgLeft * scaleX;
+                    const canvasY = imgTop * scaleY;
+                    const canvasW = imgWidth * scaleX;
+                    const canvasH = imgHeight * scaleY;
                     
-                    // Convert to high-quality JPEG for printing
+                    // Draw the image with exact positioning
+                    ctx.drawImage(img, canvasX, canvasY, canvasW, canvasH);
+                    
+                    // Reset filter for any additional operations
+                    ctx.filter = 'none';
+                    
+                    // Convert to data URL
                     const dataURL = canvas.toDataURL('image/jpeg', 0.95);
-                    console.log('Cropped and styled image captured for printing');
+                    
+                    console.log('✅ Frame image captured successfully with exact positioning');
                     resolve(dataURL);
                     
                 } catch (error) {
-                    console.error('Error creating cropped image:', error);
-                    resolve(state.image);
+                    console.error('Error during image capture:', error);
+                    resolve(state.image); // Fallback to original image
                 }
             };
             
             img.onerror = () => {
-                console.error('Error loading image for cropping');
+                console.error('Failed to load image for capture');
                 resolve(state.image);
             };
             
-            img.crossOrigin = 'anonymous';
-            img.src = state.image;
+            // Load the original image
+            img.src = state.originalImage || state.image;
             
         } catch (error) {
             console.error('Error in captureFramedImage:', error);
@@ -1480,11 +1663,11 @@ function downloadPrintImages() {
 // Cart Modal Functions
 function updateCartCount() {
     try {
-        const cart = JSON.parse(localStorage.getItem('photoFramingCart') || '[]');
+        const cart = JSON.parse(sessionStorage.getItem('photoFramingCart') || '[]');
         const count = cart.length;
         
         console.log('updateCartCount called:', {
-            cartData: localStorage.getItem('photoFramingCart'),
+            cartData: sessionStorage.getItem('photoFramingCart'),
             parsedCart: cart,
             count: count
         });
@@ -1596,22 +1779,56 @@ window.removeCartItem = removeCartItem;
 function addToCart(item) {
     console.log('addToCart function called with item:', item);
     try {
+        // Validate the item has required fields
+        if (!item || typeof item !== 'object') {
+            throw new Error('Invalid item data');
+        }
+
+        if (!item.frameSize) {
+            throw new Error('Missing frame size information');
+        }
+
         // Get existing cart
-        let cart = JSON.parse(localStorage.getItem('photoFramingCart') || '[]');
+        let cart;
+        try {
+            const cartData = sessionStorage.getItem('photoFramingCart');
+            cart = cartData ? JSON.parse(cartData) : [];
+        } catch (parseError) {
+            console.warn('Error parsing existing cart, creating new cart:', parseError);
+            cart = [];
+        }
+        
         console.log('Current cart:', cart);
         
         // Add timestamp if not present
         if (!item.timestamp) {
             item.timestamp = new Date().toISOString();
         }
+
+        // Ensure item has an ID
+        if (!item.id) {
+            item.id = Date.now() + Math.random();
+        }
         
         // Add the item to cart
         cart.push(item);
         console.log('Updated cart:', cart);
         
-        // Save updated cart
-        localStorage.setItem('photoFramingCart', JSON.stringify(cart));
-        console.log('Cart saved to localStorage');
+        // Save updated cart with better error handling
+        try {
+            const cartJSON = JSON.stringify(cart);
+            sessionStorage.setItem('photoFramingCart', cartJSON);
+            console.log('Cart saved to sessionStorage');
+        } catch (saveError) {
+            console.error('Error saving to sessionStorage:', saveError);
+            
+            // Check if it's a quota exceeded error
+            if (saveError.name === 'QuotaExceededError' || saveError.code === 22) {
+                throw new Error('QuotaExceededError');
+            } else {
+                throw new Error('Failed to save cart to session storage');
+            }
+        }
         
         // Update cart count
         updateCartCount();
@@ -1624,17 +1841,36 @@ function addToCart(item) {
             elements.addToCartBtn.disabled = true;
             
             setTimeout(() => {
-                elements.addToCartBtn.innerHTML = originalText;
-                elements.addToCartBtn.classList.remove('success');
-                elements.addToCartBtn.disabled = false;
+                if (elements.addToCartBtn) {
+                    elements.addToCartBtn.innerHTML = originalText;
+                    elements.addToCartBtn.classList.remove('success');
+                    elements.addToCartBtn.disabled = false;
+                }
             }, 2000);
         }
         
         console.log('Item successfully added to cart');
+        return true;
         
     } catch (error) {
         console.error('Error adding to cart:', error);
-        alert('Error adding item to cart. Please try again.');
+        
+        // Show user-friendly error message based on specific error types
+        let errorMessage;
+        if (error.name === 'QuotaExceededError' || error.code === 22) {
+            errorMessage = 'Cart storage is full. Please remove some items and try again.';
+        } else if (error.message && error.message.includes('Failed to save cart to local storage')) {
+            errorMessage = 'Unable to save to cart. Your browser storage might be full.';
+        } else if (error.message && error.message.includes('Invalid item data')) {
+            errorMessage = 'Invalid item configuration. Please try customizing your item again.';
+        } else if (error.message && error.message.includes('Missing frame size')) {
+            errorMessage = 'Please select a frame size before adding to cart.';
+        } else {
+            errorMessage = 'Error adding item to cart. Please try again.';
+        }
+            
+        alert(errorMessage);
+        return false;
     }
 }
 
@@ -1664,6 +1900,29 @@ elements.imageContainer.addEventListener('mousemove', () => {
         }, 2000);
     }
 }); 
+
+// Debug functions for testing
+window.clearCartDebug = function() {
+    localStorage.removeItem('photoFramingCart');
+    console.log('Cart cleared from localStorage');
+    location.reload();
+};
+
+window.showCartDebug = function() {
+    const cartData = localStorage.getItem('photoFramingCart');
+    console.log('Cart data:', cartData);
+    if (cartData) {
+        try {
+            const parsed = JSON.parse(cartData);
+            console.log('Parsed cart:', parsed);
+            console.log('Cart length:', parsed.length);
+        } catch (e) {
+            console.error('Error parsing cart:', e);
+        }
+    } else {
+        console.log('No cart data found');
+    }
+};
 
 // Live Preview Capture Functions
 function captureFramePreview() {
@@ -2465,14 +2724,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
-    button.addEventListener('click', () => {
-        // Remove selected class from all buttons
-        document.querySelectorAll('.size-options button, .desktop-size-btn').forEach(btn => {
-            btn.classList.remove('selected');
-        });
-        
-        // Add selected class to clicked button
-        button.classList.add('selected');
+
+// Frame Size Selection - moved inside DOMContentLoaded 
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.size-options button, .desktop-size-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove selected class from all buttons
+            document.querySelectorAll('.size-options button, .desktop-size-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked button
+            button.classList.add('selected');
         
         // Update state with new frame size
         state.frameSize = {
@@ -2512,7 +2775,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }, 600);
         }
+        });
     });
+});
 
 // Function to update frame size and recalculate minimum zoom
 function updateFrameSize() {

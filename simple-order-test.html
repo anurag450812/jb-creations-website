@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Order Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .log { background: #f0f0f0; padding: 15px; border-radius: 5px; font-family: monospace; margin: 10px 0; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Simple Order Creation Test</h1>
+    <button onclick="testCloudinaryOnly()">🌥️ Test Cloudinary Upload Only</button>
+    <button onclick="testFirebaseOnly()">🔥 Test Firebase Only</button>
+    <button onclick="clearLog()">🧹 Clear</button>
+    <div class="log" id="log">Ready for testing...</div>
+
+    <script>
+        function log(msg) {
+            document.getElementById('log').innerHTML += new Date().toLocaleTimeString() + ': ' + msg + '<br>';
+        }
+        function clearLog() {
+            document.getElementById('log').innerHTML = 'Log cleared...<br>';
+        }
+
+        async function testCloudinaryOnly() {
+            log('🌥️ Testing Cloudinary upload...');
+            
+            try {
+                // Create simple test image
+                const canvas = document.createElement('canvas');
+                canvas.width = 50;
+                canvas.height = 50;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ff0000';
+                ctx.fillRect(0, 0, 50, 50);
+                const testImage = canvas.toDataURL('image/png');
+                
+                log('📸 Created test image');
+
+                // Upload to Cloudinary
+                const response = await fetch('http://localhost:3001/api/upload-to-cloudinary', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        image: testImage,
+                        publicId: `test-simple-${Date.now()}`
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    log('✅ Cloudinary upload successful!');
+                    log('🔗 URL: ' + result.secure_url);
+                    
+                    // Test if we can load the image
+                    const img = new Image();
+                    img.onload = () => log('✅ Image accessible from Cloudinary');
+                    img.onerror = () => log('❌ Image not accessible');
+                    img.src = result.secure_url;
+                    
+                } else {
+                    log('❌ Cloudinary upload failed: ' + result.error);
+                }
+
+            } catch (error) {
+                log('❌ Test failed: ' + error.message);
+            }
+        }
+
+        async function testFirebaseOnly() {
+            log('🔥 Testing Firebase connection...');
+            
+            // Try to access Firebase directly
+            if (typeof firebase !== 'undefined') {
+                log('✅ Firebase SDK loaded');
+            } else {
+                log('❌ Firebase SDK not loaded');
+                return;
+            }
+
+            // Check for Firebase config
+            try {
+                if (window.firebaseConfig) {
+                    log('✅ Firebase config found');
+                } else {
+                    log('❌ Firebase config not found');
+                }
+
+                // Try to initialize manually if needed
+                if (!firebase.apps.length) {
+                    log('🔄 Initializing Firebase...');
+                    // We'll skip actual initialization to avoid errors
+                    log('⚠️ Manual Firebase initialization needed');
+                } else {
+                    log('✅ Firebase already initialized');
+                }
+
+            } catch (error) {
+                log('❌ Firebase test failed: ' + error.message);
+            }
+        }
+
+        log('🚀 Simple test tool ready');
+    </script>
+</body>
+</html>

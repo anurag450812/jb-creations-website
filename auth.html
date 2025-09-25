@@ -17,124 +17,6 @@
     
     <!-- Google Sign-In will be handled by auth.js -->
     <style>
-        /* Professional Header Button Styling */
-        .profile-dropdown {
-            position: relative;
-        }
-
-        .profile-icon-btn {
-            background: transparent;
-            border: none;
-            backdrop-filter: none;
-            -webkit-backdrop-filter: none;
-            box-shadow: none;
-            color: #16697A;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 22px;
-            transition: all 0.3s ease;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            min-width: 50px;
-            text-align: center;
-        }
-
-        .profile-icon-btn:hover {
-            background: rgba(22, 105, 122, 0.25);
-            border: 1px solid rgba(22, 105, 122, 0.4);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-            color: white;
-        }
-
-        .profile-icon-btn i {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            margin: 0;
-            line-height: 1;
-            font-size: 20px;
-        }
-
-        .profile-icon-btn .button-label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            line-height: 1;
-            margin: 0;
-            width: 100%;
-            text-align: center;
-        }
-
-        .back-home-btn {
-            background: transparent;
-            border: none;
-            backdrop-filter: none;
-            -webkit-backdrop-filter: none;
-            box-shadow: none;
-            color: #16697A;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 22px;
-            transition: all 0.3s ease;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            min-width: 50px;
-            text-align: center;
-            text-decoration: none;
-        }
-
-        .back-home-btn:hover {
-            background: rgba(22, 105, 122, 0.25);
-            border: 1px solid rgba(22, 105, 122, 0.4);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-            color: white;
-        }
-
-        .back-home-btn i {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            margin: 0;
-            line-height: 1;
-            font-size: 20px;
-        }
-
-        .back-home-btn .button-label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            line-height: 1;
-            margin: 0;
-            width: 100%;
-            text-align: center;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
         .auth-container {
             min-height: calc(100vh - 80px);
             padding-top: 80px;
@@ -1053,21 +935,207 @@
             text-align: center;
             color: inherit;
         }
+
+        /* Header and Dropdown Styles - Matching Homepage */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .auth-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-icon-btn {
+            background: transparent;
+            border: none;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            box-shadow: none;
+            color: #16697A;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 22px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .profile-icon-btn:hover {
+            background: rgba(22, 105, 122, 0.25);
+            border: 1px solid rgba(22, 105, 122, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            color: white;
+        }
+
+        .profile-icon-btn i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin: 0;
+            line-height: 1;
+            font-size: 20px;
+        }
+
+        .profile-icon-btn .button-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1;
+            margin: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        .profile-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            min-width: 220px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            padding: 8px 0;
+        }
+
+        .profile-dropdown:hover .profile-dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .profile-dropdown-menu .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            margin: 2px 8px;
+        }
+
+        .profile-dropdown-menu .dropdown-item:hover {
+            background: linear-gradient(135deg, rgba(72, 159, 181, 0.1), rgba(72, 159, 181, 0.05));
+            color: #489FB5;
+            transform: translateX(5px);
+        }
+
+        .profile-dropdown-menu .dropdown-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(72, 159, 181, 0.3), transparent);
+            margin: 8px 16px;
+        }
+
+        /* User Info Section in Dropdown */
+        .dropdown-user-info {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(22, 105, 122, 0.05);
+            border-radius: 8px;
+            margin: 8px;
+        }
+
+        .dropdown-user-info .user-avatar {
+            font-size: 24px;
+            color: #16697A;
+            margin-right: 12px;
+        }
+
+        .dropdown-user-info .user-details {
+            flex: 1;
+        }
+
+        .dropdown-user-info .user-name {
+            font-weight: 600;
+            color: #16697A;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .dropdown-user-info .user-phone {
+            color: #489FB5;
+            font-size: 12px;
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 600px) {
+            .header-right {
+                gap: 10px;
+            }
+
+            .profile-icon-btn {
+                min-width: 40px;
+                font-size: 18px;
+                padding: 6px 8px;
+                gap: 2px;
+            }
+
+            .profile-icon-btn .button-label {
+                font-size: 9px;
+            }
+
+            .cart-icon-btn {
+                min-width: 40px;
+                font-size: 16px;
+                padding: 6px 8px;
+                gap: 2px;
+            }
+
+            .cart-icon-btn .button-label {
+                font-size: 9px;
+            }
+
+            .profile-dropdown-menu {
+                min-width: 200px;
+                right: -10px;
+            }
+
+            .profile-dropdown-menu .dropdown-item {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+        }
     </style>
 </head>
 <body>
     <!-- Header -->
     <header class="site-header">
         <div class="header-content">
-            <div class="header-left">
-                <!-- Back to Home Button -->
-                <div class="header-back">
-                    <a href="index.html" class="back-home-btn" id="backHomeBtn">
-                        <i class="fas fa-home"></i>
-                        <span class="button-label">Home</span>
-                    </a>
-                </div>
-            </div>
+            <div class="header-left"></div>
             <div class="header-brand">
                 <h1 class="brand-name">JB Creations</h1>
             </div>
@@ -1082,19 +1150,31 @@
                         <div class="profile-dropdown-menu" id="profileDropdownMenu">
                             <!-- Guest user options -->
                             <div class="guest-options" id="guestOptions">
-                                <a href="index.html" class="dropdown-item">
-                                    <i class="fas fa-home"></i>
-                                    Home
+                                <a href="otp-login.html?redirect=auth.html" class="dropdown-item">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    Sign In
+                                </a>
+                                <a href="otp-login.html?redirect=auth.html" class="dropdown-item">
+                                    <i class="fas fa-user-plus"></i>
+                                    Sign Up
                                 </a>
                                 <div class="dropdown-divider"></div>
                             </div>
                             
                             <!-- Authenticated user options (hidden by default) -->
                             <div class="authenticated-options" id="authenticatedOptions" style="display: none;">
-                                <a href="index.html" class="dropdown-item">
-                                    <i class="fas fa-home"></i>
-                                    Home
-                                </a>
+                                <!-- User Info Section -->
+                                <div class="dropdown-user-info" id="dropdownUserInfo">
+                                    <div class="user-avatar">
+                                        <i class="fas fa-user-circle"></i>
+                                    </div>
+                                    <div class="user-details">
+                                        <div class="user-name" id="dropdownUserName">User</div>
+                                        <div class="user-phone" id="dropdownUserPhone">Phone</div>
+                                    </div>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                
                                 <a href="#" class="dropdown-item" onclick="viewProfile()">
                                     <i class="fas fa-user-circle"></i>
                                     My Profile
@@ -1112,6 +1192,10 @@
                             </div>
                             
                             <!-- Common options for all users -->
+                            <a href="track-order.html" class="dropdown-item">
+                                <i class="fas fa-search"></i>
+                                Track Order
+                            </a>
                             <a href="#" class="dropdown-item" onclick="contactUs()">
                                 <i class="fas fa-envelope"></i>
                                 Contact Us
@@ -1125,7 +1209,7 @@
                 </div>
                 
                 <div class="header-cart">
-                    <button class="cart-icon-btn" id="headerCartBtn">
+                    <button class="cart-icon-btn" id="headerCartBtn" onclick="window.location.href='cart.html'">
                         <i class="fas fa-shopping-cart"></i>
                         <span class="cart-count" id="cartCount">0</span>
                         <span class="button-label">Cart</span>
@@ -1348,22 +1432,8 @@
     <script src="auth.js"></script>
     <script>
         // Header functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            // Profile dropdown functionality
-            const profileBtn = document.getElementById('profileBtn');
-            const profileDropdownMenu = document.getElementById('profileDropdownMenu');
-            
-            if (profileBtn && profileDropdownMenu) {
-                profileBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    profileDropdownMenu.classList.toggle('show');
-                });
-
-                // Close dropdown when clicking outside
-                document.addEventListener('click', function() {
-                    profileDropdownMenu.classList.remove('show');
-                });
-            }
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Profile dropdown is now handled by CSS hover - no JavaScript needed
 
             // Cart functionality - redirect to cart page
             const headerCartBtn = document.getElementById('headerCartBtn');
@@ -1375,15 +1445,133 @@
 
             // Update cart count from localStorage
             updateCartCount();
+            
+            // Update authentication UI
+            await updateAuthUI();
         });
 
-        // View user profile
-        function viewProfile() {
-            const user = authUtils && authUtils.getCurrentUser ? authUtils.getCurrentUser() : null;
-            if (user) {
-                alert(`Profile for ${user.name}\nEmail: ${user.email}\nPhone: ${user.phone}\nMember since: ${new Date(user.registrationDate).toLocaleDateString()}`);
+        // Get current authenticated user from Firebase
+        async function getCurrentAuthenticatedUser() {
+            try {
+                // Wait for Firebase to be ready with retry mechanism
+                const maxRetries = 5; // Reduced from 10 since we now have the proper scripts
+                for (let i = 0; i < maxRetries; i++) {
+                    if (typeof window.otpAuth !== 'undefined') {
+                        console.log('📱 Getting current user from Firebase...');
+                        const user = await window.otpAuth.getCurrentUser();
+                        console.log('📱 Firebase user result:', user);
+                        return user;
+                    } else {
+                        console.log(`⏳ Firebase not ready yet, retrying... (${i + 1}/${maxRetries})`);
+                        await new Promise(resolve => setTimeout(resolve, 300)); // Reduced from 500ms
+                    }
+                }
+                
+                console.log('❌ OTP Auth system not available after retries, falling back to localStorage');
+                // Fallback to localStorage if Firebase is not available after retries
+                const userDataStr = localStorage.getItem('jb_current_user');
+                if (!userDataStr) return null;
+                
+                try {
+                    return JSON.parse(userDataStr);
+                } catch (parseError) {
+                    console.log('Failed to parse user data as JSON, might be old format:', userDataStr);
+                    if (userDataStr.startsWith('+91') || userDataStr.startsWith('+')) {
+                        return { phone: userDataStr, name: 'User' };
+                    }
+                    return null;
+                }
+            } catch (error) {
+                console.error('❌ Error getting current user from Firebase:', error);
+                return null;
             }
         }
+
+        // Update authentication UI based on login status
+        async function updateAuthUI() {
+            try {
+                const user = await getCurrentAuthenticatedUser();
+                console.log('📱 updateAuthUI - user found:', user);
+                
+                const guestOptions = document.getElementById('guestOptions');
+                const authenticatedOptions = document.getElementById('authenticatedOptions');
+                const profileBtn = document.getElementById('profileBtn');
+                
+                if (user) {
+                    console.log('📱 updateAuthUI - user name:', user.name);
+                    console.log('📱 updateAuthUI - user phone:', user.phone);
+                    
+                    // User is logged in - show authenticated options, hide guest options
+                    if (guestOptions) {
+                        guestOptions.style.display = 'none';
+                    }
+                    if (authenticatedOptions) {
+                        authenticatedOptions.style.display = 'block';
+                    }
+                    
+                    // Update user info in dropdown
+                    const dropdownUserName = document.getElementById('dropdownUserName');
+                    const dropdownUserPhone = document.getElementById('dropdownUserPhone');
+                    
+                    if (dropdownUserName) {
+                        dropdownUserName.textContent = user.name || 'User';
+                        console.log('📱 updateAuthUI - Set dropdown name to:', user.name || 'User');
+                    }
+                    if (dropdownUserPhone) {
+                        dropdownUserPhone.textContent = user.phone || 'Phone not available';
+                    }
+                    
+                    // Always keep profile button text as "Profile"
+                    if (profileBtn) {
+                        profileBtn.innerHTML = `
+                            <i class="fas fa-user-alt"></i>
+                            <span class="button-label">Profile</span>
+                        `;
+                        profileBtn.style.color = '#16697A';
+                    }
+                } else {
+                    // User is not logged in - show guest options, hide authenticated options
+                    if (guestOptions) {
+                        guestOptions.style.display = 'block';
+                    }
+                    if (authenticatedOptions) {
+                        authenticatedOptions.style.display = 'none';
+                    }
+                    
+                    // Reset profile button to default
+                    if (profileBtn) {
+                        profileBtn.innerHTML = `
+                            <i class="fas fa-user-alt"></i>
+                            <span class="button-label">Profile</span>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Error updating auth UI:', error);
+            }
+        }
+
+        // View user profile / toggle dropdown
+        function viewProfile() {
+            const dropdown = document.getElementById('profileDropdownMenu');
+            if (dropdown) {
+                dropdown.style.opacity = dropdown.style.opacity === '1' ? '0' : '1';
+                dropdown.style.visibility = dropdown.style.visibility === 'visible' ? 'hidden' : 'visible';
+                dropdown.style.transform = dropdown.style.opacity === '1' ? 'translateY(0)' : 'translateY(-10px)';
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('profileDropdownMenu');
+            const profileBtn = document.getElementById('profileBtn');
+            
+            if (dropdown && profileBtn && !profileBtn.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.style.opacity = '0';
+                dropdown.style.visibility = 'hidden';
+                dropdown.style.transform = 'translateY(-10px)';
+            }
+        });
 
         // View user orders
         function viewOrders() {

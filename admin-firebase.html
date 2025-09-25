@@ -1,0 +1,2147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JB Creations - Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Colors */
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #a5b4fc;
+            --secondary: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            
+            /* Neutrals */
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            /* Background */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            
+            /* Text */
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            
+            /* Border */
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            
+            /* Radius */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            
+            /* Transitions */
+            --transition: all 0.2s ease-in-out;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Layout */
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 2rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 2rem;
+            height: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 1.5rem;
+        }
+
+        .nav-section {
+            margin-bottom: 2rem;
+        }
+
+        .nav-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            padding: 0 0.75rem;
+        }
+
+        .nav-items {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: var(--bg-tertiary);
+            color: var(--primary);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-icon {
+            width: 1.25rem;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-light);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-left {
+            flex: 1;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            padding: 2rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: white;
+        }
+
+        .stat-icon.primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        }
+
+        .stat-icon.success {
+            background: linear-gradient(135deg, var(--success), #059669);
+        }
+
+        .stat-icon.warning {
+            background: linear-gradient(135deg, var(--warning), #d97706);
+        }
+
+        .stat-icon.info {
+            background: linear-gradient(135deg, var(--info), #2563eb);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-change {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .stat-change.positive {
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            color: var(--danger);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            border: none;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-medium);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+        }
+
+        /* Table */
+        .table-container {
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-primary);
+        }
+
+        .table tbody tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        /* Status badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* Action buttons */
+        .action-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            width: 2rem;
+            height: 2rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .action-btn.view {
+            background: #dbeafe;
+            color: var(--info);
+        }
+
+        .action-btn.edit {
+            background: #fef3c7;
+            color: var(--warning);
+        }
+
+        .action-btn.delete {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 2rem;
+            height: 2rem;
+            border: 2px solid var(--border-light);
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Search and Filter */
+        .search-filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            background: var(--bg-primary);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .filter-select {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            background: var(--bg-primary);
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            max-width: 95vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            width: 1200px;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0.5rem;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .order-details {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-light);
+            gap: 1rem;
+            min-height: 2rem;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            min-width: 150px;
+            flex-shrink: 0;
+        }
+
+        .detail-value {
+            color: var(--text-primary);
+            flex: 1;
+            word-wrap: break-word;
+        }
+
+        /* Order header grid styling */
+        .order-header {
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .order-header .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .order-header .detail-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-light);
+        }
+
+        /* Order item cards */
+        .order-item-card {
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            background: var(--bg-secondary);
+        }
+
+        .order-item-card .item-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .order-item-card .detail-row {
+            background: var(--bg-primary);
+            padding: 0.5rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-light);
+        }
+
+        /* Image grid and cards */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .image-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 15px;
+            text-align: center;
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--border-light);
+        }
+
+        /* Download buttons */
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 8px 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.85em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 10px;
+        }
+
+        .download-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .download-btn i {
+            font-size: 0.9em;
+        }
+
+        /* Adjustments section */
+        .adjustments-section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .adjustments-section .adjustment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+            font-size: 0.85em;
+        }
+
+        .adjustments-section .adjustment-item {
+            background: var(--bg-secondary);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-light);
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .content {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <span>JB Creations</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-title">Main</div>
+                    <ul class="nav-items">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link active" data-view="dashboard">
+                                <i class="nav-icon fas fa-chart-line"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-view="orders">
+                                <i class="nav-icon fas fa-shopping-bag"></i>
+                                Orders
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-view="customers">
+                                <i class="nav-icon fas fa-users"></i>
+                                Customers
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-view="analytics">
+                                <i class="nav-icon fas fa-chart-bar"></i>
+                                Analytics
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-title">Management</div>
+                    <ul class="nav-items">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-view="products">
+                                <i class="nav-icon fas fa-box"></i>
+                                Products
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-view="inventory">
+                                <i class="nav-icon fas fa-warehouse"></i>
+                                Inventory
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-view="reports">
+                                <i class="nav-icon fas fa-file-chart"></i>
+                                Reports
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-title">Settings</div>
+                    <ul class="nav-items">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-view="settings">
+                                <i class="nav-icon fas fa-cog"></i>
+                                Settings
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-view="profile">
+                                <i class="nav-icon fas fa-user"></i>
+                                Profile
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <h1 class="page-title" id="page-title">Dashboard</h1>
+                    <p class="page-subtitle" id="page-subtitle">Welcome to your admin dashboard</p>
+                </div>
+                <div class="header-right">
+                    <button class="btn btn-primary" onclick="exportData()">
+                        <i class="fas fa-download"></i>
+                        Export Data
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="content" id="main-content">
+                <!-- Dashboard View -->
+                <div id="dashboard-view" class="view">
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-label">Total Orders</div>
+                                    <div class="stat-value" id="total-orders">-</div>
+                                </div>
+                                <div class="stat-icon primary">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </div>
+                            </div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>12% vs last month</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-label">Total Revenue</div>
+                                    <div class="stat-value" id="total-revenue">-</div>
+                                </div>
+                                <div class="stat-icon success">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                            </div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>8% vs last month</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-label">Pending Orders</div>
+                                    <div class="stat-value" id="pending-orders">-</div>
+                                </div>
+                                <div class="stat-icon warning">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                            </div>
+                            <div class="stat-change negative">
+                                <i class="fas fa-arrow-down"></i>
+                                <span>3% vs last month</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-label">New Customers</div>
+                                    <div class="stat-value" id="new-customers">-</div>
+                                </div>
+                                <div class="stat-icon info">
+                                    <i class="fas fa-user-plus"></i>
+                                </div>
+                            </div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>15% vs last month</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Orders -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Recent Orders</h3>
+                            <button class="btn btn-secondary btn-sm" onclick="showView('orders')">View All</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="loading" id="orders-loading">
+                                <div class="spinner"></div>
+                            </div>
+                            <div class="table-container" id="orders-table-container" style="display: none;">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Date</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="orders-table-body">
+                                        <!-- Orders will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orders View -->
+                <div id="orders-view" class="view" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">All Orders</h3>
+                            <div class="header-right">
+                                <button class="btn btn-secondary btn-sm" onclick="exportOrdersCSV()">
+                                    <i class="fas fa-download"></i>
+                                    Export CSV
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- Search and Filter -->
+                            <div class="search-filter-bar">
+                                <input type="text" class="search-input" placeholder="Search orders..." id="order-search">
+                                <select class="filter-select" id="status-filter">
+                                    <option value="">All Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="processing">Processing</option>
+                                    <option value="shipped">Shipped</option>
+                                    <option value="delivered">Delivered</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                            
+                            <div class="loading" id="all-orders-loading">
+                                <div class="spinner"></div>
+                            </div>
+                            <div class="table-container" id="all-orders-table-container" style="display: none;">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Email</th>
+                                            <th>Date</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="all-orders-table-body">
+                                        <!-- All orders will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other views placeholder -->
+                <div id="customers-view" class="view" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Customers</h3>
+                        </div>
+                        <div class="card-body">
+                            <p style="text-align: center; color: var(--text-muted); padding: 3rem;">Customer management coming soon...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="analytics-view" class="view" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Analytics</h3>
+                        </div>
+                        <div class="card-body">
+                            <p style="text-align: center; color: var(--text-muted); padding: 3rem;">Analytics dashboard coming soon...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="products-view" class="view" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Products</h3>
+                        </div>
+                        <div class="card-body">
+                            <p style="text-align: center; color: var(--text-muted); padding: 3rem;">Product management coming soon...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="inventory-view" class="view" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Inventory</h3>
+                        </div>
+                        <div class="card-body">
+                            <p style="text-align: center; color: var(--text-muted); padding: 3rem;">Inventory management coming soon...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="reports-view" class="view" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Reports</h3>
+                        </div>
+                        <div class="card-body">
+                            <p style="text-align: center; color: var(--text-muted); padding: 3rem;">Reports coming soon...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="settings-view" class="view" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Settings</h3>
+                        </div>
+                        <div class="card-body">
+                            <p style="text-align: center; color: var(--text-muted); padding: 3rem;">Settings panel coming soon...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="profile-view" class="view" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Profile</h3>
+                        </div>
+                        <div class="card-body">
+                            <p style="text-align: center; color: var(--text-muted); padding: 3rem;">Profile settings coming soon...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="order-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Order Details</h3>
+                <button class="modal-close" onclick="closeOrderModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="order-details" id="order-details-content">
+                    <!-- Order details will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let orders = [];
+        let filteredOrders = [];
+        let customers = [];
+        let stats = {};
+
+        // Navigation handling
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize navigation
+            initNavigation();
+            
+            // Load initial data
+            loadDashboardData();
+            
+            // Set up search and filter
+            setupSearchAndFilter();
+            
+            // Set up periodic refresh
+            setInterval(loadDashboardData, 30000); // Refresh every 30 seconds
+        });
+
+        function initNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all links
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    
+                    // Add active class to clicked link
+                    this.classList.add('active');
+                    
+                    // Get view name
+                    const viewName = this.getAttribute('data-view');
+                    
+                    // Show corresponding view
+                    showView(viewName);
+                });
+            });
+        }
+
+        function showView(viewName) {
+            // Hide all views
+            const views = document.querySelectorAll('.view');
+            views.forEach(view => view.style.display = 'none');
+            
+            // Show selected view
+            const targetView = document.getElementById(viewName + '-view');
+            if (targetView) {
+                targetView.style.display = 'block';
+            }
+            
+            // Update page title
+            updatePageTitle(viewName);
+            
+            // Load view-specific data
+            loadViewData(viewName);
+        }
+
+        function updatePageTitle(viewName) {
+            const titles = {
+                'dashboard': 'Dashboard',
+                'orders': 'Orders',
+                'customers': 'Customers',
+                'analytics': 'Analytics',
+                'products': 'Products',
+                'inventory': 'Inventory',
+                'reports': 'Reports',
+                'settings': 'Settings',
+                'profile': 'Profile'
+            };
+            
+            const subtitles = {
+                'dashboard': 'Welcome to your admin dashboard',
+                'orders': 'Manage all customer orders',
+                'customers': 'View and manage customers',
+                'analytics': 'Business insights and analytics',
+                'products': 'Manage your product catalog',
+                'inventory': 'Track stock and inventory',
+                'reports': 'Generate and view reports',
+                'settings': 'Configure system settings',
+                'profile': 'Manage your profile'
+            };
+            
+            document.getElementById('page-title').textContent = titles[viewName] || 'Dashboard';
+            document.getElementById('page-subtitle').textContent = subtitles[viewName] || 'Welcome to your admin dashboard';
+        }
+
+        function loadViewData(viewName) {
+            switch(viewName) {
+                case 'orders':
+                    loadAllOrders();
+                    break;
+                case 'customers':
+                    loadCustomers();
+                    break;
+                case 'analytics':
+                    loadAnalytics();
+                    break;
+                // Add more cases as needed
+            }
+        }
+
+        function setupSearchAndFilter() {
+            const searchInput = document.getElementById('order-search');
+            const statusFilter = document.getElementById('status-filter');
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', filterOrders);
+            }
+            
+            if (statusFilter) {
+                statusFilter.addEventListener('change', filterOrders);
+            }
+        }
+
+        function filterOrders() {
+            const searchTerm = document.getElementById('order-search')?.value.toLowerCase() || '';
+            const statusFilter = document.getElementById('status-filter')?.value || '';
+            
+            filteredOrders = orders.filter(order => {
+                const matchesSearch = !searchTerm || 
+                    order.orderNumber.toLowerCase().includes(searchTerm) ||
+                    order.customerName?.toLowerCase().includes(searchTerm) ||
+                    order.email?.toLowerCase().includes(searchTerm);
+                
+                const matchesStatus = !statusFilter || order.status === statusFilter;
+                
+                return matchesSearch && matchesStatus;
+            });
+            
+            updateAllOrdersTable(filteredOrders);
+        }
+
+        // Data loading functions - Firebase version
+        async function loadDashboardData() {
+            console.log('🔄 Loading dashboard data from Firebase...');
+            
+            // Check if Firebase API is available
+            if (window.jbAPI && typeof window.jbAPI.getAllOrders === 'function') {
+                try {
+                    console.log('🔥 Firebase API found, calling getAllOrders...');
+                    console.log('🔍 Type of getAllOrders:', typeof window.jbAPI.getAllOrders);
+                    const result = await window.jbAPI.getAllOrders();
+                    console.log('📊 getAllOrders result:', result);
+                    
+                    if (result.success && result.orders) {
+                        // Transform Firebase data to match expected format
+                        orders = result.orders.map(order => ({
+                            orderNumber: order.orderNumber || order.id, // Use actual orderNumber, fallback to document ID
+                            id: order.id, // Keep document ID as id
+                            customer: {
+                                name: order.customerName || order.customer?.name || 'Guest',
+                                email: order.customerEmail || order.customer?.email || '',
+                                phone: order.customerPhone || order.customer?.phone || '',
+                                address: order.customerAddress || order.customer?.address || '',
+                                specialInstructions: order.specialInstructions || order.customer?.specialInstructions || ''
+                            },
+                            status: order.status || 'pending',
+                            orderDate: order.createdAt,
+                            totals: {
+                                total: order.totalAmount || 299
+                            },
+                            status: order.status || 'pending',
+                            orderDate: order.orderDate || order.createdAt,
+                            totals: order.totals || {
+                                total: order.totalAmount || 299
+                            },
+                            items: order.items || [], // Use the actual items array from new structure
+                            images: order.images || [], // Use the actual images array
+                            deliveryMethod: order.deliveryMethod || 'standard',
+                            usingCloudinary: order.usingCloudinary || false,
+                            paymentId: order.paymentId || null
+                        }));
+                        
+                        filteredOrders = [...orders];
+                        console.log(`✅ Loaded ${orders.length} orders from Firebase`);
+                        
+                        updateDashboardStats();
+                        updateRecentOrdersTable();
+                        debugAfterLoad(); // Debug the loaded data
+                        return;
+                    } else {
+                        console.error('❌ Failed to load orders from Firebase:', result?.error || 'Unknown error');
+                        console.log('🔍 Full result object:', JSON.stringify(result, null, 2));
+                    }
+                } catch (error) {
+                    console.error('❌ Error loading Firebase data:', error);
+                    console.error('❌ Error details:', {
+                        message: error.message,
+                        stack: error.stack,
+                        name: error.name
+                    });
+                }
+            }
+            
+            // Fallback - set empty data if Firebase not available
+            console.warn('⚠️ Firebase API not available, using empty data');
+            console.log('📊 Available window properties:', Object.keys(window).filter(k => k.includes('firebase') || k.includes('jb')));
+            console.log('📊 window.jbAPI exists:', !!window.jbAPI);
+            if (window.jbAPI) {
+                console.log('📊 jbAPI type:', typeof window.jbAPI);
+                console.log('📊 jbAPI constructor:', window.jbAPI.constructor.name);
+                console.log('📊 jbAPI methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(window.jbAPI)));
+                console.log('📊 jbAPI direct properties:', Object.keys(window.jbAPI));
+                console.log('📊 getAllOrders method exists:', typeof window.jbAPI.getAllOrders);
+            }
+            orders = [];
+            filteredOrders = [];
+            updateDashboardStats();
+            updateRecentOrdersTable();
+        }
+
+        function updateDashboardStats() {
+            const totalOrders = orders.length;
+            const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.totals.total || 0), 0);
+            const pendingOrders = orders.filter(order => order.status === 'pending').length;
+            const today = new Date().toDateString();
+            const newCustomers = orders.filter(order => new Date(order.orderDate).toDateString() === today).length;
+
+            document.getElementById('total-orders').textContent = totalOrders.toLocaleString();
+            document.getElementById('total-revenue').textContent = '₹' + totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 });
+            document.getElementById('pending-orders').textContent = pendingOrders.toLocaleString();
+            document.getElementById('new-customers').textContent = newCustomers.toLocaleString();
+        }
+
+        function updateRecentOrdersTable() {
+            const tableBody = document.getElementById('orders-table-body');
+            const loading = document.getElementById('orders-loading');
+            const tableContainer = document.getElementById('orders-table-container');
+            
+            if (!tableBody || !loading || !tableContainer) return;
+            
+            // Hide loading, show table
+            loading.style.display = 'none';
+            tableContainer.style.display = 'block';
+            
+            // Get recent orders (last 10)
+            const recentOrders = orders.slice(-10).reverse();
+            
+            if (recentOrders.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">No orders found</td></tr>';
+                return;
+            }
+            
+            tableBody.innerHTML = recentOrders.map(order => `
+                <tr>
+                    <td><strong>#${order.orderNumber}</strong></td>
+                    <td>${order.customer.name || 'N/A'}</td>
+                    <td>${formatDate(order.orderDate)}</td>
+                    <td>₹${parseFloat(order.totals.total || 0).toFixed(2)}</td>
+                    <td>${getStatusBadge(order.status)}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="action-btn view" onclick="viewOrder('${order.orderNumber}')" title="View">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn edit" onclick="editOrder('${order.orderNumber}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete" onclick="deleteOrder('${order.orderNumber}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadAllOrders() {
+            const tableBody = document.getElementById('all-orders-table-body');
+            const loading = document.getElementById('all-orders-loading');
+            const tableContainer = document.getElementById('all-orders-table-container');
+            
+            if (!tableBody || !loading || !tableContainer) return;
+            
+            // Show loading
+            loading.style.display = 'flex';
+            tableContainer.style.display = 'none';
+            
+            // Use existing orders data
+            updateAllOrdersTable(filteredOrders);
+            
+            // Hide loading, show table
+            loading.style.display = 'none';
+            tableContainer.style.display = 'block';
+        }
+
+        function updateAllOrdersTable(ordersToShow) {
+            const tableBody = document.getElementById('all-orders-table-body');
+            if (!tableBody) return;
+            
+            if (ordersToShow.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No orders found</td></tr>';
+                return;
+            }
+            
+            tableBody.innerHTML = ordersToShow.map(order => `
+                <tr>
+                    <td><strong>#${order.orderNumber}</strong></td>
+                    <td>${order.customer.name || 'N/A'}</td>
+                    <td>${order.customer.email || 'N/A'}</td>
+                    <td>${formatDate(order.orderDate)}</td>
+                    <td>₹${parseFloat(order.totals.total || 0).toFixed(2)}</td>
+                    <td>${getStatusBadge(order.status)}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="action-btn view" onclick="viewOrder('${order.orderNumber}')" title="View">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn edit" onclick="editOrder('${order.orderNumber}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete" onclick="deleteOrder('${order.orderNumber}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Utility functions
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function getStatusBadge(status) {
+            const statusClasses = {
+                'pending': 'badge-warning',
+                'processing': 'badge-info',
+                'shipped': 'badge-info',
+                'delivered': 'badge-success',
+                'completed': 'badge-success',
+                'cancelled': 'badge-danger'
+            };
+            
+            const className = statusClasses[status] || 'badge-info';
+            const displayStatus = status || 'pending';
+            return `<span class="badge ${className}">${displayStatus}</span>`;
+        }
+
+        // Action functions - Firebase version
+        async function viewOrder(orderNumber) {
+            try {
+                // 🚨 DEBUG: Log all orders that match this order number
+                console.log(`🔍 Searching for orders with orderNumber: ${orderNumber}`);
+                const matchingOrders = orders.filter(o => o.id === orderNumber || o.orderNumber === orderNumber);
+                console.log(`📊 Found ${matchingOrders.length} matching orders:`);
+                matchingOrders.forEach((order, index) => {
+                    console.log(`  Order ${index + 1}:`, {
+                        id: order.id,
+                        orderNumber: order.orderNumber,
+                        customerName: order.customer?.name,
+                        customerEmail: order.customer?.email,
+                        hasImagePaths: order.items?.some(item => 
+                            item.originalImagePath || item.displayImagePath || item.printImagePath
+                        ),
+                        usingCloudinary: order.usingCloudinary,
+                        timestamp: order.orderDate
+                    });
+                });
+
+                // Find order in our existing data instead of fetching from API
+                const order = orders.find(o => o.id === orderNumber || o.orderNumber === orderNumber);
+                
+                if (order) {
+                    // Add detailed debugging for each order
+                    console.log('======= ORDER DEBUG INFO =======');
+                    console.log('Order ID:', order.id);
+                    console.log('Order full data:', JSON.stringify(order));
+                    console.log('Order items:', order.items);
+                    console.log('Direct images array:', order.images);
+                    console.log('Using Cloudinary:', order.usingCloudinary ? 'Yes' : 'No');
+                    
+                    if (order.images && order.images.length > 0) {
+                        console.log('First image data preview:', 
+                            order.usingCloudinary ? 
+                                `Cloudinary URL: ${order.images[0].originalImage}` : 
+                                (order.images[0].data ? order.images[0].data.substring(0, 100) + '...' : 'No data')
+                        );
+                        
+                        // Check for Cloudinary IDs
+                        if (order.images[0].cloudinaryPublicId) {
+                            console.log('Found Cloudinary Public ID:', order.images[0].cloudinaryPublicId);
+                        }
+                    }
+                    
+                    if (order.items && order.items.length > 0) {
+                        console.log('First item image properties:',  {
+                            hasOriginalImagePath: !!order.items[0].originalImagePath,
+                            hasPrintImage: !!order.items[0].printImage,
+                            hasPreviewImage: !!order.items[0].previewImage
+                        });
+                    }
+                    console.log('======= END DEBUG INFO =======');
+                    
+                    showOrderModal(order);
+                } else {
+                    console.error('Order not found:', orderNumber);
+                    alert('Order not found: ' + orderNumber);
+                }
+            } catch (error) {
+                console.error('Error viewing order details:', error);
+                alert('Error loading order details');
+            }
+        }
+
+        function showOrderModal(order) {
+            console.log('📋 Showing order modal for:', order);
+            const modal = document.getElementById('order-modal');
+            const content = document.getElementById('order-details-content');
+            
+            // Debug order structure
+            console.log('Order items:', order.items);
+            console.log('Order customer:', order.customer);
+            console.log('Raw order images from Firebase:', order.images);
+            console.log('Using Cloudinary:', order.usingCloudinary ? 'Yes' : 'No');
+            
+            // Generate items HTML with images - ENHANCED IMAGE DETECTION
+            const itemsHTML = order.items.map((item, index) => {
+                // Extended debug info to trace all possible image sources
+                console.log(`📸 Item ${index + 1} - ALL IMAGE PROPERTIES:`);
+                console.log(`- originalImagePath:`, item.originalImagePath);
+                console.log(`- printImage:`, item.printImage ? `Available (${item.printImage.substring(0, 30)}...)` : 'Not available');
+                console.log(`- previewImage:`, item.previewImage ? `Available (${item.previewImage.substring(0, 30)}...)` : 'Not available');
+                console.log(`- displayImage:`, item.displayImage ? `Available (${item.displayImage.substring(0, 30)}...)` : 'Not available');
+                
+                // Check if there are Cloudinary URLs available in the order images
+                let cloudinaryUrl = null;
+                let base64Image = null;
+                
+                if (order.images && order.images.length > index) {
+                    const orderImage = order.images[index];
+                    
+                    // Check for Cloudinary URL in multiple possible locations
+                    if (orderImage.originalImage && orderImage.originalImage.startsWith('https://res.cloudinary.com/')) {
+                        cloudinaryUrl = orderImage.originalImage;
+                        console.log(`- Found Cloudinary URL in originalImage:`, cloudinaryUrl);
+                    } else if (orderImage.printImage && orderImage.printImage.startsWith('https://res.cloudinary.com/')) {
+                        cloudinaryUrl = orderImage.printImage;
+                        console.log(`- Found Cloudinary URL in printImage:`, cloudinaryUrl);
+                    } else if (orderImage.displayImage && orderImage.displayImage.startsWith('https://res.cloudinary.com/')) {
+                        cloudinaryUrl = orderImage.displayImage;
+                        console.log(`- Found Cloudinary URL in displayImage:`, cloudinaryUrl);
+                    }
+                    
+                    // Check for base64 image data
+                    if (!cloudinaryUrl) {
+                        if (orderImage.originalImage && orderImage.originalImage.startsWith('data:')) {
+                            base64Image = orderImage.originalImage;
+                            console.log(`- Found base64 in originalImage:`, base64Image.substring(0, 50) + '...');
+                        } else if (orderImage.printImage && orderImage.printImage.startsWith('data:')) {
+                            base64Image = orderImage.printImage;
+                            console.log(`- Found base64 in printImage:`, base64Image.substring(0, 50) + '...');
+                        } else if (orderImage.displayImage && orderImage.displayImage.startsWith('data:')) {
+                            base64Image = orderImage.displayImage;
+                            console.log(`- Found base64 in displayImage:`, base64Image.substring(0, 50) + '...');
+                        } else if (orderImage.data) {
+                            base64Image = orderImage.data;
+                            console.log(`- Found base64 in data:`, base64Image.substring(0, 50) + '...');
+                        }
+                    }
+                }
+                
+                // Also check the item itself for image data
+                if (!cloudinaryUrl && !base64Image) {
+                    // Priority: printImage (processed image without frame) > previewImage (with frame borders)
+                    if (item.printImage && item.printImage.startsWith('https://res.cloudinary.com/')) {
+                        cloudinaryUrl = item.printImage;
+                        console.log(`- Found Cloudinary URL in item.printImage:`, cloudinaryUrl);
+                    } else if (item.previewImage && item.previewImage.startsWith('https://res.cloudinary.com/')) {
+                        cloudinaryUrl = item.previewImage;
+                        console.log(`- Found Cloudinary URL in item.previewImage:`, cloudinaryUrl);
+                    } else if (item.printImage && item.printImage.startsWith('data:')) {
+                        base64Image = item.printImage;
+                        console.log(`- Found base64 in item.printImage (processed without frame):`, base64Image.substring(0, 50) + '...');
+                    } else if (item.previewImage && item.previewImage.startsWith('data:')) {
+                        base64Image = item.previewImage;
+                        console.log(`- Found base64 in item.previewImage:`, base64Image.substring(0, 50) + '...');
+                    } else if (item.displayImage && item.displayImage.startsWith('data:')) {
+                        base64Image = item.displayImage;
+                        console.log(`- Found base64 in item.displayImage:`, base64Image.substring(0, 50) + '...');
+                    }
+                }
+                
+                // Choose the best available image with Cloudinary preferred
+                const bestImage = cloudinaryUrl || base64Image || item.originalImagePath || null;
+                
+                console.log(`- BEST IMAGE SELECTED:`, bestImage ? (
+                    bestImage.startsWith('https://') ? 
+                        `Cloudinary URL: ${bestImage}` : 
+                        `Base64: ${bestImage.substring(0, 30)}...`
+                ) : 'No image found');
+                
+                return `
+                <div class="order-item-card">
+                    <h4 style="color: var(--primary); margin-bottom: 15px;">Item ${index + 1}</h4>
+                    
+                    <div class="item-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Frame Size:</span>
+                            <span class="detail-value">${item.frameSize?.size || 'Standard'} ${item.frameSize?.orientation || ''}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Frame Color:</span>
+                            <span class="detail-value">${item.frameColor || 'Standard'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Frame Texture:</span>
+                            <span class="detail-value">${item.frameTexture || 'Standard'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Price:</span>
+                            <span class="detail-value">₹${item.price || '349'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="adjustments-section">
+                        <h5 style="color: var(--text-secondary); margin-bottom: 10px;">Image Adjustments:</h5>
+                        <div class="adjustment-grid">
+                            <div class="adjustment-item">Brightness: ${item.adjustments?.brightness || '0'}%</div>
+                            <div class="adjustment-item">Contrast: ${item.adjustments?.contrast || '0'}%</div>
+                            <div class="adjustment-item">Highlights: ${item.adjustments?.highlights || '0'}%</div>
+                            <div class="adjustment-item">Shadows: ${item.adjustments?.shadows || '0'}%</div>
+                            <div class="adjustment-item">Vibrance: ${item.adjustments?.vibrance || '0'}%</div>
+                            <div class="adjustment-item">Zoom: ${item.zoom || '1'}x</div>
+                        </div>
+                    </div>
+                    
+                    <div class="image-section">
+                        <h5 style="color: var(--text-secondary); margin-bottom: 15px;">Images:</h5>
+                        <div class="image-grid">
+                            ${bestImage ? `
+                                <div class="image-card">
+                                    <img src="${bestImage}" 
+                                         alt="Order Image" 
+                                         onerror="console.error('Failed to load image:', this.src); console.error('Image error for item ${index + 1}'); this.style.display='none'; this.nextElementSibling.style.display='block';"
+                                         onload="console.log('Image loaded successfully for item ${index + 1}:', this.src.substring(0, 50) + '...')">
+                                    <div style="display: none; padding: 20px; color: var(--text-muted); font-style: italic;">
+                                        Image failed to load<br>
+                                        <small>URL: ${bestImage.substring(0, 100)}...</small>
+                                    </div>
+                                    <p style="margin: 8px 0; font-size: 0.85em; color: var(--text-muted); font-weight: 500;">
+                                        ${cloudinaryUrl ? '🌐 Cloudinary Image' : '📷 Base64 Image'}
+                                    </p>
+                                    <button data-image-data="${encodeURIComponent(bestImage)}" 
+                                            data-filename="${order.orderNumber}_item${index + 1}_print.jpg"
+                                            onclick="downloadImage(this.dataset.imageData, this.dataset.filename)"
+                                            class="download-btn">
+                                        <i class="fas fa-download"></i> Download
+                                    </button>
+                                </div>
+                            ` : `
+                                <div class="image-card empty">
+                                    <div style="padding: 20px; color: var(--text-muted); font-style: italic;">
+                                        No image available<br>
+                                        <small>Checked: Cloudinary URLs, Base64 data, originalImagePath</small>
+                                    </div>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+            
+            content.innerHTML = `
+                <div class="order-header">
+                    <div class="detail-grid">
+                        <div class="detail-row">
+                            <span class="detail-label">Order Number:</span>
+                            <span class="detail-value" style="font-weight: 600; color: var(--primary);">#${order.orderNumber}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Customer Name:</span>
+                            <span class="detail-value">${order.customer.name || 'N/A'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Email:</span>
+                            <span class="detail-value">${order.customer.email || 'N/A'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Phone:</span>
+                            <span class="detail-value">${order.customer.phone || 'N/A'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Date:</span>
+                            <span class="detail-value">${formatDate(order.orderDate)}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Status:</span>
+                            <span class="detail-value">${getStatusBadge(order.status)}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Total Amount:</span>
+                            <span class="detail-value" style="font-weight: 600; color: var(--success);">₹${order.totals.total}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Delivery Method:</span>
+                            <span class="detail-value">${order.deliveryMethod === 'express' ? 'Express (2-3 days)' : 'Standard (5-7 days)'}</span>
+                        </div>
+                    </div>
+                    
+                    ${order.customer.address ? `
+                        <div class="detail-row" style="margin-top: 15px;">
+                            <span class="detail-label">Address:</span>
+                            <span class="detail-value">${order.customer.address}</span>
+                        </div>
+                    ` : ''}
+                    
+                    ${order.customer.specialInstructions ? `
+                        <div class="detail-row" style="margin-top: 15px;">
+                            <span class="detail-label">Special Instructions:</span>
+                            <span class="detail-value">${order.customer.specialInstructions}</span>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="items-section">
+                    <h3 style="color: var(--text-primary); margin-bottom: 20px;">Order Items (${order.items.length})</h3>
+                    ${itemsHTML}
+                </div>
+            `;
+            
+            modal.classList.add('show');
+        }
+
+        function closeOrderModal() {
+            const modal = document.getElementById('order-modal');
+            modal.classList.remove('show');
+        }
+
+        // Debug function to check Firebase order data
+        function debugOrderData() {
+            console.log('🔍 Current orders data:', orders);
+            if (orders.length > 0) {
+                console.log('🔍 First order structure:', orders[0]);
+                console.log('🔍 First order items:', orders[0].items);
+                console.log('🔍 First order images array:', orders[0].images);
+                if (orders[0].items && orders[0].items.length > 0) {
+                    console.log('🔍 First item image data:', orders[0].items[0]);
+                    console.log('🔍 First item properties:', Object.keys(orders[0].items[0]));
+                }
+            }
+        }
+        
+        // Add a test function to manually check order structure
+        function testOrderStructure() {
+            console.log('=== TESTING ORDER STRUCTURE ===');
+            
+            // Check localStorage for any stored orders
+            const localOrders = localStorage.getItem('jb_orders');
+            if (localOrders) {
+                try {
+                    const parsedOrders = JSON.parse(localOrders);
+                    console.log('📦 LocalStorage orders found:', parsedOrders);
+                } catch (e) {
+                    console.log('❌ Error parsing localStorage orders:', e);
+                }
+            } else {
+                console.log('📦 No orders in localStorage');
+            }
+            
+            // Check sessionStorage for any stored orders
+            const sessionOrders = sessionStorage.getItem('jb_orders');
+            if (sessionOrders) {
+                try {
+                    const parsedOrders = JSON.parse(sessionOrders);
+                    console.log('🗂️ SessionStorage orders found:', parsedOrders);
+                } catch (e) {
+                    console.log('❌ Error parsing sessionStorage orders:', e);
+                }
+            } else {
+                console.log('🗂️ No orders in sessionStorage');
+            }
+            
+            // Check current orders variable
+            console.log('🔍 Current orders array:', orders);
+            console.log('🔍 Orders length:', orders.length);
+            
+            // Check Firebase API availability
+            console.log('🔥 Firebase API available:', !!window.jbAPI);
+            if (window.jbAPI) {
+                console.log('🔥 Firebase API methods:', Object.keys(window.jbAPI));
+            }
+        }
+
+        // Add this function to window for easy console access
+        window.testOrderStructure = testOrderStructure;
+        window.debugOrderData = debugOrderData;
+        
+        // Test function to create a sample order for debugging
+        function createTestOrder() {
+            const testOrder = {
+                id: 'TEST' + Date.now(),
+                orderNumber: 'TEST' + Date.now(),
+                customer: {
+                    name: 'Test Customer',
+                    email: 'test@example.com',
+                    phone: '+91 9999999999',
+                    address: 'Test Address, Test City'
+                },
+                orderDate: new Date().toISOString(),
+                status: 'pending',
+                totals: { total: 349 },
+                usingCloudinary: false,
+                items: [{
+                    frameSize: { size: '13x10', orientation: 'Portrait' },
+                    frameColor: 'Black',
+                    frameTexture: 'Matte',
+                    price: 349,
+                    adjustments: {
+                        brightness: 0,
+                        contrast: 0,
+                        highlights: 0,
+                        shadows: 0,
+                        vibrance: 0
+                    },
+                    zoom: 1,
+                    printImage: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+                }],
+                images: [{
+                    originalImage: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+                    printImage: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+                    displayImage: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+                }]
+            };
+            
+            // Add test order to orders array
+            orders.unshift(testOrder);
+            filteredOrders.unshift(testOrder);
+            
+            // Update the display
+            updateDashboardStats();
+            updateRecentOrdersTable();
+            updateAllOrdersTable(filteredOrders);
+            
+            console.log('✅ Test order created:', testOrder);
+            alert('Test order created! Check the orders table.');
+        }
+        
+        window.createTestOrder = createTestOrder;
+
+        // Auto-run debug when orders are loaded
+        function debugAfterLoad() {
+            setTimeout(() => {
+                debugOrderData();
+            }, 2000);
+        }
+
+        // Helper function to download image from button data attributes
+        function downloadImageFromData(button) {
+            const base64Data = decodeURIComponent(button.getAttribute('data-image-data'));
+            const filename = button.getAttribute('data-filename');
+            
+            console.log('🔽 Download from data attributes triggered');
+            console.log('📁 Filename:', filename);
+            console.log('🔍 Decoded data length:', base64Data ? base64Data.length : 'null');
+            console.log('🔍 Data preview:', base64Data ? base64Data.substring(0, 50) + '...' : 'null');
+            
+            downloadImage(base64Data, filename);
+        }
+
+        // Helper function to download images (handles both Base64 and Cloudinary URLs)
+        function downloadImage(imageData, filename) {
+            console.log('🔽 Attempting to download image:', filename);
+            console.log('🔍 Image data type:', typeof imageData);
+            console.log('🔍 Image data length:', imageData ? imageData.length : 'null/undefined');
+            console.log('🔍 Image data preview:', imageData ? imageData.substring(0, 50) + '...' : 'null/undefined');
+            
+            if (!imageData) {
+                alert('No image data available for download');
+                console.error('❌ No image data provided for download');
+                return;
+            }
+            
+            try {
+                // Decode the URL if it's encoded first to check if it's a URL
+                const decodedData = decodeURIComponent(imageData);
+                
+                // Check if this is a Cloudinary or other HTTP URL
+                if (decodedData.startsWith('http')) {
+                    console.log('🌐 Detected URL image source - fetching from URL');
+                    console.log('🔗 Decoded URL:', decodedData);
+                    
+                    // For URLs, we need to fetch the image first
+                    fetch(decodedData)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.blob();
+                        })
+                        .then(blob => {
+                            // Create object URL from blob
+                            const url = window.URL.createObjectURL(blob);
+                            
+                            // Create download link
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.download = filename || 'image.jpg';
+                            
+                            // Append to body temporarily
+                            document.body.appendChild(link);
+                            
+                            // Trigger download
+                            link.click();
+                            
+                            // Clean up
+                            window.URL.revokeObjectURL(url);
+                            document.body.removeChild(link);
+                            
+                            console.log('✅ URL image download completed for:', filename);
+                        })
+                        .catch(error => {
+                            console.error('❌ Error fetching image from URL:', error);
+                            alert('Failed to download image from URL: ' + error.message);
+                        });
+                    
+                    return;
+                }
+                
+                // Handle Base64 data - use the decoded data for consistency
+                let dataUrl = decodedData;
+                if (!dataUrl.startsWith('data:')) {
+                    // If it's just base64 string, add the data URL prefix
+                    dataUrl = 'data:image/jpeg;base64,' + decodedData;
+                    console.log('🔄 Added data URL prefix to Base64 string');
+                }
+                
+                // Create a temporary link element
+                const link = document.createElement('a');
+                link.href = dataUrl;
+                link.download = filename || 'image.jpg';
+                
+                // Append to body temporarily
+                document.body.appendChild(link);
+                
+                // Trigger download
+                link.click();
+                
+                // Clean up
+                document.body.removeChild(link);
+                
+                console.log('✅ Base64 image download initiated for:', filename);
+            } catch (error) {
+                console.error('❌ Error downloading image:', error);
+                alert('Failed to download image: ' + error.message);
+            }
+        }
+
+        // Keep backward compatibility
+        function downloadBase64Image(base64Data, filename) {
+            downloadImage(base64Data, filename);
+        }
+
+        function editOrder(orderNumber) {
+            alert(`Edit order #${orderNumber} - Feature coming soon!`);
+        }
+
+        function deleteOrder(orderNumber) {
+            if (confirm(`Are you sure you want to delete order #${orderNumber}?`)) {
+                alert(`Delete order #${orderNumber} - Feature coming soon!`);
+            }
+        }
+
+        function loadCustomers() {
+            console.log('Loading customers...');
+        }
+
+        function loadAnalytics() {
+            console.log('Loading analytics...');
+        }
+
+        // Export functions
+        function exportData() {
+            exportOrdersCSV();
+        }
+
+        function exportOrdersCSV() {
+            if (orders.length === 0) {
+                alert('No orders to export');
+                return;
+            }
+            
+            const csvContent = [
+                ['Order Number', 'Customer Name', 'Email', 'Phone', 'Address', 'Date', 'Status', 'Amount', 'Frame Size', 'Frame Type'].join(','),
+                ...orders.map(order => [
+                    order.orderNumber,
+                    order.customerName || '',
+                    order.email || '',
+                    order.phone || '',
+                    order.address || '',
+                    order.orderDate || '',
+                    order.status || '',
+                    order.totalAmount || '',
+                    order.frameSize || '',
+                    order.frameType || ''
+                ].join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `orders-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Click outside modal to close
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('order-modal');
+            if (e.target === modal) {
+                closeOrderModal();
+            }
+        });
+    </script>
+
+    <!-- Firebase Integration - Use same approach as other pages -->
+    <!-- Firebase v9 SDK - Compatibility Mode -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    
+    <!-- Load Firebase client after SDK is loaded -->
+    <script src="firebase-client-new.js"></script>
+    
+    <script>
+        // Firebase integration - wait for Firebase to be ready then load data
+        let firebaseInitialized = false;
+
+        // Wait for Firebase ready event (same as other pages)
+        document.addEventListener('firebaseReady', async () => {
+            console.log('🔥 Firebase ready for admin panel');
+            firebaseInitialized = true;
+            
+            if (typeof loadDashboardData === 'function') {
+                await loadDashboardData();
+            }
+        });
+
+        // Fallback initialization - check for window.jbAPI
+        setTimeout(async () => {
+            if (!firebaseInitialized && window.jbAPI) {
+                console.log('🔄 Firebase API fallback initialization');
+                firebaseInitialized = true;
+                
+                if (typeof loadDashboardData === 'function') {
+                    await loadDashboardData();
+                }
+            }
+        }, 3000);
+        
+        // Try to load data when page loads (in case Firebase is already ready)
+        document.addEventListener('DOMContentLoaded', async () => {
+            setTimeout(async () => {
+                if (window.jbAPI && typeof loadDashboardData === 'function') {
+                    console.log('🔄 Loading data on page ready');
+                    await loadDashboardData();
+                }
+            }, 1000);
+        });
+    </script>
+    
+    <!-- Include Cloudinary configuration for image handling -->
+    <script src="cloudinary-config.js"></script>
+</body>
+</html>

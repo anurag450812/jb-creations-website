@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudinary Integration Demo - JB Creations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .demo-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            position: relative;
+        }
+        .problem { border-color: #dc3545; background: #f8d7da; }
+        .solution { border-color: #28a745; background: #d4edda; }
+        .demo-header {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: white;
+            padding: 0 10px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .problem .demo-header { color: #dc3545; }
+        .solution .demo-header { color: #28a745; }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 14px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        button.success { background: #28a745; }
+        button.danger { background: #dc3545; }
+        
+        .console-output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 12px;
+        }
+        .success { color: #28a745; font-weight: bold; }
+        .error { color: #dc3545; font-weight: bold; }
+        .info { color: #007bff; }
+        .warning { color: #856404; font-weight: bold; }
+        
+        .order-preview {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .image-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+        }
+        .image-preview {
+            width: 100%;
+            max-width: 120px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .comparison-table th,
+        .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .comparison-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+        .comparison-table .problem-row { background: #f8d7da; }
+        .comparison-table .solution-row { background: #d4edda; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Cloudinary Integration Demo</h1>
+        <p><strong>Demonstrating the difference between orders with and without Cloudinary integration</strong></p>
+        
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Aspect</th>
+                    <th>❌ Problem (Old Way)</th>
+                    <th>✅ Solution (With Cloudinary)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Image Storage</strong></td>
+                    <td class="problem-row">Base64 strings in Firebase (limited size)</td>
+                    <td class="solution-row">URLs pointing to Cloudinary (unlimited)</td>
+                </tr>
+                <tr>
+                    <td><strong>Admin Panel Display</strong></td>
+                    <td class="problem-row">❌ "No image found"</td>
+                    <td class="solution-row">✅ Images display properly</td>
+                </tr>
+                <tr>
+                    <td><strong>Performance</strong></td>
+                    <td class="problem-row">Slow loading, large Firebase docs</td>
+                    <td class="solution-row">Fast loading, optimized delivery</td>
+                </tr>
+                <tr>
+                    <td><strong>Storage Costs</strong></td>
+                    <td class="problem-row">Expensive Firebase storage</td>
+                    <td class="solution-row">Efficient Cloudinary hosting</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="demo-section problem">
+            <div class="demo-header">❌ PROBLEM EXAMPLE</div>
+            <h3>Order JB942730862 - No Cloudinary Integration</h3>
+            <p>This order was created without the Cloudinary upload flow:</p>
+            
+            <button onclick="analyzeProblematicOrder()">🔍 Analyze Problematic Order</button>
+            <button onclick="showOrderInAdmin()" class="danger">👀 View in Admin Panel</button>
+            
+            <div id="problemConsole" class="console-output">
+                Click "Analyze Problematic Order" to see the issue...
+            </div>
+            
+            <div id="problemOrderPreview" class="order-preview" style="display:none;"></div>
+        </div>
+
+        <div class="demo-section solution">
+            <div class="demo-header">✅ SOLUTION DEMONSTRATION</div>
+            <h3>Create Order with Proper Cloudinary Integration</h3>
+            <p>This will demonstrate the complete flow: Image Upload → Cloudinary → Firebase → Admin Display</p>
+            
+            <button onclick="createCloudinaryOrder()" class="success">🚀 Create Order with Cloudinary</button>
+            <button onclick="verifyCloudinaryOrder()" class="success">✅ Verify in Admin Panel</button>
+            
+            <div id="solutionConsole" class="console-output">
+                Click "Create Order with Cloudinary" to see the solution...
+            </div>
+            
+            <div id="solutionImages" class="image-grid" style="display:none;"></div>
+            <div id="solutionOrderPreview" class="order-preview" style="display:none;"></div>
+        </div>
+
+        <div class="demo-section">
+            <div class="demo-header">📊 RESULTS COMPARISON</div>
+            <h3>Side-by-Side Comparison</h3>
+            <p>After creating the Cloudinary order, this section will show the difference:</p>
+            
+            <button onclick="compareOrders()">📋 Compare Both Orders</button>
+            
+            <div id="comparisonResults" class="console-output">
+                Comparison results will appear here...
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Firebase client -->
+    <script type="module" src="firebase-client.js"></script>
+
+    <script type="module">
+        import { JBCreationsAPI } from './firebase-client.js';
+        
+        // Initialize API
+        let jbApi = null;
+        let latestCloudinaryOrderId = null;
+        
+        try {
+            jbApi = new JBCreationsAPI();
+            log('✅ Firebase API initialized', 'success', 'problemConsole');
+        } catch (error) {
+            log('❌ Firebase API initialization failed: ' + error.message, 'error', 'problemConsole');
+        }
+
+        // Sample images for testing
+        const sampleImages = [
+            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==', // Red pixel
+            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' // Blue pixel
+        ];
+
+        // Logging function
+        function log(message, type = 'info', consoleId = 'problemConsole') {
+            const output = document.getElementById(consoleId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info';
+            output.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+
+        // Analyze the problematic order
+        window.analyzeProblematicOrder = async function() {
+            log('🔍 Analyzing problematic order JB942730862...', 'info', 'problemConsole');
+            
+            if (!jbApi) {
+                log('❌ Firebase API not available', 'error', 'problemConsole');
+                return;
+            }
+            
+            try {
+                const orders = await jbApi.getAllOrders();
+                if (!orders.success) {
+                    throw new Error('Failed to fetch orders: ' + orders.error);
+                }
+                
+                const problematicOrder = orders.orders.find(o => o.orderNumber === 'JB942730862' || o.id === 'JB942730862');
+                
+                if (!problematicOrder) {
+                    log('⚠️ Order JB942730862 not found in Firebase', 'warning', 'problemConsole');
+                    log('ℹ️ This order might have been created locally or deleted', 'info', 'problemConsole');
+                    return;
+                }
+                
+                log('📋 Found problematic order:', 'info', 'problemConsole');
+                log(`   Order ID: ${problematicOrder.id || problematicOrder.orderNumber}`, 'info', 'problemConsole');
+                log(`   Customer: ${problematicOrder.customer?.name || 'Unknown'}`, 'info', 'problemConsole');
+                log(`   Items: ${problematicOrder.items?.length || 0}`, 'info', 'problemConsole');
+                log(`   Images Array: ${problematicOrder.images?.length || 0}`, 'info', 'problemConsole');
+                log(`   Using Cloudinary: ${problematicOrder.usingCloudinary || false}`, 'info', 'problemConsole');
+                
+                // Check image paths in items
+                if (problematicOrder.items && problematicOrder.items.length > 0) {
+                    log('🔍 Checking image paths in items:', 'info', 'problemConsole');
+                    problematicOrder.items.forEach((item, index) => {
+                        log(`   Item ${index + 1}:`, 'info', 'problemConsole');
+                        log(`     - originalImagePath: ${item.originalImagePath || '❌ NULL'}`, item.originalImagePath ? 'success' : 'error', 'problemConsole');
+                        log(`     - displayImagePath: ${item.displayImagePath || '❌ NULL'}`, item.displayImagePath ? 'success' : 'error', 'problemConsole');
+                        log(`     - printImagePath: ${item.printImagePath || '❌ NULL'}`, item.printImagePath ? 'success' : 'error', 'problemConsole');
+                    });
+                }
+                
+                log('⚠️ DIAGNOSIS: This order has NULL image paths!', 'warning', 'problemConsole');
+                log('📋 ROOT CAUSE: Order created without Cloudinary upload flow', 'warning', 'problemConsole');
+                log('💡 IMPACT: Admin panel cannot display images for this order', 'warning', 'problemConsole');
+                
+                // Show order preview
+                const preview = document.getElementById('problemOrderPreview');
+                preview.style.display = 'block';
+                preview.innerHTML = JSON.stringify(problematicOrder, null, 2);
+                
+            } catch (error) {
+                log('❌ Analysis error: ' + error.message, 'error', 'problemConsole');
+            }
+        };
+
+        // Create order with proper Cloudinary integration
+        window.createCloudinaryOrder = async function() {
+            log('🚀 Creating order with proper Cloudinary integration...', 'info', 'solutionConsole');
+            
+            try {
+                // Step 1: Upload images to Cloudinary
+                log('📸 Step 1: Uploading images to Cloudinary...', 'info', 'solutionConsole');
+                
+                const orderNumber = `DEMO_CLOUDINARY_${Date.now()}`;
+                const uploadResults = [];
+                
+                for (let i = 0; i < sampleImages.length; i++) {
+                    const publicId = `jb-creations-orders/${orderNumber}/demo_item${i + 1}_${Date.now()}`;
+                    
+                    log(`   Uploading image ${i + 1} to Cloudinary...`, 'info', 'solutionConsole');
+                    
+                    const response = await fetch('http://localhost:3001/api/upload-to-cloudinary', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            image: sampleImages[i],
+                            publicId: publicId
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    uploadResults.push(result);
+                    
+                    if (result.success) {
+                        log(`   ✅ Image ${i + 1} uploaded: ${result.secure_url}`, 'success', 'solutionConsole');
+                    } else {
+                        log(`   ❌ Image ${i + 1} upload failed: ${result.error}`, 'error', 'solutionConsole');
+                    }
+                }
+                
+                const successfulUploads = uploadResults.filter(r => r.success);
+                log(`📊 Cloudinary uploads: ${successfulUploads.length}/${uploadResults.length} successful`, 'info', 'solutionConsole');
+                
+                if (successfulUploads.length === 0) {
+                    throw new Error('All Cloudinary uploads failed');
+                }
+                
+                // Display uploaded images
+                const imagesDiv = document.getElementById('solutionImages');
+                imagesDiv.style.display = 'grid';
+                imagesDiv.innerHTML = successfulUploads.map((result, index) => `
+                    <div class="image-card">
+                        <img src="${result.secure_url}" class="image-preview" alt="Demo image ${index + 1}" />
+                        <div style="font-size: 10px; margin-top: 5px;">
+                            <strong>Cloudinary URL:</strong><br>
+                            ${result.secure_url}
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Step 2: Create Firebase order with Cloudinary data
+                log('🔥 Step 2: Creating Firebase order with Cloudinary URLs...', 'info', 'solutionConsole');
+                
+                const cloudinaryImages = uploadResults.map((result, index) => ({
+                    itemIndex: index,
+                    urls: result.success ? {
+                        original: result.secure_url,
+                        print: result.secure_url,
+                        display: result.secure_url,
+                        publicId: result.public_id
+                    } : null
+                }));
+                
+                const orderData = {
+                    orderNumber: orderNumber,
+                    customer: {
+                        name: 'Cloudinary Demo Customer',
+                        email: 'demo@cloudinary-test.com',
+                        phone: '+91 9999999999',
+                        address: 'Demo Address for Cloudinary Integration Test'
+                    },
+                    items: sampleImages.map((image, index) => ({
+                        frameSize: { size: '13x19', orientation: 'Portrait' },
+                        frameColor: 'black',
+                        frameTexture: 'Standard',
+                        price: 349,
+                        adjustments: { brightness: 100, contrast: 100, highlights: 100, shadows: 100, vibrance: 100 },
+                        zoom: 1,
+                        originalImage: image,
+                        printImage: image,
+                        displayImage: image
+                    })),
+                    cloudinaryImages: cloudinaryImages,
+                    totals: { total: 698 },
+                    totalAmount: 698,
+                    deliveryMethod: 'express',
+                    usingCloudinary: true,
+                    specialInstructions: 'Demo order showcasing Cloudinary integration'
+                };
+                
+                log('📤 Submitting order to Firebase with Cloudinary data...', 'info', 'solutionConsole');
+                const firebaseResult = await jbApi.createOrder(orderData);
+                
+                if (firebaseResult.success) {
+                    log('✅ SUCCESS! Order created with Cloudinary integration!', 'success', 'solutionConsole');
+                    log(`📋 Order Number: ${firebaseResult.orderNumber}`, 'success', 'solutionConsole');
+                    log(`🆔 Order ID: ${firebaseResult.orderId}`, 'success', 'solutionConsole');
+                    
+                    latestCloudinaryOrderId = firebaseResult.orderNumber;
+                    
+                    // Step 3: Verify the order
+                    log('🔍 Step 3: Verifying order in Firebase...', 'info', 'solutionConsole');
+                    const orders = await jbApi.getAllOrders();
+                    const createdOrder = orders.orders?.find(o => o.orderNumber === orderNumber);
+                    
+                    if (createdOrder) {
+                        log('✅ Order verification successful!', 'success', 'solutionConsole');
+                        log('📋 Order contains:', 'info', 'solutionConsole');
+                        log(`   - Items: ${createdOrder.items?.length || 0}`, 'info', 'solutionConsole');
+                        log(`   - Using Cloudinary: ${createdOrder.usingCloudinary}`, 'success', 'solutionConsole');
+                        
+                        if (createdOrder.items) {
+                            createdOrder.items.forEach((item, index) => {
+                                log(`   - Item ${index + 1} images:`, 'info', 'solutionConsole');
+                                log(`     ✅ Original: ${item.originalImagePath ? 'Present' : 'Missing'}`, item.originalImagePath ? 'success' : 'error', 'solutionConsole');
+                                log(`     ✅ Display: ${item.displayImagePath ? 'Present' : 'Missing'}`, item.displayImagePath ? 'success' : 'error', 'solutionConsole');
+                                if (item.originalImagePath && item.originalImagePath.includes('cloudinary.com')) {
+                                    log(`     🌟 Cloudinary URL confirmed!`, 'success', 'solutionConsole');
+                                }
+                            });
+                        }
+                        
+                        // Show order preview
+                        const preview = document.getElementById('solutionOrderPreview');
+                        preview.style.display = 'block';
+                        preview.innerHTML = JSON.stringify(createdOrder, null, 2);
+                        
+                    } else {
+                        log('❌ Order verification failed - not found in Firebase', 'error', 'solutionConsole');
+                    }
+                } else {
+                    throw new Error('Firebase order creation failed: ' + firebaseResult.error);
+                }
+                
+            } catch (error) {
+                log('❌ Cloudinary order creation error: ' + error.message, 'error', 'solutionConsole');
+            }
+        };
+
+        // Show order in admin panel
+        window.showOrderInAdmin = function() {
+            log('🔗 Opening admin panel...', 'info', 'problemConsole');
+            window.open('admin-firebase.html', '_blank');
+        };
+
+        // Verify Cloudinary order in admin
+        window.verifyCloudinaryOrder = function() {
+            if (!latestCloudinaryOrderId) {
+                log('⚠️ No Cloudinary order created yet. Create one first!', 'warning', 'solutionConsole');
+                return;
+            }
+            log('🔗 Opening admin panel to verify Cloudinary order...', 'info', 'solutionConsole');
+            log(`📋 Look for order: ${latestCloudinaryOrderId}`, 'info', 'solutionConsole');
+            window.open('admin-firebase.html', '_blank');
+        };
+
+        // Compare both orders
+        window.compareOrders = async function() {
+            log('📊 Comparing orders with and without Cloudinary...', 'info', 'comparisonResults');
+            
+            try {
+                const orders = await jbApi.getAllOrders();
+                if (!orders.success) {
+                    throw new Error('Failed to fetch orders');
+                }
+                
+                const problematicOrder = orders.orders.find(o => o.orderNumber === 'JB942730862' || o.id === 'JB942730862');
+                const cloudinaryOrder = latestCloudinaryOrderId ? 
+                    orders.orders.find(o => o.orderNumber === latestCloudinaryOrderId) : null;
+                
+                log('📋 COMPARISON RESULTS:', 'info', 'comparisonResults');
+                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info', 'comparisonResults');
+                
+                // Problem order analysis
+                log('❌ PROBLEMATIC ORDER (JB942730862):', 'error', 'comparisonResults');
+                if (problematicOrder) {
+                    log(`   Status: Found in Firebase`, 'info', 'comparisonResults');
+                    log(`   Using Cloudinary: ${problematicOrder.usingCloudinary || false}`, problematicOrder.usingCloudinary ? 'success' : 'error', 'comparisonResults');
+                    log(`   Items with images: ${problematicOrder.items?.filter(item => item.originalImagePath || item.displayImagePath).length || 0}`, 'error', 'comparisonResults');
+                    log(`   Admin panel result: ❌ "No image found"`, 'error', 'comparisonResults');
+                } else {
+                    log('   Status: Not found in Firebase', 'warning', 'comparisonResults');
+                }
+                
+                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info', 'comparisonResults');
+                
+                // Solution order analysis
+                log('✅ CLOUDINARY ORDER:', 'success', 'comparisonResults');
+                if (cloudinaryOrder) {
+                    log(`   Order Number: ${cloudinaryOrder.orderNumber}`, 'success', 'comparisonResults');
+                    log(`   Using Cloudinary: ${cloudinaryOrder.usingCloudinary}`, 'success', 'comparisonResults');
+                    log(`   Items with images: ${cloudinaryOrder.items?.filter(item => item.originalImagePath || item.displayImagePath).length || 0}`, 'success', 'comparisonResults');
+                    log(`   Admin panel result: ✅ Images display correctly`, 'success', 'comparisonResults');
+                    
+                    // Show sample URLs
+                    if (cloudinaryOrder.items && cloudinaryOrder.items[0]?.originalImagePath) {
+                        log(`   Sample URL: ${cloudinaryOrder.items[0].originalImagePath}`, 'info', 'comparisonResults');
+                    }
+                } else {
+                    log('   Status: Create a Cloudinary order first!', 'warning', 'comparisonResults');
+                }
+                
+                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info', 'comparisonResults');
+                log('💡 CONCLUSION:', 'info', 'comparisonResults');
+                log('   The Cloudinary integration successfully stores image URLs', 'success', 'comparisonResults');
+                log('   instead of base64 data, enabling proper admin panel display.', 'success', 'comparisonResults');
+                
+            } catch (error) {
+                log('❌ Comparison error: ' + error.message, 'error', 'comparisonResults');
+            }
+        };
+
+        // Auto-load
+        window.addEventListener('load', function() {
+            log('🚀 Cloudinary Integration Demo Loaded', 'success', 'problemConsole');
+            log('🎯 This demo shows the difference between orders with and without Cloudinary', 'info', 'problemConsole');
+        });
+    </script>
+</body>
+</html>

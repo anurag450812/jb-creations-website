@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudinary Image Display Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; max-width: 1000px; }
+        .test-section { 
+            background: #f8f9fa; border: 1px solid #dee2e6; 
+            padding: 20px; margin: 15px 0; border-radius: 8px; 
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #856404; }
+        .console-output { 
+            background: #000; color: #0f0; font-family: monospace; 
+            padding: 15px; max-height: 300px; overflow-y: auto; 
+            white-space: pre-wrap; 
+        }
+        button { 
+            padding: 10px 20px; margin: 10px 5px; border: none; 
+            border-radius: 5px; cursor: pointer; background: #007bff; color: white; 
+        }
+        .test-image { max-width: 300px; border: 2px solid #ddd; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Cloudinary Image Display Test</h1>
+    <p>This test verifies that Cloudinary upload and display workflow is working correctly.</p>
+
+    <div class="test-section">
+        <h3>📊 Test Status</h3>
+        <div id="test-status">
+            <p>⏳ Click "Run Complete Test" to start testing...</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔧 Test Controls</h3>
+        <button onclick="testCloudinaryBackend()">🌐 Test Backend Connection</button>
+        <button onclick="testImageUpload()">📤 Test Image Upload</button>
+        <button onclick="testCompleteFlow()">🚀 Run Complete Test</button>
+        <button onclick="clearConsole()">🗑️ Clear Console</button>
+    </div>
+
+    <div class="test-section">
+        <h3>📺 Console Output</h3>
+        <div class="console-output" id="console">
+            Cloudinary test ready...\n
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>🖼️ Test Images</h3>
+        <div id="test-images">
+            <p>Images will appear here after upload test...</p>
+        </div>
+    </div>
+
+    <!-- Load Firebase client for order testing -->
+    <script type="module" src="../firebase-client.js"></script>
+
+    <script>
+        let jbApi = null;
+
+        // Initialize Firebase API
+        window.addEventListener('firebaseReady', () => {
+            try {
+                jbApi = window.jbAPI || window.jbFirebaseAPI;
+                log('✅ Firebase API initialized');
+            } catch (error) {
+                log('❌ Firebase API initialization failed: ' + error.message);
+            }
+        });
+
+        function log(message, type = 'info') {
+            const console = document.getElementById('console');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'success' ? '#0f0' : type === 'error' ? '#f00' : type === 'warning' ? '#ff0' : '#0f0';
+            console.innerHTML += `<span style="color: ${color}">[${timestamp}] ${message}</span>\n`;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('console').innerHTML = 'Console cleared...\n';
+        }
+
+        async function testCloudinaryBackend() {
+            log('🌐 Testing Cloudinary backend connection...');
+            
+            try {
+                const response = await fetch('http://localhost:3001/health');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('✅ Backend connected successfully', 'success');
+                    log(`   Status: ${data.status}`);
+                    log(`   Message: ${data.message}`);
+                    
+                    updateStatus('✅ Backend Connection: OK');
+                    return true;
+                } else {
+                    log('❌ Backend connection failed', 'error');
+                    log(`   Status: ${response.status} ${response.statusText}`, 'error');
+                    
+                    updateStatus('❌ Backend Connection: Failed');
+                    return false;
+                }
+            } catch (error) {
+                log('❌ Backend connection error: ' + error.message, 'error');
+                log('   Make sure the backend server is running on localhost:3001', 'warning');
+                
+                updateStatus('❌ Backend Connection: Error');
+                return false;
+            }
+        }
+
+        async function testImageUpload() {
+            log('📤 Testing Cloudinary image upload...');
+            
+            // Create a simple test image (1x1 pixel PNG)
+            const testImageBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+            
+            const testOrderNumber = `TEST_CLOUDINARY_${new Date().getTime()}`;
+            const publicId = `jb-creations-orders/${testOrderNumber}/test_upload_${Date.now()}`;
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/upload-to-cloudinary', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        image: testImageBase64,
+                        publicId: publicId
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    if (result.secure_url) {
+                        log('✅ Image upload successful!', 'success');
+                        log(`   Cloudinary URL: ${result.secure_url}`);
+                        log(`   Public ID: ${result.public_id}`);
+                        
+                        // Display the uploaded image
+                        const imagesDiv = document.getElementById('test-images');
+                        imagesDiv.innerHTML += `
+                            <div style="margin: 15px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+                                <h4>✅ Uploaded Test Image</h4>
+                                <img src="${result.secure_url}" class="test-image" alt="Test Upload" 
+                                     onload="console.log('Image loaded successfully')"
+                                     onerror="console.error('Failed to load image')">
+                                <p><strong>URL:</strong> <a href="${result.secure_url}" target="_blank">${result.secure_url}</a></p>
+                                <p><strong>Public ID:</strong> ${result.public_id}</p>
+                            </div>
+                        `;
+                        
+                        updateStatus('✅ Image Upload: OK');
+                        return result.secure_url;
+                    } else {
+                        log('❌ Upload failed: No secure_url in response', 'error');
+                        updateStatus('❌ Image Upload: No URL returned');
+                        return null;
+                    }
+                } else {
+                    const errorData = await response.text();
+                    log('❌ Upload failed: ' + response.status + ' ' + response.statusText, 'error');
+                    log('   Error details: ' + errorData, 'error');
+                    
+                    updateStatus('❌ Image Upload: Failed');
+                    return null;
+                }
+            } catch (error) {
+                log('❌ Upload error: ' + error.message, 'error');
+                updateStatus('❌ Image Upload: Error');
+                return null;
+            }
+        }
+
+        async function testCompleteFlow() {
+            log('🚀 Starting complete Cloudinary workflow test...');
+            
+            updateStatus('⏳ Running complete test...');
+            
+            // Step 1: Test backend connection
+            const backendOk = await testCloudinaryBackend();
+            if (!backendOk) {
+                log('❌ Complete test failed: Backend connection failed', 'error');
+                updateStatus('❌ Complete Test: Backend Failed');
+                return;
+            }
+            
+            // Step 2: Test image upload
+            const uploadedImageUrl = await testImageUpload();
+            if (!uploadedImageUrl) {
+                log('❌ Complete test failed: Image upload failed', 'error');
+                updateStatus('❌ Complete Test: Upload Failed');
+                return;
+            }
+            
+            // Step 3: Test Firebase order creation with Cloudinary URL
+            if (jbApi) {
+                log('📝 Testing Firebase order creation with Cloudinary image...');
+                
+                const testOrderData = {
+                    customer: {
+                        name: 'Test Customer Cloudinary',
+                        email: 'test@cloudinary-test.com',
+                        phone: '9876543210',
+                        address: 'Test Address for Cloudinary Test'
+                    },
+                    items: [{
+                        frameSize: { size: 'Standard', orientation: 'Portrait' },
+                        frameColor: 'Wood',
+                        frameTexture: 'Standard',
+                        price: 299,
+                        originalImage: uploadedImageUrl,  // Use uploaded Cloudinary URL
+                        printImage: uploadedImageUrl,
+                        displayImage: uploadedImageUrl
+                    }],
+                    images: [{
+                        originalImage: uploadedImageUrl,
+                        printImage: uploadedImageUrl,
+                        displayImage: uploadedImageUrl
+                    }],
+                    cloudinaryImages: [{
+                        urls: {
+                            original: uploadedImageUrl,
+                            print: uploadedImageUrl,
+                            display: uploadedImageUrl,
+                            publicId: `test-order-${Date.now()}`
+                        }
+                    }],
+                    totalAmount: 299,
+                    paymentId: `TEST_PAY_${Date.now()}`, // Add payment ID for test
+                    usingCloudinary: true
+                };
+                
+                try {
+                    const orderResult = await jbApi.createOrder(testOrderData);
+                    
+                    if (orderResult.success) {
+                        log('✅ Test order created successfully with Cloudinary images!', 'success');
+                        log(`   Order ID: ${orderResult.orderId}`);
+                        log(`   Order Number: ${orderResult.orderNumber}`);
+                        
+                        updateStatus('✅ Complete Test: SUCCESS! 🎉');
+                        
+                        log('🎯 Test Summary:', 'success');
+                        log('   ✅ Backend connection: OK', 'success');
+                        log('   ✅ Image upload to Cloudinary: OK', 'success');
+                        log('   ✅ Order creation with Cloudinary images: OK', 'success');
+                        log('   ✅ Admin panel should now display images properly!', 'success');
+                        
+                    } else {
+                        log('❌ Test order creation failed: ' + orderResult.error, 'error');
+                        updateStatus('❌ Complete Test: Order Creation Failed');
+                    }
+                } catch (error) {
+                    log('❌ Order creation error: ' + error.message, 'error');
+                    updateStatus('❌ Complete Test: Order Creation Error');
+                }
+            } else {
+                log('⚠️ Firebase API not available - skipping order creation test', 'warning');
+                updateStatus('⚠️ Complete Test: Partial Success (No Firebase)');
+            }
+        }
+
+        function updateStatus(message) {
+            document.getElementById('test-status').innerHTML = `<p>${message}</p>`;
+        }
+
+        // Auto-initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🔧 Cloudinary test initialized');
+            log('   Backend URL: http://localhost:3001');
+            log('   Upload endpoint: /api/upload-to-cloudinary');
+            log('   Ready for testing!');
+        });
+    </script>
+</body>
+</html>

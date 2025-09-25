@@ -6,8 +6,9 @@
     <title>Customize Your Frame - JB Creations</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <style>
-        /* Authentication styles for header */
+        /* Header and Dropdown Styles - Matching Homepage */
         .header-right {
             display: flex;
             align-items: center;
@@ -19,154 +20,6 @@
             align-items: center;
         }
 
-        .guest-buttons {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .auth-link {
-            color: white;
-            text-decoration: none;
-            padding: 10px 18px;
-            border-radius: 25px;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .auth-link::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: rgba(255,255,255,0.2);
-            transition: left 0.5s;
-        }
-
-        .auth-link:hover::before {
-            left: 100%;
-        }
-
-        .signin-link {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.3);
-            backdrop-filter: blur(10px);
-        }
-
-        .signin-link:hover {
-            background: #82C0CC;
-            border-color: #82C0CC;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(130, 192, 204, 0.3);
-        }
-
-        .signup-link {
-            background: #82C0CC;
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #16697A;
-            font-weight: 700;
-        }
-
-        .signup-link:hover {
-            background: #EDE7E3;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(237, 231, 227, 0.4);
-            color: #16697A;
-        }
-
-        .user-dropdown {
-            position: relative;
-        }
-
-        .user-avatar {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .user-avatar:hover {
-            background: rgba(255,255,255,0.2);
-        }
-
-        .dropdown-menu {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            min-width: 180px;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s;
-            margin-top: 8px;
-        }
-
-        .user-dropdown.active .dropdown-menu {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .dropdown-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 16px;
-            color: #333;
-            text-decoration: none;
-            transition: background 0.3s;
-            font-size: 14px;
-        }
-
-        .dropdown-item:hover {
-            background: #f8f9fa;
-        }
-
-        .dropdown-divider {
-            height: 1px;
-            background: #e9ecef;
-            margin: 8px 0;
-        }
-
-        .back-to-home {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .back-to-home:hover {
-            background: rgba(255,255,255,0.25);
-            transform: translateY(-1px);
-        }
-
-        /* Profile Dropdown Styles */
         .profile-dropdown {
             position: relative;
         }
@@ -214,61 +67,6 @@
         }
 
         .profile-icon-btn .button-label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            line-height: 1;
-            margin: 0;
-            width: 100%;
-            text-align: center;
-        }
-
-        /* Back to Home Button Styles */
-        .back-home-btn {
-            background: transparent;
-            border: none;
-            backdrop-filter: none;
-            -webkit-backdrop-filter: none;
-            box-shadow: none;
-            color: #16697A;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 22px;
-            transition: all 0.3s ease;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            min-width: 50px;
-            text-align: center;
-            text-decoration: none;
-        }
-
-        .back-home-btn:hover {
-            background: rgba(22, 105, 122, 0.25);
-            border: 1px solid rgba(22, 105, 122, 0.4);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-            color: white;
-        }
-
-        .back-home-btn i {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            margin: 0;
-            line-height: 1;
-            font-size: 20px;
-        }
-
-        .back-home-btn .button-label {
             font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
@@ -333,40 +131,74 @@
             margin: 8px 16px;
         }
 
+        /* User Info Section in Dropdown */
+        .dropdown-user-info {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(22, 105, 122, 0.05);
+            border-radius: 8px;
+            margin: 8px;
+        }
+
+        .dropdown-user-info .user-avatar {
+            font-size: 24px;
+            color: #16697A;
+            margin-right: 12px;
+        }
+
+        .dropdown-user-info .user-details {
+            flex: 1;
+        }
+
+        .dropdown-user-info .user-name {
+            font-weight: 600;
+            color: #16697A;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .dropdown-user-info .user-phone {
+            color: #489FB5;
+            font-size: 12px;
+        }
+
+        /* Mobile Responsive Styles */
         @media (max-width: 600px) {
             .header-right {
                 gap: 10px;
             }
 
-            .guest-buttons {
-                gap: 8px;
+            .profile-icon-btn {
+                min-width: 40px;
+                font-size: 18px;
+                padding: 6px 8px;
+                gap: 2px;
             }
 
-            .auth-link {
-                padding: 6px 12px;
-                font-size: 12px;
+            .profile-icon-btn .button-label {
+                font-size: 9px;
             }
 
-            .auth-link i {
-                display: none;
+            .cart-icon-btn {
+                min-width: 40px;
+                font-size: 16px;
+                padding: 6px 8px;
+                gap: 2px;
             }
 
-            .user-avatar {
-                padding: 6px 10px;
-                font-size: 12px;
+            .cart-icon-btn .button-label {
+                font-size: 9px;
             }
 
-            .user-avatar span {
-                display: none;
+            .profile-dropdown-menu {
+                min-width: 200px;
+                right: -10px;
             }
 
-            .back-home-btn {
-                padding: 6px 12px;
-                font-size: 12px;
-            }
-
-            .back-home-btn .button-label {
-                display: none;
+            .profile-dropdown-menu .dropdown-item {
+                padding: 10px 16px;
+                font-size: 13px;
             }
         }
     </style>
@@ -375,15 +207,7 @@
     <!-- Header -->
     <header class="site-header">
         <div class="header-content">
-            <div class="header-left">
-                <!-- Back to Home Button -->
-                <div class="header-back">
-                    <a href="index.html" class="back-home-btn" id="backHomeBtn">
-                        <i class="fas fa-home"></i>
-                        <span class="button-label">Home</span>
-                    </a>
-                </div>
-            </div>
+            <div class="header-left"></div>
             <div class="header-brand">
                 <h1 class="brand-name">JB Creations</h1>
             </div>
@@ -398,11 +222,11 @@
                         <div class="profile-dropdown-menu" id="profileDropdownMenu">
                             <!-- Guest user options -->
                             <div class="guest-options" id="guestOptions">
-                                <a href="auth.html" class="dropdown-item">
+                                <a href="otp-login.html?redirect=customize.html" class="dropdown-item">
                                     <i class="fas fa-sign-in-alt"></i>
                                     Sign In
                                 </a>
-                                <a href="auth.html" class="dropdown-item">
+                                <a href="otp-login.html?redirect=customize.html" class="dropdown-item">
                                     <i class="fas fa-user-plus"></i>
                                     Sign Up
                                 </a>
@@ -411,6 +235,18 @@
                             
                             <!-- Authenticated user options (hidden by default) -->
                             <div class="authenticated-options" id="authenticatedOptions" style="display: none;">
+                                <!-- User Info Section -->
+                                <div class="dropdown-user-info" id="dropdownUserInfo">
+                                    <div class="user-avatar">
+                                        <i class="fas fa-user-circle"></i>
+                                    </div>
+                                    <div class="user-details">
+                                        <div class="user-name" id="dropdownUserName">User</div>
+                                        <div class="user-phone" id="dropdownUserPhone">Phone</div>
+                                    </div>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                
                                 <a href="#" class="dropdown-item" onclick="viewProfile()">
                                     <i class="fas fa-user-circle"></i>
                                     My Profile
@@ -428,6 +264,10 @@
                             </div>
                             
                             <!-- Common options for all users -->
+                            <a href="track-order.html" class="dropdown-item">
+                                <i class="fas fa-search"></i>
+                                Track Order
+                            </a>
                             <a href="#" class="dropdown-item" onclick="contactUs()">
                                 <i class="fas fa-envelope"></i>
                                 Contact Us
@@ -922,59 +762,201 @@
         </div>
     </div>
 
+    <!-- Firebase Backend Integration -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script type="module" src="firebase-client-new.js?v=3"></script>
+    <script src="otp-auth-firebase.js"></script>
     <script src="auth.js"></script>
     <script src="script.js"></script>
     <script>
-        // Initialize authentication on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            updateAuthUI();
-            setupUserDropdown();
+        // Profile dropdown functionality
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Profile dropdown is now handled by CSS hover - no JavaScript needed
+            
+            // Check authentication status
+            await checkAuthStatus();
         });
 
+        // Get current authenticated user from Firebase
+        async function getCurrentAuthenticatedUser() {
+            try {
+                // Wait for Firebase to be ready with retry mechanism
+                const maxRetries = 5; // Reduced from 10 since we now have the proper scripts
+                for (let i = 0; i < maxRetries; i++) {
+                    if (typeof window.otpAuth !== 'undefined') {
+                        console.log('📱 Getting current user from Firebase...');
+                        const user = await window.otpAuth.getCurrentUser();
+                        console.log('📱 Firebase user result:', user);
+                        return user;
+                    } else {
+                        console.log(`⏳ Firebase not ready yet, retrying... (${i + 1}/${maxRetries})`);
+                        await new Promise(resolve => setTimeout(resolve, 300)); // Reduced from 500ms
+                    }
+                }
+                
+                console.log('❌ OTP Auth system not available after retries, falling back to localStorage');
+                // Fallback to localStorage if Firebase is not available after retries
+                const userDataStr = localStorage.getItem('jb_current_user');
+                if (!userDataStr) return null;
+                
+                try {
+                    return JSON.parse(userDataStr);
+                } catch (parseError) {
+                    console.log('Failed to parse user data as JSON, might be old format:', userDataStr);
+                    if (userDataStr.startsWith('+91') || userDataStr.startsWith('+')) {
+                        return { phone: userDataStr, name: 'User' };
+                    }
+                    return null;
+                }
+            } catch (error) {
+                console.error('❌ Error getting current user from Firebase:', error);
+                return null;
+            }
+        }
+
+        // Check if user is authenticated and update UI accordingly
+        async function checkAuthStatus() {
+            try {
+                const user = await getCurrentAuthenticatedUser();
+                console.log('📱 checkAuthStatus - user found:', user);
+                
+                const guestOptions = document.getElementById('guestOptions');
+                const authenticatedOptions = document.getElementById('authenticatedOptions');
+                
+                if (user && user.phone) {
+                    console.log('📱 checkAuthStatus - user name:', user.name);
+                    console.log('📱 checkAuthStatus - user phone:', user.phone);
+                    
+                    // User is logged in
+                    if (guestOptions) guestOptions.style.display = 'none';
+                    if (authenticatedOptions) authenticatedOptions.style.display = 'block';
+                    
+                    // Update user info in dropdown
+                    const dropdownUserName = document.getElementById('dropdownUserName');
+                    const dropdownUserPhone = document.getElementById('dropdownUserPhone');
+                    
+                    if (dropdownUserName) {
+                        dropdownUserName.textContent = user.name || 'User';
+                        console.log('📱 checkAuthStatus - Set dropdown name to:', user.name || 'User');
+                    }
+                    if (dropdownUserPhone) {
+                        dropdownUserPhone.textContent = user.phone || 'Phone not available';
+                    }
+                } else {
+                    showGuestState();
+                }
+                
+                // Also call updateAuthUI for consistency with homepage
+                await updateAuthUI();
+            } catch (error) {
+                console.log('Auth check error:', error);
+                showGuestState();
+            }
+        }
+
+        function showGuestState() {
+            // Default to guest state
+            const guestOptions = document.getElementById('guestOptions');
+            const authenticatedOptions = document.getElementById('authenticatedOptions');
+            if (guestOptions) guestOptions.style.display = 'block';
+            if (authenticatedOptions) authenticatedOptions.style.display = 'none';
+        }
+
+        // Sign out function
+        function signOut() {
+            if (confirm('Are you sure you want to sign out?')) {
+                localStorage.removeItem('jb_current_user');
+                localStorage.removeItem('jb_users');
+                window.location.reload();
+            }
+        }
+        
         // Update authentication UI based on login status
-        function updateAuthUI() {
-            const user = authUtils.getCurrentUser();
-            const guestButtons = document.getElementById('guestButtons');
-            const userDropdown = document.getElementById('userDropdown');
-            const userName = document.getElementById('userName');
-
-            if (user) {
-                // User is logged in
-                guestButtons.style.display = 'none';
-                userDropdown.style.display = 'block';
-                userName.textContent = user.name;
-            } else {
-                // User is not logged in
-                guestButtons.style.display = 'flex';
-                userDropdown.style.display = 'none';
+        async function updateAuthUI() {
+            try {
+                const user = await getCurrentAuthenticatedUser();
+                console.log('📱 updateAuthUI - user found:', user);
+                
+                const guestOptions = document.getElementById('guestOptions');
+                const authenticatedOptions = document.getElementById('authenticatedOptions');
+                const profileBtn = document.getElementById('profileBtn');
+                
+                if (user) {
+                    console.log('📱 updateAuthUI - user name:', user.name);
+                    console.log('📱 updateAuthUI - user phone:', user.phone);
+                    
+                    // User is logged in - show authenticated options, hide guest options
+                    if (guestOptions) {
+                        guestOptions.style.display = 'none';
+                    }
+                    if (authenticatedOptions) {
+                        authenticatedOptions.style.display = 'block';
+                    }
+                    
+                    // Update user info in dropdown
+                    const dropdownUserName = document.getElementById('dropdownUserName');
+                    const dropdownUserPhone = document.getElementById('dropdownUserPhone');
+                    
+                    if (dropdownUserName) {
+                        dropdownUserName.textContent = user.name || 'User';
+                        console.log('📱 updateAuthUI - Set dropdown name to:', user.name || 'User');
+                    }
+                    if (dropdownUserPhone) {
+                        dropdownUserPhone.textContent = user.phone || 'Phone not available';
+                    }
+                    
+                    // Always keep profile button text as "Profile"
+                    if (profileBtn) {
+                        profileBtn.innerHTML = `
+                            <i class="fas fa-user-alt"></i>
+                            <span class="button-label">Profile</span>
+                        `;
+                        profileBtn.style.color = '#16697A';
+                    }
+                } else {
+                    // User is not logged in - show guest options, hide authenticated options
+                    if (guestOptions) {
+                        guestOptions.style.display = 'block';
+                    }
+                    if (authenticatedOptions) {
+                        authenticatedOptions.style.display = 'none';
+                    }
+                    
+                    // Reset profile button to default
+                    if (profileBtn) {
+                        profileBtn.innerHTML = `
+                            <i class="fas fa-user-alt"></i>
+                            <span class="button-label">Profile</span>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Error updating auth UI:', error);
+            }
+        }
+        
+        // View user profile / toggle dropdown
+        async function viewProfile() {
+            const dropdown = document.getElementById('profileDropdownMenu');
+            if (dropdown) {
+                dropdown.style.opacity = dropdown.style.opacity === '1' ? '0' : '1';
+                dropdown.style.visibility = dropdown.style.visibility === 'visible' ? 'hidden' : 'visible';
+                dropdown.style.transform = dropdown.style.opacity === '1' ? 'translateY(0)' : 'translateY(-10px)';
             }
         }
 
-        // Setup user dropdown functionality
-        function setupUserDropdown() {
-            const userAvatar = document.getElementById('userAvatar');
-            const userDropdown = document.getElementById('userDropdown');
-
-            if (userAvatar) {
-                userAvatar.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    userDropdown.classList.toggle('active');
-                });
-
-                // Close dropdown when clicking outside
-                document.addEventListener('click', function() {
-                    userDropdown.classList.remove('active');
-                });
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('profileDropdownMenu');
+            const profileBtn = document.getElementById('profileBtn');
+            
+            if (dropdown && profileBtn && !profileBtn.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.style.opacity = '0';
+                dropdown.style.visibility = 'hidden';
+                dropdown.style.transform = 'translateY(-10px)';
             }
-        }
-
-        // View user profile
-        function viewProfile() {
-            const user = authUtils.getCurrentUser();
-            if (user) {
-                alert(`Profile for ${user.name}\nEmail: ${user.email}\nPhone: ${user.phone}\nMember since: ${new Date(user.registrationDate).toLocaleDateString()}`);
-            }
-        }
+        });
 
         // View user orders
         function viewOrders() {
@@ -983,7 +965,7 @@
         
         // Contact us function
         function contactUs() {
-            alert('Contact Us\n\nEmail: info@jbcreations.com\nPhone: +91 98765 43210\nAddress: 123 Art Street, Creative City, India\n\nWe\'d love to hear from you!');
+            alert('Contact Us\n\nEmail: contact@jbcreations.com\nPhone: +91 12345 67890\nAddress: 123 Art Street, Creative City, India\n\nWe\'d love to hear from you!');
         }
 
         // About us function

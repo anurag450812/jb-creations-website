@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Cleanup Utility</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .order-card { border: 1px solid #ddd; margin: 10px 0; padding: 15px; border-radius: 5px; }
+        .problematic { border-left: 4px solid #dc3545; background-color: #fff5f5; }
+        .normal { border-left: 4px solid #28a745; background-color: #f8fff9; }
+        .actions { margin-top: 10px; }
+        button { padding: 8px 16px; margin: 5px; border: none; border-radius: 3px; cursor: pointer; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-warning { background-color: #ffc107; color: black; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .console-output { 
+            background: #f8f9fa; 
+            border: 1px solid #dee2e6; 
+            padding: 15px; 
+            margin: 10px 0; 
+            font-family: monospace; 
+            white-space: pre-wrap; 
+            max-height: 300px; 
+            overflow-y: auto; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Order Cleanup Utility</h1>
+        <p>This tool helps identify and clean up problematic orders that were created without images.</p>
+        
+        <div class="actions">
+            <button onclick="loadProblematicOrders()" class="btn-primary">🔍 Find Problematic Orders</button>
+            <button onclick="clearConsole()" class="btn-warning">Clear Console</button>
+        </div>
+        
+        <div class="console-output" id="console-output">
+            Click "Find Problematic Orders" to start analysis...
+        </div>
+        
+        <div id="orders-display">
+            <!-- Orders will be displayed here -->
+        </div>
+    </div>
+
+    <!-- Load Firebase client -->
+    <script type="module" src="firebase-client.js"></script>
+
+    <script type="module">
+        import { JBCreationsAPI } from './firebase-client.js';
+        
+        // Initialize API
+        let jbApi = null;
+        
+        try {
+            jbApi = new JBCreationsAPI();
+            log('✅ Firebase API initialized for cleanup utility');
+        } catch (error) {
+            log('❌ Firebase API initialization failed: ' + error.message);
+        }
+
+        // Logging function
+        function log(message) {
+            const output = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.textContent += `[${timestamp}] ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+
+        window.clearConsole = function() {
+            document.getElementById('console-output').textContent = 'Console cleared...\n';
+        };
+
+        window.loadProblematicOrders = async function() {
+            log('🔍 Analyzing all orders for image issues...');
+            
+            if (!jbApi) {
+                log('❌ Firebase API not available');
+                return;
+            }
+
+            try {
+                const result = await jbApi.getAllOrders();
+                
+                if (!result.success) {
+                    log('❌ Failed to load orders: ' + result.error);
+                    return;
+                }
+
+                const orders = result.orders || [];
+                log(`📊 Total orders found: ${orders.length}`);
+
+                const problematicOrders = [];
+                const normalOrders = [];
+
+                orders.forEach(order => {
+                    const hasImages = (order.images && order.images.length > 0) ||
+                                     (order.items && order.items.some(item => 
+                                         item.originalImagePath || item.displayImagePath || item.printImagePath
+                                     ));
+                    
+                    const isProblematic = !hasImages || 
+                                         (order.customer?.name === 'Guest' || 
+                                          order.customer?.name === 'Guest Customer' ||
+                                          order.customer?.name?.includes('Test')) ||
+                                         order.usingCloudinary === false;
+
+                    if (isProblematic) {
+                        problematicOrders.push(order);
+                    } else {
+                        normalOrders.push(order);
+                    }
+                });
+
+                log(`⚠️ Problematic orders found: ${problematicOrders.length}`);
+                log(`✅ Normal orders found: ${normalOrders.length}`);
+
+                // Display orders
+                displayOrders(problematicOrders, normalOrders);
+
+                // Log specific problematic orders
+                if (problematicOrders.length > 0) {
+                    log('\n🔍 Detailed analysis of problematic orders:');
+                    problematicOrders.forEach((order, index) => {
+                        log(`\n--- Problematic Order ${index + 1} ---`);
+                        log(`ID: ${order.id || order.orderNumber}`);
+                        log(`Customer: ${order.customer?.name || 'N/A'}`);
+                        log(`Email: ${order.customer?.email || 'N/A'}`);
+                        log(`Images count: ${order.images?.length || 0}`);
+                        log(`Has item images: ${order.items?.some(item => item.originalImagePath) || false}`);
+                        log(`Using Cloudinary: ${order.usingCloudinary || false}`);
+                        log(`Created: ${order.createdAt || order.orderDate || 'N/A'}`);
+                    });
+                }
+
+            } catch (error) {
+                log('❌ Error analyzing orders: ' + error.message);
+            }
+        };
+
+        function displayOrders(problematicOrders, normalOrders) {
+            const container = document.getElementById('orders-display');
+            
+            let html = '';
+            
+            if (problematicOrders.length > 0) {
+                html += '<h3>⚠️ Problematic Orders (No Images)</h3>';
+                problematicOrders.forEach(order => {
+                    html += `
+                        <div class="order-card problematic">
+                            <strong>Order #${order.id || order.orderNumber}</strong><br>
+                            <strong>Customer:</strong> ${order.customer?.name || 'N/A'}<br>
+                            <strong>Email:</strong> ${order.customer?.email || 'N/A'}<br>
+                            <strong>Images:</strong> ${order.images?.length || 0}<br>
+                            <strong>Using Cloudinary:</strong> ${order.usingCloudinary || false}<br>
+                            <strong>Created:</strong> ${new Date(order.createdAt || order.orderDate).toLocaleString()}<br>
+                            <div class="actions">
+                                <button onclick="markOrderForCleanup('${order.id || order.orderNumber}')" class="btn-warning">
+                                    🏷️ Mark for Cleanup
+                                </button>
+                                <small style="color: #666;">
+                                    This order has no displayable images and may be a test order.
+                                </small>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            if (normalOrders.length > 0) {
+                html += '<h3>✅ Normal Orders (With Images)</h3>';
+                normalOrders.slice(0, 5).forEach(order => {  // Show only first 5 normal orders
+                    html += `
+                        <div class="order-card normal">
+                            <strong>Order #${order.id || order.orderNumber}</strong><br>
+                            <strong>Customer:</strong> ${order.customer?.name || 'N/A'}<br>
+                            <strong>Images:</strong> ${order.images?.length || 0}<br>
+                            <strong>Using Cloudinary:</strong> ${order.usingCloudinary || false}<br>
+                        </div>
+                    `;
+                });
+                if (normalOrders.length > 5) {
+                    html += `<p><em>... and ${normalOrders.length - 5} more normal orders</em></p>`;
+                }
+            }
+
+            container.innerHTML = html;
+        }
+
+        window.markOrderForCleanup = function(orderId) {
+            log(`🏷️ Order ${orderId} marked for cleanup`);
+            log('💡 Note: This is a demonstration. In production, you would:');
+            log('   - Add a "cleanup" flag to the order');
+            log('   - Move to a "test-orders" collection');
+            log('   - Or delete if confirmed as test data');
+            log(`   - For now, just noting: Order ${orderId} needs attention`);
+        };
+
+    </script>
+</body>
+</html>

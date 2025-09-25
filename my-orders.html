@@ -7,7 +7,324 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Professional Header Button Styling */
+        /* Add CSS root variables for consistency */
+        :root {
+            --primary-color: #16697A; /* Caribbean Current - Teal */
+            --secondary-color: #EDE7E3; /* Isabelline - Light Beige */
+            --accent-color: #489FB5; /* Moonstone - Blue */
+            --background-color: #EDE7E3; /* Isabelline - Light Beige */
+            --text-color: #16697A; /* Caribbean Current for text */
+            --card-background: #FFFFFF;
+            --success-color: #82C0CC; /* Sky Blue */
+            --highlight-color: #FFA62B; /* Orange Peel */
+            --border-radius: 12px;
+            --shadow: 0 4px 16px rgba(22, 105, 122, 0.1);
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .orders-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--background-color);
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #82C0CC 0%, #489FB5 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(130, 192, 204, 0.3);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .page-header h1 {
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: rgba(255, 255, 255, 0.9);
+            margin: 0;
+        }
+
+        .user-info {
+            background: #EDE7E3;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(22, 105, 122, 0.1);
+        }
+
+        .user-info h3 {
+            margin-bottom: 15px;
+            color: #16697A;
+        }
+
+        .user-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .user-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(22, 105, 122, 0.8);
+        }
+
+        .orders-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(22, 105, 122, 0.1);
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: #16697A;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .order-card {
+            border-bottom: 1px solid #e9ecef;
+            padding: 20px;
+            transition: background 0.3s;
+        }
+
+        .order-card:hover {
+            background: #EDE7E3;
+        }
+
+        .order-card:last-child {
+            border-bottom: none;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .order-number {
+            font-size: 18px;
+            font-weight: 600;
+            color: #16697A;
+        }
+
+        .order-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: rgba(255, 166, 43, 0.1);
+            color: #FFA62B;
+        }
+
+        .status-processing {
+            background: rgba(72, 159, 181, 0.1);
+            color: #489FB5;
+        }
+
+        .status-shipped {
+            background: rgba(130, 192, 204, 0.1);
+            color: #82C0CC;
+        }
+
+        .status-delivered {
+            background: rgba(22, 105, 122, 0.1);
+            color: #16697A;
+        }
+
+        .order-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .order-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: rgba(22, 105, 122, 0.7);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #16697A;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #489FB5;
+        }
+
+        .btn-secondary {
+            background: #6B6B6B;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        .btn-outline {
+            background: white;
+            color: #16697A;
+            border: 2px solid #16697A;
+        }
+
+        .btn-outline:hover {
+            background: #16697A;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(22, 105, 122, 0.7);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: rgba(130, 192, 204, 0.5);
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #16697A;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .orders-container {
+                padding: 15px;
+            }
+
+            .page-header {
+                padding: 20px;
+            }
+
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .order-details {
+                grid-template-columns: 1fr;
+            }
+
+            .order-actions {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Loading and Error States */
+        .loading-state, .error-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(22, 105, 122, 0.7);
+        }
+
+        .loading-state i {
+            font-size: 48px;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        .error-state i {
+            font-size: 48px;
+            color: var(--highlight-color);
+            margin-bottom: 20px;
+        }
+
+        .loading-state p, .error-state h3, .error-state p {
+            margin: 10px 0;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Header and Dropdown Styles - Matching Homepage */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .auth-section {
+            display: flex;
+            align-items: center;
+        }
+
         .profile-dropdown {
             position: relative;
         }
@@ -65,313 +382,128 @@
             text-align: center;
         }
 
-        .back-home-btn {
-            background: transparent;
-            border: none;
-            backdrop-filter: none;
-            -webkit-backdrop-filter: none;
-            box-shadow: none;
-            color: #16697A;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 22px;
+        .profile-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            min-width: 220px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
             transition: all 0.3s ease;
-            position: relative;
+            margin-top: 10px;
+            padding: 8px 0;
+        }
+
+        .profile-dropdown:hover .profile-dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .profile-dropdown-menu .dropdown-item {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            gap: 4px;
-            min-width: 50px;
-            text-align: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #333;
             text-decoration: none;
-        }
-
-        .back-home-btn:hover {
-            background: rgba(22, 105, 122, 0.25);
-            border: 1px solid rgba(22, 105, 122, 0.4);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-            color: white;
-        }
-
-        .back-home-btn i {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            margin: 0;
-            line-height: 1;
-            font-size: 20px;
-        }
-
-        .back-home-btn .button-label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            line-height: 1;
-            margin: 0;
-            width: 100%;
-            text-align: center;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .orders-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .page-header {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        .page-header h1 {
-            color: #2C2C2C;
-            margin-bottom: 10px;
-        }
-
-        .user-info {
-            background: #F0F0F0;
-            padding: 20px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
             border-radius: 8px;
-            margin-bottom: 30px;
+            margin: 2px 8px;
         }
 
-        .user-info h3 {
-            margin-bottom: 15px;
-            color: #1DB954;
+        .profile-dropdown-menu .dropdown-item:hover {
+            background: linear-gradient(135deg, rgba(72, 159, 181, 0.1), rgba(72, 159, 181, 0.05));
+            color: #489FB5;
+            transform: translateX(5px);
         }
 
-        .user-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+        .profile-dropdown-menu .dropdown-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(72, 159, 181, 0.3), transparent);
+            margin: 8px 16px;
         }
 
-        .user-detail {
+        /* User Info Section in Dropdown */
+        .dropdown-user-info {
             display: flex;
             align-items: center;
-            gap: 8px;
-            color: #666;
+            padding: 12px 16px;
+            background: rgba(22, 105, 122, 0.05);
+            border-radius: 8px;
+            margin: 8px;
         }
 
-        .orders-section {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            overflow: hidden;
+        .dropdown-user-info .user-avatar {
+            font-size: 24px;
+            color: #16697A;
+            margin-right: 12px;
         }
 
-        .section-header {
-            background: #1DB954;
-            color: white;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .dropdown-user-info .user-details {
+            flex: 1;
         }
 
-        .order-card {
-            border-bottom: 1px solid #e9ecef;
-            padding: 20px;
-            transition: background 0.3s;
-        }
-
-        .order-card:hover {
-            background: #F0F0F0;
-        }
-
-        .order-card:last-child {
-            border-bottom: none;
-        }
-
-        .order-header {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .order-number {
-            font-size: 18px;
+        .dropdown-user-info .user-name {
             font-weight: 600;
-            color: #1DB954;
-        }
-
-        .order-status {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-processing {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-
-        .status-shipped {
-            background: #cce5ff;
-            color: #004085;
-        }
-
-        .status-delivered {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .order-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .order-detail {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .detail-label {
-            font-size: 12px;
-            color: #666;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        .detail-value {
+            color: #16697A;
             font-size: 14px;
-            color: #2C2C2C;
-            font-weight: 500;
+            margin-bottom: 2px;
         }
 
-        .order-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+        .dropdown-user-info .user-phone {
+            color: #489FB5;
+            font-size: 12px;
         }
 
-        .action-btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-primary {
-            background: #1DB954;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #0056b3;
-        }
-
-        .btn-secondary {
-            background: #6B6B6B;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #545b62;
-        }
-
-        .btn-outline {
-            background: white;
-            color: #1DB954;
-            border: 2px solid #1DB954;
-        }
-
-        .btn-outline:hover {
-            background: #1DB954;
-            color: white;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
-        }
-
-        .empty-state i {
-            font-size: 64px;
-            margin-bottom: 20px;
-            color: #ddd;
-        }
-
-        .empty-state h3 {
-            margin-bottom: 10px;
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: #1DB954;
-            text-decoration: none;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 768px) {
-            .orders-container {
-                padding: 15px;
+        /* Mobile Responsive Styles */
+        @media (max-width: 600px) {
+            .header-right {
+                gap: 10px;
             }
 
-            .page-header {
-                padding: 20px;
+            .profile-icon-btn {
+                min-width: 40px;
+                font-size: 18px;
+                padding: 6px 8px;
+                gap: 2px;
             }
 
-            .order-header {
-                flex-direction: column;
-                align-items: flex-start;
+            .profile-icon-btn .button-label {
+                font-size: 9px;
             }
 
-            .order-details {
-                grid-template-columns: 1fr;
+            .cart-icon-btn {
+                min-width: 40px;
+                font-size: 16px;
+                padding: 6px 8px;
+                gap: 2px;
             }
 
-            .order-actions {
-                flex-direction: column;
+            .cart-icon-btn .button-label {
+                font-size: 9px;
             }
 
-            .action-btn {
-                width: 100%;
-                justify-content: center;
+            .profile-dropdown-menu {
+                min-width: 200px;
+                right: -10px;
+            }
+
+            .profile-dropdown-menu .dropdown-item {
+                padding: 10px 16px;
+                font-size: 13px;
             }
         }
     </style>
@@ -380,18 +512,9 @@
     <!-- Header -->
     <header class="site-header">
         <div class="header-content">
-            <div class="header-left">
-                <!-- Back to Home Button -->
-                <div class="header-back">
-                    <a href="index.html" class="back-home-btn" id="backHomeBtn">
-                        <i class="fas fa-home"></i>
-                        <span class="button-label">Home</span>
-                    </a>
-                </div>
-            </div>
+            <div class="header-left"></div>
             <div class="header-brand">
                 <h1 class="brand-name">JB Creations</h1>
-                <p class="brand-quote">Beautiful Memories Deserve a Frame</p>
             </div>
             <div class="header-right">
                 <div class="auth-section" id="authSection">
@@ -402,13 +525,68 @@
                             <span class="button-label">Profile</span>
                         </button>
                         <div class="profile-dropdown-menu" id="profileDropdownMenu">
-                            <!-- Profile dropdown content will be managed by JavaScript -->
+                            <!-- Guest user options -->
+                            <div class="guest-options" id="guestOptions">
+                                <a href="otp-login.html?redirect=my-orders.html" class="dropdown-item">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    Sign In
+                                </a>
+                                <a href="otp-login.html?redirect=my-orders.html" class="dropdown-item">
+                                    <i class="fas fa-user-plus"></i>
+                                    Sign Up
+                                </a>
+                                <div class="dropdown-divider"></div>
+                            </div>
+                            
+                            <!-- Authenticated user options (hidden by default) -->
+                            <div class="authenticated-options" id="authenticatedOptions" style="display: none;">
+                                <!-- User Info Section -->
+                                <div class="dropdown-user-info" id="dropdownUserInfo">
+                                    <div class="user-avatar">
+                                        <i class="fas fa-user-circle"></i>
+                                    </div>
+                                    <div class="user-details">
+                                        <div class="user-name" id="dropdownUserName">User</div>
+                                        <div class="user-phone" id="dropdownUserPhone">Phone</div>
+                                    </div>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                
+                                <a href="#" class="dropdown-item" onclick="viewProfile()">
+                                    <i class="fas fa-user-circle"></i>
+                                    My Profile
+                                </a>
+                                <a href="#" class="dropdown-item" onclick="viewOrders()">
+                                    <i class="fas fa-box"></i>
+                                    My Orders
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a href="#" class="dropdown-item" onclick="authUtils.logout()">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Sign Out
+                                </a>
+                                <div class="dropdown-divider"></div>
+                            </div>
+                            
+                            <!-- Common options for all users -->
+                            <a href="track-order.html" class="dropdown-item">
+                                <i class="fas fa-search"></i>
+                                Track Order
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="contactUs()">
+                                <i class="fas fa-envelope"></i>
+                                Contact Us
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="aboutUs()">
+                                <i class="fas fa-info-circle"></i>
+                                About Us
+                            </a>
                         </div>
                     </div>
                 </div>
                 
                 <div class="header-cart">
-                    <button class="cart-icon-btn" onclick="window.location.href='cart.html'">
+                    <button class="cart-icon-btn" id="headerCartBtn" onclick="window.location.href='cart.html'">
                         <i class="fas fa-shopping-cart"></i>
                         <span class="cart-count" id="cartCount">0</span>
                         <span class="button-label">Cart</span>
@@ -451,66 +629,283 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    
+    <!-- JB Creations Scripts -->
+    <script src="firebase-client-new.js"></script>
+    <script src="otp-auth-firebase.js"></script>
     <script src="auth.js"></script>
     <script>
         let currentUser = null;
 
         // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check authentication
-            currentUser = authUtils.getCurrentUser();
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('My Orders page loading...');
+            
+            // Profile dropdown is now handled by CSS hover - no JavaScript needed
+            
+            // Listen for global auth state changes
+            window.addEventListener('auth-state-changed', function(event) {
+                console.log('Auth state changed event:', event.detail);
+                if (event.detail && event.detail.user) {
+                    currentUser = event.detail.user;
+                    console.log('Updated current user from auth event:', currentUser.name);
+                    updateDropdownUserInfo();
+                    // Don't redirect if we're on the orders page and got a user
+                    if (!document.getElementById('ordersContainer').innerHTML.includes('Loading your orders')) {
+                        try {
+                            updateUserInfo();
+                        } catch (error) {
+                            console.warn('Error updating user info from auth event (non-critical):', error);
+                        }
+                        loadUserOrders();
+                    }
+                }
+            });
+            
+            // Wait a bit for other authentication systems to load
+            setTimeout(async () => {
+                // Check if user is already authenticated globally first
+                await checkGlobalAuthState();
+                
+                // Initialize dropdown state (will be updated after auth check)
+                updateDropdownUserInfo();
+                
+                // Wait for Firebase to be ready
+                if (!window.jbAPI) {
+                    console.log('Waiting for Firebase to load...');
+                    document.addEventListener('firebase-ready', initializePage);
+                } else {
+                    await initializePage();
+                }
+            }, 500);
+        });
+
+        // Check global authentication state
+        async function checkGlobalAuthState() {
+            try {
+                console.log('Checking global authentication state...');
+                
+                // Method 1: Check if there's a global currentUser variable
+                if (window.currentUser && window.currentUser.name) {
+                    currentUser = window.currentUser;
+                    console.log('Found global window.currentUser:', currentUser.name);
+                    return;
+                }
+                
+                // Method 2: Check if there's a global user from OTP auth
+                if (window.otpAuth && typeof window.otpAuth.getCurrentUser === 'function') {
+                    try {
+                        const globalUser = await window.otpAuth.getCurrentUser();
+                        if (globalUser && globalUser.name) {
+                            currentUser = globalUser;
+                            console.log('Found OTP auth user:', currentUser.name);
+                            return;
+                        }
+                    } catch (e) {
+                        console.log('OTP auth getCurrentUser failed:', e.message);
+                    }
+                }
+                
+                // Method 3: Check localStorage for session with more detailed parsing
+                const sessionData = localStorage.getItem('jb_current_user');
+                if (sessionData) {
+                    try {
+                        const session = JSON.parse(sessionData);
+                        console.log('Session data:', session);
+                        if (session && (session.name || session.user?.name) && (session.phone || session.user?.phone)) {
+                            // Handle both direct session and nested user object
+                            currentUser = session.user || session;
+                            console.log('Found session user:', currentUser.name);
+                            return;
+                        }
+                    } catch (e) {
+                        console.log('Failed to parse session data:', e.message);
+                    }
+                }
+                
+                // Method 4: Try to get user data if phone exists in any form
+                const phoneFromStorage = localStorage.getItem('userPhone') || 
+                                       (sessionData && JSON.parse(sessionData).phone);
+                if (phoneFromStorage && window.jbAPI) {
+                    try {
+                        const userResult = await window.jbAPI.getUserByPhone(phoneFromStorage);
+                        if (userResult.success && userResult.user) {
+                            currentUser = userResult.user;
+                            console.log('Found user via phone lookup:', currentUser.name);
+                            return;
+                        }
+                    } catch (e) {
+                        console.log('Phone lookup failed:', e.message);
+                    }
+                }
+                
+                console.log('No global user found');
+            } catch (error) {
+                console.error('Error checking global auth state:', error);
+            }
+        }
+
+        async function initializePage() {
+            try {
+                // Check Firebase authentication
+                console.log('Checking Firebase authentication...');
+                
+                // First try to get current user from OTP auth system
+                if (window.otpAuth && window.otpAuth.getCurrentUser) {
+                    const globalUser = await window.otpAuth.getCurrentUser();
+                    console.log('OTP Auth user:', globalUser);
+                    if (globalUser) {
+                        currentUser = globalUser;
+                        console.log('User authenticated from OTP auth:', currentUser.name);
+                        
+                        try {
+                            updateUserInfo();
+                        } catch (error) {
+                            console.warn('Error updating user info (non-critical):', error);
+                        }
+                        
+                        updateDropdownUserInfo();
+                        await updateAuthUI();
+                        loadUserOrders();
+                        return;
+                    }
+                }
+                
+                // Get current user session from localStorage
+                const sessionData = localStorage.getItem('jb_current_user');
+                if (!sessionData) {
+                    console.log('No user session found, redirecting to login');
+                    await redirectToLogin();
+                    return;
+                }
+
+                const session = JSON.parse(sessionData);
+                if (!session.phone) {
+                    console.log('Invalid session data, redirecting to login');
+                    await redirectToLogin();
+                    return;
+                }
+
+                // Get user data from Firebase
+                const userResult = await window.jbAPI.getUserByPhone(session.phone);
+                if (!userResult.success || !userResult.user) {
+                    console.log('User not found in Firebase, redirecting to login');
+                    await redirectToLogin();
+                    return;
+                }
+
+                currentUser = userResult.user;
+                console.log('User authenticated:', currentUser.name);
+
+                try {
+                    updateUserInfo();
+                } catch (error) {
+                    console.warn('Error updating user info (non-critical):', error);
+                }
+                
+                updateDropdownUserInfo();
+                await updateAuthUI();
+                loadUserOrders();
+            } catch (error) {
+                console.error('Authentication error:', error);
+                await redirectToLogin();
+            }
+        }
+
+        async function redirectToLogin() {
+            // Store current page for redirect after login
+            const currentPage = 'my-orders.html';
+            
+            // Update dropdown to show guest options before redirecting
+            updateDropdownUserInfo();
+            await updateAuthUI();
+            
+            window.location.href = `otp-login.html?redirect=${currentPage}`;
+        }
+
+        // Update user information display - Hide the user info section
+        function updateUserInfo() {
             if (!currentUser) {
-                sessionStorage.setItem('auth_redirect', window.location.href);
-                window.location.href = 'auth.html';
+                console.log('No current user to update info for');
                 return;
             }
 
-            updateUserInfo();
-            loadUserOrders();
-            setupUserDropdown();
-        });
-
-        // Update user information display
-        function updateUserInfo() {
             const userInfoContainer = document.getElementById('userInfo');
-            const userName = document.getElementById('userName');
+            if (!userInfoContainer) {
+                console.log('User info container not found');
+                return;
+            }
             
-            userName.textContent = currentUser.name;
-            
-            userInfoContainer.innerHTML = `
-                <h3>Account Information</h3>
-                <div class="user-details">
-                    <div class="user-detail">
-                        <i class="fas fa-user"></i>
-                        <span>${currentUser.name}</span>
-                    </div>
-                    <div class="user-detail">
-                        <i class="fas fa-envelope"></i>
-                        <span>${currentUser.email}</span>
-                    </div>
-                    <div class="user-detail">
-                        <i class="fas fa-phone"></i>
-                        <span>${currentUser.phone}</span>
-                    </div>
-                    <div class="user-detail">
-                        <i class="fas fa-calendar"></i>
-                        <span>Member since ${new Date(currentUser.registrationDate).toLocaleDateString()}</span>
-                    </div>
-                </div>
-            `;
+            // Hide the user info container instead of showing account details
+            userInfoContainer.style.display = 'none';
         }
 
-        // Load user orders
-        function loadUserOrders() {
+        // Update dropdown user information
+        function updateDropdownUserInfo() {
+            const dropdownUserName = document.getElementById('dropdownUserName');
+            const dropdownUserPhone = document.getElementById('dropdownUserPhone');
+            const guestOptions = document.getElementById('guestOptions');
+            const authenticatedOptions = document.getElementById('authenticatedOptions');
+
+            console.log('Updating dropdown user info. Current user:', currentUser ? currentUser.name : 'null');
+
+            if (currentUser && currentUser.name) {
+                // User is authenticated - show authenticated options
+                console.log('User is authenticated, showing authenticated options');
+                if (dropdownUserName) dropdownUserName.textContent = currentUser.name;
+                if (dropdownUserPhone) dropdownUserPhone.textContent = currentUser.phone || '';
+                
+                // Hide guest options and show authenticated options
+                if (guestOptions) {
+                    guestOptions.style.display = 'none';
+                }
+                if (authenticatedOptions) {
+                    authenticatedOptions.style.display = 'block';
+                }
+            } else {
+                // User is not authenticated - show guest options
+                console.log('User is not authenticated, showing guest options');
+                if (guestOptions) {
+                    guestOptions.style.display = 'block';
+                }
+                if (authenticatedOptions) {
+                    authenticatedOptions.style.display = 'none';
+                }
+            }
+        }
+
+        // Load user orders from Firebase
+        async function loadUserOrders() {
             const ordersContainer = document.getElementById('ordersContainer');
             
             try {
-                // Get user's orders from localStorage
-                const users = JSON.parse(localStorage.getItem('jb_users') || '[]');
-                const user = users.find(u => u.id === currentUser.id);
-                const orders = user?.orders || [];
+                console.log('Loading orders for user:', currentUser.phone);
+                
+                // Show loading state
+                ordersContainer.innerHTML = `
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading your orders...</p>
+                    </div>
+                `;
+                
+                // Get user's orders from Firebase
+                let userOrders = [];
+                if (currentUser.orders && currentUser.orders.length > 0) {
+                    // Orders are stored as references in user document
+                    userOrders = currentUser.orders;
+                } else {
+                    // Try to fetch orders directly from orders collection
+                    const ordersResult = await window.jbAPI.getOrdersByPhone(currentUser.phone);
+                    if (ordersResult.success) {
+                        userOrders = ordersResult.orders;
+                    }
+                }
 
-                if (orders.length === 0) {
+                if (!userOrders || userOrders.length === 0) {
                     ordersContainer.innerHTML = `
                         <div class="empty-state">
                             <i class="fas fa-box-open"></i>
@@ -526,65 +921,78 @@
                 }
 
                 // Sort orders by date (newest first)
-                orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+                const sortedOrders = userOrders.sort((a, b) => {
+                    const dateA = a.orderDate ? new Date(a.orderDate) : new Date(0);
+                    const dateB = b.orderDate ? new Date(b.orderDate) : new Date(0);
+                    return dateB - dateA;
+                });
 
                 // Display orders
-                ordersContainer.innerHTML = orders.map(order => `
-                    <div class="order-card">
-                        <div class="order-header">
-                            <div class="order-number">#${order.orderNumber}</div>
-                            <div class="order-status status-${order.status}">
-                                ${order.status}
+                ordersContainer.innerHTML = sortedOrders.map(order => {
+                    const orderDate = order.orderDate ? new Date(order.orderDate).toLocaleDateString() : 'Unknown';
+                    const itemCount = order.items ? order.items.length : (order.itemCount || 1);
+                    const total = order.totalAmount || order.total || 0;
+                    const status = order.status || 'pending';
+                    const orderNumber = order.orderId || order.orderNumber || 'N/A';
+                    const deliveryMethod = order.deliveryMethod || 'standard';
+                    
+                    return `
+                        <div class="order-card">
+                            <div class="order-header">
+                                <div class="order-number">#${orderNumber}</div>
+                                <div class="order-status status-${status}">
+                                    ${status.charAt(0).toUpperCase() + status.slice(1)}
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="order-details">
-                            <div class="order-detail">
-                                <div class="detail-label">Order Date</div>
-                                <div class="detail-value">${new Date(order.orderDate).toLocaleDateString()}</div>
+                            
+                            <div class="order-details">
+                                <div class="order-detail">
+                                    <div class="detail-label">Order Date</div>
+                                    <div class="detail-value">${orderDate}</div>
+                                </div>
+                                <div class="order-detail">
+                                    <div class="detail-label">Items</div>
+                                    <div class="detail-value">${itemCount} item${itemCount > 1 ? 's' : ''}</div>
+                                </div>
+                                <div class="order-detail">
+                                    <div class="detail-label">Total</div>
+                                    <div class="detail-value">₹${total}</div>
+                                </div>
+                                <div class="order-detail">
+                                    <div class="detail-label">Delivery</div>
+                                    <div class="detail-value">${deliveryMethod === 'express' ? 'Express' : 'Standard'}</div>
+                                </div>
                             </div>
-                            <div class="order-detail">
-                                <div class="detail-label">Items</div>
-                                <div class="detail-value">${order.itemCount} item${order.itemCount > 1 ? 's' : ''}</div>
-                            </div>
-                            <div class="order-detail">
-                                <div class="detail-label">Total</div>
-                                <div class="detail-value">₹${order.total}</div>
-                            </div>
-                            <div class="order-detail">
-                                <div class="detail-label">Delivery</div>
-                                <div class="detail-value">${order.deliveryMethod === 'express' ? 'Express' : 'Standard'}</div>
-                            </div>
-                        </div>
 
-                        <div class="order-actions">
-                            <button class="action-btn btn-primary" onclick="viewOrderDetails('${order.orderNumber}')">
-                                <i class="fas fa-eye"></i>
-                                View Details
-                            </button>
-                            <button class="action-btn btn-outline" onclick="trackOrder('${order.orderNumber}')">
-                                <i class="fas fa-truck"></i>
-                                Track Order
-                            </button>
-                            ${order.status === 'delivered' ? `
-                                <button class="action-btn btn-secondary" onclick="reorderItems('${order.orderNumber}')">
-                                    <i class="fas fa-redo"></i>
-                                    Reorder
+                            <div class="order-actions">
+                                <button class="action-btn btn-primary" onclick="viewOrderDetails('${orderNumber}')">
+                                    <i class="fas fa-eye"></i>
+                                    View Details
                                 </button>
-                            ` : ''}
+                                <button class="action-btn btn-outline" onclick="trackOrder('${orderNumber}')">
+                                    <i class="fas fa-truck"></i>
+                                    Track Order
+                                </button>
+                                ${status === 'delivered' ? `
+                                    <button class="action-btn btn-secondary" onclick="reorderItems('${orderNumber}')">
+                                        <i class="fas fa-redo"></i>
+                                        Reorder
+                                    </button>
+                                ` : ''}
+                            </div>
                         </div>
-                    </div>
-                `).join('');
-
+                    `;
+                }).join('');
+                
             } catch (error) {
                 console.error('Error loading orders:', error);
                 ordersContainer.innerHTML = `
-                    <div class="empty-state">
+                    <div class="error-state">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <h3>Error loading orders</h3>
-                        <p>There was an error loading your orders. Please try refreshing the page.</p>
-                        <button class="action-btn btn-primary" onclick="refreshOrders()" style="margin-top: 20px;">
-                            <i class="fas fa-refresh"></i>
+                        <h3>Error Loading Orders</h3>
+                        <p>There was a problem loading your orders. Please try again later.</p>
+                        <button onclick="loadUserOrders()" class="action-btn btn-primary" style="margin-top: 20px;">
+                            <i class="fas fa-redo"></i>
                             Try Again
                         </button>
                     </div>
@@ -612,34 +1020,111 @@
             loadUserOrders();
         }
 
-        // Setup user dropdown
+        // Setup user dropdown - Fixed to use correct IDs
         function setupUserDropdown() {
-            const userAvatar = document.getElementById('userAvatar');
-            const userDropdown = document.getElementById('userDropdown');
+            const profileBtn = document.getElementById('profileBtn');
+            const profileDropdown = document.getElementById('profileDropdown');
 
-            userAvatar.addEventListener('click', function(e) {
-                e.stopPropagation();
-                userDropdown.classList.toggle('active');
-            });
+            if (profileBtn && profileDropdown) {
+                profileBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    profileDropdown.classList.toggle('active');
+                });
 
-            document.addEventListener('click', function() {
-                userDropdown.classList.remove('active');
-            });
+                document.addEventListener('click', function() {
+                    profileDropdown.classList.remove('active');
+                });
+            }
         }
 
-        // View profile
+        // Sign out function
+        function signOut() {
+            // Clear user session
+            localStorage.removeItem('jb_current_user');
+            
+            // Redirect to login page
+            window.location.href = 'otp-login.html';
+        }
+
+        // Update authentication UI based on login status
+        async function updateAuthUI() {
+            try {
+                const user = await getCurrentAuthenticatedUser();
+                console.log('📱 updateAuthUI - user found:', user);
+                
+                const guestOptions = document.getElementById('guestOptions');
+                const authenticatedOptions = document.getElementById('authenticatedOptions');
+                const profileBtn = document.getElementById('profileBtn');
+                
+                if (user) {
+                    console.log('📱 updateAuthUI - user name:', user.name);
+                    console.log('📱 updateAuthUI - user phone:', user.phone);
+                    
+                    // User is logged in - show authenticated options, hide guest options
+                    if (guestOptions) {
+                        guestOptions.style.display = 'none';
+                    }
+                    if (authenticatedOptions) {
+                        authenticatedOptions.style.display = 'block';
+                    }
+                    
+                    // Update user info in dropdown
+                    const dropdownUserName = document.getElementById('dropdownUserName');
+                    const dropdownUserPhone = document.getElementById('dropdownUserPhone');
+                    
+                    if (dropdownUserName) {
+                        dropdownUserName.textContent = user.name || 'User';
+                        console.log('📱 updateAuthUI - Set dropdown name to:', user.name || 'User');
+                    }
+                    if (dropdownUserPhone) {
+                        dropdownUserPhone.textContent = user.phone || 'Phone not available';
+                    }
+                    
+                    // Always keep profile button text as "Profile"
+                    if (profileBtn) {
+                        profileBtn.innerHTML = `
+                            <i class="fas fa-user-alt"></i>
+                            <span class="button-label">Profile</span>
+                        `;
+                        profileBtn.style.color = '#16697A';
+                    }
+                } else {
+                    // User is not logged in - show guest options, hide authenticated options
+                    if (guestOptions) {
+                        guestOptions.style.display = 'block';
+                    }
+                    if (authenticatedOptions) {
+                        authenticatedOptions.style.display = 'none';
+                    }
+                    
+                    // Reset profile button to default
+                    if (profileBtn) {
+                        profileBtn.innerHTML = `
+                            <i class="fas fa-user-alt"></i>
+                            <span class="button-label">Profile</span>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Error updating auth UI:', error);
+            }
+        }
+        
+        // View profile / toggle dropdown
         function viewProfile() {
-            alert(`Profile for ${currentUser.name}\nEmail: ${currentUser.email}\nPhone: ${currentUser.phone}\nMember since: ${new Date(currentUser.registrationDate).toLocaleDateString()}`);
+            const dropdown = document.getElementById('profileDropdownMenu');
+            if (dropdown) {
+                dropdown.style.opacity = dropdown.style.opacity === '1' ? '0' : '1';
+                dropdown.style.visibility = dropdown.style.visibility === 'visible' ? 'hidden' : 'visible';
+                dropdown.style.transform = dropdown.style.opacity === '1' ? 'translateY(0)' : 'translateY(-10px)';
+            }
         }
+
+        // Profile dropdown now uses CSS hover - no click handlers needed
 
         // View orders (current page)
         function viewOrders() {
             // Already on orders page
-        }
-
-        // Logout
-        function logout() {
-            authUtils.logout();
         }
         
         // Contact us function

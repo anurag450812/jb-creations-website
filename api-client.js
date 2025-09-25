@@ -3,6 +3,9 @@
  * Handles all API calls to the backend server
  */
 
+// Global auth state - declared in auth.js, just reference it here
+// const authState will be available globally from auth.js
+
 // API Configuration
 const API_CONFIG = {
     // Use Netlify Functions - works automatically with your domain
@@ -146,8 +149,8 @@ class APIClient {
 // Create global API client instance
 const apiClient = new APIClient();
 
-// Enhanced Authentication utilities with backend integration
-const authUtils = {
+// Enhanced Authentication utilities with backend integration (legacy system)
+const legacyAuthUtils = {
     // Check if user is logged in
     isLoggedIn() {
         const token = localStorage.getItem('auth_token');
@@ -293,7 +296,7 @@ const orderUtils = {
     // Get user's orders
     async getUserOrders(page = 1, limit = 10, status = null) {
         try {
-            if (!authUtils.isLoggedIn()) {
+            if (!legacyAuthUtils.isLoggedIn()) {
                 throw new Error('Please login to view your orders');
             }
 
@@ -332,7 +335,7 @@ const orderUtils = {
 const adminUtils = {
     // Check if current user is admin
     isAdmin() {
-        const user = authUtils.getCurrentUser();
+        const user = legacyAuthUtils.getCurrentUser();
         return user && user.email === 'admin@jbcreations.com'; // Adjust based on your admin logic
     },
 
@@ -369,11 +372,26 @@ const adminUtils = {
 
 // Initialize authentication state on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Update auth state from localStorage
-    if (authUtils.isLoggedIn()) {
-        authState.isAuthenticated = true;
-        authState.user = authUtils.getCurrentUser();
+    // Update auth state from localStorage - check both auth systems
+    let isAuthenticated = false;
+    let currentUser = null;
+    
+    // Check OTP auth system first
+    if (typeof window.otpAuth !== 'undefined') {
+        currentUser = window.otpAuth.getCurrentUser();
+        if (currentUser) {
+            isAuthenticated = true;
+        }
     }
+    
+    // Fallback to legacy auth system
+    if (!isAuthenticated && legacyAuthUtils.isLoggedIn()) {
+        isAuthenticated = true;
+        currentUser = legacyAuthUtils.getCurrentUser();
+    }
+    
+    authState.isAuthenticated = isAuthenticated;
+    authState.user = currentUser;
     
     console.log('🔄 API Client initialized');
     console.log('🔐 Auth state:', authState.isAuthenticated ? 'Logged in' : 'Guest');
@@ -381,6 +399,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Export for global use
 window.apiClient = apiClient;
-window.authUtils = authUtils;
+// Note: authUtils is defined in auth.js, don't redefine here
 window.orderUtils = orderUtils;
 window.adminUtils = adminUtils;

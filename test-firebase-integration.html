@@ -62,7 +62,7 @@
         
         <h3>Test Actions</h3>
         <button onclick="testFirebaseConnection()" id="testConnectionBtn">Test Firebase Connection</button>
-        <button onclick="testOrderCreation()" id="testOrderBtn" disabled>Test Order Creation</button>
+        <button onclick="testOrderCreation()" id="testOrderBtn" disabled style="background-color: #dc3545; border-color: #dc3545;" title="DISABLED: Creates orders without images in production!">⚠️ Test Order Creation (DISABLED)</button>
         <button onclick="clearConsole()" id="clearBtn">Clear Console</button>
         
         <h3>Console Output</h3>
@@ -152,6 +152,13 @@
         }
 
         async function testOrderCreation() {
+            appendToConsole('\n⚠️ Test order creation is DISABLED\n');
+            appendToConsole('❌ This function was creating orders without images in production\n');
+            appendToConsole('ℹ️ Use proper Cloudinary integration for testing instead\n');
+            return;
+            
+            // DISABLED CODE - DO NOT REMOVE FOR REFERENCE
+            /*
             appendToConsole('\n🧪 Testing order creation...\n');
             
             if (!jbApi) {
@@ -166,7 +173,7 @@
                     phone: '1234567890',
                     address: '123 Test Street'
                 },
-                images: [], // Empty for test
+                images: [], // Empty for test - THIS WAS THE PROBLEM
                 frameSize: 'Standard',
                 frameType: 'Wood',
                 quantity: 1,
@@ -191,6 +198,7 @@
                     appendToConsole('   Please check FIREBASE-SETUP.md for rules configuration\n');
                 }
             }
+            */
         }
 
         function appendToConsole(text) {

@@ -1,6 +1,6 @@
 /*
- * Checkout Page JavaScript - V3 (Firebase Module Integration Fixed)
- * Handles order processing and submission with Firebase integration
+ * Checkout Page JavaScript - V4 (Cloudinary Integration Added)
+ * Handles order processing and submission with Firebase and Cloudinary integration
  * Users can place orders without login requirement
  */
 
@@ -15,6 +15,19 @@ window.addEventListener('firebaseReady', (event) => {
     console.log('✅ Firebase API initialized for checkout:', jbApi);
 });
 
+// Load Cloudinary client library
+document.addEventListener('DOMContentLoaded', function() {
+    // Add Cloudinary script if not already added
+    if (!window.cloudinary) {
+        const script = document.createElement('script');
+        script.src = 'https://widget.cloudinary.com/v2.0/global/all.js';
+        script.onload = function() {
+            console.log('✅ Cloudinary library loaded');
+        };
+        document.head.appendChild(script);
+    }
+});
+
 // Fallback: Try to access Firebase API directly from window after delay
 setTimeout(() => {
     if (!jbApi && (window.jbAPI || window.jbFirebaseAPI)) {
@@ -25,6 +38,48 @@ setTimeout(() => {
         console.warn('⚠️ Firebase client not available after timeout, using local fallback');
     }
 }, 2000);
+
+// Cloudinary reference 
+let cloudinaryConfig = null;
+setTimeout(() => {
+    if (window.cloudinaryConfig) {
+        cloudinaryConfig = window.cloudinaryConfig;
+        console.log('✅ Cloudinary config loaded:', cloudinaryConfig.cloudName);
+    } else {
+        console.warn('⚠️ Cloudinary config not available');
+    }
+}, 1000);
+
+// Enhanced Cloudinary Upload with Direct Upload Support
+async function uploadOrderImagesToCloudinaryEnhanced(orderData) {
+    console.log('🔄 Starting enhanced Cloudinary upload process...');
+    
+    // Try direct upload first (production-ready, no server needed)
+    if (window.CloudinaryDirect) {
+        console.log('📤 Attempting direct browser-to-Cloudinary upload...');
+        try {
+            const cloudinaryDirect = new window.CloudinaryDirect();
+            const results = await cloudinaryDirect.uploadOrderImages(orderData.items, orderData.orderNumber);
+            
+            // Check if all uploads were successful
+            const successfulUploads = results.filter(result => result.urls !== null);
+            if (successfulUploads.length > 0) {
+                console.log(`✅ Direct upload successful: ${successfulUploads.length}/${results.length} images`);
+                return results;
+            } else {
+                console.warn('⚠️ Direct upload failed for all images, trying fallback...');
+            }
+        } catch (error) {
+            console.warn('⚠️ Direct upload failed:', error.message);
+            console.log('🔄 Falling back to server-based upload...');
+        }
+    } else {
+        console.log('📋 Direct upload not available, using server-based upload...');
+    }
+    
+    // Fallback to existing server-based upload
+    return await uploadOrderImagesToCloudinary(orderData);
+}
 
 // Order management state
 let orderData = {
@@ -40,36 +95,50 @@ let orderData = {
 
 // Initialize checkout page
 document.addEventListener('DOMContentLoaded', function() {
-    // Check if user is authenticated
-    const user = getCurrentUser();
-    
-    if (user) {
-        // Pre-fill customer information for logged-in users
-        document.getElementById('customerName').value = user.name || '';
-        document.getElementById('customerEmail').value = user.email || '';
+    // Wait for auth utilities to load
+    function initializeCheckout() {
+        // Check if user is authenticated
+        const user = getCurrentUser();
         
-        // Handle phone number with +91 prefix
-        const userPhone = user.phone || '';
-        if (userPhone && !userPhone.startsWith('+91')) {
-            // Add +91 prefix if not present
-            document.getElementById('customerPhone').value = '+91 ' + userPhone.replace(/[^\d]/g, '');
+        if (user) {
+            // Pre-fill customer information for logged-in users
+            const userName = user.name || user.displayName || user.fullName || '';
+            const userEmail = user.email || '';
+            
+            document.getElementById('customerName').value = userName;
+            document.getElementById('customerEmail').value = userEmail;
+            
+            // Handle phone number with +91 prefix
+            const userPhone = user.phone || '';
+            if (userPhone && !userPhone.startsWith('+91')) {
+                // Add +91 prefix if not present
+                document.getElementById('customerPhone').value = '+91 ' + userPhone.replace(/[^\d]/g, '');
+            } else {
+                document.getElementById('customerPhone').value = userPhone;
+            }
+            
+            // Hide the status container completely for logged-in users
+            hideUserStatusContainer();
         } else {
-            document.getElementById('customerPhone').value = userPhone;
+            // Show guest checkout options
+            showGuestCheckoutOptions();
         }
-        
-        // Show logged-in user info
-        showUserStatus(user);
-    } else {
-        // Show guest checkout options
-        showGuestCheckoutOptions();
+
+        loadCartItems();
+        updateOrderSummary();
+        updateEstimatedDelivery();
+
+        // Add form validation listeners
+        addFormValidationListeners();
     }
-
-    loadCartItems();
-    updateOrderSummary();
-    updateEstimatedDelivery();
-
-    // Add form validation listeners
-    addFormValidationListeners();
+    
+    // Check if auth utilities are ready, otherwise wait a bit
+    if (window.otpAuthUtils) {
+        initializeCheckout();
+    } else {
+        // Wait for auth utilities to load
+        setTimeout(initializeCheckout, 500);
+    }
 });
 
 // Pincode lookup functionality
@@ -412,7 +481,7 @@ document.addEventListener('keydown', function(e) {
 
 // Load cart items from localStorage
 function loadCartItems() {
-    const cart = JSON.parse(localStorage.getItem('photoFramingCart') || '[]');
+    const cart = JSON.parse(sessionStorage.getItem('photoFramingCart') || '[]');
     
     console.log('Loading cart items:', cart);
     console.log('Cart items count:', cart.length);
@@ -438,14 +507,26 @@ function loadCartItems() {
     calculateTotals();
 }
 
-// Show user status for logged-in users
+// Hide user status container for logged-in users
+function hideUserStatusContainer() {
+    const statusContainer = document.getElementById('userStatusContainer');
+    if (statusContainer) {
+        statusContainer.style.display = 'none';
+        statusContainer.innerHTML = '';
+    }
+}
+
+// Show user status for logged-in users (kept for backward compatibility, but not used)
 function showUserStatus(user) {
     const statusContainer = document.getElementById('userStatusContainer');
     if (statusContainer) {
+        const userName = user.name || user.displayName || user.fullName || 'User';
+        const userEmail = user.email || '';
+        
         statusContainer.innerHTML = `
             <div class="user-status logged-in">
                 <i class="fas fa-user-check"></i>
-                <span>Logged in as: <strong>${user.name}</strong> (${user.email})</span>
+                <span>Logged in as: <strong>${userName}</strong> ${userEmail ? `(${userEmail})` : ''}</span>
                 <button type="button" class="btn-link" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> Sign Out
                 </button>
@@ -522,12 +603,26 @@ function enableGuestForm() {
 
 // Redirect to login
 function redirectToLogin() {
+    // Use OTP auth redirect if available
+    if (window.otpAuthUtils) {
+        window.otpAuthUtils.redirectToAuth();
+        return;
+    }
+    
+    // Fallback to legacy auth
     sessionStorage.setItem('auth_redirect', window.location.href);
     window.location.href = 'auth.html';
 }
 
 // Logout function
 function logout() {
+    // Clear OTP authentication if available
+    if (window.otpAuthUtils) {
+        window.otpAuthUtils.logout();
+        return; // OTP auth handles redirect
+    }
+    
+    // Fallback to legacy logout
     localStorage.removeItem('jb_user');
     sessionStorage.removeItem('jb_user');
     window.location.reload();
@@ -882,7 +977,7 @@ function prepareOrderData() {
     };
     
     // Add order metadata
-    orderData.orderNumber = generateOrderNumber();
+    orderData.orderNumber = generateOrderNumber(formData.get('customerPhone'));
     orderData.orderDate = new Date().toISOString();
     orderData.status = 'pending';
     orderData.customerType = user ? 'registered' : 'guest';
@@ -890,11 +985,33 @@ function prepareOrderData() {
     return orderData;
 }
 
-// Generate unique order number
-function generateOrderNumber() {
-    const timestamp = Date.now();
-    const random = Math.floor(Math.random() * 1000);
-    return `JB${timestamp.toString().slice(-6)}${random.toString().padStart(3, '0')}`;
+// Generate unique order number in yearmonthdatetimeseconds+phone format
+function generateOrderNumber(customerPhone = '') {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const date = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    
+    // Extract last 4 digits of phone number, default to random if not available
+    let phoneLastFour = '0000';
+    if (customerPhone) {
+        // Remove all non-digit characters
+        const digitsOnly = customerPhone.replace(/\D/g, '');
+        if (digitsOnly.length >= 4) {
+            phoneLastFour = digitsOnly.slice(-4);
+        } else if (digitsOnly.length > 0) {
+            // Pad with zeros if less than 4 digits
+            phoneLastFour = digitsOnly.padStart(4, '0');
+        }
+    } else {
+        // Generate random 4 digits if no phone number
+        phoneLastFour = Math.floor(1000 + Math.random() * 9000).toString();
+    }
+    
+    return `JB${year}${month}${date}${hours}${minutes}${seconds}${phoneLastFour}`;
 }
 
 // Convert order data to email format for backend processing
@@ -959,6 +1076,16 @@ async function submitOrder(orderData) {
             hasItems: !!orderData.items && orderData.items.length > 0,
             totalAmount: orderData.totals?.total
         });
+
+        // First, upload images to Cloudinary using enhanced method (direct + fallback)
+        console.log('🖼️ Uploading images to Cloudinary with enhanced method...');
+        const cloudinaryImages = await uploadOrderImagesToCloudinaryEnhanced(orderData);
+        
+        if (!cloudinaryImages) {
+            console.warn('⚠️ Cloudinary upload failed or was not available. Proceeding with Firebase-only storage.');
+        } else {
+            console.log('✅ Images uploaded to Cloudinary successfully:', cloudinaryImages);
+        }
         
         // Wait a bit more for Firebase to initialize
         let retryCount = 0;
@@ -973,10 +1100,9 @@ async function submitOrder(orderData) {
                 if (!window.jbApi) {
                     window.jbApi = window.jbAPI || new window.JBCreationsAPI();
                 }
-                console.log('� Firebase client found, attempting order submission...');
                 
                 try {
-                    // Prepare Firebase-compatible order data
+                    // Prepare Firebase-compatible order data with Cloudinary URLs
                     const firebaseOrderData = {
                         customer: {
                             name: orderData.customer?.name || 'Guest Customer',
@@ -984,10 +1110,30 @@ async function submitOrder(orderData) {
                             phone: orderData.customer?.phone || '0000000000',
                             address: orderData.customer?.address || 'No address provided'
                         },
-                        images: orderData.items.map((item, index) => ({
-                            originalImage: item.originalImage || `data:image/png;base64,placeholder${index}`,
-                            printImage: item.printImage || `data:image/png;base64,placeholder${index}`,
-                            displayImage: item.displayImage || item.previewImage || `data:image/png;base64,placeholder${index}`
+                        items: orderData.items, // Pass the original items
+                        // Include Cloudinary upload results for processing
+                        cloudinaryImages: cloudinaryImages,
+                        // Legacy images array for backward compatibility
+                        images: cloudinaryImages ? cloudinaryImages.map((result, index) => {
+                            if (result.urls) {
+                                return {
+                                    original: result.urls.original,
+                                    print: result.urls.print,
+                                    display: result.urls.display,
+                                    publicId: result.urls.publicId
+                                };
+                            }
+                            // Fallback to item data if Cloudinary failed
+                            const item = orderData.items[index];
+                            return {
+                                original: item?.originalImage || null,
+                                print: item?.printImage || null,
+                                display: item?.displayImage || item?.previewImage || null
+                            };
+                        }) : orderData.items.map(item => ({
+                            original: item.originalImage || null,
+                            print: item.printImage || null,
+                            display: item.displayImage || item.previewImage || null
                         })),
                         frameSize: orderData.items[0]?.frameSize?.size || 'Standard',
                         frameType: orderData.items[0]?.frameColor || 'Wood',
@@ -998,14 +1144,38 @@ async function submitOrder(orderData) {
                         totalAmount: orderData.totals.total,
                         deliveryMethod: orderData.deliveryMethod,
                         paymentId: orderData.paymentId,
-                        orderNumber: orderData.orderNumber
+                        orderNumber: orderData.orderNumber,
+                        // Add flag to indicate whether we're using Cloudinary
+                        usingCloudinary: !!cloudinaryImages && cloudinaryImages.some(img => img.urls !== null)
                     };
 
                     console.log('📤 Submitting to Firebase with data:', {
                         customerName: firebaseOrderData.customer.name,
-                        itemCount: firebaseOrderData.images.length,
-                        totalAmount: firebaseOrderData.totalAmount
+                        itemCount: firebaseOrderData.items.length,
+                        cloudinaryImages: firebaseOrderData.cloudinaryImages?.length || 0,
+                        successfulUploads: firebaseOrderData.cloudinaryImages?.filter(img => img.urls !== null)?.length || 0,
+                        totalAmount: firebaseOrderData.totalAmount,
+                        usingCloudinary: firebaseOrderData.usingCloudinary,
+                        firstImageUrl: firebaseOrderData.cloudinaryImages?.[0]?.urls?.original || 'none'
                     });
+                    
+                    // Debug: Log the complete Cloudinary images array
+                    if (firebaseOrderData.cloudinaryImages && firebaseOrderData.cloudinaryImages.length > 0) {
+                        console.log('🌥️ Complete Cloudinary images being sent to Firebase:');
+                        firebaseOrderData.cloudinaryImages.forEach((img, index) => {
+                            console.log(`   Image ${index + 1}:`, {
+                                itemIndex: img.itemIndex,
+                                hasUrls: !!img.urls,
+                                originalUrl: img.urls?.original || 'null',
+                                error: img.error || 'none'
+                            });
+                        });
+                    } else {
+                        console.log('❌ No Cloudinary images array being sent to Firebase');
+                    }
+                    
+                    // Debug: Log the complete structure being sent to Firebase
+                    console.log('📋 Complete Firebase order structure:', JSON.stringify(firebaseOrderData, null, 2));
 
                     // Submit to Firebase
                     const result = await window.jbApi.createOrder(firebaseOrderData);
@@ -1046,25 +1216,42 @@ async function submitOrder(orderData) {
             retryCount++;
         }
         
-        // Fallback: Store locally and simulate success
+        // Fallback: Store locally and simulate success (without large image data)
         console.log('💾 Using local storage fallback...');
         const orders = JSON.parse(localStorage.getItem('jb_orders') || '[]');
-        const newOrder = {
-            ...orderData,
+        
+        // Create lightweight order data without Base64 images
+        const lightweightOrderData = {
             id: Date.now().toString(),
+            orderNumber: orderData.orderNumber,
+            customerName: orderData.customer?.name || 'Guest',
+            customerEmail: orderData.customer?.email || '',
+            customerPhone: orderData.customer?.phone || '',
+            totalAmount: orderData.totals?.total || 0,
+            itemCount: orderData.items?.length || 0,
             status: 'pending',
             createdAt: new Date().toISOString(),
-            method: 'localStorage'
+            method: 'localStorage',
+            note: 'Images stored locally - will sync to server once database is available'
         };
-        orders.push(newOrder);
-        localStorage.setItem('jb_orders', JSON.stringify(orders));
         
-        console.log('✅ Order saved locally successfully');
+        orders.push(lightweightOrderData);
+        
+        try {
+            localStorage.setItem('jb_orders', JSON.stringify(orders));
+            console.log('✅ Order saved locally successfully (without images)');
+        } catch (storageError) {
+            console.warn('⚠️ LocalStorage quota exceeded, saving minimal data');
+            // Keep only last 5 orders if storage is full
+            const trimmedOrders = orders.slice(-5);
+            localStorage.setItem('jb_orders', JSON.stringify(trimmedOrders));
+        }
+        
         return { 
             success: true, 
-            orderId: newOrder.id, 
+            orderId: lightweightOrderData.id, 
             method: 'localStorage',
-            message: 'Order saved locally. Will sync with server once database is configured.'
+            message: 'Order saved locally. Images and full details will be processed once server is available.'
         };
         
     } catch (error) {
@@ -1138,18 +1325,19 @@ async function placeOrder() {
                     successMessage += '\n\nOrder saved to secure cloud database.';
                 }
                 
-                // Add appropriate redirect message
+                // Store order details for confirmation page
+                sessionStorage.setItem('lastOrderNumber', orderData.orderNumber);
+                sessionStorage.setItem('lastCustomerName', orderData.customer?.name || 'Valued Customer');
+                sessionStorage.setItem('lastCustomerEmail', orderData.customer?.email || '');
+                sessionStorage.setItem('lastOrderAmount', orderData.totals?.total || '299');
+                
+                // Show success message briefly then redirect to confirmation page
                 if (user) {
-                    successMessage += '\n\nYou will receive a confirmation email shortly.\nYou can view this order in your account.';
-                    alert(successMessage);
-                    // Redirect to orders page for logged-in users
-                    window.location.href = 'my-orders.html';
+                    // For logged-in users
+                    window.location.href = `order-success.html?order=${orderData.orderNumber}&name=${encodeURIComponent(orderData.customer?.name || 'Customer')}&email=${encodeURIComponent(orderData.customer?.email || '')}&amount=${orderData.totals?.total || 299}&guest=false`;
                 } else {
-                    successMessage += '\n\nIMPORTANT: Save your order number to track your order!\nYou can track your order anytime at: track-order.html';
-                    successMessage += `\n\nConfirmation email sent to: ${orderData.customer.email}`;
-                    alert(successMessage);
-                    // Redirect to track order page for guests
-                    window.location.href = `track-order.html?order=${orderData.orderNumber}`;
+                    // For guest users
+                    window.location.href = `order-success.html?order=${orderData.orderNumber}&name=${encodeURIComponent(orderData.customer?.name || 'Guest Customer')}&email=${encodeURIComponent(orderData.customer?.email || '')}&amount=${orderData.totals?.total || 299}&guest=true`;
                 }
             } else {
                 // Handle specific error types
@@ -1207,6 +1395,15 @@ window.downloadOrderData = downloadOrderData;
 
 // Authentication helper functions
 function getCurrentUser() {
+    // First check OTP authentication system (newer)
+    if (window.otpAuthUtils) {
+        const otpUser = window.otpAuthUtils.getCurrentUser();
+        if (otpUser) {
+            return otpUser;
+        }
+    }
+    
+    // Fallback to legacy authentication system
     const storedUser = localStorage.getItem('jb_user') || sessionStorage.getItem('jb_user');
     if (storedUser) {
         try {
@@ -1216,6 +1413,7 @@ function getCurrentUser() {
             return null;
         }
     }
+    
     return null;
 }
 
@@ -1276,6 +1474,142 @@ function saveGuestOrderHistory(orderData) {
         localStorage.setItem('jb_guest_orders', JSON.stringify(guestOrders));
     } catch (error) {
         console.error('Error saving guest order history:', error);
+    }
+}
+
+/**
+ * Upload all images in an order to Cloudinary
+ * @param {Object} orderData - The order data containing items with images
+ * @returns {Promise<Array>} - Array of objects with Cloudinary URLs for each item
+ */
+async function uploadOrderImagesToCloudinary(orderData) {
+    try {
+        console.log('🖼️ Starting image uploads to Cloudinary...');
+        
+        // Generate order number in yearmonthdatetimeseconds+phone format
+        const generateOrderNumber = (customerPhone = '') => {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const date = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            // Extract last 4 digits of phone number, default to random if not available
+            let phoneLastFour = '0000';
+            if (customerPhone) {
+                // Remove all non-digit characters
+                const digitsOnly = customerPhone.replace(/\D/g, '');
+                if (digitsOnly.length >= 4) {
+                    phoneLastFour = digitsOnly.slice(-4);
+                } else if (digitsOnly.length > 0) {
+                    // Pad with zeros if less than 4 digits
+                    phoneLastFour = digitsOnly.padStart(4, '0');
+                }
+            } else {
+                // Generate random 4 digits if no phone number
+                phoneLastFour = Math.floor(1000 + Math.random() * 9000).toString();
+            }
+            
+            return `JB${year}${month}${date}${hours}${minutes}${seconds}${phoneLastFour}`;
+        };
+        
+        const orderNumber = orderData.orderNumber || generateOrderNumber(orderData.customer?.phone);
+        const cloudinaryImages = [];
+        
+        // For each item in the order, upload its images to Cloudinary
+        for (let i = 0; i < orderData.items.length; i++) {
+            const item = orderData.items[i];
+            
+            // Find the best available image to upload - prioritize printImage (processed without frame)
+            let imageToUpload = item.printImage || item.displayImage || item.previewImage || item.originalImage ||
+                               item.printImagePath || item.displayImagePath || item.originalImagePath ||
+                               item.enhancedPrintPath;
+            
+            // Additional debug logging
+            console.log(`🔍 Item ${i+1} image properties:`, {
+                printImage: !!item.printImage,
+                displayImage: !!item.displayImage,
+                previewImage: !!item.previewImage,
+                originalImage: !!item.originalImage,
+                printImagePath: !!item.printImagePath,
+                displayImagePath: !!item.displayImagePath,
+                originalImagePath: !!item.originalImagePath,
+                enhancedPrintPath: !!item.enhancedPrintPath,
+                imageToUpload: !!imageToUpload,
+                imageSize: imageToUpload ? imageToUpload.length : 0
+            });
+            
+            if (!imageToUpload) {
+                console.warn(`⚠️ No image found for item ${i+1}`);
+                cloudinaryImages.push({
+                    itemIndex: i,
+                    urls: null
+                });
+                continue;
+            }
+            
+            console.log(`🔄 Uploading image for item ${i+1}...`);
+            
+            try {
+                // Generate unique public ID for this image
+                const timestamp = Date.now();
+                const publicId = `jb-creations-orders/${orderNumber}/item${i+1}_${timestamp}`;
+                
+                // Use fetch to upload to our backend endpoint
+                const response = await fetch('http://localhost:3001/api/upload-to-cloudinary', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        image: imageToUpload,
+                        publicId: publicId
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log(`✅ Image uploaded successfully for item ${i+1}:`, result.secure_url);
+                    cloudinaryImages.push({
+                        itemIndex: i,
+                        urls: {
+                            original: result.secure_url,
+                            print: result.secure_url,
+                            display: result.secure_url,
+                            publicId: result.public_id
+                        }
+                    });
+                } else {
+                    console.error(`❌ Failed to upload image for item ${i+1}:`, result.error);
+                    cloudinaryImages.push({
+                        itemIndex: i,
+                        urls: null,
+                        error: result.error
+                    });
+                }
+                
+            } catch (uploadError) {
+                console.error(`❌ Upload error for item ${i+1}:`, uploadError);
+                cloudinaryImages.push({
+                    itemIndex: i,
+                    urls: null,
+                    error: uploadError.message
+                });
+            }
+        }
+        
+        // Log upload summary
+        const successfulUploads = cloudinaryImages.filter(img => img.urls !== null).length;
+        console.log(`📊 Cloudinary upload summary: ${successfulUploads}/${cloudinaryImages.length} successful`);
+        
+        return cloudinaryImages.length > 0 ? cloudinaryImages : null;
+        
+    } catch (error) {
+        console.error('❌ Cloudinary upload process failed:', error);
+        return null;
     }
 }
 

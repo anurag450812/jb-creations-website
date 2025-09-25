@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication - JB Creations</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Enhanced OTP Authentication Styles with Theme Colors */
+        :root {
+            --primary-color: #16697A; /* Caribbean Current - Teal */
+            --secondary-color: #EDE7E3; /* Isabelline - Light Beige */
+            --accent-color: #489FB5; /* Moonstone - Blue */
+            --background-color: #EDE7E3; /* Isabelline - Light Beige */
+            --text-color: #16697A; /* Caribbean Current for text */
+            --card-background: #FFFFFF;
+            --success-color: #82C0CC; /* Sky Blue */
+            --highlight-color: #FFA62B; /* Orange Peel */
+            --border-radius: 12px;
+            --shadow: 0 4px 16px rgba(22, 105, 122, 0.1);
+        }
+
+        .otp-auth-container {
+            min-height: 100vh;
+            background: var(--background-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .otp-auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('room-preview-images/13X19 LANDSCAPE/1.jpg') center/cover;
+            opacity: 0.05;
+            z-index: 1;
+        }
+
+        .auth-card {
+            backdrop-filter: blur(10px);
+            background: var(--card-background);
+            border: 2px solid rgba(22, 105, 122, 0.1);
+            border-radius: 25px;
+            padding: 0;
+            box-shadow: var(--shadow);
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            z-index: 2;
+            overflow: hidden;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .auth-tabs {
+            display: flex;
+            background: rgba(22, 105, 122, 0.05);
+            border-radius: 25px 25px 0 0;
+            overflow: hidden;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .auth-tab::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+
+        .auth-tab.active {
+            background: var(--card-background);
+            color: var(--primary-color);
+            box-shadow: 0 -5px 15px rgba(22, 105, 122, 0.1);
+        }
+
+        .auth-tab.active::before {
+            background: var(--highlight-color);
+            height: 4px;
+        }
+
+        .auth-tab:hover:not(.active) {
+            background: rgba(22, 105, 122, 0.08);
+            color: var(--highlight-color);
+        }
+
+        .auth-content {
+            padding: 30px 40px 40px 40px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .welcome-message {
+            background: var(--primary-color);
+            color: white;
+            padding: 20px 25px;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+            font-weight: 600;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .welcome-message.new-user {
+            background: var(--success-color);
+        }
+
+        .welcome-message.existing-user {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            border: 2px solid rgba(22, 105, 122, 0.2);
+        }
+
+        .welcome-message i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .error-message,
+        .success-message {
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease-in;
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+            color: white;
+            border: 2px solid #ff5252;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, var(--highlight-color), #ff8f00);
+            color: white;
+            border: 2px solid var(--highlight-color);
+            box-shadow: 0 4px 15px rgba(255, 166, 43, 0.2);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes orangeGlow {
+            0%, 100% { 
+                box-shadow: 0 0 5px rgba(255, 166, 43, 0.3);
+            }
+            50% { 
+                box-shadow: 0 0 20px rgba(255, 166, 43, 0.6);
+            }
+        }
+
+        /* Add subtle glow to active elements */
+        .otp-digit.filled {
+            border-color: var(--highlight-color);
+            color: var(--highlight-color);
+            background: rgba(255, 166, 43, 0.05);
+            animation: orangeGlow 2s ease-in-out infinite;
+        }
+
+        /* Header Title Styling */
+        .auth-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 166, 43, 0.1);
+        }
+
+        .auth-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .auth-header .brand-accent {
+            color: var(--highlight-color);
+            text-shadow: 0 0 10px rgba(255, 166, 43, 0.3);
+        }
+
+        .auth-header p {
+            margin: 8px 0 0 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .auth-form {
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 15px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 18px 24px;
+            border: 2px solid rgba(22, 105, 122, 0.2);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            background: var(--card-background);
+            font-family: inherit;
+            color: var(--text-color);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--highlight-color);
+            box-shadow: 0 0 0 4px rgba(255, 166, 43, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .form-input.error {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .otp-input-container {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 25px 0;
+        }
+
+        .otp-digit {
+            width: 55px;
+            height: 65px;
+            border: 2px solid rgba(22, 105, 122, 0.2);
+            border-radius: var(--border-radius);
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            background: var(--card-background);
+            transition: all 0.3s ease;
+        }
+
+        .otp-digit:focus {
+            outline: none;
+            border-color: var(--highlight-color);
+            box-shadow: 0 0 0 4px rgba(255, 166, 43, 0.15);
+            transform: scale(1.05);
+        }
+
+        .auth-button {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .auth-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 166, 43, 0.3), transparent);
+            transition: all 0.6s ease;
+        }
+
+        .auth-button:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .auth-button:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--highlight-color) 0%, #ff8f00 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 166, 43, 0.4);
+        }
+
+        .auth-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-button.secondary {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            box-shadow: none;
+        }
+
+        .auth-button.secondary::before {
+            background: linear-gradient(90deg, transparent, rgba(22, 105, 122, 0.1), transparent);
+        }
+
+        .auth-button.secondary:hover:not(:disabled) {
+            background: rgba(255, 166, 43, 0.1);
+            border-color: var(--highlight-color);
+            color: var(--highlight-color);
+            box-shadow: 0 4px 15px rgba(255, 166, 43, 0.2);
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin: 20px 0;
+            border-left: 5px solid #c62828;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(198, 40, 40, 0.1);
+        }
+
+        .success-message {
+            background: rgba(130, 192, 204, 0.1);
+            color: var(--primary-color);
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin: 20px 0;
+            border-left: 5px solid var(--success-color);
+            font-weight: 500;
+            box-shadow: var(--shadow);
+        }
+
+        .otp-timer {
+            color: #666;
+            font-size: 14px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .otp-timer.expired {
+            color: #dc3545;
+            font-weight: 700;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .auth-steps {
+            margin: 35px 0;
+            padding: 25px;
+            background: rgba(22, 105, 122, 0.05);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(22, 105, 122, 0.1);
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            font-size: 15px;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            color: var(--primary-color);
+            font-weight: 700;
+            transform: translateX(5px);
+        }
+
+        .step.completed {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
+        .step-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 14px;
+            color: white;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-icon {
+            background: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        .step.completed .step-icon {
+            background: var(--success-color);
+        }
+
+        .auth-footer {
+            text-align: center;
+            padding: 25px 40px 40px;
+            border-top: 1px solid rgba(22, 105, 122, 0.1);
+        }
+
+        .back-to-home {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: rgba(22, 105, 122, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .auth-card {
+                max-width: 400px;
+                margin: 10px;
+            }
+
+            .auth-content {
+                padding: 30px 25px;
+            }
+
+            .auth-tab {
+                padding: 15px 10px;
+                font-size: 14px;
+            }
+
+            .otp-input-container {
+                gap: 8px;
+            }
+
+            .otp-digit {
+                width: 45px;
+                height: 55px;
+                font-size: 20px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--highlight-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Slide-up Animation */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="otp-auth-container">
+        <div class="auth-card">
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <button class="auth-tab signup-tab active" id="signupTab">
+                    <i class="fas fa-user-plus"></i>
+                    Sign Up
+                </button>
+                <button class="auth-tab signin-tab" id="signinTab">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Sign In
+                </button>
+            </div>
+
+            <div class="auth-content">
+                <!-- Brand Header -->
+                <div class="auth-header">
+                    <h1>
+                        <i class="fas fa-camera-retro brand-accent"></i>
+                        JB Creations
+                    </h1>
+                    <p>Professional Photo Framing Service</p>
+                </div>
+
+                <!-- Sign Up Tab Content -->
+                <div id="signupContent" class="tab-content signup-content active">
+                    <!-- Welcome Message for Sign Up -->
+                    <div id="signupWelcomeMessage" class="welcome-message new-user" style="display: none;">
+                        <i class="fas fa-star"></i>
+                        Welcome to JB Creations! Let's create your account.
+                    </div>
+
+                    <!-- Sign Up Steps -->
+                    <div class="auth-steps">
+                        <div class="step active" id="signupStep1">
+                            <div class="step-icon">1</div>
+                            <span>Enter Details</span>
+                        </div>
+                        <div class="step" id="signupStep2">
+                            <div class="step-icon">2</div>
+                            <span>Verify Phone</span>
+                        </div>
+                        <div class="step" id="signupStep3">
+                            <div class="step-icon">3</div>
+                            <span>Account Created</span>
+                        </div>
+                    </div>
+
+                    <!-- Sign Up Details Step -->
+                    <div id="signupPhoneStep" class="auth-form">
+                        <div class="form-group">
+                            <label for="signupUserName" class="form-label">Full Name *</label>
+                            <input type="text" id="signupUserName" class="form-input" placeholder="Enter your full name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="signupUserEmail" class="form-label">Email Address <span style="color: #666; font-weight: normal;">(Optional)</span></label>
+                            <input type="email" id="signupUserEmail" class="form-input" placeholder="Enter your email address">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="signupPhone" class="form-label">Mobile Number *</label>
+                            <input type="tel" id="signupPhone" class="form-input" placeholder="Enter 10-digit mobile number" maxlength="10" required>
+                        </div>
+                        
+                        <button type="button" id="signupSendOtpBtn" class="auth-button">
+                            <i class="fas fa-paper-plane"></i>
+                            Send OTP
+                        </button>
+                    </div>
+
+                    <!-- Sign Up OTP Step -->
+                    <div id="signupOtpStep" class="auth-form" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Enter 6-Digit OTP</label>
+                            <div class="otp-input-container">
+                                <input type="text" class="otp-digit" maxlength="1" id="signupOtp1">
+                                <input type="text" class="otp-digit" maxlength="1" id="signupOtp2">
+                                <input type="text" class="otp-digit" maxlength="1" id="signupOtp3">
+                                <input type="text" class="otp-digit" maxlength="1" id="signupOtp4">
+                                <input type="text" class="otp-digit" maxlength="1" id="signupOtp5">
+                                <input type="text" class="otp-digit" maxlength="1" id="signupOtp6">
+                            </div>
+                        </div>
+                        
+                        <div id="signupOtpTimer" class="otp-timer"></div>
+                        
+                        <button type="button" id="signupVerifyOtpBtn" class="auth-button">
+                            <i class="fas fa-check-circle"></i>
+                            Verify OTP
+                        </button>
+                        
+                        <button type="button" id="signupResendOtpBtn" class="auth-button secondary" style="display: none; margin-top: 15px;">
+                            <i class="fas fa-redo"></i>
+                            Resend OTP
+                        </button>
+                        
+                        <button id="signupBackToPhoneBtn" class="auth-button secondary" style="margin-top: 15px;">
+                            <i class="fas fa-arrow-left"></i>
+                            Change Number
+                        </button>
+                    </div>
+
+                    <!-- Sign Up Success Step -->
+                    <div id="signupSuccessStep" class="auth-form" style="display: none;">
+                        <div class="success-message">
+                            <i class="fas fa-party-horn"></i>
+                            Account created successfully! Welcome to JB Creations!
+                        </div>
+                        
+                        <button id="signupContinueBtn" class="auth-button">
+                            <i class="fas fa-arrow-right"></i>
+                            Continue to Website
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sign In Tab Content -->
+                <div id="signinContent" class="tab-content signin-content">
+                    <!-- Welcome Message for Sign In -->
+                    <div id="signinWelcomeMessage" class="welcome-message" style="display: none;"></div>
+
+                    <!-- Sign In Steps -->
+                    <div class="auth-steps">
+                        <div class="step active" id="signinStep1">
+                            <div class="step-icon">1</div>
+                            <span>Enter Mobile Number</span>
+                        </div>
+                        <div class="step" id="signinStep2">
+                            <div class="step-icon">2</div>
+                            <span>Verify OTP</span>
+                        </div>
+                        <div class="step" id="signinStep3">
+                            <div class="step-icon">3</div>
+                            <span>Access Account</span>
+                        </div>
+                    </div>
+
+                    <!-- Sign In Phone Step -->
+                    <div id="signinPhoneStep" class="auth-form">
+                        <div class="form-group">
+                            <label for="signinPhone" class="form-label">Mobile Number</label>
+                            <input type="tel" id="signinPhone" class="form-input" placeholder="Enter your registered mobile number" maxlength="10">
+                        </div>
+                        <button type="button" id="signinSendOtpBtn" class="auth-button">
+                            <i class="fas fa-paper-plane"></i>
+                            Send OTP
+                        </button>
+                    </div>
+
+                    <!-- Sign In OTP Step -->
+                    <div id="signinOtpStep" class="auth-form" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Enter 6-Digit OTP</label>
+                            <div class="otp-input-container">
+                                <input type="text" class="otp-digit" maxlength="1" id="signinOtp1">
+                                <input type="text" class="otp-digit" maxlength="1" id="signinOtp2">
+                                <input type="text" class="otp-digit" maxlength="1" id="signinOtp3">
+                                <input type="text" class="otp-digit" maxlength="1" id="signinOtp4">
+                                <input type="text" class="otp-digit" maxlength="1" id="signinOtp5">
+                                <input type="text" class="otp-digit" maxlength="1" id="signinOtp6">
+                            </div>
+                        </div>
+                        
+                        <div id="signinOtpTimer" class="otp-timer"></div>
+                        
+                        <button id="signinVerifyOtpBtn" class="auth-button">
+                            <i class="fas fa-check-circle"></i>
+                            Verify & Sign In
+                        </button>
+                        
+                        <button id="signinResendOtpBtn" class="auth-button secondary" style="display: none; margin-top: 15px;">
+                            <i class="fas fa-redo"></i>
+                            Resend OTP
+                        </button>
+                        
+                        <button id="signinBackToPhoneBtn" class="auth-button secondary" style="margin-top: 15px;">
+                            <i class="fas fa-arrow-left"></i>
+                            Change Number
+                        </button>
+                    </div>
+
+                    <!-- Sign In Success Step -->
+                    <div id="signinSuccessStep" class="auth-form" style="display: none;">
+                        <div class="success-message">
+                            <i class="fas fa-thumbs-up"></i>
+                            Successfully signed in! Welcome back!
+                        </div>
+                        
+                        <button id="signinContinueBtn" class="auth-button">
+                            <i class="fas fa-arrow-right"></i>
+                            Continue to Website
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="auth-footer">
+                <a href="index.html" class="back-to-home">
+                    <i class="fas fa-home"></i>
+                    Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Scripts -->
+    <script src="firebase-client-new.js"></script>
+    <script src="otp-auth-firebase.js"></script>
+    <script>
+        // Enhanced OTP Authentication with Tabbed Interface
+        class TabbedOTPAuth {
+            constructor() {
+                this.currentTab = 'signup';
+                this.signupTimer = null;
+                this.signinTimer = null;
+                this.signupTimeLeft = 0;
+                this.signinTimeLeft = 0;
+                this.tempUserData = null; // Store user data during signup flow
+                this.init();
+            }
+
+            init() {
+                console.log('TabbedOTPAuth init() called');
+                this.setupTabSwitching();
+                this.setupEventListeners();
+                this.setupOTPDigitInputs();
+                console.log('Tabbed OTP Authentication initialized');
+            }
+
+            setupTabSwitching() {
+                document.getElementById('signupTab').addEventListener('click', () => this.switchTab('signup'));
+                document.getElementById('signinTab').addEventListener('click', () => this.switchTab('signin'));
+            }
+
+            switchTab(tab) {
+                // Clear any existing errors
+                this.removeMessages();
+                
+                // Update tab buttons
+                document.querySelectorAll('.auth-tab').forEach(tabBtn => {
+                    tabBtn.classList.remove('active');
+                });
+                document.getElementById(`${tab}Tab`).classList.add('active');
+                
+                // Update tab content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(`${tab}Content`).classList.add('active');
+                
+                this.currentTab = tab;
+            }
+
+            setupEventListeners() {
+                console.log('Setting up event listeners...');
+                
+                // Sign Up Event Listeners
+                const signupSendBtn = document.getElementById('signupSendOtpBtn');
+                console.log('signupSendOtpBtn found:', !!signupSendBtn);
+                if (signupSendBtn) {
+                    signupSendBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        console.log('Send OTP button clicked!');
+                        this.sendOTP('signup');
+                    });
+                }
+                
+                document.getElementById('signupVerifyOtpBtn').addEventListener('click', () => this.verifyOTP('signup'));
+                document.getElementById('signupResendOtpBtn').addEventListener('click', () => this.resendOTP('signup'));
+                document.getElementById('signupBackToPhoneBtn').addEventListener('click', () => this.backToPhone('signup'));
+                document.getElementById('signupContinueBtn').addEventListener('click', () => this.continueToWebsite());
+
+                // Sign In Event Listeners
+                const signinSendBtn = document.getElementById('signinSendOtpBtn');
+                console.log('signinSendOtpBtn found:', !!signinSendBtn);
+                if (signinSendBtn) {
+                    signinSendBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        console.log('Sign In Send OTP button clicked!');
+                        this.sendOTP('signin');
+                    });
+                }
+                
+                document.getElementById('signinVerifyOtpBtn').addEventListener('click', () => this.verifyOTP('signin'));
+                document.getElementById('signinResendOtpBtn').addEventListener('click', () => this.resendOTP('signin'));
+                document.getElementById('signinBackToPhoneBtn').addEventListener('click', () => this.backToPhone('signin'));
+                document.getElementById('signinContinueBtn').addEventListener('click', () => this.continueToWebsite());
+
+                // Phone input change listeners
+                document.getElementById('signinPhone').addEventListener('input', (e) => this.handlePhoneInput('signin', e));
+                document.getElementById('signupPhone').addEventListener('input', (e) => this.handlePhoneInput('signup', e));
+            }
+
+            setupOTPDigitInputs() {
+                ['signup', 'signin'].forEach(type => {
+                    for (let i = 1; i <= 6; i++) {
+                        const input = document.getElementById(`${type}Otp${i}`);
+                        if (input) {
+                            input.addEventListener('input', (e) => this.handleOTPInput(e, type, i));
+                            input.addEventListener('keydown', (e) => this.handleOTPKeydown(e, type, i));
+                            input.addEventListener('paste', (e) => this.handleOTPPaste(e, type));
+                        }
+                    }
+                });
+            }
+
+            async handlePhoneInput(type, e) {
+                const phone = e.target.value.replace(/\D/g, '');
+                e.target.value = phone;
+
+                if (type === 'signin' && phone.length === 10) {
+                    try {
+                        const user = await window.otpAuth.getUserByPhone(phone);
+                        if (user) {
+                            const welcomeMsg = document.getElementById('signinWelcomeMessage');
+                            welcomeMsg.innerHTML = `
+                                <i class="fas fa-heart"></i>
+                                Welcome back, ${user.name}! We're happy to see you again.
+                            `;
+                            welcomeMsg.style.display = 'block';
+                        }
+                    } catch (error) {
+                        console.log('User not found for sign in');
+                        const welcomeMsg = document.getElementById('signinWelcomeMessage');
+                        welcomeMsg.style.display = 'none';
+                    }
+                }
+            }
+
+            async sendOTP(type) {
+                console.log('sendOTP called with type:', type);
+                
+                if (type === 'signup') {
+                    // For signup, validate name, email, and phone
+                    const nameInput = document.getElementById('signupUserName');
+                    const emailInput = document.getElementById('signupUserEmail');
+                    const phoneInput = document.getElementById('signupPhone');
+                    
+                    const name = nameInput.value.trim();
+                    const email = emailInput.value.trim();
+                    const phone = phoneInput.value.trim();
+
+                    // Clear previous errors
+                    [nameInput, emailInput, phoneInput].forEach(input => input.classList.remove('error'));
+
+                    // Validate required fields
+                    if (!name) {
+                        this.showError('Please enter your full name');
+                        nameInput.classList.add('error');
+                        nameInput.focus();
+                        return;
+                    }
+
+                    if (email && !this.isValidEmail(email)) {
+                        this.showError('Please enter a valid email address');
+                        emailInput.classList.add('error');
+                        emailInput.focus();
+                        return;
+                    }
+
+                    if (!phone || phone.length !== 10) {
+                        this.showError('Please enter a valid 10-digit mobile number');
+                        phoneInput.classList.add('error');
+                        phoneInput.focus();
+                        return;
+                    }
+
+                    // Check if user already exists
+                    try {
+                        // Normalize phone number for consistent checking (same as Firebase storage)
+                        const normalizedPhone = phone.startsWith('+91') ? phone : '+91' + phone;
+                        
+                        if (window.jbAPI && window.jbAPI.getUserByPhone) {
+                            const result = await window.jbAPI.getUserByPhone(normalizedPhone);
+                            if (result.success && result.user) {
+                                const existingUser = result.user;
+                                console.log('👤 User already exists, proceeding with existing user data:', existingUser.name);
+                                
+                                // Update signup welcome message to show existing user
+                                const welcomeMsg = document.getElementById('signupWelcomeMessage');
+                                welcomeMsg.innerHTML = `
+                                    <i class="fas fa-user-check"></i>
+                                    Welcome back, <strong>${existingUser.name}</strong>! We found your account.
+                                `;
+                                welcomeMsg.className = 'welcome-message existing-user'; // Use existing-user class
+                                welcomeMsg.style.display = 'block';
+                                
+                                // Store existing user data for verification
+                                this.tempUserData = { 
+                                    name: existingUser.name, 
+                                    email: existingUser.email, 
+                                    phone: phone,
+                                    isExistingUser: true 
+                                };
+                                
+                                // Continue with OTP sending (don't return/block)
+                                console.log('📱 Proceeding with OTP verification for existing user');
+                            } else {
+                                console.log('✅ New user signup, showing regular welcome message');
+                                
+                                // Show regular signup welcome message for new users
+                                const welcomeMsg = document.getElementById('signupWelcomeMessage');
+                                welcomeMsg.innerHTML = `
+                                    <i class="fas fa-star"></i>
+                                    Welcome to JB Creations! Let's create your account.
+                                `;
+                                welcomeMsg.className = 'welcome-message new-user';
+                                welcomeMsg.style.display = 'block';
+                                
+                                // Store new user data for verification
+                                this.tempUserData = { name, email, phone, isExistingUser: false };
+                            }
+                        } else {
+                            console.log('⚠️ Firebase API not available, proceeding as new user');
+                            // Store new user data for verification
+                            this.tempUserData = { name, email, phone, isExistingUser: false };
+                        }
+                    } catch (error) {
+                        console.log('User check error (continuing anyway):', error);
+                        // Continue with signup even if user check fails
+                        this.tempUserData = { name, email, phone, isExistingUser: false };
+                    }
+                } else {
+                    // For signin, just validate phone
+                    const phoneInput = document.getElementById(`${type}Phone`);
+                    const phone = phoneInput.value.trim();
+
+                    if (!phone || phone.length !== 10) {
+                        this.showError('Please enter a valid 10-digit mobile number');
+                        phoneInput.classList.add('error');
+                        return;
+                    }
+
+                    phoneInput.classList.remove('error');
+
+                    // Check if user exists for sign in
+                    try {
+                        // Normalize phone number for consistent checking (same as Firebase storage)
+                        const normalizedPhone = phone.startsWith('+91') ? phone : '+91' + phone;
+                        
+                        if (window.jbAPI && window.jbAPI.getUserByPhone) {
+                            const result = await window.jbAPI.getUserByPhone(normalizedPhone);
+                            if (!result.success || !result.user) {
+                                this.showError('Number not registered. Please use Sign Up to create an account.');
+                                phoneInput.classList.add('error');
+                                return;
+                            }
+                        }
+                    } catch (error) {
+                        console.log('User check error (continuing anyway):', error);
+                        // Continue with signin even if user check fails
+                    }
+                }
+
+                // Send OTP
+                const phone = type === 'signup' ? this.tempUserData.phone : document.getElementById(`${type}Phone`).value;
+                const btn = document.getElementById(`${type}SendOtpBtn`);
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<span class="loading"></span> Sending OTP...';
+                btn.disabled = true;
+
+                try {
+                    let result;
+                    if (type === 'signup') {
+                        // For signup, pass user data to be saved immediately
+                        result = await window.otpAuth.sendOTP(phone, this.tempUserData);
+                    } else {
+                        // For signin, just send OTP
+                        result = await window.otpAuth.sendOTP(phone);
+                    }
+                    
+                    if (result.success) {
+                        this.showStep(type, 'otp');
+                        this.startTimer(type);
+                        this.updateStepStatus(type, 2, 'active');
+                        console.log(`Demo OTP for ${type}: ${result.otp}`);
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error) {
+                    this.showError(error.message || 'Failed to send OTP. Please try again.');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            }
+
+            async verifyOTP(type) {
+                const otp = this.getOTPValue(type);
+                
+                if (otp.length !== 6) {
+                    this.showError('Please enter complete 6-digit OTP');
+                    return;
+                }
+
+                const btn = document.getElementById(`${type}VerifyOtpBtn`);
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<span class="loading"></span> Verifying...';
+                btn.disabled = true;
+
+                try {
+                    const phone = type === 'signup' ? this.tempUserData.phone : document.getElementById(`${type}Phone`).value;
+                    const result = await window.otpAuth.verifyOTP(phone, otp);
+                    
+                    if (result.success) {
+                        this.clearTimer(type);
+                        this.updateStepStatus(type, 2, 'completed');
+                        
+                        if (type === 'signup') {
+                            // Update success message based on whether user was existing or new
+                            const successMessage = document.querySelector('#signupSuccessStep .success-message');
+                            if (this.tempUserData && this.tempUserData.isExistingUser) {
+                                successMessage.innerHTML = `
+                                    <i class="fas fa-user-check"></i>
+                                    Welcome back, <strong>${this.tempUserData.name}</strong>! Successfully signed in.
+                                `;
+                            } else {
+                                successMessage.innerHTML = `
+                                    <i class="fas fa-party-horn"></i>
+                                    Account created successfully! Welcome to JB Creations, <strong>${this.tempUserData.name}</strong>!
+                                `;
+                            }
+                            
+                            // For signup, user was already created during sendOTP, just show success
+                            this.showStep('signup', 'success');
+                            this.updateStepStatus('signup', 3, 'completed');
+                            // Clear temporary data
+                            this.tempUserData = null;
+                            // Auto-redirect after brief success display
+                            setTimeout(() => {
+                                this.continueToWebsite();
+                            }, 2000);
+                        } else {
+                            // Sign in success
+                            this.showStep('signin', 'success');
+                            this.updateStepStatus('signin', 3, 'completed');
+                            // Auto-redirect after brief success display
+                            setTimeout(() => {
+                                this.continueToWebsite();
+                            }, 2000);
+                        }
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error) {
+                    this.showError(error.message || 'Invalid OTP. Please try again.');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            }
+
+            async createSignupAccount() {
+                try {
+                    const result = await window.otpAuth.registerNewUser({
+                        name: this.tempUserData.name,
+                        email: this.tempUserData.email || '',
+                        phone: this.tempUserData.phone
+                    });
+
+                    if (result.success) {
+                        this.showStep('signup', 'success');
+                        this.updateStepStatus('signup', 3, 'completed');
+                        // Clear temporary data
+                        this.tempUserData = null;
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error) {
+                    this.showError(error.message || 'Failed to create account. Please try again.');
+                }
+            }
+
+            continueToWebsite() {
+                // Get the redirect URL from URL parameters or use referrer
+                const urlParams = new URLSearchParams(window.location.search);
+                let redirectUrl = urlParams.get('redirect');
+                
+                // If no redirect parameter, try to get from sessionStorage (set on page load)
+                if (!redirectUrl) {
+                    redirectUrl = sessionStorage.getItem('auth_redirect_url');
+                }
+                
+                // If still no redirect URL, default to homepage
+                if (!redirectUrl || redirectUrl === window.location.pathname) {
+                    redirectUrl = 'index.html';
+                }
+                
+                // Clean up stored redirect URL
+                sessionStorage.removeItem('auth_redirect_url');
+                
+                // Add auth success parameter and redirect
+                const separator = redirectUrl.includes('?') ? '&' : '?';
+                window.location.href = `${redirectUrl}${separator}auth=success`;
+            }
+
+            showStep(type, step) {
+                // Hide all steps for this type
+                const steps = ['phone', 'otp', 'success'];
+                steps.forEach(s => {
+                    const element = document.getElementById(`${type}${s.charAt(0).toUpperCase() + s.slice(1)}Step`);
+                    if (element) element.style.display = 'none';
+                });
+
+                // Show the requested step
+                const stepElement = document.getElementById(`${type}${step.charAt(0).toUpperCase() + step.slice(1)}Step`);
+                if (stepElement) stepElement.style.display = 'block';
+            }
+
+            updateStepStatus(type, stepNumber, status) {
+                const stepElement = document.getElementById(`${type}Step${stepNumber}`);
+                if (stepElement) {
+                    stepElement.className = `step ${status}`;
+                    if (status === 'completed') {
+                        const icon = stepElement.querySelector('.step-icon');
+                        icon.innerHTML = '<i class="fas fa-check"></i>';
+                    }
+                }
+            }
+
+            backToPhone(type) {
+                this.clearTimer(type);
+                this.showStep(type, 'phone');
+                this.updateStepStatus(type, 1, 'active');
+                this.updateStepStatus(type, 2, '');
+                this.clearOTP(type);
+                
+                // Clear temporary user data for signup
+                if (type === 'signup') {
+                    this.tempUserData = null;
+                }
+                
+                // Re-enable send button
+                const btn = document.getElementById(`${type}SendOtpBtn`);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
+            }
+
+            startTimer(type) {
+                this.clearTimer(type);
+                
+                if (type === 'signup') {
+                    this.signupTimeLeft = 300; // 5 minutes
+                } else {
+                    this.signinTimeLeft = 300;
+                }
+
+                const timer = type === 'signup' ? 
+                    setInterval(() => this.updateTimer('signup'), 1000) :
+                    setInterval(() => this.updateTimer('signin'), 1000);
+                
+                if (type === 'signup') {
+                    this.signupTimer = timer;
+                } else {
+                    this.signinTimer = timer;
+                }
+                
+                this.updateTimer(type);
+            }
+
+            updateTimer(type) {
+                const timeLeft = type === 'signup' ? this.signupTimeLeft : this.signinTimeLeft;
+                const timerElement = document.getElementById(`${type}OtpTimer`);
+                const resendBtn = document.getElementById(`${type}ResendOtpBtn`);
+
+                if (timeLeft <= 0) {
+                    timerElement.innerHTML = '<span class="expired">OTP expired. Please request a new one.</span>';
+                    timerElement.classList.add('expired');
+                    resendBtn.style.display = 'block';
+                    this.clearTimer(type);
+                } else {
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    timerElement.innerHTML = `OTP expires in ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    timerElement.classList.remove('expired');
+                    
+                    if (type === 'signup') {
+                        this.signupTimeLeft--;
+                    } else {
+                        this.signinTimeLeft--;
+                    }
+                }
+            }
+
+            clearTimer(type) {
+                if (type === 'signup' && this.signupTimer) {
+                    clearInterval(this.signupTimer);
+                    this.signupTimer = null;
+                } else if (type === 'signin' && this.signinTimer) {
+                    clearInterval(this.signinTimer);
+                    this.signinTimer = null;
+                }
+            }
+
+            async resendOTP(type) {
+                const phone = document.getElementById(`${type}Phone`).value;
+                const btn = document.getElementById(`${type}ResendOtpBtn`);
+                
+                btn.innerHTML = '<span class="loading"></span> Resending...';
+                btn.disabled = true;
+
+                try {
+                    const result = await window.otpAuth.sendOTP(phone);
+                    if (result.success) {
+                        this.startTimer(type);
+                        btn.style.display = 'none';
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-redo"></i> Resend OTP';
+                        console.log(`Demo OTP for ${type}: ${result.otp}`);
+                    }
+                } catch (error) {
+                    this.showError('Failed to resend OTP. Please try again.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-redo"></i> Resend OTP';
+                }
+            }
+
+            getOTPValue(type) {
+                let otp = '';
+                for (let i = 1; i <= 6; i++) {
+                    otp += document.getElementById(`${type}Otp${i}`).value;
+                }
+                return otp;
+            }
+
+            clearOTP(type) {
+                for (let i = 1; i <= 6; i++) {
+                    const input = document.getElementById(`${type}Otp${i}`);
+                    input.value = '';
+                    input.classList.remove('filled');
+                }
+            }
+
+            handleOTPInput(e, type, position) {
+                const value = e.target.value.replace(/\D/g, '');
+                e.target.value = value;
+
+                // Add orange glow effect when digit is filled
+                if (value) {
+                    e.target.classList.add('filled');
+                } else {
+                    e.target.classList.remove('filled');
+                }
+
+                if (value && position < 6) {
+                    const nextInput = document.getElementById(`${type}Otp${position + 1}`);
+                    if (nextInput) nextInput.focus();
+                }
+
+                // Auto-verify when all 6 digits are entered
+                if (position === 6 && value) {
+                    setTimeout(() => this.verifyOTP(type), 500);
+                }
+            }
+
+            handleOTPKeydown(e, type, position) {
+                if (e.key === 'Backspace' && !e.target.value && position > 1) {
+                    const prevInput = document.getElementById(`${type}Otp${position - 1}`);
+                    if (prevInput) {
+                        prevInput.focus();
+                        prevInput.select();
+                        prevInput.classList.remove('filled');
+                    }
+                } else if (e.key === 'Backspace' && e.target.value) {
+                    // Remove filled class when clearing current input
+                    setTimeout(() => {
+                        if (!e.target.value) {
+                            e.target.classList.remove('filled');
+                        }
+                    }, 10);
+                }
+            }
+
+            handleOTPPaste(e, type) {
+                e.preventDefault();
+                const paste = (e.clipboardData || window.clipboardData).getData('text');
+                const digits = paste.replace(/\D/g, '').substring(0, 6);
+                
+                for (let i = 0; i < digits.length; i++) {
+                    const input = document.getElementById(`${type}Otp${i + 1}`);
+                    if (input) {
+                        input.value = digits[i];
+                        input.classList.add('filled');
+                    }
+                }
+                
+                if (digits.length === 6) {
+                    setTimeout(() => this.verifyOTP(type), 500);
+                }
+            }
+
+            showError(message) {
+                this.removeMessages();
+                const container = document.querySelector('.auth-content');
+                if (!container) {
+                    console.error('Error: auth-content container not found');
+                    alert('Error: ' + message); // Fallback to alert
+                    return;
+                }
+                
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+                
+                // Insert at the beginning of the container
+                container.insertBefore(errorDiv, container.firstChild);
+                
+                setTimeout(() => {
+                    if (errorDiv.parentNode) {
+                        errorDiv.remove();
+                    }
+                }, 5000);
+            }
+
+            removeMessages() {
+                const container = document.querySelector('.auth-content');
+                if (container) {
+                    const messages = container.querySelectorAll('.error-message, .success-message');
+                    messages.forEach(msg => msg.remove());
+                }
+            }
+
+            showSuccess(message) {
+                this.removeMessages();
+                const container = document.querySelector('.auth-content');
+                if (!container) {
+                    console.log('Success: ' + message);
+                    return;
+                }
+                
+                const successDiv = document.createElement('div');
+                successDiv.className = 'success-message';
+                successDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+                
+                // Insert at the beginning of the container
+                container.insertBefore(successDiv, container.firstChild);
+                
+                setTimeout(() => {
+                    if (successDiv.parentNode) {
+                        successDiv.remove();
+                    }
+                }, 5000);
+            }
+
+            isValidEmail(email) {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            }
+        }
+
+        // Initialize Tabbed OTP Authentication when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded');
+            
+            // Capture redirect URL from URL parameters or referrer
+            const urlParams = new URLSearchParams(window.location.search);
+            let redirectUrl = urlParams.get('redirect');
+            
+            // If no redirect parameter, use document.referrer (if it's from same origin)
+            if (!redirectUrl && document.referrer) {
+                const referrerUrl = new URL(document.referrer);
+                const currentUrl = new URL(window.location.href);
+                
+                // Only use referrer if it's from the same origin and not the login page itself
+                if (referrerUrl.origin === currentUrl.origin && 
+                    !referrerUrl.pathname.includes('otp-login.html')) {
+                    // Include the full path with query parameters and hash
+                    redirectUrl = referrerUrl.pathname + referrerUrl.search + referrerUrl.hash;
+                }
+            }
+            
+            // Store the redirect URL in sessionStorage
+            if (redirectUrl) {
+                sessionStorage.setItem('auth_redirect_url', redirectUrl);
+                console.log('🔄 Stored redirect URL:', redirectUrl);
+            } else {
+                console.log('🔄 No redirect URL found, will default to homepage');
+            }
+            
+            // Wait for Firebase to be ready
+            function initializeAuth() {
+                // Make sure OTP Auth is available
+                if (typeof window.otpAuth === 'undefined') {
+                    console.error('OTP Auth service not available');
+                    return;
+                }
+                console.log('OTP Auth service available');
+
+                // Initialize the tabbed auth system
+                window.tabbedOTPAuth = new TabbedOTPAuth();
+                console.log('Tabbed OTP Auth initialized');
+            }
+
+            // Check if Firebase is already ready
+            if (window.jbAPI) {
+                initializeAuth();
+            } else {
+                // Wait for Firebase ready event
+                window.addEventListener('firebaseReady', initializeAuth);
+                
+                // Also try after a short delay as fallback
+                setTimeout(initializeAuth, 1000);
+            }
+        });
+    </script>
+</body>
+</html>

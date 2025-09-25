@@ -940,6 +940,38 @@
             margin: 8px 16px;
         }
 
+        /* User Info Section in Dropdown */
+        .dropdown-user-info {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(22, 105, 122, 0.05);
+            border-radius: 8px;
+            margin: 8px;
+        }
+
+        .dropdown-user-info .user-avatar {
+            font-size: 24px;
+            color: #16697A;
+            margin-right: 12px;
+        }
+
+        .dropdown-user-info .user-details {
+            flex: 1;
+        }
+
+        .dropdown-user-info .user-name {
+            font-weight: 600;
+            color: #16697A;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .dropdown-user-info .user-phone {
+            color: #489FB5;
+            font-size: 12px;
+        }
+
         /* Authentication styles for header */
         .auth-section {
             display: flex;
@@ -1661,11 +1693,11 @@
                         <div class="profile-dropdown-menu" id="profileDropdownMenu">
                             <!-- Guest user options -->
                             <div class="guest-options" id="guestOptions">
-                                <a href="auth.html" class="dropdown-item">
+                                <a href="otp-login.html?redirect=index.html" class="dropdown-item">
                                     <i class="fas fa-sign-in-alt"></i>
                                     Sign In
                                 </a>
-                                <a href="auth.html" class="dropdown-item">
+                                <a href="otp-login.html?redirect=index.html" class="dropdown-item">
                                     <i class="fas fa-user-plus"></i>
                                     Sign Up
                                 </a>
@@ -1674,6 +1706,18 @@
                             
                             <!-- Authenticated user options (hidden by default) -->
                             <div class="authenticated-options" id="authenticatedOptions" style="display: none;">
+                                <!-- User Info Section -->
+                                <div class="dropdown-user-info" id="dropdownUserInfo">
+                                    <div class="user-avatar">
+                                        <i class="fas fa-user-circle"></i>
+                                    </div>
+                                    <div class="user-details">
+                                        <div class="user-name" id="dropdownUserName">User</div>
+                                        <div class="user-phone" id="dropdownUserPhone">Phone</div>
+                                    </div>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                
                                 <a href="#" class="dropdown-item" onclick="viewProfile()">
                                     <i class="fas fa-user-circle"></i>
                                     My Profile
@@ -1917,41 +1961,179 @@
         </div>
     </div>
 
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    
     <!-- JB Creations Firebase Backend -->
-    <script src="firebase-client.js" type="module"></script>
+    <script src="firebase-client-new.js"></script>
     <script src="api-client.js"></script>
+    <script src="otp-auth-firebase.js"></script>
     <script src="auth.js"></script>
     <script src="script.js"></script>
     <script>
         // Initialize authentication on page load
         document.addEventListener('DOMContentLoaded', function() {
-            updateAuthUI();
+            console.log('DOM loaded, initializing auth UI');
+            
+            // Clean up old localStorage data to prevent conflicts with Firebase
+            console.log('🧹 Cleaning up old localStorage data...');
+            const keysToRemove = ['jb_users']; // Keep jb_current_user for session
+            keysToRemove.forEach(key => {
+                if (localStorage.getItem(key)) {
+                    localStorage.removeItem(key);
+                    console.log('🗑️ Removed old localStorage key:', key);
+                }
+            });
+            
+            // Check if user just logged in
+            const urlParams = new URLSearchParams(window.location.search);
+            const authSuccess = urlParams.get('auth') === 'success';
+            
+            if (authSuccess) {
+                console.log('User just logged in, forcing auth UI update');
+                // Clear the URL parameter
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // Force multiple auth UI updates with delays to ensure it works
+                // Also ensure OTP auth is available before checking
+                const checkAuthWithRetry = (retryCount = 0) => {
+                    if (retryCount < 5) { // Reduced retry attempts
+                        setTimeout(async () => {
+                            if (typeof window.otpAuth !== 'undefined') {
+                                await updateAuthUI();
+                            } else {
+                                checkAuthWithRetry(retryCount + 1);
+                            }
+                        }, 100 + (retryCount * 100)); // Increasing delay
+                    }
+                };
+                
+                checkAuthWithRetry();
+                setTimeout(async () => await updateAuthUI(), 500);
+                setTimeout(async () => await updateAuthUI(), 1000);
+            } else {
+                // Normal initialization
+                updateAuthUI();
+            }
+            
+            // Also try after Firebase is ready
+            if (window.jbAPI) {
+                setTimeout(updateAuthUI, 500);
+            } else {
+                window.addEventListener('firebaseReady', function() {
+                    setTimeout(updateAuthUI, 500);
+                });
+            }
+            
+            // Fallback - try again after a longer delay
+            setTimeout(updateAuthUI, 2000);
         });
 
+        // Unified function to get current user from any auth system
+        // Get current authenticated user from Firebase
+        async function getCurrentAuthenticatedUser() {
+            try {
+                if (typeof window.otpAuth !== 'undefined') {
+                    console.log('� Getting current user from Firebase...');
+                    const user = await window.otpAuth.getCurrentUser();
+                    console.log('� Firebase user result:', user);
+                    return user;
+                } else {
+                    console.log('❌ OTP Auth system not available');
+                    return null;
+                }
+            } catch (error) {
+                console.error('❌ Error getting current user from Firebase:', error);
+                return null;
+            }
+        }
+
         // Update authentication UI based on login status
-        function updateAuthUI() {
-            const user = authUtils.getCurrentUser();
-            const guestOptions = document.getElementById('guestOptions');
-            const authenticatedOptions = document.getElementById('authenticatedOptions');
-
-            if (user) {
-                // User is logged in - show authenticated options, hide guest options
-                guestOptions.style.display = 'none';
-                authenticatedOptions.style.display = 'block';
-            } else {
-                // User is not logged in - show guest options, hide authenticated options
-                guestOptions.style.display = 'block';
-                authenticatedOptions.style.display = 'none';
+        async function updateAuthUI() {
+            try {
+                const user = await getCurrentAuthenticatedUser();
+                console.log('📱 updateAuthUI - user found:', user);
+                
+                const guestOptions = document.getElementById('guestOptions');
+                const authenticatedOptions = document.getElementById('authenticatedOptions');
+                const profileBtn = document.getElementById('profileBtn');
+                
+                if (user) {
+                    console.log('📱 updateAuthUI - user name:', user.name);
+                    console.log('📱 updateAuthUI - user phone:', user.phone);
+                    
+                    // User is logged in - show authenticated options, hide guest options
+                    if (guestOptions) {
+                        guestOptions.style.display = 'none';
+                    }
+                    if (authenticatedOptions) {
+                        authenticatedOptions.style.display = 'block';
+                    }
+                    
+                    // Update user info in dropdown
+                    const dropdownUserName = document.getElementById('dropdownUserName');
+                    const dropdownUserPhone = document.getElementById('dropdownUserPhone');
+                    
+                    if (dropdownUserName) {
+                        dropdownUserName.textContent = user.name || 'User';
+                        console.log('📱 updateAuthUI - Set dropdown name to:', user.name || 'User');
+                    }
+                    if (dropdownUserPhone) {
+                        dropdownUserPhone.textContent = user.phone || 'Phone not available';
+                    }
+                    
+                    // Always keep profile button text as "Profile"
+                    if (profileBtn) {
+                        profileBtn.innerHTML = `
+                            <i class="fas fa-user-alt"></i>
+                            <span class="button-label">Profile</span>
+                        `;
+                        profileBtn.style.color = '#16697A';
+                    }
+                } else {
+                    // User is not logged in - show guest options, hide authenticated options
+                    if (guestOptions) {
+                        guestOptions.style.display = 'block';
+                    }
+                    if (authenticatedOptions) {
+                        authenticatedOptions.style.display = 'none';
+                    }
+                    
+                    // Reset profile button to default
+                    if (profileBtn) {
+                        profileBtn.innerHTML = `
+                            <i class="fas fa-user-alt"></i>
+                            <span class="button-label">Profile</span>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Error updating auth UI:', error);
             }
         }
 
-        // View user profile
-        function viewProfile() {
-            const user = authUtils.getCurrentUser();
-            if (user) {
-                alert(`Profile for ${user.name}\nEmail: ${user.email}\nPhone: ${user.phone}\nMember since: ${new Date(user.registrationDate).toLocaleDateString()}`);
+        // View user profile / toggle dropdown
+        async function viewProfile() {
+            const dropdown = document.getElementById('profileDropdownMenu');
+            if (dropdown) {
+                dropdown.style.opacity = dropdown.style.opacity === '1' ? '0' : '1';
+                dropdown.style.visibility = dropdown.style.visibility === 'visible' ? 'hidden' : 'visible';
+                dropdown.style.transform = dropdown.style.opacity === '1' ? 'translateY(0)' : 'translateY(-10px)';
             }
         }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('profileDropdownMenu');
+            const profileBtn = document.getElementById('profileBtn');
+            
+            if (dropdown && profileBtn && !profileBtn.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.style.opacity = '0';
+                dropdown.style.visibility = 'hidden';
+                dropdown.style.transform = 'translateY(-10px)';
+            }
+        });
 
         // View user orders
         function viewOrders() {
@@ -2071,7 +2253,12 @@
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            razorpaySystem = new RazorpayPaymentSystem();
+            // Only initialize RazorpayPaymentSystem if it's available
+            if (typeof RazorpayPaymentSystem !== 'undefined') {
+                razorpaySystem = new RazorpayPaymentSystem();
+            } else {
+                console.log('RazorpayPaymentSystem not available, payment functionality may be limited');
+            }
         });
 
         // Frame payment function

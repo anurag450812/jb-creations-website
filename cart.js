@@ -18,12 +18,12 @@ class CartManager {
     }
 
     loadCart() {
-        const cartData = localStorage.getItem('photoFramingCart');
+        const cartData = sessionStorage.getItem('photoFramingCart');
         return cartData ? JSON.parse(cartData) : [];
     }
 
     saveCart() {
-        localStorage.setItem('photoFramingCart', JSON.stringify(this.cart));
+        sessionStorage.setItem('photoFramingCart', JSON.stringify(this.cart));
         this.updateHeader();
     }
 
@@ -366,16 +366,46 @@ class CartManager {
 }
 
 // Common header functions
-function viewProfile() {
-    // Check if auth utilities are available
-    if (typeof authUtils !== 'undefined' && authUtils.getCurrentUser) {
-        const user = authUtils.getCurrentUser();
-        if (user) {
-            alert(`Profile for ${user.name}\nEmail: ${user.email}\nPhone: ${user.phone}\nMember since: ${new Date(user.registrationDate).toLocaleDateString()}`);
+async function viewProfile() {
+    try {
+        // Use Firebase OTP auth system
+        if (typeof window.otpAuth !== 'undefined') {
+            const user = await window.otpAuth.getCurrentUser();
+            if (user) {
+                const registrationDate = user.registrationDate ? new Date(user.registrationDate).toLocaleDateString() : 'Unknown';
+                alert(`Profile for ${user.name || 'User'}\nPhone: ${user.phone || 'Unknown'}\nEmail: ${user.email || 'Not provided'}\nMember since: ${registrationDate}\nUser ID: ${user.id || 'N/A'}`);
+                return;
+            }
         }
-    } else {
-        // Fallback for when auth utilities are not loaded
+        
+        // Fallback to localStorage if Firebase isn't ready
+        const userDataStr = localStorage.getItem('jb_current_user');
+        if (userDataStr) {
+            let userData;
+            try {
+                userData = JSON.parse(userDataStr);
+            } catch (parseError) {
+                // Handle old format (just phone number)
+                if (userDataStr.startsWith('+91') || userDataStr.startsWith('+')) {
+                    userData = { phone: userDataStr, name: 'User' };
+                } else {
+                    alert('Please sign in to view your profile.');
+                    return;
+                }
+            }
+            
+            if (userData && userData.phone) {
+                const registrationDate = userData.registrationDate ? new Date(userData.registrationDate).toLocaleDateString() : 'Unknown';
+                alert(`Profile for ${userData.name || 'User'}\nPhone: ${userData.phone || 'Unknown'}\nEmail: ${userData.email || 'Not provided'}\nMember since: ${registrationDate}\nUser ID: ${userData.id || 'N/A'}`);
+                return;
+            }
+        }
+        
+        // No user found
         alert('Please sign in to view your profile.');
+    } catch (error) {
+        console.error('❌ Error viewing profile:', error);
+        alert('Error loading profile. Please try again.');
     }
 }
 

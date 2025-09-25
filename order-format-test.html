@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Number Format Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; max-width: 800px; }
+        .test-result { 
+            background: #f8f9fa; border: 1px solid #dee2e6; 
+            padding: 15px; margin: 10px 0; border-radius: 5px; 
+        }
+        .old-format { color: #dc3545; }
+        .new-format { color: #28a745; font-weight: bold; }
+        .format-example { font-family: monospace; background: #e9ecef; padding: 5px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>📅 Order Number Format Test</h1>
+    <p>Testing the new order number format: <strong>yearmonthdatetimeseconds + phone last 4 digits</strong></p>
+
+    <div class="test-result">
+        <h3>🔤 Format Explanation</h3>
+        <p><strong>New Format:</strong> <span class="format-example">JBYYYYMMDDHHmmssXXXX</span></p>
+        <ul>
+            <li><strong>JB</strong> - Company prefix</li>
+            <li><strong>YYYY</strong> - 4-digit year (e.g., 2025)</li>
+            <li><strong>MM</strong> - 2-digit month (01-12)</li>
+            <li><strong>DD</strong> - 2-digit day (01-31)</li>
+            <li><strong>HH</strong> - 2-digit hour (00-23)</li>
+            <li><strong>mm</strong> - 2-digit minute (00-59)</li>
+            <li><strong>ss</strong> - 2-digit second (00-59)</li>
+            <li><strong>XXXX</strong> - Last 4 digits of customer phone number</li>
+        </ul>
+    </div>
+
+    <div class="test-result">
+        <h3>📞 Phone Number Test</h3>
+        <p>Enter a phone number to test the format:</p>
+        <input type="text" id="phone-input" placeholder="+91 9876543210" style="padding: 8px; margin: 5px; width: 200px;">
+        <button onclick="testWithPhoneNumber()" style="padding: 8px 15px; margin: 5px;">🧪 Generate Order ID</button>
+        <p><strong>Generated Order ID:</strong> <span id="phone-test-result" class="new-format"></span></p>
+    </div>
+
+    <div class="test-result">
+        <h3>🧪 Live Generation Test</h3>
+        <p>Current timestamp: <span id="current-time"></span></p>
+        <p class="old-format">Old format would be: <span id="old-format"></span></p>
+        <p class="new-format">New format will be: <span id="new-format"></span></p>
+        <p class="new-format">With phone (9876543210): <span id="new-format-phone"></span></p>
+        <button onclick="generateNewExample()">🔄 Generate New Example</button>
+    </div>
+
+    <div class="test-result">
+        <h3>📊 Format Comparison</h3>
+        <table border="1" cellpadding="10" style="border-collapse: collapse; width: 100%;">
+            <tr>
+                <th>Format Type</th>
+                <th>Example</th>
+                <th>Readability</th>
+            </tr>
+            <tr>
+                <td>Old (timestamp)</td>
+                <td class="old-format format-example">JB1727095722311</td>
+                <td>❌ Hard to read, no date info, no phone info</td>
+            </tr>
+            <tr>
+                <td>New (formatted)</td>
+                <td class="new-format format-example">JB202509231145301234</td>
+                <td>✅ Easy to read: Sept 23, 2025 at 11:45:30, phone ends in 1234</td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        function generateOrderNumber(customerPhone = '') {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const date = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            // Extract last 4 digits of phone number, default to random if not available
+            let phoneLastFour = '0000';
+            if (customerPhone) {
+                // Remove all non-digit characters
+                const digitsOnly = customerPhone.replace(/\D/g, '');
+                if (digitsOnly.length >= 4) {
+                    phoneLastFour = digitsOnly.slice(-4);
+                } else if (digitsOnly.length > 0) {
+                    // Pad with zeros if less than 4 digits
+                    phoneLastFour = digitsOnly.padStart(4, '0');
+                }
+            } else {
+                // Generate random 4 digits if no phone number
+                phoneLastFour = Math.floor(1000 + Math.random() * 9000).toString();
+            }
+            
+            return `JB${year}${month}${date}${hours}${minutes}${seconds}${phoneLastFour}`;
+        }
+
+        function updateExamples() {
+            const now = new Date();
+            
+            document.getElementById('current-time').textContent = now.toLocaleString();
+            document.getElementById('old-format').textContent = `JB${Date.now()}`;
+            document.getElementById('new-format').textContent = generateOrderNumber();
+            document.getElementById('new-format-phone').textContent = generateOrderNumber('9876543210');
+        }
+
+        function testWithPhoneNumber() {
+            const phoneInput = document.getElementById('phone-input').value;
+            const result = generateOrderNumber(phoneInput);
+            document.getElementById('phone-test-result').textContent = result;
+        }
+
+        function generateNewExample() {
+            // Wait a moment to ensure different second
+            setTimeout(updateExamples, 100);
+        }
+
+        // Update examples on page load
+        updateExamples();
+
+        // Auto-update every second to show live changes
+        setInterval(updateExamples, 1000);
+    </script>
+</body>
+</html>

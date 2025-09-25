@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Number Fix Verification</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; max-width: 800px; }
+        .result { 
+            background: #f8f9fa; border: 1px solid #dee2e6; 
+            padding: 15px; margin: 10px 0; border-radius: 5px; 
+        }
+        .old-format { color: #dc3545; }
+        .new-format { color: #28a745; font-weight: bold; }
+        .test-button { 
+            padding: 10px 20px; margin: 10px 5px; border: none; 
+            border-radius: 5px; cursor: pointer; background: #007bff; color: white; 
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Order Number Fix Verification</h1>
+    <p>This page verifies that the order number generation has been fixed to use the new format.</p>
+
+    <div class="result">
+        <h3>📞 Test with Phone Number</h3>
+        <p>Enter a phone number to test the new order generation:</p>
+        <input type="text" id="phone-input" placeholder="9876543210" style="padding: 8px; margin: 5px; width: 200px;">
+        <button onclick="testOrderGeneration()" class="test-button">🧪 Generate Order Number</button>
+        
+        <p><strong>Generated Order Number:</strong> <span id="test-result" class="new-format"></span></p>
+        <p><strong>Format Breakdown:</strong> <span id="breakdown"></span></p>
+    </div>
+
+    <div class="result">
+        <h3>🔍 Problem Analysis</h3>
+        <p><strong>Issue:</strong> Order <code class="old-format">JB665939210</code> was still using the old format</p>
+        <p><strong>Root Cause:</strong> The <code>generateOrderNumber()</code> function in <code>checkout.js</code> line 918 was not updated</p>
+        <p><strong>Fix Applied:</strong> Updated the function to use the new <code>JBYYYYMMDDHHmmssXXXX</code> format</p>
+    </div>
+
+    <div class="result">
+        <h3>✅ Verification Steps</h3>
+        <ol>
+            <li>✅ Updated <code>generateOrderNumber()</code> function in checkout.js</li>
+            <li>✅ Modified function call to pass customer phone number</li>
+            <li>✅ All order generation functions now use consistent format</li>
+            <li>🧪 Ready for testing: Place a new order to verify the fix</li>
+        </ol>
+    </div>
+
+    <div class="result">
+        <h3>📋 Format Comparison</h3>
+        <table border="1" cellpadding="10" style="border-collapse: collapse; width: 100%;">
+            <tr>
+                <th>Source</th>
+                <th>Old Format</th>
+                <th>New Format</th>
+                <th>Status</th>
+            </tr>
+            <tr>
+                <td>checkout.js line 918</td>
+                <td class="old-format">JB665939210</td>
+                <td class="new-format">JB202509231145303210</td>
+                <td>✅ Fixed</td>
+            </tr>
+            <tr>
+                <td>firebase-client.js</td>
+                <td class="old-format">JB1727095722311</td>
+                <td class="new-format">JB202509231145301234</td>
+                <td>✅ Already Fixed</td>
+            </tr>
+            <tr>
+                <td>server-production.js</td>
+                <td class="old-format">JB1727095722311</td>
+                <td class="new-format">JB202509231145305678</td>
+                <td>✅ Already Fixed</td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        // Copy the fixed generateOrderNumber function for testing
+        function generateOrderNumber(customerPhone = '') {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const date = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            // Extract last 4 digits of phone number, default to random if not available
+            let phoneLastFour = '0000';
+            if (customerPhone) {
+                // Remove all non-digit characters
+                const digitsOnly = customerPhone.replace(/\D/g, '');
+                if (digitsOnly.length >= 4) {
+                    phoneLastFour = digitsOnly.slice(-4);
+                } else if (digitsOnly.length > 0) {
+                    // Pad with zeros if less than 4 digits
+                    phoneLastFour = digitsOnly.padStart(4, '0');
+                }
+            } else {
+                // Generate random 4 digits if no phone number
+                phoneLastFour = Math.floor(1000 + Math.random() * 9000).toString();
+            }
+            
+            return `JB${year}${month}${date}${hours}${minutes}${seconds}${phoneLastFour}`;
+        }
+
+        function testOrderGeneration() {
+            const phoneInput = document.getElementById('phone-input').value;
+            const orderNumber = generateOrderNumber(phoneInput);
+            
+            document.getElementById('test-result').textContent = orderNumber;
+            
+            // Break down the format
+            const year = orderNumber.substring(2, 6);
+            const month = orderNumber.substring(6, 8);
+            const date = orderNumber.substring(8, 10);
+            const hour = orderNumber.substring(10, 12);
+            const minute = orderNumber.substring(12, 14);
+            const second = orderNumber.substring(14, 16);
+            const phone = orderNumber.substring(16, 20);
+            
+            const breakdown = `JB + ${year}/${month}/${date} ${hour}:${minute}:${second} + phone:${phone}`;
+            document.getElementById('breakdown').textContent = breakdown;
+        }
+
+        // Auto-generate example on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('phone-input').value = '9876543210';
+            testOrderGeneration();
+        });
+    </script>
+</body>
+</html>

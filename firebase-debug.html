@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Debug - JB Creations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        #results {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .order-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #fff;
+        }
+        .order-header {
+            font-weight: bold;
+            color: #16697A;
+            margin-bottom: 10px;
+        }
+        .order-details {
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Firebase Debug Tool</h1>
+        <p>This tool helps debug Firebase connectivity and data storage issues.</p>
+        
+        <div id="firebase-status" class="status info">🔄 Loading Firebase...</div>
+        
+        <h3>Debug Actions</h3>
+        <button onclick="testFirebaseConnection()">Test Firebase Connection</button>
+        <button onclick="loadAllOrders()">Load All Orders</button>
+        <button onclick="createTestOrder()" style="background-color: #dc3545; border-color: #dc3545;" title="WARNING: Creates orders in production database!">⚠️ Create Test Order (DISABLED)</button>
+        <button onclick="checkFirestoreRules()">Check Firestore Rules</button>
+        <button onclick="clearResults()">Clear Results</button>
+        
+        <h3>Results</h3>
+        <div id="results">Waiting for Firebase to load...\n</div>
+        
+        <h3>Orders Found</h3>
+        <div id="orders-display">No orders loaded yet.</div>
+    </div>
+
+    <!-- Firebase Integration -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        window.firebaseImports = { initializeApp, getFirestore };
+        log('✅ Firebase SDK modules loaded\n');
+    </script>
+
+    <!-- Load Firebase Client -->
+    <script type="module" src="firebase-client.js"></script>
+
+    <!-- Debug Tool JavaScript -->
+    <script>
+        let firebaseAPI = null;
+
+        // Logging function
+        function log(message) {
+            const results = document.getElementById('results');
+            results.textContent += `${new Date().toLocaleTimeString()}: ${message}\n`;
+            results.scrollTop = results.scrollHeight;
+            console.log(message);
+        }
+
+        // Wait for Firebase ready event
+        window.addEventListener('firebaseReady', () => {
+            log('🔥 Firebase ready event received');
+            firebaseAPI = window.jbAPI || window.jbFirebaseAPI;
+            
+            if (firebaseAPI) {
+                document.getElementById('firebase-status').className = 'status success';
+                document.getElementById('firebase-status').textContent = '✅ Firebase connected successfully';
+                log('✅ Firebase API available for debugging\n');
+            } else {
+                document.getElementById('firebase-status').className = 'status error';
+                document.getElementById('firebase-status').textContent = '❌ Firebase API not available';
+                log('❌ Firebase API not available\n');
+            }
+        });
+
+        // Fallback initialization
+        setTimeout(() => {
+            if (!firebaseAPI && (window.jbAPI || window.jbFirebaseAPI)) {
+                firebaseAPI = window.jbAPI || window.jbFirebaseAPI;
+                log('🔄 Firebase API loaded via fallback\n');
+                document.getElementById('firebase-status').className = 'status success';
+                document.getElementById('firebase-status').textContent = '✅ Firebase connected (fallback)';
+            } else if (!firebaseAPI) {
+                document.getElementById('firebase-status').className = 'status error';
+                document.getElementById('firebase-status').textContent = '❌ Firebase connection failed';
+                log('❌ Firebase connection failed after timeout\n');
+            }
+        }, 3000);
+
+        // Test Firebase connection
+        async function testFirebaseConnection() {
+            log('\n🧪 Testing Firebase connection...');
+            
+            if (!firebaseAPI) {
+                log('❌ No Firebase API instance available');
+                return;
+            }
+
+            try {
+                const result = await firebaseAPI.healthCheck();
+                if (result.success) {
+                    log('✅ Firebase connection successful');
+                    log(`   Status: ${result.status}`);
+                    log(`   Backend: ${result.backend}`);
+                    log(`   Timestamp: ${result.timestamp}`);
+                } else {
+                    log('❌ Firebase connection failed: ' + result.message);
+                }
+            } catch (error) {
+                log('❌ Firebase connection error: ' + error.message);
+            }
+        }
+
+        // Load all orders from Firebase
+        async function loadAllOrders() {
+            log('\n📋 Loading all orders from Firebase...');
+            
+            if (!firebaseAPI) {
+                log('❌ No Firebase API instance available');
+                return;
+            }
+
+            try {
+                const result = await firebaseAPI.getAllOrders();
+                
+                if (result.success) {
+                    const orders = result.orders || [];
+                    log(`✅ Successfully loaded ${orders.length} orders`);
+                    
+                    if (orders.length > 0) {
+                        log('\n📊 Order Details:');
+                        orders.forEach((order, index) => {
+                            log(`\n--- Order ${index + 1} ---`);
+                            log(`ID: ${order.id}`);
+                            log(`Customer: ${order.customerName || 'N/A'}`);
+                            log(`Email: ${order.customerEmail || 'N/A'}`);
+                            log(`Amount: ₹${order.totalAmount || 'N/A'}`);
+                            log(`Status: ${order.status || 'N/A'}`);
+                            log(`Created: ${order.createdAt || 'N/A'}`);
+                        });
+                        
+                        // Display orders in UI
+                        displayOrders(orders);
+                    } else {
+                        log('📭 No orders found in database');
+                        document.getElementById('orders-display').innerHTML = '<p style="color: #666;">No orders found in Firebase.</p>';
+                    }
+                } else {
+                    log('❌ Failed to load orders: ' + result.error);
+                    
+                    // Check for permission errors
+                    if (result.error && result.error.includes('permission')) {
+                        log('🔒 This appears to be a Firestore rules issue');
+                        log('   Please check your Firestore security rules');
+                    }
+                }
+            } catch (error) {
+                log('❌ Error loading orders: ' + error.message);
+                
+                if (error.message.includes('permission') || error.message.includes('PERMISSION_DENIED')) {
+                    log('🔒 Permission denied error detected');
+                    log('   Your Firestore rules may not be configured correctly');
+                }
+            }
+        }
+
+        // Display orders in a readable format
+        function displayOrders(orders) {
+            const container = document.getElementById('orders-display');
+            
+            if (!orders || orders.length === 0) {
+                container.innerHTML = '<p style="color: #666;">No orders to display.</p>';
+                return;
+            }
+
+            const ordersHtml = orders.map(order => `
+                <div class="order-card">
+                    <div class="order-header">Order #${order.id}</div>
+                    <div class="order-details">
+                        <strong>Customer:</strong> ${order.customerName || 'N/A'}<br>
+                        <strong>Email:</strong> ${order.customerEmail || 'N/A'}<br>
+                        <strong>Phone:</strong> ${order.customerPhone || 'N/A'}<br>
+                        <strong>Amount:</strong> ₹${order.totalAmount || 'N/A'}<br>
+                        <strong>Status:</strong> ${order.status || 'pending'}<br>
+                        <strong>Created:</strong> ${order.createdAt ? new Date(order.createdAt).toLocaleString() : 'N/A'}<br>
+                        <strong>Images:</strong> ${order.images ? order.images.length : 0} images
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = ordersHtml;
+        }
+
+        // Create a test order - DISABLED FOR PRODUCTION
+        async function createTestOrder() {
+            log('\n⚠️ Test order creation is DISABLED to prevent production database pollution');
+            log('❌ This function was creating orders without images, affecting the admin panel');
+            log('ℹ️ Re-enable only for development/testing with proper Cloudinary integration');
+            return;
+            
+            // DISABLED CODE BELOW - DO NOT REMOVE FOR REFERENCE
+            /*
+            log('\n🧪 Creating test order...');
+            
+            if (!firebaseAPI) {
+                log('❌ No Firebase API instance available');
+                return;
+            }
+
+            const testOrder = {
+                customer: {
+                    name: 'Test Customer Debug',
+                    email: 'test@debug.com',
+                    phone: '9999999999',
+                    address: 'Test Address for Debug'
+                },
+                images: [], // Empty for test - THIS WAS THE PROBLEM
+                frameSize: 'Standard',
+                frameType: 'Wood',
+                quantity: 1,
+                totalAmount: 299
+            };
+
+            try {
+                const result = await firebaseAPI.createOrder(testOrder);
+                
+                if (result.success) {
+                    log('✅ Test order created successfully');
+                    log(`   Order ID: ${result.orderId}`);
+                    log(`   Customer ID: ${result.customerId}`);
+                    
+                    // Reload orders to show the new test order
+                    setTimeout(() => loadAllOrders(), 1000);
+                } else {
+                    log('❌ Test order creation failed: ' + result.error);
+                }
+            } catch (error) {
+                log('❌ Test order creation error: ' + error.message);
+            }
+            */
+        }
+        }
+
+        // Check Firestore rules (informational)
+        function checkFirestoreRules() {
+            log('\n🔒 Firestore Rules Check:');
+            log('To check your Firestore rules:');
+            log('1. Go to https://console.firebase.google.com/');
+            log('2. Select your project: jb-creations-backend');
+            log('3. Go to Firestore Database > Rules');
+            log('4. Make sure rules allow read/write access');
+            log('\nExpected rules:');
+            log('rules_version = "2";');
+            log('service cloud.firestore {');
+            log('  match /databases/{database}/documents {');
+            log('    match /customers/{document} {');
+            log('      allow read, write: if true;');
+            log('    }');
+            log('    match /orders/{document} {');
+            log('      allow read, write: if true;');
+            log('    }');
+            log('  }');
+            log('}');
+        }
+
+        // Clear results
+        function clearResults() {
+            document.getElementById('results').textContent = 'Results cleared...\n';
+            document.getElementById('orders-display').innerHTML = 'Orders display cleared.';
+        }
+
+        // Initial load message
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Firebase Debug Tool initialized');
+            log('Wait for Firebase to load, then test the connection\n');
+        });
+    </script>
+</body>
+</html>

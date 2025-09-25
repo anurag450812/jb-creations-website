@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudinary Flow Test - JB Creations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .console-output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 12px;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #007bff; }
+        .warning { color: #ffc107; }
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 10px;
+        }
+        .test-results {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Complete Cloudinary Flow Test</h1>
+        <p>This page tests the complete flow: Image Upload → Cloudinary → Firebase → Admin Display</p>
+        
+        <div class="test-section">
+            <h3>Step 1: Backend Health Check</h3>
+            <button onclick="testBackendHealth()">Test Backend Connection</button>
+            <div id="backendStatus" class="test-results">Status: Not tested</div>
+        </div>
+
+        <div class="test-section">
+            <h3>Step 2: Cloudinary Upload Test</h3>
+            <button onclick="testCloudinaryUpload()">Test Cloudinary Upload</button>
+            <button onclick="testMultipleUploads()">Test Multiple Images</button>
+            <div id="cloudinaryStatus" class="test-results">Status: Not tested</div>
+            <div id="cloudinaryImages"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Step 3: Complete Order Flow Test</h3>
+            <button onclick="testCompleteFlow()">Test Complete Order Flow</button>
+            <div id="orderFlowStatus" class="test-results">Status: Not tested</div>
+        </div>
+
+        <div class="test-section">
+            <h3>Step 4: Admin Panel Image Display</h3>
+            <button onclick="testAdminDisplay()">Test Admin Image Display</button>
+            <div id="adminStatus" class="test-results">Status: Not tested</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Console Output</h3>
+            <div id="consoleOutput" class="console-output">
+                🚀 Cloudinary Flow Test Ready...\n
+            </div>
+            <button onclick="clearConsole()">Clear Console</button>
+        </div>
+    </div>
+
+    <!-- Load Firebase client -->
+    <script type="module" src="firebase-client.js"></script>
+
+    <script type="module">
+        import { JBCreationsAPI } from './firebase-client.js';
+        
+        // Initialize API
+        let jbApi = null;
+        
+        try {
+            jbApi = new JBCreationsAPI();
+            log('✅ Firebase API initialized', 'success');
+        } catch (error) {
+            log('❌ Firebase API initialization failed: ' + error.message, 'error');
+        }
+
+        // Sample base64 image for testing (1x1 red pixel)
+        const sampleImageBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
+
+        // Sample base64 image for testing (1x1 blue pixel)  
+        const sampleImageBase64_2 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+
+        // Logging function
+        function log(message, type = 'info') {
+            const output = document.getElementById('consoleOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info';
+            output.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+
+        // Test backend health
+        window.testBackendHealth = async function() {
+            log('🔄 Testing backend health...', 'info');
+            const statusDiv = document.getElementById('backendStatus');
+            
+            try {
+                const response = await fetch('http://localhost:3001/health');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log('✅ Backend is healthy: ' + data.message, 'success');
+                    statusDiv.innerHTML = `<span class="success">✅ Backend Online</span> - ${data.message}`;
+                    statusDiv.className = 'test-results success';
+                } else {
+                    log('❌ Backend health check failed', 'error');
+                    statusDiv.innerHTML = `<span class="error">❌ Backend Error</span>`;
+                    statusDiv.className = 'test-results error';
+                }
+            } catch (error) {
+                log('❌ Cannot connect to backend: ' + error.message, 'error');
+                statusDiv.innerHTML = `<span class="error">❌ Cannot Connect</span> - Make sure server is running on port 3001`;
+                statusDiv.className = 'test-results error';
+            }
+        };
+
+        // Test Cloudinary upload
+        window.testCloudinaryUpload = async function() {
+            log('🔄 Testing Cloudinary upload...', 'info');
+            const statusDiv = document.getElementById('cloudinaryStatus');
+            const imagesDiv = document.getElementById('cloudinaryImages');
+            
+            try {
+                const publicId = `test-upload-${Date.now()}`;
+                
+                const response = await fetch('http://localhost:3001/api/upload-to-cloudinary', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        image: sampleImageBase64,
+                        publicId: publicId
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    log('✅ Cloudinary upload successful: ' + result.secure_url, 'success');
+                    statusDiv.innerHTML = `<span class="success">✅ Upload Successful</span>`;
+                    statusDiv.className = 'test-results success';
+                    
+                    // Display the uploaded image
+                    imagesDiv.innerHTML = `
+                        <div>
+                            <h4>Uploaded Image:</h4>
+                            <img src="${result.secure_url}" class="image-preview" alt="Uploaded test image" />
+                            <p><strong>URL:</strong> <a href="${result.secure_url}" target="_blank">${result.secure_url}</a></p>
+                            <p><strong>Public ID:</strong> ${result.public_id}</p>
+                        </div>
+                    `;
+                } else {
+                    log('❌ Cloudinary upload failed: ' + result.error, 'error');
+                    statusDiv.innerHTML = `<span class="error">❌ Upload Failed</span> - ${result.error}`;
+                    statusDiv.className = 'test-results error';
+                }
+            } catch (error) {
+                log('❌ Cloudinary upload error: ' + error.message, 'error');
+                statusDiv.innerHTML = `<span class="error">❌ Upload Error</span> - ${error.message}`;
+                statusDiv.className = 'test-results error';
+            }
+        };
+
+        // Test multiple uploads
+        window.testMultipleUploads = async function() {
+            log('🔄 Testing multiple Cloudinary uploads...', 'info');
+            const statusDiv = document.getElementById('cloudinaryStatus');
+            const imagesDiv = document.getElementById('cloudinaryImages');
+            
+            try {
+                const uploads = [
+                    { image: sampleImageBase64, publicId: `test-multi-1-${Date.now()}` },
+                    { image: sampleImageBase64_2, publicId: `test-multi-2-${Date.now()}` }
+                ];
+                
+                const uploadPromises = uploads.map(async (upload) => {
+                    const response = await fetch('http://localhost:3001/api/upload-to-cloudinary', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(upload)
+                    });
+                    return await response.json();
+                });
+                
+                const results = await Promise.all(uploadPromises);
+                const successful = results.filter(r => r.success);
+                
+                log(`📊 Multiple uploads completed: ${successful.length}/${results.length} successful`, 'info');
+                
+                if (successful.length > 0) {
+                    statusDiv.innerHTML = `<span class="success">✅ Multiple Uploads: ${successful.length}/${results.length}</span>`;
+                    statusDiv.className = 'test-results success';
+                    
+                    let imagesHtml = '<div><h4>Uploaded Images:</h4>';
+                    successful.forEach((result, index) => {
+                        imagesHtml += `
+                            <div style="display: inline-block; margin: 10px;">
+                                <img src="${result.secure_url}" class="image-preview" alt="Test image ${index + 1}" />
+                                <p><small>${result.public_id}</small></p>
+                            </div>
+                        `;
+                    });
+                    imagesHtml += '</div>';
+                    imagesDiv.innerHTML = imagesHtml;
+                } else {
+                    statusDiv.innerHTML = `<span class="error">❌ All uploads failed</span>`;
+                    statusDiv.className = 'test-results error';
+                }
+            } catch (error) {
+                log('❌ Multiple upload error: ' + error.message, 'error');
+                statusDiv.innerHTML = `<span class="error">❌ Multiple Upload Error</span>`;
+                statusDiv.className = 'test-results error';
+            }
+        };
+
+        // Test complete order flow
+        window.testCompleteFlow = async function() {
+            log('🔄 Testing complete order flow...', 'info');
+            const statusDiv = document.getElementById('orderFlowStatus');
+            
+            if (!jbApi) {
+                log('❌ Firebase API not available', 'error');
+                statusDiv.innerHTML = `<span class="error">❌ Firebase API Missing</span>`;
+                return;
+            }
+            
+            try {
+                // Step 1: Simulate Cloudinary uploads
+                log('📸 Step 1: Uploading images to Cloudinary...', 'info');
+                const orderNumber = `FLOW_TEST_${Date.now()}`;
+                
+                const uploads = [
+                    { image: sampleImageBase64, publicId: `jb-creations-orders/${orderNumber}/item1_${Date.now()}` },
+                    { image: sampleImageBase64_2, publicId: `jb-creations-orders/${orderNumber}/item2_${Date.now()}` }
+                ];
+                
+                const uploadPromises = uploads.map(async (upload) => {
+                    const response = await fetch('http://localhost:3001/api/upload-to-cloudinary', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(upload)
+                    });
+                    return await response.json();
+                });
+                
+                const uploadResults = await Promise.all(uploadPromises);
+                const cloudinaryImages = uploadResults.map((result, index) => ({
+                    itemIndex: index,
+                    urls: result.success ? {
+                        original: result.secure_url,
+                        print: result.secure_url,
+                        display: result.secure_url,
+                        publicId: result.public_id
+                    } : null
+                }));
+                
+                log(`✅ Step 1 Complete: ${cloudinaryImages.filter(img => img.urls).length}/2 images uploaded`, 'success');
+                
+                // Step 2: Create Firebase order with Cloudinary URLs
+                log('🔥 Step 2: Creating Firebase order with Cloudinary URLs...', 'info');
+                
+                const orderData = {
+                    orderNumber: orderNumber,
+                    customer: {
+                        name: 'Flow Test Customer',
+                        email: 'flowtest@example.com',
+                        phone: '+91 9999999999',
+                        address: 'Flow Test Address, Test City, Test State - 123456'
+                    },
+                    items: [
+                        {
+                            frameSize: { size: '13x19', orientation: 'Portrait' },
+                            frameColor: 'black',
+                            frameTexture: 'Standard',
+                            price: 349,
+                            adjustments: { brightness: 100, contrast: 100, highlights: 100, shadows: 100, vibrance: 100 },
+                            zoom: 1,
+                            originalImage: sampleImageBase64,
+                            printImage: sampleImageBase64,
+                            displayImage: sampleImageBase64
+                        },
+                        {
+                            frameSize: { size: '13x10', orientation: 'Landscape' },
+                            frameColor: 'brown',
+                            frameTexture: 'Wood',
+                            price: 299,
+                            adjustments: { brightness: 100, contrast: 100, highlights: 100, shadows: 100, vibrance: 100 },
+                            zoom: 1,
+                            originalImage: sampleImageBase64_2,
+                            printImage: sampleImageBase64_2,
+                            displayImage: sampleImageBase64_2
+                        }
+                    ],
+                    cloudinaryImages: cloudinaryImages,
+                    totals: { total: 648 },
+                    totalAmount: 648,
+                    deliveryMethod: 'standard',
+                    usingCloudinary: true,
+                    specialInstructions: 'Flow test order with Cloudinary images'
+                };
+                
+                const firebaseResult = await jbApi.createOrder(orderData);
+                
+                if (firebaseResult.success) {
+                    log(`✅ Step 2 Complete: Firebase order created - ${firebaseResult.orderNumber}`, 'success');
+                    
+                    // Step 3: Verify order in Firebase
+                    log('🔍 Step 3: Verifying order data in Firebase...', 'info');
+                    const orders = await jbApi.getAllOrders();
+                    const createdOrder = orders.orders?.find(o => o.orderNumber === orderNumber);
+                    
+                    if (createdOrder) {
+                        log('✅ Step 3 Complete: Order verified in Firebase', 'success');
+                        log(`📋 Order Items: ${createdOrder.items?.length || 0}`, 'info');
+                        log(`📸 Image URLs in items:`, 'info');
+                        
+                        if (createdOrder.items) {
+                            createdOrder.items.forEach((item, index) => {
+                                log(`  Item ${index + 1}:`, 'info');
+                                log(`    - Original: ${item.originalImagePath ? '✅ ' + item.originalImagePath : '❌ Missing'}`, item.originalImagePath ? 'success' : 'error');
+                                log(`    - Display: ${item.displayImagePath ? '✅ ' + item.displayImagePath : '❌ Missing'}`, item.displayImagePath ? 'success' : 'error');
+                            });
+                        }
+                        
+                        statusDiv.innerHTML = `<span class="success">✅ Complete Flow Success</span> - Order: ${orderNumber}`;
+                        statusDiv.className = 'test-results success';
+                    } else {
+                        log('❌ Step 3 Failed: Order not found in Firebase', 'error');
+                        statusDiv.innerHTML = `<span class="error">❌ Order Verification Failed</span>`;
+                        statusDiv.className = 'test-results error';
+                    }
+                } else {
+                    log('❌ Step 2 Failed: Firebase order creation failed - ' + firebaseResult.error, 'error');
+                    statusDiv.innerHTML = `<span class="error">❌ Firebase Order Failed</span>`;
+                    statusDiv.className = 'test-results error';
+                }
+                
+            } catch (error) {
+                log('❌ Complete flow error: ' + error.message, 'error');
+                statusDiv.innerHTML = `<span class="error">❌ Flow Error</span> - ${error.message}`;
+                statusDiv.className = 'test-results error';
+            }
+        };
+
+        // Test admin display
+        window.testAdminDisplay = async function() {
+            log('🔄 Testing admin panel image display...', 'info');
+            const statusDiv = document.getElementById('adminStatus');
+            
+            try {
+                if (!jbApi) {
+                    throw new Error('Firebase API not available');
+                }
+                
+                const orders = await jbApi.getAllOrders();
+                if (!orders.success || !orders.orders.length) {
+                    throw new Error('No orders found to test');
+                }
+                
+                // Find orders with Cloudinary URLs
+                const ordersWithCloudinary = orders.orders.filter(order => 
+                    order.items && order.items.some(item => 
+                        item.originalImagePath && 
+                        (item.originalImagePath.includes('cloudinary.com') || item.originalImagePath.startsWith('https://'))
+                    )
+                );
+                
+                if (ordersWithCloudinary.length === 0) {
+                    log('⚠️ No orders with Cloudinary URLs found', 'warning');
+                    statusDiv.innerHTML = `<span class="warning">⚠️ No Cloudinary Orders</span> - Create some orders first`;
+                    statusDiv.className = 'test-results warning';
+                    return;
+                }
+                
+                log(`✅ Found ${ordersWithCloudinary.length} orders with Cloudinary URLs`, 'success');
+                log('🔍 Sample order structure:', 'info');
+                
+                const sampleOrder = ordersWithCloudinary[0];
+                log(`Order: ${sampleOrder.orderNumber || sampleOrder.id}`, 'info');
+                log(`Items: ${sampleOrder.items?.length || 0}`, 'info');
+                
+                if (sampleOrder.items) {
+                    sampleOrder.items.forEach((item, index) => {
+                        log(`Item ${index + 1}:`, 'info');
+                        log(`  - Original: ${item.originalImagePath || 'Missing'}`, item.originalImagePath ? 'success' : 'error');
+                        log(`  - Display: ${item.displayImagePath || 'Missing'}`, item.displayImagePath ? 'success' : 'error');
+                        log(`  - Print: ${item.printImagePath || 'Missing'}`, item.printImagePath ? 'success' : 'error');
+                    });
+                }
+                
+                statusDiv.innerHTML = `<span class="success">✅ Admin Ready</span> - ${ordersWithCloudinary.length} orders with Cloudinary images`;
+                statusDiv.className = 'test-results success';
+                
+                // Open admin panel
+                log('🔗 Opening admin panel...', 'info');
+                window.open('admin-firebase.html', '_blank');
+                
+            } catch (error) {
+                log('❌ Admin display test error: ' + error.message, 'error');
+                statusDiv.innerHTML = `<span class="error">❌ Admin Test Failed</span> - ${error.message}`;
+                statusDiv.className = 'test-results error';
+            }
+        };
+
+        window.clearConsole = function() {
+            document.getElementById('consoleOutput').innerHTML = '🚀 Console cleared...\n';
+        };
+
+        // Auto-run backend health check
+        window.addEventListener('load', function() {
+            log('🚀 Cloudinary Flow Test Page Loaded', 'success');
+            setTimeout(() => {
+                testBackendHealth();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

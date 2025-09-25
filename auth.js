@@ -1,10 +1,92 @@
 /*
- * Mobile OTP Authentication JavaScript with Firebase
- * Handles mobile number sign up, sign in with Firebase OTP verification
+ * Enhanced Authentication JavaScript for JB Creations
+ * Handles both traditional auth and new OTP authentication system
  */
 
-// Authentication state management
-const authState = {
+// Enhanced Authentication utilities for OTP system
+const otpAuthUtils = {
+    // Get current authenticated user (works with both systems)
+    getCurrentUser() {
+        // First check OTP auth system
+        if (window.otpAuth) {
+            const otpUser = window.otpAuth.getCurrentUser();
+            if (otpUser) {
+                return {
+                    id: otpUser.id,
+                    name: otpUser.name,
+                    email: otpUser.email,
+                    phone: otpUser.phone,
+                    authType: 'otp'
+                };
+            }
+        }
+        
+        // Fallback to legacy auth
+        const legacyUser = localStorage.getItem('currentUser');
+        if (legacyUser) {
+            try {
+                const userData = JSON.parse(legacyUser);
+                return {
+                    ...userData,
+                    authType: 'legacy'
+                };
+            } catch (error) {
+                console.warn('Invalid legacy user data');
+            }
+        }
+        
+        return null;
+    },
+
+    // Check if user is authenticated
+    isAuthenticated() {
+        return this.getCurrentUser() !== null;
+    },
+
+    // Get user display name
+    getUserDisplayName() {
+        const user = this.getCurrentUser();
+        return user ? user.name : 'Guest';
+    },
+
+    // Get user phone number
+    getUserPhone() {
+        const user = this.getCurrentUser();
+        return user ? user.phone : null;
+    },
+
+    // Logout user
+    logout() {
+        // Clear OTP auth
+        if (window.otpAuth) {
+            window.otpAuth.logout();
+        }
+        
+        // Clear legacy auth
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('jb_current_user');
+        
+        // Get current page for redirect
+        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        
+        // Redirect to auth page with redirect parameter
+        window.location.href = `otp-login.html?redirect=${currentPage}`;
+    },
+
+    // Redirect to appropriate auth page
+    redirectToAuth() {
+        // Get current page for redirect
+        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        window.location.href = `otp-login.html?redirect=${currentPage}`;
+    }
+};
+
+// Make otpAuthUtils globally available
+window.otpAuthUtils = otpAuthUtils;
+
+// Legacy authentication state management (keep for backward compatibility)
+// Use var to allow redeclaration if needed
+var authState = authState || {
     isAuthenticated: false,
     user: null,
     currentPhone: null,
@@ -216,7 +298,7 @@ function goToOrders() {
 
 function handleLogout() {
     if (confirm('Are you sure you want to sign out?')) {
-        authUtils.logout();
+        otpAuthUtils.logout();
     }
 }
 
@@ -984,15 +1066,58 @@ function clearAuthData() {
 // Utility object for authentication functions (used by other pages)
 window.authUtils = {
     getCurrentUser() {
+        // First check OTP auth system
+        if (window.otpAuth && typeof window.otpAuth.getCurrentUser === 'function') {
+            const otpUser = window.otpAuth.getCurrentUser();
+            if (otpUser) {
+                return {
+                    id: otpUser.id,
+                    name: otpUser.name,
+                    email: otpUser.email,
+                    phone: otpUser.phone,
+                    authType: 'otp'
+                };
+            }
+        }
+        
+        // Check otpAuthUtils system
+        if (typeof otpAuthUtils !== 'undefined' && typeof otpAuthUtils.getCurrentUser === 'function') {
+            const otpUser = otpAuthUtils.getCurrentUser();
+            if (otpUser) {
+                return otpUser;
+            }
+        }
+        
+        // Fallback to legacy system
         return authState.user;
     },
     
     isAuthenticated() {
-        return authState.isAuthenticated;
+        // Check if any authentication system has a user
+        const user = this.getCurrentUser();
+        return user !== null;
     },
     
     logout() {
+        // Clear OTP auth system
+        if (window.otpAuth && typeof window.otpAuth.logout === 'function') {
+            window.otpAuth.logout();
+        }
+        
+        // Clear otpAuthUtils system
+        if (typeof otpAuthUtils !== 'undefined' && typeof otpAuthUtils.logout === 'function') {
+            otpAuthUtils.logout();
+        }
+        
+        // Clear legacy auth
         clearAuthData();
+        
+        // Clear all possible auth storage keys
+        localStorage.removeItem('jb_current_user');
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('jb_user');
+        sessionStorage.removeItem('jb_user');
+        
         // If on auth page, show logged out state instead of redirecting
         const currentPage = window.location.pathname.split('/').pop() || 'index.html';
         if (currentPage === 'auth.html') {
@@ -1016,6 +1141,17 @@ window.authUtils = {
             
             // Show success message
             showSuccess('You have been successfully logged out.');
+        } else if (currentPage === 'index.html') {
+            // On homepage, update the UI immediately and show a message
+            console.log('Logging out on homepage');
+            
+            // Update the auth UI to show logged out state
+            if (typeof updateAuthUI === 'function') {
+                updateAuthUI();
+            }
+            
+            // Show logout success message
+            alert('You have been successfully signed out.');
         } else {
             // On other pages, redirect to home
             window.location.href = 'index.html';
