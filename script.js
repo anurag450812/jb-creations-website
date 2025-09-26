@@ -2027,17 +2027,21 @@ function clearCart() {
 
 // Add drag hint visibility toggle
 let dragTimeout;
-elements.imageContainer.addEventListener('mousemove', () => {
-    const dragHint = document.querySelector('.drag-hint');
-    if (dragHint) {
-        dragHint.style.opacity = '1';
-        
-        clearTimeout(dragTimeout);
-        dragTimeout = setTimeout(() => {
-            dragHint.style.opacity = '0.8';
-        }, 2000);
-    }
-}); 
+if (elements.imageContainer) {
+    elements.imageContainer.addEventListener('mousemove', () => {
+        const dragHint = document.querySelector('.drag-hint');
+        if (dragHint) {
+            dragHint.style.opacity = '1';
+            
+            clearTimeout(dragTimeout);
+            dragTimeout = setTimeout(() => {
+                dragHint.style.opacity = '0.8';
+            }, 2000);
+        }
+    });
+} else {
+    console.warn('imageContainer not found, skipping drag hint functionality');
+} 
 
 // Debug functions for testing
 window.clearCartDebug = function() {

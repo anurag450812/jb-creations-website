@@ -1508,6 +1508,29 @@ async function submitOrder(orderData) {
                     };
                     console.log('📋 Complete Firebase order structure (sanitized for debug):', JSON.stringify(debugOrder, null, 2));
 
+                    // CRITICAL: Clean undefined values - Firebase doesn't accept undefined
+                    function removeUndefinedValues(obj) {
+                        if (obj === null || typeof obj !== 'object') {
+                            return obj;
+                        }
+                        
+                        if (Array.isArray(obj)) {
+                            return obj.map(item => removeUndefinedValues(item));
+                        }
+                        
+                        const cleaned = {};
+                        for (const key in obj) {
+                            if (obj.hasOwnProperty(key) && obj[key] !== undefined) {
+                                cleaned[key] = removeUndefinedValues(obj[key]);
+                            }
+                        }
+                        return cleaned;
+                    }
+                    
+                    // Clean the Firebase order data
+                    firebaseOrderData = removeUndefinedValues(firebaseOrderData);
+                    console.log('🧹 Cleaned undefined values from Firebase order data');
+
                     // CRITICAL: Double-check that we're not sending base64 data
                     const hasBase64 = JSON.stringify(firebaseOrderData).includes('data:image');
                     if (hasBase64) {
@@ -1672,12 +1695,7 @@ async function placeOrder() {
             const result = await submitOrder({...orderData, paymentId: paymentResult.paymentId});
             
             if (result.success) {
-                // Save order to user's order history (only if user is logged in)
-                if (user) {
-                    saveOrderToUserHistory(user.id, {...orderData, paymentId: paymentResult.paymentId});
-                }
-                
-                // Clear cart and temporary image storage
+                // Clear cart and temporary image storage ONLY after successful Firebase submission
                 const cartData = sessionStorage.getItem('photoFramingCart');
                 if (cartData) {
                     try {
@@ -1704,28 +1722,36 @@ async function placeOrder() {
                     console.log('🧹 Cleared temporary window image storage');
                 }
                 
-                // Show success message based on storage method
+                // Show success message based on storage method - only for actual Firebase success
                 let successMessage = `Payment Successful! Order placed successfully!\n\nOrder Number: ${orderData.orderNumber}\nPayment ID: ${paymentResult.paymentId}`;
                 
-                if (result.method === 'localStorage') {
-                    successMessage += '\n\nNote: Order saved locally. Will sync with server once database is configured.';
-                } else if (result.method === 'firebase') {
-                    successMessage += '\n\nOrder saved to secure cloud database.';
-                }
-                
-                // Store order details for confirmation page
-                sessionStorage.setItem('lastOrderNumber', orderData.orderNumber);
-                sessionStorage.setItem('lastCustomerName', orderData.customer?.name || 'Valued Customer');
-                sessionStorage.setItem('lastCustomerEmail', orderData.customer?.email || '');
-                sessionStorage.setItem('lastOrderAmount', orderData.totals?.total || '299');
-                
-                // Show success message briefly then redirect to confirmation page
-                if (user) {
-                    // For logged-in users
-                    window.location.href = `order-success.html?order=${orderData.orderNumber}&name=${encodeURIComponent(orderData.customer?.name || 'Customer')}&email=${encodeURIComponent(orderData.customer?.email || '')}&amount=${orderData.totals?.total || 299}&guest=false`;
+                if (result.method === 'firebase') {
+                    successMessage += '\n\nOrder saved to secure cloud database and will be visible in admin panel.';
+                    
+                    // Store order details for confirmation page
+                    sessionStorage.setItem('lastOrderNumber', orderData.orderNumber);
+                    sessionStorage.setItem('lastCustomerName', orderData.customer?.name || 'Valued Customer');
+                    sessionStorage.setItem('lastCustomerEmail', orderData.customer?.email || '');
+                    sessionStorage.setItem('lastOrderAmount', orderData.totals?.total || '299');
+                    
+                    // Redirect to success page ONLY for Firebase success
+                    if (user) {
+                        // For logged-in users
+                        window.location.href = `order-success.html?order=${orderData.orderNumber}&name=${encodeURIComponent(orderData.customer?.name || 'Customer')}&email=${encodeURIComponent(orderData.customer?.email || '')}&amount=${orderData.totals?.total || 299}&guest=false`;
+                    } else {
+                        // For guest users
+                        window.location.href = `order-success.html?order=${orderData.orderNumber}&name=${encodeURIComponent(orderData.customer?.name || 'Guest Customer')}&email=${encodeURIComponent(orderData.customer?.email || '')}&amount=${orderData.totals?.total || 299}&guest=true`;
+                    }
                 } else {
-                    // For guest users
-                    window.location.href = `order-success.html?order=${orderData.orderNumber}&name=${encodeURIComponent(orderData.customer?.name || 'Guest Customer')}&email=${encodeURIComponent(orderData.customer?.email || '')}&amount=${orderData.totals?.total || 299}&guest=true`;
+                    // For localStorage fallback, show error instead of success
+                    console.error('❌ Order not saved to Firebase - showing error message instead of success');
+                    
+                    // Hide processing overlay
+                    document.getElementById('processingOverlay').style.display = 'none';
+                    document.getElementById('placeOrderBtn').disabled = false;
+                    
+                    alert('❌ Order Creation Failed!\n\nYour payment was successful, but there was an error creating the order in our system.\n\nPlease contact support with your payment details:\nPayment ID: ' + paymentResult.paymentId + '\nOrder Number: ' + orderData.orderNumber);
+                    return;
                 }
             } else {
                 // Handle specific error types
@@ -1738,6 +1764,9 @@ async function placeOrder() {
                 }
                 
                 // Don't redirect on error - let user contact support
+                // Hide processing overlay
+                document.getElementById('processingOverlay').style.display = 'none';
+                document.getElementById('placeOrderBtn').disabled = false;
                 return;
             }
         }
