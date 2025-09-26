@@ -108,13 +108,17 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('customerName').value = userName;
             document.getElementById('customerEmail').value = userEmail;
             
-            // Handle phone number with +91 prefix
+            // Handle phone number - extract digits only for new format
             const userPhone = user.phone || '';
-            if (userPhone && !userPhone.startsWith('+91')) {
-                // Add +91 prefix if not present
-                document.getElementById('customerPhone').value = '+91 ' + userPhone.replace(/[^\d]/g, '');
-            } else {
-                document.getElementById('customerPhone').value = userPhone;
+            if (userPhone) {
+                // Extract only the 10-digit number (remove +91 prefix if present)
+                let phoneDigits = userPhone.replace(/[^\d]/g, '');
+                if (phoneDigits.startsWith('91') && phoneDigits.length > 10) {
+                    phoneDigits = phoneDigits.substring(2); // Remove 91 prefix
+                }
+                if (phoneDigits.length >= 10) {
+                    document.getElementById('customerPhone').value = phoneDigits.substring(0, 10);
+                }
             }
             
             // Hide the status container completely for logged-in users
@@ -130,6 +134,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Add form validation listeners
         addFormValidationListeners();
+        
+        // Add special phone number event listeners
+        addPhoneEventListeners();
     }
     
     // Check if auth utilities are ready, otherwise wait a bit
@@ -308,29 +315,181 @@ function enableManualEdit(fieldId) {
     }
 }
 
-// Format phone number with +91 prefix
-function formatPhoneNumber(input) {
+// Helper function to update phone container styling
+function updatePhoneContainerStyling(input, isValid, hasContent) {
+    const container = input.closest('.phone-input-container');
+    if (!container) return;
+    
+    container.classList.remove('valid', 'invalid');
+    
+    if (hasContent) {
+        if (isValid) {
+            container.classList.add('valid');
+        } else if (input.required || input.id === 'customerPhone') {
+            container.classList.add('invalid');
+        }
+    }
+}
+
+// New phone number formatting for 10-digit numbers only
+function formatPhoneNumberNew(input) {
     let value = input.value;
     
-    // Always ensure +91 prefix
-    if (!value.startsWith('+91 ')) {
-        // Remove any existing +91 variations and non-digits except the space after +91
-        value = value.replace(/^\+91\s?/, '').replace(/[^\d]/g, '');
-        
-        // Add +91 prefix
-        value = '+91 ' + value;
+    // Remove all non-digit characters
+    value = value.replace(/[^\d]/g, '');
+    
+    // Limit to 10 digits
+    if (value.length > 10) {
+        value = value.substring(0, 10);
     }
     
-    // Extract the number part after +91 
+    // Set the value
+    input.value = value;
+    
+    // Update styling using helper function
+    const isValid = value.length === 10;
+    const hasContent = value.length > 0;
+    
+    updatePhoneContainerStyling(input, isValid, hasContent);
+    
+    // Also update input classes for consistency
+    input.classList.remove('valid', 'invalid');
+    if (hasContent) {
+        if (isValid) {
+            input.classList.add('valid');
+        } else if (input.required || input.id === 'customerPhone') {
+            input.classList.add('invalid');
+        }
+    }
+}
+
+// New focus handler for phone fields
+function handlePhoneFocusNew(input) {
+    // Just focus the field - no need to add prefix
+    const container = input.closest('.phone-input-container');
+    if (container) {
+        container.style.borderColor = 'var(--accent-color)';
+    }
+}
+
+// New blur handler for phone fields
+function handlePhoneBlurNew(input) {
+    const container = input.closest('.phone-input-container');
+    if (container) {
+        container.style.borderColor = '';
+    }
+    
+    // Trigger validation styling
+    formatPhoneNumberNew(input);
+}
+
+// Handle phone field focus
+function handlePhoneFocus(input) {
+    // Ensure the field has the +91 prefix when focused
+    if (!input.value || input.value.trim() === '') {
+        input.value = '+91 ';
+    }
+    
+    // Position cursor after the +91 prefix
+    requestAnimationFrame(() => {
+        if (input.value === '+91 ') {
+            input.setSelectionRange(4, 4);
+        } else {
+            // Position cursor at the end of existing content
+            input.setSelectionRange(input.value.length, input.value.length);
+        }
+    });
+}
+
+// Handle phone field blur
+function handlePhoneBlur(input) {
+    // If field only contains +91 prefix, clear it for optional fields
+    if (input.value.trim() === '+91' || input.value.trim() === '+91 ') {
+        // Only clear if it's the alternate phone (optional field)
+        if (input.id === 'alternatePhone') {
+            input.value = '';
+            input.classList.remove('invalid', 'valid');
+        } else {
+            // For required phone field, keep the prefix
+            input.value = '+91 ';
+        }
+    }
+}
+
+// DEPRECATED: Old phone number formatting for +91 prefix inside input (kept for compatibility)
+function formatPhoneNumber(input) {
+    console.warn('formatPhoneNumber is deprecated, use formatPhoneNumberNew instead');
+    formatPhoneNumberNew(input);
+}
+
+// DEPRECATED: Old focus handler (kept for compatibility)
+function handlePhoneFocus(input) {
+    console.warn('handlePhoneFocus is deprecated, use handlePhoneFocusNew instead');
+    handlePhoneFocusNew(input);
+}
+
+// DEPRECATED: Old blur handler (kept for compatibility) 
+function handlePhoneBlur(input) {
+    console.warn('handlePhoneBlur is deprecated, use handlePhoneBlurNew instead');
+    handlePhoneBlurNew(input);
+}
+
+// Format phone number with +91 prefix
+function formatPhoneNumber(input) {
+    // Store current cursor position
+    let cursorPosition = input.selectionStart;
+    let value = input.value;
+    
+    // Handle deletion/clearing - if user is trying to clear the field completely
+    if (value === '' || value === '+') {
+        input.value = '+91 ';
+        input.setSelectionRange(4, 4);
+        return;
+    }
+    
+    // Always ensure +91 prefix exists and is correct
+    if (!value.startsWith('+91 ')) {
+        // Remove any existing +91 variations and extract just the digits
+        value = value.replace(/^\+91\s?/, '').replace(/[^\d]/g, '');
+        
+        // Add proper +91 prefix
+        value = '+91 ' + value;
+        
+        // Adjust cursor position if we're adding the prefix
+        if (cursorPosition <= 4) {
+            cursorPosition = 4;
+        }
+    }
+    
+    // Extract the number part after '+91 '
     let numberPart = value.substring(4).replace(/[^\d]/g, '');
     
     // Limit to 10 digits
     if (numberPart.length > 10) {
         numberPart = numberPart.substring(0, 10);
+        
+        // If cursor was beyond the 10 digit limit, adjust it
+        if (cursorPosition > 14) { // 4 for '+91 ' + 10 digits
+            cursorPosition = 14;
+        }
     }
     
     // Set the formatted value
-    input.value = '+91 ' + numberPart;
+    const newValue = '+91 ' + numberPart;
+    input.value = newValue;
+    
+    // Restore cursor position (but not before the '+91 ' part)
+    let newCursorPos = Math.max(4, Math.min(cursorPosition, newValue.length));
+    
+    // If user is typing, place cursor at the end of the number part
+    if (cursorPosition >= 4 && numberPart.length > 0) {
+        newCursorPos = 4 + numberPart.length;
+    }
+    
+    // Set cursor position
+    requestAnimationFrame(() => {
+        input.setSelectionRange(newCursorPos, newCursorPos);
+    });
     
     // Add validation styling
     if (numberPart.length === 10) {
@@ -719,6 +878,48 @@ function updateEstimatedDelivery() {
     estimatedDateElement.textContent = deliveryDate.toLocaleDateString('en-IN', options);
 }
 
+// Add special event listeners for phone number fields (updated for new format)
+function addPhoneEventListeners() {
+    const phoneFields = ['customerPhone', 'alternatePhone'];
+    
+    phoneFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            // Handle paste events
+            field.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                
+                // Extract just the numbers from pasted content
+                let numbers = pastedText.replace(/[^\d]/g, '');
+                
+                // If it starts with 91, remove it (assuming +91 prefix was pasted)
+                if (numbers.startsWith('91') && numbers.length > 10) {
+                    numbers = numbers.substring(2);
+                }
+                
+                // Limit to 10 digits
+                if (numbers.length >= 10) {
+                    this.value = numbers.substring(0, 10);
+                    formatPhoneNumberNew(this);
+                } else if (numbers.length > 0) {
+                    this.value = numbers;
+                    formatPhoneNumberNew(this);
+                }
+            });
+            
+            // Handle keypress to allow only numbers
+            field.addEventListener('keypress', function(e) {
+                // Allow only numbers, backspace, delete, tab, escape, enter
+                if (!/[0-9]/.test(e.key) && 
+                    !['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+                    e.preventDefault();
+                }
+            });
+        }
+    });
+}
+
 // Add form validation listeners
 function addFormValidationListeners() {
     const form = document.getElementById('checkoutForm');
@@ -878,18 +1079,56 @@ function validateForm() {
         }
     }
     
-    // Phone validation
+    // Phone validation (updated for new 10-digit format)
     const phone = formData.get('customerPhone');
     const phoneInput = document.getElementById('customerPhone');
+    const phoneContainer = phoneInput ? phoneInput.closest('.phone-input-container') : null;
+    
     if (phone) {
-        // Check if phone follows +91 XXXXXXXXXX format
-        const phoneRegex = /^\+91 [0-9]{10}$/;
+        // Check if phone is exactly 10 digits
+        const phoneRegex = /^[0-9]{10}$/;
         if (!phoneRegex.test(phone.trim())) {
             phoneInput.classList.add('invalid');
+            if (phoneContainer) phoneContainer.classList.add('invalid');
             if (!firstErrorField) firstErrorField = phoneInput;
             isValid = false;
-            if (isValid) alert('Please enter a valid phone number in +91 XXXXXXXXXX format');
+            if (isValid) alert('Please enter a valid 10-digit phone number');
+        } else {
+            phoneInput.classList.remove('invalid');
+            phoneInput.classList.add('valid');
+            if (phoneContainer) {
+                phoneContainer.classList.remove('invalid');
+                phoneContainer.classList.add('valid');
+            }
         }
+    }
+
+    // Alternate phone validation (optional field, but if filled should be valid)
+    const alternatePhone = formData.get('alternatePhone');
+    const alternatePhoneInput = document.getElementById('alternatePhone');
+    const alternatePhoneContainer = alternatePhoneInput ? alternatePhoneInput.closest('.phone-input-container') : null;
+    
+    if (alternatePhone && alternatePhone.trim() !== '') {
+        // Check if alternate phone is exactly 10 digits
+        const phoneRegex = /^[0-9]{10}$/;
+        if (!phoneRegex.test(alternatePhone.trim())) {
+            alternatePhoneInput.classList.add('invalid');
+            if (alternatePhoneContainer) alternatePhoneContainer.classList.add('invalid');
+            if (!firstErrorField) firstErrorField = alternatePhoneInput;
+            isValid = false;
+            if (isValid) alert('Please enter a valid 10-digit alternate phone number');
+        } else {
+            alternatePhoneInput.classList.remove('invalid');
+            alternatePhoneInput.classList.add('valid');
+            if (alternatePhoneContainer) {
+                alternatePhoneContainer.classList.remove('invalid');
+                alternatePhoneContainer.classList.add('valid');
+            }
+        }
+    } else if (alternatePhone && alternatePhone.trim() === '') {
+        // Clear validation classes for empty alternate phone (it's optional)
+        alternatePhoneInput.classList.remove('invalid', 'valid');
+        if (alternatePhoneContainer) alternatePhoneContainer.classList.remove('invalid', 'valid');
     }
     
     // Pincode validation
@@ -916,7 +1155,10 @@ function validateForm() {
             errorMessages.push('• Valid email address is required');
         }
         if (document.getElementById('customerPhone').classList.contains('invalid')) {
-            errorMessages.push('• Valid phone number in +91 XXXXXXXXXX format is required');
+            errorMessages.push('• Valid 10-digit phone number is required');
+        }
+        if (document.getElementById('alternatePhone') && document.getElementById('alternatePhone').classList.contains('invalid')) {
+            errorMessages.push('• Valid 10-digit alternate phone number is required');
         }
         if (document.getElementById('customerAddress').classList.contains('invalid')) {
             errorMessages.push('• Street address is required');
@@ -964,7 +1206,8 @@ function prepareOrderData() {
         isGuest: !user, // Add guest indicator
         name: formData.get('customerName'),
         email: formData.get('customerEmail'),
-        phone: formData.get('customerPhone'),
+        phone: '+91 ' + formData.get('customerPhone'), // Add +91 prefix for storage
+        alternatePhone: formData.get('alternatePhone') ? '+91 ' + formData.get('alternatePhone') : '',
         address: fullAddress,
         addressDetails: {
             street: street,
