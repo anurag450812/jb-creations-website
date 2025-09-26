@@ -1345,7 +1345,7 @@ async function submitOrder(orderData) {
                 }
                 
                 try {
-                    // Prepare Firebase-compatible order data with Cloudinary URLs
+                    // Prepare Firebase-compatible order data with Cloudinary URLs (excluding base64 data)
                     const firebaseOrderData = {
                         customer: {
                             name: orderData.customer?.name || 'Guest Customer',
@@ -1353,10 +1353,24 @@ async function submitOrder(orderData) {
                             phone: orderData.customer?.phone || '0000000000',
                             address: orderData.customer?.address || 'No address provided'
                         },
-                        items: orderData.items, // Pass the original items
+                        // Clean items data - exclude large base64 images, keep only essential data
+                        items: orderData.items.map((item, index) => ({
+                            id: item.id,
+                            frameSize: item.frameSize,
+                            frameColor: item.frameColor,
+                            frameTexture: item.frameTexture,
+                            price: item.price,
+                            // Only include small metadata, no base64 images
+                            hasImage: !!(item.originalImage || item.printImage || item.displayImage),
+                            imageIndex: index,
+                            // If Cloudinary upload succeeded, reference it
+                            cloudinaryUrl: cloudinaryImages && cloudinaryImages[index] && cloudinaryImages[index].urls 
+                                ? cloudinaryImages[index].urls.original 
+                                : null
+                        })),
                         // Include Cloudinary upload results for processing
                         cloudinaryImages: cloudinaryImages,
-                        // Legacy images array for backward compatibility
+                        // Legacy images array for backward compatibility - only URLs, no base64
                         images: cloudinaryImages ? cloudinaryImages.map((result, index) => {
                             if (result.urls) {
                                 return {
@@ -1366,18 +1380,14 @@ async function submitOrder(orderData) {
                                     publicId: result.urls.publicId
                                 };
                             }
-                            // Fallback to item data if Cloudinary failed
-                            const item = orderData.items[index];
+                            // If Cloudinary failed, don't include base64 fallback
                             return {
-                                original: item?.originalImage || null,
-                                print: item?.printImage || null,
-                                display: item?.displayImage || item?.previewImage || null
+                                original: null,
+                                print: null,
+                                display: null,
+                                error: 'Cloudinary upload failed'
                             };
-                        }) : orderData.items.map(item => ({
-                            original: item.originalImage || null,
-                            print: item.printImage || null,
-                            display: item.displayImage || item.previewImage || null
-                        })),
+                        }) : [],
                         frameSize: orderData.items[0]?.frameSize?.size || 'Standard',
                         frameType: orderData.items[0]?.frameColor || 'Wood',
                         quantity: orderData.items.length || 1,
@@ -1417,8 +1427,18 @@ async function submitOrder(orderData) {
                         console.log('❌ No Cloudinary images array being sent to Firebase');
                     }
                     
-                    // Debug: Log the complete structure being sent to Firebase
-                    console.log('📋 Complete Firebase order structure:', JSON.stringify(firebaseOrderData, null, 2));
+                    // Debug: Log the complete structure being sent to Firebase (without base64 data)
+                    const debugOrder = {
+                        ...firebaseOrderData,
+                        // Exclude potentially large data from debug logs
+                        items: firebaseOrderData.items.map(item => ({
+                            ...item,
+                            // Remove any remaining image data from debug
+                            hasImage: item.hasImage,
+                            cloudinaryUrl: item.cloudinaryUrl ? 'Present' : 'None'
+                        }))
+                    };
+                    console.log('📋 Complete Firebase order structure (sanitized for debug):', JSON.stringify(debugOrder, null, 2));
 
                     // Submit to Firebase
                     const result = await window.jbApi.createOrder(firebaseOrderData);
