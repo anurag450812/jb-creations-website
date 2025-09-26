@@ -727,11 +727,12 @@ function initializeEventListeners() {
 elements.imageContainer = document.getElementById('imageContainer');
 elements.uploadOverlay = document.getElementById('uploadOverlay');
 
-// Initialize all sliders
-const sliders = ['brightness', 'contrast', 'highlights', 'shadows', 'vibrance'].map(id => ({
+// Initialize all sliders - only on customize page
+const isCustomizePage = window.location.pathname.includes('customize.html');
+const sliders = isCustomizePage ? ['brightness', 'contrast', 'highlights', 'shadows', 'vibrance'].map(id => ({
     id,
     element: document.getElementById(id)
-}));
+})) : [];
 
 function calculateRequiredZoom(imgWidth, imgHeight, frameWidth, frameHeight) {
     // Validate inputs
@@ -902,21 +903,22 @@ document.querySelectorAll('button').forEach(button => {
     });
 });
 
-// Enhance slider interaction
-sliders.forEach(({ id, element }) => {
-    // Check if element exists
-    if (!element) {
-        console.warn(`Slider element for ${id} not found`);
-        return;
-    }
-    
-    const label = element?.previousElementSibling;
-    
-    element.addEventListener('input', (e) => {
-        console.log('Adjustment slider changed:', id, 'to', e.target.value);
+// Enhance slider interaction - only if sliders exist
+if (sliders.length > 0) {
+    sliders.forEach(({ id, element }) => {
+        // Check if element exists
+        if (!element) {
+            console.warn(`Slider element for ${id} not found`);
+            return;
+        }
         
-        state.adjustments[id] = e.target.value;
-        updateImageFilters();
+        const label = element?.previousElementSibling;
+        
+        element.addEventListener('input', (e) => {
+            console.log('Adjustment slider changed:', id, 'to', e.target.value);
+            
+            state.adjustments[id] = e.target.value;
+            updateImageFilters();
         
         // Update label with value
         const value = e.target.value;
@@ -956,6 +958,7 @@ sliders.forEach(({ id, element }) => {
         }, 800); // Wait 800ms after user stops adjusting to prevent too many rapid updates
     });
 });
+}
 
 // Update image filters based on adjustment values
 function updateImageFilters() {
@@ -4085,8 +4088,13 @@ function syncMobileSlidersWithState() {
     window.captureFramePreview = captureFramePreview;
     window.overlayFrameOnRoomImages = overlayFrameOnRoomImages;
     
-    // Initialize Update Room Previews button with multiple attempts
+    // Initialize Update Room Previews button with multiple attempts - only on customize page
     function initUpdateRoomPreviewsButton() {
+        // Only try to initialize on customize page
+        if (!window.location.pathname.includes('customize.html')) {
+            return true; // Return true to prevent retry attempts on wrong pages
+        }
+        
         console.log('🔍 Looking for Update Room Previews button...');
         const updateRoomPreviewsBtn = document.getElementById('updateRoomPreviews');
         

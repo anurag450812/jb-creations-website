@@ -1510,18 +1510,21 @@ async function submitOrder(orderData) {
 
                     // CRITICAL: Clean undefined values - Firebase doesn't accept undefined
                     function removeUndefinedValues(obj) {
-                        if (obj === null || typeof obj !== 'object') {
-                            return obj;
-                        }
+                        if (obj === null) return null;
+                        if (obj === undefined) return null;
+                        if (typeof obj !== 'object') return obj;
                         
                         if (Array.isArray(obj)) {
-                            return obj.map(item => removeUndefinedValues(item));
+                            return obj.map(item => removeUndefinedValues(item)).filter(item => item !== undefined && item !== null);
                         }
                         
                         const cleaned = {};
                         for (const key in obj) {
-                            if (obj.hasOwnProperty(key) && obj[key] !== undefined) {
-                                cleaned[key] = removeUndefinedValues(obj[key]);
+                            if (obj.hasOwnProperty(key) && obj[key] !== undefined && obj[key] !== null) {
+                                const cleanedValue = removeUndefinedValues(obj[key]);
+                                if (cleanedValue !== undefined && cleanedValue !== null) {
+                                    cleaned[key] = cleanedValue;
+                                }
                             }
                         }
                         return cleaned;
@@ -1530,6 +1533,16 @@ async function submitOrder(orderData) {
                     // Clean the Firebase order data
                     firebaseOrderData = removeUndefinedValues(firebaseOrderData);
                     console.log('🧹 Cleaned undefined values from Firebase order data');
+
+                    // Additional comprehensive cleaning pass
+                    const cleanedDataString = JSON.stringify(firebaseOrderData, (key, value) => {
+                        if (value === undefined || value === null) {
+                            return null; // Convert undefined to null for JSON
+                        }
+                        return value;
+                    });
+                    firebaseOrderData = JSON.parse(cleanedDataString);
+                    console.log('🧹 Additional cleaning pass completed');
 
                     // CRITICAL: Double-check that we're not sending base64 data
                     const hasBase64 = JSON.stringify(firebaseOrderData).includes('data:image');
