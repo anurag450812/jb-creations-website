@@ -1381,10 +1381,19 @@
                         }));
                         
                         filteredOrders = [...orders];
+                        
+                        // Apply default sorting (latest first)
+                        filteredOrders.sort((a, b) => {
+                            const dateA = getOrderDate(a.orderDate);
+                            const dateB = getOrderDate(b.orderDate);
+                            return dateB - dateA; // Latest first by default
+                        });
+                        
                         console.log(`✅ Loaded ${orders.length} orders from Firebase`);
                         
                         updateDashboardStats();
                         updateRecentOrdersTable();
+                        updateAllOrdersTable(filteredOrders); // Update all orders table with sorted data
                         debugAfterLoad(); // Debug the loaded data
                         return;
                     } else {

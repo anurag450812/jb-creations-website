@@ -91,11 +91,26 @@ async function uploadOrderImagesToCloudinaryEnhanced(orderData) {
             // Try to get compressed image for admin viewing
             let fallbackImageData = null;
             try {
+                // First try compressed images
                 const sessionImageData = sessionStorage.getItem(`cartImage_${item.id}`);
                 if (sessionImageData) {
                     const imageData = JSON.parse(sessionImageData);
                     // Use the smallest available image for admin viewing
                     fallbackImageData = imageData.previewImage || imageData.displayImage || imageData.originalImage;
+                    console.log(`🖼️ Found compressed fallback image for item ${item.id}:`, 
+                        fallbackImageData ? fallbackImageData.substring(0, 50) + '...' : 'none');
+                }
+                
+                // If no compressed image, try full quality
+                if (!fallbackImageData) {
+                    const sessionFullImageData = sessionStorage.getItem(`cartImage_full_${item.id}`);
+                    if (sessionFullImageData) {
+                        const fullImageData = JSON.parse(sessionFullImageData);
+                        // Use preview image (smallest) for admin viewing
+                        fallbackImageData = fullImageData.previewImage || fullImageData.displayImage || fullImageData.originalImage;
+                        console.log(`🖼️ Found full-quality fallback image for item ${item.id}:`, 
+                            fallbackImageData ? fallbackImageData.substring(0, 50) + '...' : 'none');
+                    }
                 }
             } catch (error) {
                 console.warn('Could not retrieve fallback image:', error);
@@ -104,7 +119,10 @@ async function uploadOrderImagesToCloudinaryEnhanced(orderData) {
             // Fallback to thumbnail if available
             if (!fallbackImageData && item.thumbnailImage) {
                 fallbackImageData = item.thumbnailImage;
+                console.log(`🖼️ Using thumbnail as fallback image for item ${item.id}`);
             }
+            
+            console.log(`🔍 Final fallback image status for item ${item.id}:`, !!fallbackImageData);
             
             fallbackResults.push({
                 itemIndex: i,
