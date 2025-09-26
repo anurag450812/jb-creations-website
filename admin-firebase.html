@@ -1040,6 +1040,10 @@
                                     <option value="delivered">Delivered</option>
                                     <option value="completed">Completed</option>
                                 </select>
+                                <select class="filter-select" id="date-sort-filter">
+                                    <option value="latest">Latest First</option>
+                                    <option value="oldest">Oldest First</option>
+                                </select>
                             </div>
                             
                             <div class="loading" id="all-orders-loading">
@@ -1274,6 +1278,7 @@
         function setupSearchAndFilter() {
             const searchInput = document.getElementById('order-search');
             const statusFilter = document.getElementById('status-filter');
+            const dateSortFilter = document.getElementById('date-sort-filter');
             
             if (searchInput) {
                 searchInput.addEventListener('input', filterOrders);
@@ -1282,11 +1287,16 @@
             if (statusFilter) {
                 statusFilter.addEventListener('change', filterOrders);
             }
+            
+            if (dateSortFilter) {
+                dateSortFilter.addEventListener('change', filterOrders);
+            }
         }
 
         function filterOrders() {
             const searchTerm = document.getElementById('order-search')?.value.toLowerCase() || '';
             const statusFilter = document.getElementById('status-filter')?.value || '';
+            const dateSortFilter = document.getElementById('date-sort-filter')?.value || 'latest';
             
             filteredOrders = orders.filter(order => {
                 const matchesSearch = !searchTerm || 
@@ -1299,7 +1309,34 @@
                 return matchesSearch && matchesStatus;
             });
             
+            // Sort orders by date
+            filteredOrders.sort((a, b) => {
+                const dateA = getOrderDate(a.orderDate);
+                const dateB = getOrderDate(b.orderDate);
+                
+                if (dateSortFilter === 'oldest') {
+                    return dateA - dateB; // Oldest first
+                } else {
+                    return dateB - dateA; // Latest first (default)
+                }
+            });
+            
             updateAllOrdersTable(filteredOrders);
+        }
+        
+        // Helper function to get comparable date from various date formats
+        function getOrderDate(dateInput) {
+            if (!dateInput) return new Date(0); // Very old date for invalid dates
+            
+            // Handle Firebase Timestamp objects (with seconds and nanoseconds)
+            if (dateInput && typeof dateInput === 'object' && dateInput.seconds) {
+                return new Date(dateInput.seconds * 1000);
+            } 
+            // Handle regular date strings or Date objects
+            else {
+                const date = new Date(dateInput);
+                return isNaN(date.getTime()) ? new Date(0) : date;
+            }
         }
 
         // Data loading functions - Firebase version
@@ -1405,8 +1442,14 @@
             loading.style.display = 'none';
             tableContainer.style.display = 'block';
             
-            // Get recent orders (last 10)
-            const recentOrders = orders.slice(-10).reverse();
+            // Get recent orders (last 10) sorted by date (latest first)
+            const sortedOrders = [...orders].sort((a, b) => {
+                const dateA = getOrderDate(a.orderDate);
+                const dateB = getOrderDate(b.orderDate);
+                return dateB - dateA; // Latest first
+            });
+            
+            const recentOrders = sortedOrders.slice(0, 10);
             
             if (recentOrders.length === 0) {
                 tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">No orders found</td></tr>';
@@ -1676,6 +1719,15 @@
                     } else if (item.displayImage && item.displayImage.startsWith('data:')) {
                         base64Image = item.displayImage;
                         console.log(`- Found base64 in item.displayImage:`, base64Image.substring(0, 50) + '...');
+                    }
+                }
+                
+                // Also check for fallback images in the images array (new Firebase structure)
+                if (!cloudinaryUrl && !base64Image && order.images && order.images[index]) {
+                    const imageEntry = order.images[index];
+                    if (imageEntry.fallbackImage && imageEntry.fallbackImage.startsWith('data:')) {
+                        base64Image = imageEntry.fallbackImage;
+                        console.log(`- Found fallback image:`, base64Image.substring(0, 50) + '...');
                     }
                 }
                 

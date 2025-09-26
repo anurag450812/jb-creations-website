@@ -80,14 +80,41 @@ async function uploadOrderImagesToCloudinaryEnhanced(orderData) {
     // Fallback to existing server-based upload
     const fallbackResult = await uploadOrderImagesToCloudinary(orderData);
     
-    // If server-based upload also fails, create mock success entries for Firebase
+    // If server-based upload also fails, create fallback with compressed images for admin viewing
     if (!fallbackResult || fallbackResult.length === 0) {
-        console.warn('⚠️ All upload methods failed, creating placeholder entries');
-        return orderData.items.map((item, index) => ({
-            itemIndex: index,
-            urls: null,
-            error: 'Upload failed - image saved locally'
-        }));
+        console.warn('⚠️ All upload methods failed, creating fallback entries with compressed images');
+        
+        const fallbackResults = [];
+        for (let i = 0; i < orderData.items.length; i++) {
+            const item = orderData.items[i];
+            
+            // Try to get compressed image for admin viewing
+            let fallbackImageData = null;
+            try {
+                const sessionImageData = sessionStorage.getItem(`cartImage_${item.id}`);
+                if (sessionImageData) {
+                    const imageData = JSON.parse(sessionImageData);
+                    // Use the smallest available image for admin viewing
+                    fallbackImageData = imageData.previewImage || imageData.displayImage || imageData.originalImage;
+                }
+            } catch (error) {
+                console.warn('Could not retrieve fallback image:', error);
+            }
+            
+            // Fallback to thumbnail if available
+            if (!fallbackImageData && item.thumbnailImage) {
+                fallbackImageData = item.thumbnailImage;
+            }
+            
+            fallbackResults.push({
+                itemIndex: i,
+                urls: null,
+                error: 'Upload failed - using local storage',
+                fallbackImage: fallbackImageData // Store for admin panel
+            });
+        }
+        
+        return fallbackResults;
     }
     
     return fallbackResult;
@@ -1394,12 +1421,13 @@ async function submitOrder(orderData) {
                                     publicId: result.urls.publicId
                                 };
                             }
-                            // If Cloudinary failed, don't include base64 fallback
+                            // If Cloudinary failed but we have fallback image, include it for admin viewing
                             return {
                                 original: null,
                                 print: null,
                                 display: null,
-                                error: 'Cloudinary upload failed'
+                                error: 'Cloudinary upload failed',
+                                fallbackImage: result.fallbackImage || null // Include compressed image for admin
                             };
                         }) : [],
                         frameSize: orderData.items[0]?.frameSize?.size || 'Standard',
