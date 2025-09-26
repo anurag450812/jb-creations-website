@@ -1577,6 +1577,41 @@ async function submitOrder(orderData) {
                         console.log('✅ Emergency cleaning completed');
                     }
 
+                    // ULTIMATE CLEANING: Convert to JSON and back to eliminate ALL undefined values
+                    console.log('🔧 Final ultimate cleaning to eliminate any remaining undefined values...');
+                    const jsonString = JSON.stringify(firebaseOrderData, (key, value) => {
+                        // Replace undefined with null, remove functions and symbols
+                        if (value === undefined) return null;
+                        if (typeof value === 'function') return null;
+                        if (typeof value === 'symbol') return null;
+                        return value;
+                    });
+                    
+                    firebaseOrderData = JSON.parse(jsonString);
+                    
+                    // Remove any null values that might cause issues
+                    function removeNullValues(obj) {
+                        if (obj === null || obj === undefined) return null;
+                        if (typeof obj !== 'object') return obj;
+                        if (Array.isArray(obj)) {
+                            return obj.map(removeNullValues).filter(item => item !== null && item !== undefined);
+                        }
+                        
+                        const cleaned = {};
+                        for (const key in obj) {
+                            if (obj.hasOwnProperty(key) && obj[key] !== null && obj[key] !== undefined) {
+                                const cleanedValue = removeNullValues(obj[key]);
+                                if (cleanedValue !== null && cleanedValue !== undefined) {
+                                    cleaned[key] = cleanedValue;
+                                }
+                            }
+                        }
+                        return Object.keys(cleaned).length > 0 ? cleaned : null;
+                    }
+                    
+                    firebaseOrderData = removeNullValues(firebaseOrderData);
+                    console.log('✅ Ultimate cleaning completed - all undefined values eliminated');
+
                     // Submit to Firebase
                     const result = await window.jbApi.createOrder(firebaseOrderData);
                     
