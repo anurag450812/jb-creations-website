@@ -393,25 +393,37 @@ function initializeEventListeners() {
                 }
 
                 console.log('Adding item to cart:', cartItem);
-                const success = addToCart(cartItem);
                 
-                if (success) {
-                    // Reset button state
+                // Call addToCart and handle the response
+                try {
+                    const success = await addToCart(cartItem);
+                    
+                    if (success) {
+                        // Show success feedback
+                        elements.addToCartBtn.innerHTML = '<i class="fas fa-check"></i> Added!';
+                        elements.addToCartBtn.style.background = '#27ae60';
+                        
+                        setTimeout(() => {
+                            elements.addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
+                            elements.addToCartBtn.style.background = '';
+                            elements.addToCartBtn.disabled = false;
+                        }, 2000);
+                    } else {
+                        // Reset button state on failure
+                        elements.addToCartBtn.disabled = false;
+                        elements.addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
+                    }
+                } catch (cartError) {
+                    console.error('Error adding to cart:', cartError);
                     elements.addToCartBtn.disabled = false;
                     elements.addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
                     
-                    // Show success feedback
-                    const originalText = elements.addToCartBtn.innerHTML;
-                    elements.addToCartBtn.innerHTML = '<i class="fas fa-check"></i> Added!';
-                    elements.addToCartBtn.style.background = '#27ae60';
-                    setTimeout(() => {
-                        elements.addToCartBtn.innerHTML = originalText;
-                        elements.addToCartBtn.style.background = '';
-                    }, 2000);
-                } else {
-                    // Reset button state on failure
-                    elements.addToCartBtn.disabled = false;
-                    elements.addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
+                    // Show user-friendly error
+                    if (cartError.message && cartError.message.includes('storage is full')) {
+                        alert('Your cart is full! Please checkout or remove some items before adding more.');
+                    } else {
+                        alert('Unable to add item to cart. Please try again.');
+                    }
                 }
                 
             } catch (error) {
@@ -1776,7 +1788,47 @@ function removeCartItem(index) {
 // Make removeCartItem globally accessible
 window.removeCartItem = removeCartItem;
 
-function addToCart(item) {
+// Compress image for thumbnail (small size for cart display)
+function compressImageForThumbnail(base64Image, maxWidth = 100, maxHeight = 100, quality = 0.6) {
+    return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.onload = function() {
+            // Calculate thumbnail dimensions while maintaining aspect ratio
+            let { width, height } = img;
+            const aspectRatio = width / height;
+            
+            if (width > maxWidth || height > maxHeight) {
+                if (aspectRatio > 1) {
+                    width = maxWidth;
+                    height = maxWidth / aspectRatio;
+                } else {
+                    height = maxHeight;
+                    width = maxHeight * aspectRatio;
+                }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            // Draw and compress
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+            resolve(compressedBase64);
+        };
+        
+        img.onerror = function() {
+            console.warn('Failed to compress thumbnail, using null');
+            resolve(null);
+        };
+        
+        img.src = base64Image;
+    });
+}
+
+async function addToCart(item) {
     console.log('addToCart function called with item:', item);
     try {
         // Validate the item has required fields
@@ -1798,21 +1850,59 @@ function addToCart(item) {
             cart = [];
         }
         
+        // Create lightweight cart item (without large base64 images)
+        const lightweightItem = {
+            id: item.id,
+            timestamp: item.timestamp || new Date().toISOString(),
+            frameSize: item.frameSize,
+            frameColor: item.frameColor,
+            frameTexture: item.frameTexture,
+            price: item.price,
+            // Store only essential image metadata, not base64 data
+            hasImage: !!(item.originalImage || item.printImage || item.displayImage),
+            imageSize: {
+                original: item.originalImage ? item.originalImage.length : 0,
+                print: item.printImage ? item.printImage.length : 0,
+                preview: item.displayImage ? item.displayImage.length : 0
+            },
+            // Create small thumbnail for cart display (compressed)
+            thumbnailImage: item.displayImage ? await compressImageForThumbnail(item.displayImage) : null
+        };
+        
+        // Store full image data in sessionStorage for order processing (separate from cart)
+        const fullImageData = {
+            originalImage: item.originalImage,
+            printImage: item.printImage,
+            displayImage: item.displayImage,
+            previewImage: item.previewImage
+        };
+        
+        try {
+            // Store in sessionStorage with a separate key for images
+            sessionStorage.setItem(`cartImage_${item.id}`, JSON.stringify(fullImageData));
+            console.log(`🗂️ Stored full images in sessionStorage for item ${item.id}:`, {
+                originalImage: !!item.originalImage,
+                printImage: !!item.printImage,
+                displayImage: !!item.displayImage,
+                previewImage: !!item.previewImage,
+                originalImageSize: item.originalImage ? item.originalImage.length : 0,
+                printImageSize: item.printImage ? item.printImage.length : 0,
+                displayImageSize: item.displayImage ? item.displayImage.length : 0
+            });
+        } catch (storageError) {
+            console.warn('⚠️ Failed to store full images in sessionStorage, falling back to window storage:', storageError);
+            // Fallback to window storage if sessionStorage fails
+            if (typeof window.cartImageStorage === 'undefined') {
+                window.cartImageStorage = {};
+            }
+            window.cartImageStorage[item.id] = fullImageData;
+        }
+        
         console.log('Current cart:', cart);
         
-        // Add timestamp if not present
-        if (!item.timestamp) {
-            item.timestamp = new Date().toISOString();
-        }
-
-        // Ensure item has an ID
-        if (!item.id) {
-            item.id = Date.now() + Math.random();
-        }
-        
-        // Add the item to cart
-        cart.push(item);
-        console.log('Updated cart:', cart);
+        // Add the lightweight item to cart
+        cart.push(lightweightItem);
+        console.log('Updated cart with lightweight item:', cart);
         
         // Save updated cart with better error handling
         try {
@@ -1832,22 +1922,6 @@ function addToCart(item) {
         
         // Update cart count
         updateCartCount();
-        
-        // Show success feedback
-        if (elements.addToCartBtn) {
-            const originalText = elements.addToCartBtn.innerHTML;
-            elements.addToCartBtn.innerHTML = '<i class="fas fa-check"></i> Added to Cart!';
-            elements.addToCartBtn.classList.add('success');
-            elements.addToCartBtn.disabled = true;
-            
-            setTimeout(() => {
-                if (elements.addToCartBtn) {
-                    elements.addToCartBtn.innerHTML = originalText;
-                    elements.addToCartBtn.classList.remove('success');
-                    elements.addToCartBtn.disabled = false;
-                }
-            }, 2000);
-        }
         
         console.log('Item successfully added to cart');
         return true;

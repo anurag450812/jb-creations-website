@@ -817,14 +817,16 @@ function updateOrderSummary() {
     
     // Add each cart item
     orderData.items.forEach((item, index) => {
-        // Use the available image properties with fallbacks
-        const imageSource = item.previewImage || item.displayImage || item.printImage;
+        // Use thumbnail for lightweight cart items, fallback to full images if available
+        const imageSource = item.thumbnailImage || item.previewImage || item.displayImage || item.printImage;
         
         console.log(`Item ${index + 1} image sources:`, {
+            thumbnailImage: item.thumbnailImage ? 'Available' : 'Not available',
             previewImage: item.previewImage ? 'Available' : 'Not available',
             displayImage: item.displayImage ? 'Available' : 'Not available', 
             printImage: item.printImage ? 'Available' : 'Not available',
-            selectedSource: imageSource ? 'Found' : 'None found'
+            selectedSource: imageSource ? 'Found' : 'None found',
+            isLightweight: !!(item.hasImage && !item.printImage && !item.displayImage) // Detect lightweight items
         });
         
         // Create a placeholder image if no image is available
@@ -1609,8 +1611,31 @@ async function placeOrder() {
                     saveOrderToUserHistory(user.id, {...orderData, paymentId: paymentResult.paymentId});
                 }
                 
-                // Clear cart
-                localStorage.removeItem('photoFramingCart');
+                // Clear cart and temporary image storage
+                const cartData = sessionStorage.getItem('photoFramingCart');
+                if (cartData) {
+                    try {
+                        const cartItems = JSON.parse(cartData);
+                        // Clear individual image storage for each cart item
+                        cartItems.forEach(item => {
+                            if (item.id) {
+                                sessionStorage.removeItem(`cartImage_${item.id}`);
+                                console.log(`🧹 Cleared image storage for item ${item.id}`);
+                            }
+                        });
+                    } catch (e) {
+                        console.warn('⚠️ Error parsing cart data during cleanup:', e);
+                    }
+                }
+                
+                sessionStorage.removeItem('photoFramingCart');
+                localStorage.removeItem('photoFramingCart'); // Remove from both in case of migration
+                
+                // Clear temporary image storage
+                if (window.cartImageStorage) {
+                    window.cartImageStorage = {};
+                    console.log('🧹 Cleared temporary window image storage');
+                }
                 
                 // Show success message based on storage method
                 let successMessage = `Payment Successful! Order placed successfully!\n\nOrder Number: ${orderData.orderNumber}\nPayment ID: ${paymentResult.paymentId}`;
@@ -1817,6 +1842,51 @@ async function uploadOrderImagesToCloudinary(orderData) {
         // For each item in the order, upload its images to Cloudinary
         for (let i = 0; i < orderData.items.length; i++) {
             const item = orderData.items[i];
+            
+            // Debug temporary storage
+            console.log(`🔍 Checking image storage for item ${item.id}:`, {
+                sessionStorageKey: `cartImage_${item.id}`,
+                cartImageStorageExists: !!window.cartImageStorage,
+                cartImageStorageKeys: window.cartImageStorage ? Object.keys(window.cartImageStorage) : 'No window storage',
+                hasItemInStorage: !!(window.cartImageStorage && window.cartImageStorage[item.id])
+            });
+            
+            let fullImageData = null;
+            
+            // Try to retrieve from sessionStorage first (persistent across pages)
+            try {
+                const sessionImageData = sessionStorage.getItem(`cartImage_${item.id}`);
+                if (sessionImageData) {
+                    fullImageData = JSON.parse(sessionImageData);
+                    console.log(`🔄 Retrieved full images for item ${item.id} from sessionStorage`);
+                }
+            } catch (sessionError) {
+                console.warn(`⚠️ Failed to retrieve from sessionStorage for item ${item.id}:`, sessionError);
+            }
+            
+            // Fallback to window storage if sessionStorage failed
+            if (!fullImageData && window.cartImageStorage && window.cartImageStorage[item.id]) {
+                fullImageData = window.cartImageStorage[item.id];
+                console.log(`🔄 Retrieved full images for item ${item.id} from window storage (fallback)`);
+            }
+            
+            // Retrieve full images from storage if available
+            if (fullImageData) {
+                console.log(`📸 Full image data available for item ${item.id}:`, {
+                    originalImage: !!fullImageData.originalImage,
+                    printImage: !!fullImageData.printImage,
+                    displayImage: !!fullImageData.displayImage,
+                    previewImage: !!fullImageData.previewImage,
+                    originalImageSize: fullImageData.originalImage ? fullImageData.originalImage.length : 0,
+                    printImageSize: fullImageData.printImage ? fullImageData.printImage.length : 0
+                });
+                
+                // Merge full image data back into item for upload
+                if (fullImageData.originalImage) item.originalImage = fullImageData.originalImage;
+                if (fullImageData.printImage) item.printImage = fullImageData.printImage;
+                if (fullImageData.displayImage) item.displayImage = fullImageData.displayImage;
+                if (fullImageData.previewImage) item.previewImage = fullImageData.previewImage;
+            }
             
             // Find the best available image to upload - prioritize printImage (processed without frame)
             let imageToUpload = item.printImage || item.displayImage || item.previewImage || item.originalImage ||

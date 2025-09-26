@@ -111,24 +111,21 @@ class CartManager {
 
         cartItemsContainer.innerHTML = this.cart.map((item, index) => {
             console.log(`Cart item ${index}:`, {
-                hasPrintImage: !!item.printImage,
-                hasPreviewImage: !!item.previewImage,
-                printImageType: typeof item.printImage,
-                previewImageType: typeof item.previewImage,
-                printImageLength: item.printImage ? item.printImage.length : 0,
-                previewImageLength: item.previewImage ? item.previewImage.length : 0,
-                startsWithDataImage: item.printImage && item.printImage.startsWith('data:image/'),
-                previewStartsWithDataImage: item.previewImage && item.previewImage.startsWith('data:image/')
+                hasImage: !!item.hasImage,
+                hasThumbnail: !!item.thumbnailImage,
+                thumbnailType: typeof item.thumbnailImage,
+                thumbnailLength: item.thumbnailImage ? item.thumbnailImage.length : 0,
+                imageSize: item.imageSize
             });
             
             return `
             <div class="cart-item" data-index="${index}">
                 <div class="cart-item-image">
-                    ${item.previewImage ? 
-                        `<img src="${item.previewImage}" alt="Frame Preview">` : 
-                        item.printImage ? 
-                        `<img src="${item.printImage}" alt="Frame Preview">` : 
-                        '<i class="fas fa-image"></i>'
+                    ${item.thumbnailImage ? 
+                        `<img src="${item.thumbnailImage}" alt="Frame Preview">` : 
+                        item.hasImage ? 
+                        '<i class="fas fa-image"></i>' : 
+                        '<i class="fas fa-image text-muted"></i>'
                     }
                 </div>
                 <div class="cart-item-details">
