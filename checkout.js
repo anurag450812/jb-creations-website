@@ -1440,6 +1440,39 @@ async function submitOrder(orderData) {
                     };
                     console.log('📋 Complete Firebase order structure (sanitized for debug):', JSON.stringify(debugOrder, null, 2));
 
+                    // CRITICAL: Double-check that we're not sending base64 data
+                    const hasBase64 = JSON.stringify(firebaseOrderData).includes('data:image');
+                    if (hasBase64) {
+                        console.error('🚨 CRITICAL: Base64 data detected in Firebase order data! Cleaning now...');
+                        
+                        // Emergency clean - remove all base64 data
+                        firebaseOrderData.items = firebaseOrderData.items.map(item => {
+                            const cleanItem = { ...item };
+                            // Remove all image-related base64 data
+                            delete cleanItem.originalImage;
+                            delete cleanItem.printImage;
+                            delete cleanItem.displayImage;
+                            delete cleanItem.previewImage;
+                            delete cleanItem.originalImagePath;
+                            delete cleanItem.printImagePath;
+                            delete cleanItem.displayImagePath;
+                            delete cleanItem.previewImagePath;
+                            return cleanItem;
+                        });
+                        
+                        // Clean the images array too
+                        if (firebaseOrderData.images) {
+                            firebaseOrderData.images = firebaseOrderData.images.map(img => ({
+                                original: img.original && !img.original.startsWith('data:') ? img.original : null,
+                                print: img.print && !img.print.startsWith('data:') ? img.print : null,
+                                display: img.display && !img.display.startsWith('data:') ? img.display : null,
+                                publicId: img.publicId
+                            }));
+                        }
+                        
+                        console.log('✅ Emergency cleaning completed');
+                    }
+
                     // Submit to Firebase
                     const result = await window.jbApi.createOrder(firebaseOrderData);
                     
