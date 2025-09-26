@@ -1870,6 +1870,55 @@ async function addToCart(item) {
         };
         
         // Store full image data in sessionStorage for order processing (separate from cart)
+        // First, try to compress images to reduce storage size
+        const compressImage = (base64Data, quality = 0.6, maxSize = 800) => {
+            return new Promise((resolve) => {
+                if (!base64Data || !base64Data.startsWith('data:image/')) {
+                    resolve(base64Data);
+                    return;
+                }
+                
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Calculate new dimensions maintaining aspect ratio
+                    let { width, height } = img;
+                    if (width > height) {
+                        if (width > maxSize) {
+                            height = (height * maxSize) / width;
+                            width = maxSize;
+                        }
+                    } else {
+                        if (height > maxSize) {
+                            width = (width * maxSize) / height;
+                            height = maxSize;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    // Draw and compress
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const compressed = canvas.toDataURL('image/jpeg', quality);
+                    resolve(compressed);
+                };
+                img.onerror = () => resolve(base64Data);
+                img.src = base64Data;
+            });
+        };
+
+        // Compress images for storage while keeping originals for upload
+        const compressedImages = {
+            originalImage: await compressImage(item.originalImage, 0.7, 1200),
+            printImage: await compressImage(item.printImage, 0.8, 1200),
+            displayImage: await compressImage(item.displayImage, 0.6, 800),
+            previewImage: await compressImage(item.previewImage, 0.6, 800)
+        };
+
+        // Store original full-quality images separately for upload
         const fullImageData = {
             originalImage: item.originalImage,
             printImage: item.printImage,
@@ -1878,19 +1927,34 @@ async function addToCart(item) {
         };
         
         try {
-            // Store in sessionStorage with a separate key for images
-            sessionStorage.setItem(`cartImage_${item.id}`, JSON.stringify(fullImageData));
-            console.log(`🗂️ Stored full images in sessionStorage for item ${item.id}:`, {
+            // Store compressed images in sessionStorage for display
+            sessionStorage.setItem(`cartImage_${item.id}`, JSON.stringify(compressedImages));
+            
+            // Store full-quality images for upload (fallback to window if sessionStorage fails)
+            try {
+                sessionStorage.setItem(`cartImage_full_${item.id}`, JSON.stringify(fullImageData));
+                console.log(`🗂️ Stored compressed and full images in sessionStorage for item ${item.id}`);
+            } catch (fullStorageError) {
+                // Fallback to window storage for full images
+                if (typeof window.cartImageStorage === 'undefined') {
+                    window.cartImageStorage = {};
+                }
+                window.cartImageStorage[item.id] = fullImageData;
+                console.log(`🗂️ Stored compressed images in sessionStorage, full images in window storage for item ${item.id}`);
+            }
+            
+            console.log(`🗂️ Image storage summary for item ${item.id}:`, {
                 originalImage: !!item.originalImage,
                 printImage: !!item.printImage,
                 displayImage: !!item.displayImage,
                 previewImage: !!item.previewImage,
                 originalImageSize: item.originalImage ? item.originalImage.length : 0,
                 printImageSize: item.printImage ? item.printImage.length : 0,
-                displayImageSize: item.displayImage ? item.displayImage.length : 0
+                compressedOriginalSize: compressedImages.originalImage ? compressedImages.originalImage.length : 0,
+                compressedPrintSize: compressedImages.printImage ? compressedImages.printImage.length : 0
             });
         } catch (storageError) {
-            console.warn('⚠️ Failed to store full images in sessionStorage, falling back to window storage:', storageError);
+            console.warn('⚠️ Failed to store images in sessionStorage, falling back to window storage:', storageError);
             // Fallback to window storage if sessionStorage fails
             if (typeof window.cartImageStorage === 'undefined') {
                 window.cartImageStorage = {};
