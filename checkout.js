@@ -1413,7 +1413,7 @@ async function submitOrder(orderData) {
                 
                 try {
                     // Prepare Firebase-compatible order data with Cloudinary URLs (excluding base64 data)
-                    const firebaseOrderData = {
+                    let firebaseOrderData = {
                         customer: {
                             name: orderData.customer?.name || 'Guest Customer',
                             email: orderData.customer?.email || 'guest@example.com',

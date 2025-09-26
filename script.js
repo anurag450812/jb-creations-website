@@ -3296,7 +3296,7 @@ function updateFrameColor() {
     }
 
     // Precision zoom functionality with smaller increments - SIMPLIFIED FOR MOBILE
-    if (precisionZoomIn) {
+    if (elements.precisionZoomIn) {
         // Function to handle precision zoom in
         const handlePrecisionZoomIn = () => {
             if (!state.image) return;
@@ -3313,7 +3313,7 @@ function updateFrameColor() {
         };
 
         // Use ontouchend instead of addEventListener for better mobile compatibility
-        precisionZoomIn.ontouchend = function(e) {
+        elements.precisionZoomIn.ontouchend = function(e) {
             e.preventDefault();
             e.stopPropagation();
             handlePrecisionZoomIn();
@@ -3321,7 +3321,7 @@ function updateFrameColor() {
         };
         
         // Keep click for desktop
-        precisionZoomIn.onclick = function(e) {
+        elements.precisionZoomIn.onclick = function(e) {
             e.preventDefault();
             handlePrecisionZoomIn();
             return false;
@@ -3340,7 +3340,7 @@ function updateFrameColor() {
         }, { passive: false });
     }
 
-    if (precisionZoomOut) {
+    if (elements.precisionZoomOut) {
         // Function to handle precision zoom out
         const handlePrecisionZoomOut = () => {
             if (!state.image || !state.frameSize) return;
@@ -3366,7 +3366,7 @@ function updateFrameColor() {
         };
 
         // Use ontouchend instead of addEventListener for better mobile compatibility
-        precisionZoomOut.ontouchend = function(e) {
+        elements.precisionZoomOut.ontouchend = function(e) {
             e.preventDefault();
             e.stopPropagation();
             handlePrecisionZoomOut();
@@ -3374,7 +3374,7 @@ function updateFrameColor() {
         };
         
         // Keep click for desktop
-        precisionZoomOut.onclick = function(e) {
+        elements.precisionZoomOut.onclick = function(e) {
             e.preventDefault();
             handlePrecisionZoomOut();
             return false;
@@ -3409,7 +3409,7 @@ function updateFrameColor() {
         // Ctrl/Cmd + Shift + Minus for precision zoom out
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === '-') {
             e.preventDefault();
-            if (precisionZoomOut) precisionZoomOut.click();
+            if (elements.precisionZoomOut) elements.precisionZoomOut.click();
         }
     });
 
