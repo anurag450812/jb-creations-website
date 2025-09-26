@@ -1564,14 +1564,29 @@ async function submitOrder(orderData) {
                             return cleanItem;
                         });
                         
-                        // Clean the images array too
+                        // Clean the images array - preserve small compressed fallbacks, remove large data
                         if (firebaseOrderData.images) {
-                            firebaseOrderData.images = firebaseOrderData.images.map(img => ({
-                                original: img.original && !img.original.startsWith('data:') ? img.original : null,
-                                print: img.print && !img.print.startsWith('data:') ? img.print : null,
-                                display: img.display && !img.display.startsWith('data:') ? img.display : null,
-                                publicId: img.publicId
-                            }));
+                            firebaseOrderData.images = firebaseOrderData.images.map(img => {
+                                const cleanImg = {
+                                    itemIndex: img.itemIndex,
+                                    urls: img.urls && !JSON.stringify(img.urls).includes('data:') ? img.urls : null,
+                                    error: img.error,
+                                    publicId: img.publicId
+                                };
+                                
+                                // Keep compressed fallback images (< 500KB), remove large ones
+                                if (img.fallbackImage && img.fallbackImage.startsWith('data:image')) {
+                                    const estimatedSize = img.fallbackImage.length * 0.75; // Base64 to binary ratio
+                                    if (estimatedSize < 500000) { // 500KB limit for admin display
+                                        cleanImg.fallbackImage = img.fallbackImage;
+                                        console.log(`📸 Preserving compressed fallback image (${Math.round(estimatedSize/1000)}KB) for admin panel`);
+                                    } else {
+                                        console.log(`🗑️ Removing large fallback image (${Math.round(estimatedSize/1000)}KB) to prevent Firebase limit`);
+                                    }
+                                }
+                                
+                                return cleanImg;
+                            });
                         }
                         
                         console.log('✅ Emergency cleaning completed');
