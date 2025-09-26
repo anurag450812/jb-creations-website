@@ -99,25 +99,31 @@ async function uploadOrderImagesToCloudinaryEnhanced(orderData) {
             // Try to get compressed image for admin viewing
             let fallbackImageData = null;
             try {
-                // First try compressed images
+                // First try compressed images - prioritize adminCroppedImage for best quality
                 const sessionImageData = sessionStorage.getItem(`cartImage_${item.id}`);
                 if (sessionImageData) {
                     const imageData = JSON.parse(sessionImageData);
-                    // Use the smallest available image for admin viewing
-                    fallbackImageData = imageData.previewImage || imageData.displayImage || imageData.originalImage;
+                    // Use adminCroppedImage first (high quality cropped), then fallback to others
+                    fallbackImageData = imageData.adminCroppedImage || imageData.previewImage || imageData.displayImage || imageData.originalImage;
                     console.log(`🖼️ Found compressed fallback image for item ${item.id}:`, 
                         fallbackImageData ? fallbackImageData.substring(0, 50) + '...' : 'none');
+                    if (imageData.adminCroppedImage) {
+                        console.log('✅ Using high-quality cropped image for admin panel');
+                    }
                 }
                 
-                // If no compressed image, try full quality
+                // If no compressed image, try full quality - prioritize adminCroppedImage
                 if (!fallbackImageData) {
                     const sessionFullImageData = sessionStorage.getItem(`cartImage_full_${item.id}`);
                     if (sessionFullImageData) {
                         const fullImageData = JSON.parse(sessionFullImageData);
-                        // Use preview image (smallest) for admin viewing
-                        fallbackImageData = fullImageData.previewImage || fullImageData.displayImage || fullImageData.originalImage;
+                        // Use adminCroppedImage first (best for admin viewing), then fallback
+                        fallbackImageData = fullImageData.adminCroppedImage || fullImageData.previewImage || fullImageData.displayImage || fullImageData.originalImage;
                         console.log(`🖼️ Found full-quality fallback image for item ${item.id}:`, 
                             fallbackImageData ? fallbackImageData.substring(0, 50) + '...' : 'none');
+                        if (fullImageData.adminCroppedImage) {
+                            console.log('✅ Using full-quality cropped image for admin panel');
+                        }
                     }
                 }
             } catch (error) {
@@ -1574,14 +1580,14 @@ async function submitOrder(orderData) {
                                     publicId: img.publicId
                                 };
                                 
-                                // Keep compressed fallback images (< 500KB), remove large ones
+                                // Keep admin-quality images (< 800KB), remove large ones
                                 if (img.fallbackImage && img.fallbackImage.startsWith('data:image')) {
                                     const estimatedSize = img.fallbackImage.length * 0.75; // Base64 to binary ratio
-                                    if (estimatedSize < 500000) { // 500KB limit for admin display
+                                    if (estimatedSize < 800000) { // 800KB limit for high-quality admin display
                                         cleanImg.fallbackImage = img.fallbackImage;
-                                        console.log(`📸 Preserving compressed fallback image (${Math.round(estimatedSize/1000)}KB) for admin panel`);
+                                        console.log(`📸 Preserving high-quality admin image (${Math.round(estimatedSize/1000)}KB) for admin panel`);
                                     } else {
-                                        console.log(`🗑️ Removing large fallback image (${Math.round(estimatedSize/1000)}KB) to prevent Firebase limit`);
+                                        console.log(`🗑️ Removing large admin image (${Math.round(estimatedSize/1000)}KB) to prevent Firebase limit`);
                                     }
                                 }
                                 

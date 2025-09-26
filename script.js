@@ -348,7 +348,7 @@ function initializeEventListeners() {
                 });
                 
                 try {
-                    const [printImageData, previewImageData] = await Promise.all([
+                    const [printImageData, previewImageData, adminCroppedImage] = await Promise.all([
                         getCanvasImageData().catch(err => {
                             console.warn('Print image capture failed:', err);
                             return null;
@@ -356,14 +356,20 @@ function initializeEventListeners() {
                         captureFramePreview().catch(err => {
                             console.warn('Preview image capture failed:', err);
                             return null;
+                        }),
+                        captureFramedImage().catch(err => {
+                            console.warn('Admin cropped image capture failed:', err);
+                            return null;
                         })
                     ]);
                     
                     console.log('Image capture results:', {
                         printImageCaptured: !!printImageData,
                         previewImageCaptured: !!previewImageData,
+                        adminCroppedImageCaptured: !!adminCroppedImage,
                         printImageSize: printImageData ? printImageData.length : 0,
-                        previewImageSize: previewImageData ? previewImageData.length : 0
+                        previewImageSize: previewImageData ? previewImageData.length : 0,
+                        adminCroppedImageSize: adminCroppedImage ? adminCroppedImage.length : 0
                     });
                     
                     // Add captured images if available
@@ -384,12 +390,21 @@ function initializeEventListeners() {
                         cartItem.previewImage = state.originalImage || state.image;
                         cartItem.displayImage = state.originalImage || state.image;
                     }
+
+                    // Add high-quality cropped image for admin panel
+                    if (adminCroppedImage) {
+                        cartItem.adminCroppedImage = adminCroppedImage;
+                        console.log('✅ High-quality cropped image captured for admin panel');
+                    } else {
+                        console.warn('⚠️ Admin cropped image not captured, will use fallback');
+                    }
                     
                 } catch (imageError) {
                     console.warn('Image capture failed, using original image as fallback:', imageError);
                     cartItem.printImage = state.originalImage || state.image;
                     cartItem.previewImage = state.originalImage || state.image;
                     cartItem.displayImage = state.originalImage || state.image;
+                    cartItem.adminCroppedImage = state.originalImage || state.image;
                 }
 
                 console.log('Adding item to cart:', cartItem);
@@ -1918,7 +1933,8 @@ async function addToCart(item) {
             originalImage: await compressImage(item.originalImage, 0.7, 1200),
             printImage: await compressImage(item.printImage, 0.8, 1200),
             displayImage: await compressImage(item.displayImage, 0.6, 800),
-            previewImage: await compressImage(item.previewImage, 0.6, 800)
+            previewImage: await compressImage(item.previewImage, 0.6, 800),
+            adminCroppedImage: item.adminCroppedImage ? await compressImage(item.adminCroppedImage, 0.9, 1600) : null // High quality for admin
         };
 
         // Store original full-quality images separately for upload
@@ -1926,7 +1942,8 @@ async function addToCart(item) {
             originalImage: item.originalImage,
             printImage: item.printImage,
             displayImage: item.displayImage,
-            previewImage: item.previewImage
+            previewImage: item.previewImage,
+            adminCroppedImage: item.adminCroppedImage // Keep full quality for admin panel
         };
         
         try {
@@ -1951,10 +1968,13 @@ async function addToCart(item) {
                 printImage: !!item.printImage,
                 displayImage: !!item.displayImage,
                 previewImage: !!item.previewImage,
+                adminCroppedImage: !!item.adminCroppedImage,
                 originalImageSize: item.originalImage ? item.originalImage.length : 0,
                 printImageSize: item.printImage ? item.printImage.length : 0,
+                adminCroppedImageSize: item.adminCroppedImage ? item.adminCroppedImage.length : 0,
                 compressedOriginalSize: compressedImages.originalImage ? compressedImages.originalImage.length : 0,
-                compressedPrintSize: compressedImages.printImage ? compressedImages.printImage.length : 0
+                compressedPrintSize: compressedImages.printImage ? compressedImages.printImage.length : 0,
+                compressedAdminCroppedSize: compressedImages.adminCroppedImage ? compressedImages.adminCroppedImage.length : 0
             });
         } catch (storageError) {
             console.warn('⚠️ Failed to store images in sessionStorage, falling back to window storage:', storageError);
