@@ -80,8 +80,16 @@ async function uploadOrderImagesToCloudinaryEnhanced(orderData) {
     // Fallback to existing server-based upload
     const fallbackResult = await uploadOrderImagesToCloudinary(orderData);
     
+    // Debug the fallback result
+    console.log('🔍 Fallback upload result:', {
+        hasResult: !!fallbackResult,
+        resultLength: fallbackResult ? fallbackResult.length : 0,
+        successfulUploads: fallbackResult ? fallbackResult.filter(r => r.urls !== null).length : 0,
+        shouldCreateFallback: !fallbackResult || fallbackResult.length === 0 || !fallbackResult.some(result => result.urls !== null)
+    });
+    
     // If server-based upload also fails, create fallback with compressed images for admin viewing
-    if (!fallbackResult || fallbackResult.length === 0) {
+    if (!fallbackResult || fallbackResult.length === 0 || !fallbackResult.some(result => result.urls !== null)) {
         console.warn('⚠️ All upload methods failed, creating fallback entries with compressed images');
         
         const fallbackResults = [];
