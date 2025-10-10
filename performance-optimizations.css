@@ -1,101 +1,74 @@
 /*
- * PERFORMANCE OPTIMIZATIONS FOR JB CREATIONS WEBSITE
- * This file contains critical CSS and JavaScript optimizations
- * Applied after comprehensive analysis of the website
+ * Performance Optimizations CSS
+ * Additional performance enhancements for all devices
  */
 
-/* ===== CSS PERFORMANCE OPTIMIZATIONS ===== */
-
-/* 1. REDUCE EXCESSIVE ANIMATIONS AND TRANSITIONS */
-/* Simplify keyframe animations to reduce GPU usage */
-@keyframes frameResize {
-    0% { transform: scale(1); }
-    50% { transform: scale(0.98); }
-    100% { transform: scale(1); }
+/* GPU Acceleration for key animations */
+.frame-transitioning,
+.frame-wrapper-transitioning,
+.frame-morphing,
+.preview-section:hover {
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
 }
 
-@keyframes frameFadeInOut {
-    0% { opacity: 1; }
-    50% { opacity: 0.95; }
-    100% { opacity: 1; }
-}
-
-/* Reduce complex morphing animation */
-@keyframes smoothMorphing {
-    0%, 100% { transform: scaleX(1) scaleY(1); }
-    50% { transform: scaleX(0.998) scaleY(0.996); }
-}
-
-/* 2. OPTIMIZE BACKDROP-FILTER USAGE */
-/* Use will-change property sparingly and remove after animation */
-.cards-container,
-.total-price-bar,
-.site-header {
-    backdrop-filter: blur(8px); /* Reduced from 10px+ */
-    -webkit-backdrop-filter: blur(8px);
-}
-
-/* Remove backdrop-filter on mobile to improve performance */
-@media (max-width: 768px) {
-    .cards-container,
-    .total-price-bar,
-    .site-header {
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-        background: rgba(255, 255, 255, 0.95); /* Fallback solid background */
-    }
-}
-
-/* 3. OPTIMIZE TRANSFORM PROPERTIES */
-/* Use transform3d for hardware acceleration */
-.zoom-controls button:hover,
-.card-nav-btn:hover,
-.mobile-size-btn:hover {
-    transform: translate3d(0, -2px, 0) scale(1.05);
-    will-change: transform; /* Add only during hover */
-}
-
-/* Remove will-change after transition */
-.zoom-controls button,
-.card-nav-btn,
-.mobile-size-btn {
-    will-change: auto;
-}
-
-/* 4. REDUCE BOX-SHADOW COMPLEXITY */
-/* Simplify complex box-shadows */
+/* Optimize heavy box-shadows */
 .preview-section,
-.room-preview-section,
-.desktop-card {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Simplified */
+.card,
+button {
+    box-shadow: 0 4px 12px rgba(22, 105, 122, 0.08);
 }
 
-/* Remove multiple box-shadows on mobile */
-@media (max-width: 768px) {
-    .preview-section,
-    .room-preview-section,
-    .desktop-card {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    }
+/* Reduce paint complexity */
+.container {
+    contain: layout;
 }
 
-/* 5. OPTIMIZE PAINT AND COMPOSITE LAYERS */
-/* Force GPU acceleration for frequently animated elements */
-.preview-image,
-.room-slider img,
-.frame {
-    transform: translateZ(0); /* Force GPU layer */
+.frame-preview {
+    contain: layout style;
+}
+
+/* Optimize image filters */
+#previewImage {
+    will-change: filter;
     backface-visibility: hidden;
 }
 
-/* 6. REDUCE LAYOUT THRASHING */
-/* Use flexbox instead of multiple position calculations */
-.container {
-    contain: layout style; /* CSS containment */
+/* Optimize font loading */
+body {
+    font-display: swap;
 }
 
-/* 7. OPTIMIZE FONT LOADING */
-/* Use system fonts for better performance - no web font loading needed */
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+/* Reduce reflows during animations */
+.frame-aspect-wrapper {
+    contain: layout;
+}
+
+/* Optimize transitions */
+button,
+.nav-btn,
+.step-dot {
+    transition: transform 0.2s ease-out, background-color 0.2s ease-out;
+}
+
+/* Prevent unnecessary repaints */
+.mobile-dropup,
+.mobile-bottom-bar {
+    contain: layout style paint;
+}
+
+/* Memory-efficient animations */
+@keyframes optimizedFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: optimizedFade 0.3s ease-out;
+}
+
+/* Preload critical images */
+.critical-image {
+    image-rendering: crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
 }

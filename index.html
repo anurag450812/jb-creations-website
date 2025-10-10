@@ -4,25 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JB Creations - Custom Photo Framing</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="mobile-responsiveness-fixes.css">
+    <link rel="stylesheet" href="performance-optimizations.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <!-- Critical CSS - Inline for performance -->
-    <link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="style.css"></noscript>
-    
-    <!-- Performance optimization files -->
-    <link rel="preload" href="performance-optimizations.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="performance-optimizations.css"></noscript>
-    
-    <link rel="preload" href="mobile-responsiveness-fixes.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="mobile-responsiveness-fixes.css"></noscript>
-    
-    <!-- Font Awesome - Load asynchronously -->
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"></noscript>
-    
-    <!-- Razorpay Integration - Load only when needed -->
-    <link rel="preload" href="razorpay-styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="razorpay-styles.css"></noscript>
+    <!-- Razorpay Integration -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <link rel="stylesheet" href="razorpay-styles.css">
     <style>
         /* Base Mobile Optimizations */
         html {
@@ -2481,6 +2470,8 @@
     <script src="api-client.js"></script>
     <script src="otp-auth-firebase.js"></script>
     <script src="auth.js"></script>
+    <script src="mobile-performance-optimizer.js"></script>
+    <script src="mobile-browser-optimizations.js"></script>
     <script src="script.js"></script>
     <script>
         function setProfileDropdownState(isOpen) {
@@ -2963,26 +2954,6 @@
         function scrollToShop() {
             document.getElementById('shop').scrollIntoView({
                 behavior: 'smooth'
-            });
-        }
-    </script>
-
-    <!-- Performance optimization scripts -->
-    <script src="performance-optimizations.js" defer></script>
-    <script src="third-party-optimizations.js" defer></script>
-    <script src="caching-optimization.js" defer></script>
-    
-    <!-- Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(function(registration) {
-                        console.log('SW registered: ', registration);
-                    })
-                    .catch(function(registrationError) {
-                        console.log('SW registration failed: ', registrationError);
-                    });
             });
         }
     </script>
