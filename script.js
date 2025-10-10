@@ -65,12 +65,215 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize cart count
     updateCartCount();
+
+    // Initialize mobile bottom bar/drop-up if present
+    initMobileBottomBar();
 });
 
 // Also update cart count on window load as a fallback
 window.addEventListener('load', function() {
     updateCartCount();
 });
+
+// Initialize Mobile Bottom Bar and Drop-up drawers
+function initMobileBottomBar() {
+    const dropup = document.getElementById('mobileDropup');
+    const bottomBar = document.getElementById('mobileBottomBar');
+    if (!dropup || !bottomBar) return;
+
+    const drawers = {
+        size: dropup.querySelector('.drawer[data-drawer="size"]'),
+        color: dropup.querySelector('.drawer[data-drawer="color"]'),
+        texture: dropup.querySelector('.drawer[data-drawer="texture"]'),
+        adjust: dropup.querySelector('.drawer[data-drawer="adjust"]'),
+    };
+
+    // Populate drawers by cloning existing mobile controls
+    const template = document.getElementById('mobileControlsTemplate');
+    if (template) {
+        const tempContent = template.content;
+        const sizeGrid = tempContent.querySelector('.mobile-size-grid');
+        const colorGrid = tempContent.querySelector('.mobile-color-grid');
+        const textureGrid = tempContent.querySelector('.mobile-texture-grid');
+        const adjustments = tempContent.querySelector('.mobile-adjustments-container');
+
+        if (sizeGrid && drawers.size && drawers.size.children.length === 0) {
+            drawers.size.appendChild(sizeGrid.cloneNode(true));
+        }
+        if (colorGrid && drawers.color && drawers.color.children.length === 0) {
+            drawers.color.appendChild(colorGrid.cloneNode(true));
+        }
+        if (textureGrid && drawers.texture && drawers.texture.children.length === 0) {
+            drawers.texture.appendChild(textureGrid.cloneNode(true));
+        }
+        if (adjustments && drawers.adjust && drawers.adjust.children.length === 0) {
+            const adjClone = adjustments.cloneNode(true);
+            // Avoid duplicate IDs by renaming clones and linking to originals
+            adjClone.querySelectorAll('input[id]').forEach(input => {
+                const origId = input.id;
+                input.dataset.sourceId = origId;
+                input.removeAttribute('id');
+                // Initialize clone value from original if present
+                const original = document.getElementById(origId);
+                if (original) input.value = original.value;
+            });
+            drawers.adjust.appendChild(adjClone);
+        }
+    }
+
+    // Event delegation inside drawers to reuse existing handlers
+    // Size
+    dropup.addEventListener('click', (e) => {
+        const sizeBtn = e.target.closest('.mobile-size-btn');
+        if (sizeBtn) {
+            // Trigger original click logic by dispatching click on matching button in main DOM
+            const selector = `.mobile-size-btn[data-size="${sizeBtn.dataset.size}"][data-orientation="${sizeBtn.dataset.orientation}"]`;
+            const original = document.querySelector(selector);
+            if (original) original.click();
+            // Update clone active states
+            if (drawers.size) {
+                drawers.size.querySelectorAll('.mobile-size-btn').forEach(btn => btn.classList.remove('active'));
+                sizeBtn.classList.add('active');
+            }
+        }
+        const colorBtn = e.target.closest('.mobile-color-btn');
+        if (colorBtn) {
+            const selector = `.mobile-color-btn[data-color="${colorBtn.dataset.color}"]`;
+            const original = document.querySelector(selector);
+            if (original) original.click();
+            if (drawers.color) {
+                drawers.color.querySelectorAll('.mobile-color-btn').forEach(btn => btn.classList.remove('active'));
+                colorBtn.classList.add('active');
+            }
+        }
+        const textureBtn = e.target.closest('.mobile-texture-btn');
+        if (textureBtn) {
+            const selector = `.mobile-texture-btn[data-texture="${textureBtn.dataset.texture}"]`;
+            const original = document.querySelector(selector);
+            if (original) original.click();
+            if (drawers.texture) {
+                drawers.texture.querySelectorAll('.mobile-texture-btn').forEach(btn => btn.classList.remove('active'));
+                textureBtn.classList.add('active');
+            }
+        }
+    });
+
+    // Adjustments sliders - sync value to originals on input
+    dropup.addEventListener('input', (e) => {
+        const id = e.target.dataset.sourceId || e.target.id;
+        if (!id) return;
+        const mobileIds = ['mobileBrightness','mobileContrast','mobileHighlights','mobileShadows','mobileVibrance'];
+        if (mobileIds.includes(id)) {
+            const val = parseInt(e.target.value, 10);
+            // Try to update the original (if present)
+            const original = document.getElementById(id);
+            if (original && original !== e.target) {
+                original.value = val;
+                original.dispatchEvent(new Event('input', { bubbles: true }));
+                return; // Original handler will update state/filters
+            }
+            // No original exists (we removed old mobile section) → update state directly
+            const base = id.startsWith('mobile') ? id.slice(6) : id; // e.g., Brightness
+            const type = base.charAt(0).toLowerCase() + base.slice(1); // brightness
+            if (state.adjustments && type in state.adjustments) {
+                state.adjustments[type] = val;
+                updateImageFilters();
+            }
+            // Also sync the desktop slider if present
+            const desktop = document.getElementById(type);
+            if (desktop) desktop.value = val;
+        }
+    });
+
+    // Measure and set bar height CSS variable for layout spacing
+    function setBarHeightVar() {
+        const h = bottomBar.getBoundingClientRect().height;
+        document.documentElement.style.setProperty('--mobile-bar-height', h + 'px');
+    }
+    setBarHeightVar();
+    // expose for external calls after bar becomes visible
+    window.recomputeMobileBarHeight = setBarHeightVar;
+    window.addEventListener('resize', setBarHeightVar);
+    window.addEventListener('orientationchange', setBarHeightVar);
+
+    // Tabs behavior
+    const tabs = bottomBar.querySelectorAll('.bar-tab');
+    const dots = bottomBar.querySelectorAll('.bar-dots .dot');
+    const titleEl = document.getElementById('dropupTitle');
+    const toggleBtn = document.getElementById('dropupToggle');
+
+    function setActiveDrawer(name) {
+        // toggle tab states
+        tabs.forEach(t => {
+            const isActive = t.dataset.target === name;
+            t.classList.toggle('active', isActive);
+            t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+        // toggle drawers
+        Object.entries(drawers).forEach(([key, el]) => {
+            if (!el) return;
+            el.classList.toggle('active', key === name);
+        });
+        // dots state
+        const order = ['size','color','texture','adjust'];
+        order.forEach((key, idx) => {
+            if (dots[idx]) dots[idx].classList.toggle('active', key === name);
+        });
+        // title
+        if (titleEl) {
+            const map = { size: 'Size', color: 'Color', texture: 'Texture', adjust: 'Adjust' };
+            titleEl.textContent = map[name] || 'Customize';
+        }
+        // open dropup
+        dropup.classList.add('open');
+        dropup.setAttribute('aria-hidden', 'false');
+        if (toggleBtn) {
+            toggleBtn.setAttribute('aria-expanded', 'true');
+            const icon = toggleBtn.querySelector('i');
+            if (icon) { icon.className = 'fas fa-chevron-down'; }
+        }
+    }
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const target = tab.dataset.target;
+            if (!target) return;
+            const alreadyOpen = dropup.classList.contains('open');
+            const thisActive = tab.classList.contains('active');
+            if (alreadyOpen && thisActive) {
+                dropup.classList.remove('open');
+                dropup.setAttribute('aria-hidden', 'true');
+                return;
+            }
+            setActiveDrawer(target);
+        });
+    });
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            const willOpen = !dropup.classList.contains('open');
+            if (willOpen) {
+                dropup.classList.add('open');
+                dropup.setAttribute('aria-hidden', 'false');
+                toggleBtn.setAttribute('aria-expanded', 'true');
+            } else {
+                dropup.classList.remove('open');
+                dropup.setAttribute('aria-hidden', 'true');
+                toggleBtn.setAttribute('aria-expanded', 'false');
+            }
+            const icon = toggleBtn.querySelector('i');
+            if (icon) {
+                icon.className = willOpen ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+            }
+        });
+    }
+
+    // Ensure a default drawer is prepared (but don't auto-open)
+    Object.values(drawers).forEach(el => el && el.classList.remove('active'));
+    if (drawers.size) drawers.size.classList.add('active');
+}
 
 // Listen for storage changes to update cart count across tabs
 window.addEventListener('storage', function(e) {
@@ -195,19 +398,12 @@ function initializeEventListeners() {
             if (totalPriceElement) {
                 totalPriceElement.textContent = '₹' + price;
             }
-            
-            // Add smooth scroll animation for mobile
-            if (window.innerWidth <= 768) {
-                setTimeout(() => {
-                    const previewSection = document.querySelector('.preview-section');
-                    if (previewSection) {
-                        previewSection.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
-                    }
-                }, 300);
+            // Also update mobile total price if present
+            if (typeof updateMobileTotalPrice === 'function') {
+                updateMobileTotalPrice();
             }
+            
+            // Removed auto-scroll on mobile to prevent page from jumping to top/center
             
             // Automatically trigger "Update Room Previews" functionality after frame size change
             setTimeout(() => {
@@ -709,6 +905,8 @@ function initializeEventListeners() {
     
     function handleChangeImage() {
         console.log('handleChangeImage called - about to reload page');
+        // Hide mobile customization UI until next upload
+        document.body.classList.remove('has-upload');
         // Reload the page to start fresh with image upload
         window.location.reload();
     }
@@ -818,6 +1016,16 @@ function handleImageUpload(file) {
                     // Enable add to cart button and mark container as having image
                     elements.addToCartBtn.disabled = false;
                     elements.imageContainer.classList.add('has-image');
+                    // Show mobile customization bar/drop-up
+                    document.body.classList.add('has-upload');
+                    if (typeof window.recomputeMobileBarHeight === 'function') {
+                        // wait a tick so layout applies display changes
+                        setTimeout(() => window.recomputeMobileBarHeight(), 50);
+                    }
+                    // Ensure mobile total price and button state update
+                    if (typeof updateMobileTotalPrice === 'function') {
+                        updateMobileTotalPrice();
+                    }
                     
                     // Update room preview button state
                     if (window.updateRoomPreviewButtonState) {
@@ -1869,6 +2077,7 @@ async function addToCart(item) {
         }
         
         // Create lightweight cart item (without large base64 images)
+        const thumbSource = item.displayImage || item.previewImage || item.printImage || item.originalImage || null;
         const lightweightItem = {
             id: item.id,
             timestamp: item.timestamp || new Date().toISOString(),
@@ -1877,14 +2086,14 @@ async function addToCart(item) {
             frameTexture: item.frameTexture,
             price: item.price,
             // Store only essential image metadata, not base64 data
-            hasImage: !!(item.originalImage || item.printImage || item.displayImage),
+            hasImage: !!(item.originalImage || item.printImage || item.displayImage || item.previewImage),
             imageSize: {
                 original: item.originalImage ? item.originalImage.length : 0,
                 print: item.printImage ? item.printImage.length : 0,
-                preview: item.displayImage ? item.displayImage.length : 0
+                preview: item.displayImage ? item.displayImage.length : (item.previewImage ? item.previewImage.length : 0)
             },
             // Create small thumbnail for cart display (compressed)
-            thumbnailImage: item.displayImage ? await compressImageForThumbnail(item.displayImage) : null
+            thumbnailImage: thumbSource ? await compressImageForThumbnail(thumbSource) : null
         };
         
         // Store full image data in sessionStorage for order processing (separate from cart)
@@ -2526,7 +2735,7 @@ function loadRoomPreviewImages(frameSize, orientation) {
 
 function initializeRoomSlider(frameSize, orientation) {
     const sliderContainer = document.getElementById('roomSliderContainer');
-    const slider = document.getElementById('roomSlider');
+    let slider = document.getElementById('roomSlider');
     const indicators = document.getElementById('sliderIndicators');
     const defaultPreview = document.getElementById('defaultRoomPreview');
     const slideCounter = document.getElementById('slideCounter');
@@ -2569,7 +2778,15 @@ function initializeRoomSlider(frameSize, orientation) {
         setTimeout(() => window.updateRoomPreviewButtonState(), 100);
     }
     
-    // Clear existing content
+    // Replace slider node to remove any previously attached touch/click handlers
+    // This ensures swipes advance exactly one image per gesture
+    if (slider && slider.parentNode) {
+        const freshSlider = slider.cloneNode(false); // no children
+        slider.parentNode.replaceChild(freshSlider, slider);
+        slider = freshSlider;
+    }
+
+    // Clear existing content (fresh node is already empty, but keep for safety)
     slider.innerHTML = '';
     indicators.innerHTML = '';
     
@@ -2763,6 +2980,9 @@ function findNextAvailableImage(startIndex) {
 
 // Enhanced touch support with better gesture detection
 function addTouchSupport(element) {
+    // Prevent duplicate bindings if called multiple times
+    if (!element || element._roomTouchAttached) return;
+    element._roomTouchAttached = true;
     let touchStartX = 0;
     let touchStartY = 0;
     let touchEndX = 0;
@@ -3911,6 +4131,8 @@ function initializeMobileCustomization() {
                         printImage: printImageData, 
                         // Live preview screenshot for display in cart (with frame borders)
                         previewImage: finalPreviewImage,
+                        // Also set displayImage for downstream consumers expecting this key
+                        displayImage: finalPreviewImage,
                         // Frame specifications
                         frameSize: state.frameSize,
                         frameColor: state.frameColor || '#8B4513',

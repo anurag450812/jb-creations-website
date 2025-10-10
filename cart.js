@@ -69,22 +69,6 @@ class CartManager {
     }
 
     setupHeaderFunctionality() {
-        // Profile dropdown functionality
-        const profileBtn = document.getElementById('profileBtn');
-        const profileDropdownMenu = document.getElementById('profileDropdownMenu');
-        
-        if (profileBtn && profileDropdownMenu) {
-            profileBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                profileDropdownMenu.classList.toggle('show');
-            });
-
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function() {
-                profileDropdownMenu.classList.remove('show');
-            });
-        }
-
         // Cart button (current page, so just update count)
         const headerCartBtn = document.getElementById('headerCartBtn');
         if (headerCartBtn) {
@@ -110,19 +94,37 @@ class CartManager {
         cartItemsContainer.style.display = 'block';
 
         cartItemsContainer.innerHTML = this.cart.map((item, index) => {
+            // Resolve a thumbnail source: prefer precomputed, else look into sessionStorage compressed images
+            let thumbSrc = item.thumbnailImage || null;
+            if (!thumbSrc && item.id) {
+                try {
+                    const stored = sessionStorage.getItem(`cartImage_${item.id}`);
+                    if (stored) {
+                        const data = JSON.parse(stored);
+                        thumbSrc = data.displayImage || data.previewImage || data.printImage || data.originalImage || null;
+                    }
+                    // Fallback to in-memory storage if available
+                    if (!thumbSrc && window.cartImageStorage && window.cartImageStorage[item.id]) {
+                        const data = window.cartImageStorage[item.id];
+                        thumbSrc = data.displayImage || data.previewImage || data.printImage || data.originalImage || null;
+                    }
+                } catch (e) {
+                    console.warn('Failed to load fallback image for cart item', item.id, e);
+                }
+            }
             console.log(`Cart item ${index}:`, {
                 hasImage: !!item.hasImage,
-                hasThumbnail: !!item.thumbnailImage,
-                thumbnailType: typeof item.thumbnailImage,
-                thumbnailLength: item.thumbnailImage ? item.thumbnailImage.length : 0,
+                hasThumbnail: !!thumbSrc,
+                thumbnailType: typeof thumbSrc,
+                thumbnailLength: thumbSrc ? thumbSrc.length : 0,
                 imageSize: item.imageSize
             });
             
             return `
             <div class="cart-item" data-index="${index}">
                 <div class="cart-item-image">
-                    ${item.thumbnailImage ? 
-                        `<img src="${item.thumbnailImage}" alt="Frame Preview">` : 
+                    ${thumbSrc ? 
+                        `<img src="${thumbSrc}" alt="Frame Preview">` : 
                         item.hasImage ? 
                         '<i class="fas fa-image"></i>' : 
                         '<i class="fas fa-image text-muted"></i>'

@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Profile - JB Creations</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        :root {
+            --primary-color: #16697A;
+            --secondary-color: #EDE7E3;
+            --accent-color: #489FB5;
+            --background-color: #EDE7E3;
+            --text-color: #16697A;
+            --card-background: #FFFFFF;
+            --success-color: #82C0CC;
+            --highlight-color: #FFA62B;
+            --border-radius: 12px;
+            --shadow: 0 4px 16px rgba(22, 105, 122, 0.1);
+        }
+            /* Header uses global styles from style.css for consistency across pages */
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .profile-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #82C0CC 0%, #489FB5 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(130,192,204,0.3);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .page-header h1 { color: #fff; margin-bottom: 8px; }
+        .page-header p { color: rgba(255,255,255,0.92); margin: 0; }
+
+        .profile-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(22, 105, 122, 0.1);
+            overflow: hidden;
+            margin-bottom: 18px;
+            border: 1px solid rgba(22,105,122,0.08);
+        }
+
+        .profile-top {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            padding: 18px;
+            background: linear-gradient(145deg, rgba(130, 192, 204, 0.18), rgba(130, 192, 204, 0.08));
+        }
+
+        .avatar {
+            width: 72px; height: 72px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-size: 32px; box-shadow: 0 6px 18px rgba(72,159,181,0.25);
+            flex-shrink: 0;
+        }
+
+        .user-main {
+            flex: 1; min-width: 0;
+        }
+        .user-name {
+            font-size: 1.4rem; font-weight: 800; color: var(--primary-color);
+        }
+        .user-phone { color: #489FB5; font-weight: 600; margin-top: 2px; }
+
+        .edit-actions {
+            margin-left: auto; display: flex; gap: 10px;
+        }
+        .btn-icon {
+            background: #fff; border: 1px solid rgba(22,105,122,0.15);
+            color: var(--primary-color); border-radius: 10px; padding: 8px 10px;
+            cursor: pointer; transition: all .2s ease; display: inline-flex; align-items: center; gap: 8px; font-weight: 600;
+        }
+        .btn-icon:hover { background: var(--primary-color); color: #fff; transform: translateY(-1px); }
+
+        .profile-details { padding: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .detail-item { background: #F9F7F5; border: 1px solid rgba(22,105,122,0.08); border-radius: 12px; padding: 14px; }
+        .detail-label { font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: rgba(22,105,122,.7); font-weight: 700; }
+        .detail-value { margin-top: 4px; font-weight: 700; color: var(--text-color); word-break: break-word; }
+
+        .section {
+            background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(22,105,122,0.1);
+            border: 1px solid rgba(22,105,122,0.08); overflow: hidden; margin-bottom: 18px;
+        }
+        .section-header { padding: 14px 18px; background: #16697A; color: #fff; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .section-body { padding: 16px; }
+
+        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+        .quick-card { background: #EDE7E3; border: 1px solid rgba(22,105,122,0.12); border-radius: 12px; padding: 14px; display: flex; gap: 12px; align-items: center; cursor: pointer; transition: all .2s ease; }
+        .quick-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+        .quick-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, #489FB5, #82C0CC); }
+        .quick-title { font-weight: 700; color: var(--text-color); }
+        .quick-sub { font-size: 12px; color: rgba(22,105,122,0.75); }
+
+        .actions-row { display: flex; flex-wrap: wrap; gap: 10px; }
+        .btn-primary { background: var(--primary-color); color: #fff; border: none; border-radius: 10px; padding: 10px 14px; font-weight: 700; cursor: pointer; }
+        .btn-secondary { background: #6B6B6B; color: #fff; border: none; border-radius: 10px; padding: 10px 14px; font-weight: 700; cursor: pointer; }
+        .btn-outline { background: #fff; color: var(--primary-color); border: 2px solid var(--primary-color); border-radius: 10px; padding: 9px 14px; font-weight: 700; cursor: pointer; }
+        .btn-danger { background: #dc3545; color: #fff; border: none; border-radius: 10px; padding: 10px 14px; font-weight: 700; cursor: pointer; }
+
+        .empty-state { text-align: center; padding: 36px 16px; color: rgba(22,105,122,0.75); }
+        .empty-state i { font-size: 48px; color: rgba(130,192,204,0.6); margin-bottom: 8px; }
+
+        /* Edit modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 4000; }
+        .modal { background: #fff; width: 95%; max-width: 460px; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden; }
+        .modal-header { padding: 14px 18px; background: #16697A; color: #fff; display: flex; align-items: center; justify-content: space-between; }
+        .modal-body { padding: 16px; display: grid; gap: 12px; }
+        .form-field { display: grid; gap: 6px; }
+        .form-field label { font-size: 12px; font-weight: 700; color: rgba(22,105,122,0.8); text-transform: uppercase; }
+        .form-field input { padding: 10px 12px; border: 1px solid rgba(22,105,122,0.25); border-radius: 10px; outline: none; font-size: 14px; }
+        .modal-actions { padding: 14px 16px; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid rgba(0,0,0,0.06); }
+        .modal-overlay.show { display: flex; }
+
+        @media (max-width: 768px) {
+            .profile-details { grid-template-columns: 1fr; }
+            .profile-top { align-items: flex-start; }
+            .edit-actions { margin-left: 0; }
+            .quick-actions { grid-template-columns: 1fr 1fr; }
+            .profile-container { padding: 16px; }
+
+            /* Glass + minimal styling for Quick Actions */
+            .section {
+                background: linear-gradient(145deg, rgba(255,255,255,0.35), rgba(255,255,255,0.18));
+                border: 2px solid rgba(255,255,255,0.4);
+                box-shadow: 0 12px 40px rgba(130,192,204,0.25), inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -1px 0 rgba(0,0,0,0.06);
+                backdrop-filter: blur(14px);
+                -webkit-backdrop-filter: blur(14px);
+            }
+            .section-header {
+                background: transparent;
+                color: var(--primary-color);
+                padding: 12px 14px;
+                font-size: 0.95rem;
+                border-bottom: 1px solid rgba(72,159,181,0.25);
+            }
+            .section-body { padding: 14px; }
+
+            .quick-card {
+                background: linear-gradient(145deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1));
+                border: 2px solid rgba(255,255,255,0.35);
+                box-shadow: 0 8px 28px rgba(22,105,122,0.12);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                padding: 12px;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 8px;
+            }
+            .quick-card:hover { transform: translateY(-1px); }
+            .quick-icon { width: 36px; height: 36px; border-radius: 10px; }
+            .quick-title { font-size: 0.95rem; }
+            .quick-sub { display: none; }
+
+            /* Minimal glass buttons for Security & Preferences */
+            .actions-row { gap: 8px; }
+            .btn-primary, .btn-outline, .btn-danger {
+                background: linear-gradient(145deg, rgba(72,159,181,0.16), rgba(130,192,204,0.08));
+                color: var(--primary-color);
+                border: 2px solid rgba(72,159,181,0.35);
+                box-shadow: 0 6px 18px rgba(22,105,122,0.12);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                padding: 9px 12px;
+            }
+            .btn-danger {
+                background: linear-gradient(145deg, rgba(220,53,69,0.08), rgba(255,255,255,0.04));
+                border-color: rgba(220,53,69,0.35);
+                color: #c0392b;
+            }
+            .btn-primary:hover, .btn-outline:hover { transform: translateY(-1px); }
+            .btn-danger:hover { transform: translateY(-1px); }
+        }
+    </style>
+    <style>
+        /* Desktop-only: make Profile Quick Actions match mobile glass style */
+        @media (min-width: 769px) {
+            /* Hide back link on desktop */
+            .profile-container .back-link { display: none !important; }
+
+            .quick-actions-section {
+                background: linear-gradient(145deg, rgba(255,255,255,0.35), rgba(255,255,255,0.18));
+                border: 2px solid rgba(255,255,255,0.4);
+                box-shadow: 0 12px 40px rgba(130,192,204,0.25), inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -1px 0 rgba(0,0,0,0.06);
+                backdrop-filter: blur(14px);
+                -webkit-backdrop-filter: blur(14px);
+            }
+            .quick-actions-section .section-header {
+                background: transparent;
+                color: var(--primary-color);
+                padding: 12px 14px;
+                font-size: 0.95rem;
+                border-bottom: 1px solid rgba(72,159,181,0.25);
+            }
+            .quick-actions-section .section-body { padding: 14px; }
+
+            .quick-actions-section .quick-card {
+                background: linear-gradient(145deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1));
+                border: 2px solid rgba(255,255,255,0.35);
+                box-shadow: 0 8px 28px rgba(22,105,122,0.12);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                padding: 12px;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 8px;
+            }
+            .quick-actions-section .quick-card:hover { transform: translateY(-1px); }
+            .quick-actions-section .quick-icon { width: 36px; height: 36px; border-radius: 10px; }
+            .quick-actions-section .quick-title { font-size: 0.95rem; }
+            .quick-actions-section .quick-sub { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="site-header">
+        <div class="header-content">
+            <div class="header-left"></div>
+            <div class="header-brand">
+                <h1 class="brand-name">JB Creations</h1>
+            </div>
+            <div class="header-right">
+                <div class="auth-section" id="authSection">
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <button class="profile-icon-btn" id="profileBtn">
+                            <i class="fas fa-user-alt"></i>
+                            <span class="button-label">Profile</span>
+                        </button>
+                        <div class="profile-dropdown-menu" id="profileDropdownMenu">
+                            <div class="guest-options" id="guestOptions">
+                                <a href="otp-login.html?redirect=my-profile.html" class="dropdown-item">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    Sign In
+                                </a>
+                                <a href="otp-login.html?redirect=my-profile.html" class="dropdown-item">
+                                    <i class="fas fa-user-plus"></i>
+                                    Sign Up
+                                </a>
+                                <div class="dropdown-divider"></div>
+                            </div>
+
+                            <div class="authenticated-options" id="authenticatedOptions" style="display: none;">
+                                <div class="dropdown-user-info" id="dropdownUserInfo">
+                                    <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                                    <div class="user-details">
+                                        <div class="user-name" id="dropdownUserName">User</div>
+                                        <div class="user-phone" id="dropdownUserPhone">Phone</div>
+                                    </div>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <a href="my-profile.html" class="dropdown-item" data-close-dropdown="true">
+                                    <i class="fas fa-user-circle"></i>
+                                    My Profile
+                                </a>
+                                <a href="my-orders.html" class="dropdown-item" data-close-dropdown="true">
+                                    <i class="fas fa-box"></i>
+                                    My Orders
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a href="#" class="dropdown-item" onclick="authUtils.logout();" data-close-dropdown="true">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Sign Out
+                                </a>
+                                <div class="dropdown-divider"></div>
+                            </div>
+
+                            <a href="track-order.html" class="dropdown-item">
+                                <i class="fas fa-search"></i>
+                                Track Order
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="contactUs()">
+                                <i class="fas fa-envelope"></i>
+                                Contact Us
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="aboutUs()">
+                                <i class="fas fa-info-circle"></i>
+                                About Us
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="header-cart">
+                    <button class="cart-icon-btn" id="headerCartBtn" onclick="window.location.href='cart.html'">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" id="cartCount">0</span>
+                        <span class="button-label">Cart</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="profile-container">
+        <div class="page-header">
+            <h1>My Profile</h1>
+            <p>Manage your account information and preferences</p>
+        </div>
+
+        <div class="profile-card" id="profileCard">
+            <div class="profile-top">
+                <div class="avatar" id="avatarCircle"><i class="fas fa-user"></i></div>
+                <div class="user-main">
+                    <div class="user-name" id="userName">—</div>
+                    <div class="user-phone" id="userPhone">—</div>
+                </div>
+                <div class="edit-actions">
+                    <button class="btn-icon" id="editProfileBtn"><i class="fas fa-pen"></i> Edit</button>
+                </div>
+            </div>
+            <div class="profile-details">
+                <div class="detail-item">
+                    <div class="detail-label">Full Name</div>
+                    <div class="detail-value" id="detailName">—</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Email</div>
+                    <div class="detail-value" id="detailEmail">—</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Phone</div>
+                    <div class="detail-value" id="detailPhone">—</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Sign-in Method</div>
+                    <div class="detail-value" id="detailMethod">—</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section quick-actions-section">
+            <div class="section-header"><i class="fas fa-bolt"></i> Quick actions</div>
+            <div class="section-body">
+                <div class="quick-actions">
+                    <a class="quick-card" href="my-orders.html">
+                        <div class="quick-icon"><i class="fas fa-box"></i></div>
+                        <div>
+                            <div class="quick-title">My Orders</div>
+                            <div class="quick-sub">View and track orders</div>
+                        </div>
+                    </a>
+                    <a class="quick-card" href="track-order.html">
+                        <div class="quick-icon"><i class="fas fa-truck"></i></div>
+                        <div>
+                            <div class="quick-title">Track Order</div>
+                            <div class="quick-sub">Track with order ID</div>
+                        </div>
+                    </a>
+                    <a class="quick-card" href="customize.html">
+                        <div class="quick-icon"><i class="fas fa-palette"></i></div>
+                        <div>
+                            <div class="quick-title">Create Frame</div>
+                            <div class="quick-sub">Start a new order</div>
+                        </div>
+                    </a>
+                    <a class="quick-card" href="#" onclick="contactUs();return false;">
+                        <div class="quick-icon"><i class="fas fa-headset"></i></div>
+                        <div>
+                            <div class="quick-title">Support</div>
+                            <div class="quick-sub">We’re here to help</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        
+
+        <div id="loadingState" class="empty-state" style="display:none">
+            <i class="fas fa-spinner fa-spin"></i>
+            <div>Loading your profile...</div>
+        </div>
+        <div id="errorState" class="empty-state" style="display:none">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>Couldn't load your profile. Please try again.</div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+            <div class="modal-header">
+                <div id="editTitle"><i class="fas fa-user-edit"></i> Edit profile</div>
+                <button class="btn-icon" id="closeEditBtn" aria-label="Close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-field">
+                    <label for="editName">Full name</label>
+                    <input id="editName" type="text" placeholder="Enter your name" />
+                </div>
+                <div class="form-field">
+                    <label for="editEmail">Email</label>
+                    <input id="editEmail" type="email" placeholder="name@example.com" />
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-outline" id="cancelEditBtn">Cancel</button>
+                <button class="btn-primary" id="saveEditBtn"><i class="fas fa-save"></i> Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <!-- App scripts -->
+    <script src="firebase-client-new.js"></script>
+    <script src="otp-auth-firebase.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        function setProfileDropdownState(isOpen) {
+            const dropdownContainer = document.getElementById('profileDropdown');
+            const dropdownMenu = document.getElementById('profileDropdownMenu');
+            const profileBtn = document.getElementById('profileBtn');
+            if (!dropdownContainer || !dropdownMenu || !profileBtn) return;
+            dropdownContainer.classList.toggle('open', isOpen);
+            profileBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            dropdownMenu.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+        }
+        function toggleProfileDropdown() {
+            const dropdownContainer = document.getElementById('profileDropdown');
+            if (!dropdownContainer) return;
+            setProfileDropdownState(!dropdownContainer.classList.contains('open'));
+        }
+        function setupProfileDropdown() {
+            const dropdownContainer = document.getElementById('profileDropdown');
+            const dropdownMenu = document.getElementById('profileDropdownMenu');
+            const profileBtn = document.getElementById('profileBtn');
+            if (!dropdownContainer || !dropdownMenu || !profileBtn || dropdownContainer.dataset.dropdownInit === 'true') return;
+            dropdownContainer.dataset.dropdownInit = 'true';
+            profileBtn.setAttribute('aria-haspopup', 'true');
+            profileBtn.setAttribute('aria-expanded', 'false');
+            dropdownMenu.setAttribute('role', 'menu');
+            dropdownMenu.setAttribute('aria-hidden', 'true');
+            profileBtn.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); toggleProfileDropdown(); });
+            dropdownMenu.addEventListener('click', function(event) {
+                const actionableItem = event.target.closest('a, button');
+                if (actionableItem && actionableItem.dataset.closeDropdown === 'true') {
+                    setProfileDropdownState(false);
+                }
+            });
+            setProfileDropdownState(false);
+        }
+
+        document.addEventListener('click', function(event){
+            const dropdownContainer = document.getElementById('profileDropdown');
+            if (dropdownContainer && !dropdownContainer.contains(event.target)) setProfileDropdownState(false);
+        });
+        document.addEventListener('keydown', function(event){ if (event.key === 'Escape') setProfileDropdownState(false); });
+
+        const state = { user: null, userDocId: null };
+
+        function setLoading(show) {
+            document.getElementById('loadingState').style.display = show ? 'block' : 'none';
+        }
+        function setError(show) {
+            document.getElementById('errorState').style.display = show ? 'block' : 'none';
+        }
+        function fillUI(user) {
+            const name = user.name || 'User';
+            const email = user.email || 'Not set';
+            const phone = user.phone || '';
+            const method = user.signInMethod || 'phone';
+            document.getElementById('userName').textContent = name;
+            document.getElementById('userPhone').textContent = phone;
+            document.getElementById('detailName').textContent = name;
+            document.getElementById('detailEmail').textContent = email || 'Not set';
+            document.getElementById('detailPhone').textContent = phone;
+            document.getElementById('detailMethod').textContent = method.toUpperCase();
+
+            const duName = document.getElementById('dropdownUserName');
+            const duPhone = document.getElementById('dropdownUserPhone');
+            const guestOptions = document.getElementById('guestOptions');
+            const authOptions = document.getElementById('authenticatedOptions');
+            if (duName) duName.textContent = name; if (duPhone) duPhone.textContent = phone;
+            if (guestOptions) guestOptions.style.display = 'none';
+            if (authOptions) authOptions.style.display = 'block';
+        }
+
+        async function ensureAuthOrRedirect() {
+            try {
+                // Prefer otpAuth current user
+                if (window.otpAuth && typeof window.otpAuth.getCurrentUser === 'function') {
+                    const u = await window.otpAuth.getCurrentUser();
+                    if (u) return u;
+                }
+                // Fallback to session phone
+                const phone = localStorage.getItem('jb_current_user');
+                if (phone && window.jbAPI) {
+                    const res = await window.jbAPI.getUserByPhone(phone);
+                    if (res.success && res.user) return res.user;
+                }
+                // Redirect to login
+                window.location.href = 'otp-login.html?redirect=my-profile.html';
+                return null;
+            } catch (e) {
+                console.error('Auth check failed', e);
+                window.location.href = 'otp-login.html?redirect=my-profile.html';
+                return null;
+            }
+        }
+
+        async function loadProfile() {
+            setLoading(true); setError(false);
+            try {
+                const baseUser = await ensureAuthOrRedirect();
+                if (!baseUser) return;
+
+                // If baseUser already contains name/email/phone, use it, and also resolve docId
+                let fullUser = baseUser;
+                let docId = baseUser.docId || null;
+
+                if (window.jbAPI) {
+                    const res = await window.jbAPI.getUserByPhone(baseUser.phone || baseUser);
+                    if (res && res.success && res.user) {
+                        fullUser = res.user; docId = res.user.docId;
+                    }
+                }
+
+                state.user = fullUser; state.userDocId = docId;
+                fillUI(fullUser);
+            } catch (err) {
+                console.error('Failed to load profile', err);
+                setError(true);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function saveProfileEdits() {
+            const name = document.getElementById('editName').value.trim();
+            const email = document.getElementById('editEmail').value.trim();
+            if (!name) { alert('Please enter your name'); return; }
+            try {
+                // Use jbAPI.createUser which upserts by phone
+                if (!window.jbAPI) throw new Error('API not initialized yet');
+                const phone = state.user?.phone;
+                if (!phone) throw new Error('Phone missing for update');
+                const result = await window.jbAPI.createUser({ name, email, phone, signInMethod: state.user?.signInMethod || 'phone' });
+                if (result && result.success) {
+                    // Reload profile from DB
+                    await loadProfile();
+                    closeEdit();
+                } else {
+                    throw new Error(result?.error || 'Update failed');
+                }
+            } catch (e) {
+                console.error('Save failed', e);
+                alert('Could not save changes. Please try again.');
+            }
+        }
+
+        function openEdit() {
+            document.getElementById('editName').value = state.user?.name || '';
+            document.getElementById('editEmail').value = state.user?.email || '';
+            document.getElementById('editModal').classList.add('show');
+        }
+        function closeEdit() { document.getElementById('editModal').classList.remove('show'); }
+
+        // Simple helpers
+        function contactUs() {
+            alert('Contact Us\n\nEmail: jbcreationssss@gmail.com\nPhone: 9424772998');
+        }
+        function aboutUs() {
+            alert('About JB Creations\n\nWe are passionate about turning your precious memories into beautiful wall art.');
+        }
+
+        // Wire up events
+        document.addEventListener('DOMContentLoaded', async function(){
+            setupProfileDropdown();
+            document.getElementById('editProfileBtn').addEventListener('click', openEdit);
+            document.getElementById('closeEditBtn').addEventListener('click', closeEdit);
+            document.getElementById('cancelEditBtn').addEventListener('click', closeEdit);
+            document.getElementById('saveEditBtn').addEventListener('click', saveProfileEdits);
+            // Removed Security & Preferences section, so no related event bindings
+
+            // Wait a bit for Firebase API
+            setTimeout(loadProfile, 250);
+        });
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column footer-brand">
+                <a href="index.html" class="footer-logo">JB Creations</a>
+                <div class="footer-tagline">Custom Photo Frames & Memories</div>
+                <p class="footer-description">Premium custom frames crafted with care and delivered to your doorstep.</p>
+            </div>
+            <div class="footer-column footer-quick-links">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="customize.html">Our Services</a></li>
+                    <li><a href="#gallery">Gallery</a></li>
+                    <li><a href="customize.html">Custom Orders</a></li>
+                    <li><a href="#" onclick="aboutUs(); return false;">About Us</a></li>
+                    <li><a href="#" onclick="contactUs(); return false;">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-column footer-contact">
+                <h3>Get In Touch</h3>
+                <div class="contact-item">
+                    <i class="fas fa-phone contact-icon"></i>
+                    <div class="contact-text"><strong>Call Us</strong> 9424772998</div>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-envelope contact-icon"></i>
+                    <div class="contact-text"><strong>Email Us</strong> jbcreationssss@gmail.com</div>
+                </div>
+                <!-- Visit Us removed as requested -->
+                <!-- Social Media Links removed as requested -->
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-bottom-content">
+                <div class="copyright">© 2024 JB Creations. All rights reserved.</div>
+                <div class="footer-bottom-links">
+                    <a href="#privacy-policy">Privacy Policy</a>
+                    <a href="#terms-conditions">Terms & Conditions</a>
+                    <div class="designed-by">Designed with <span class="heart">❤️</span> by JB Creations</div>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

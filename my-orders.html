@@ -111,7 +111,7 @@
 
         .order-header {
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
             flex-wrap: wrap;
@@ -256,6 +256,11 @@
             text-decoration: underline;
         }
 
+        /* Desktop-only: hide back link (consistency with profile page) */
+        @media (min-width: 769px) {
+            .orders-container .back-link { display: none !important; }
+        }
+
         @media (max-width: 768px) {
             .orders-container {
                 padding: 15px;
@@ -313,199 +318,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Header and Dropdown Styles - Matching Homepage */
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .auth-section {
-            display: flex;
-            align-items: center;
-        }
-
-        .profile-dropdown {
-            position: relative;
-        }
-
-        .profile-icon-btn {
-            background: transparent;
-            border: none;
-            backdrop-filter: none;
-            -webkit-backdrop-filter: none;
-            box-shadow: none;
-            color: #16697A;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 22px;
-            transition: all 0.3s ease;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            min-width: 50px;
-            text-align: center;
-        }
-
-        .profile-icon-btn:hover {
-            background: rgba(22, 105, 122, 0.25);
-            border: 1px solid rgba(22, 105, 122, 0.4);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-            color: white;
-        }
-
-        .profile-icon-btn i {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            margin: 0;
-            line-height: 1;
-            font-size: 20px;
-        }
-
-        .profile-icon-btn .button-label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            line-height: 1;
-            margin: 0;
-            width: 100%;
-            text-align: center;
-        }
-
-        .profile-dropdown-menu {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 15px;
-            box-shadow: 
-                0 20px 60px rgba(0, 0, 0, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.8);
-            min-width: 220px;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            margin-top: 10px;
-            padding: 8px 0;
-        }
-
-        .profile-dropdown:hover .profile-dropdown-menu {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .profile-dropdown-menu .dropdown-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 20px;
-            color: #333;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            font-weight: 500;
-            border-radius: 8px;
-            margin: 2px 8px;
-        }
-
-        .profile-dropdown-menu .dropdown-item:hover {
-            background: linear-gradient(135deg, rgba(72, 159, 181, 0.1), rgba(72, 159, 181, 0.05));
-            color: #489FB5;
-            transform: translateX(5px);
-        }
-
-        .profile-dropdown-menu .dropdown-divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(72, 159, 181, 0.3), transparent);
-            margin: 8px 16px;
-        }
-
-        /* User Info Section in Dropdown */
-        .dropdown-user-info {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            background: rgba(22, 105, 122, 0.05);
-            border-radius: 8px;
-            margin: 8px;
-        }
-
-        .dropdown-user-info .user-avatar {
-            font-size: 24px;
-            color: #16697A;
-            margin-right: 12px;
-        }
-
-        .dropdown-user-info .user-details {
-            flex: 1;
-        }
-
-        .dropdown-user-info .user-name {
-            font-weight: 600;
-            color: #16697A;
-            font-size: 14px;
-            margin-bottom: 2px;
-        }
-
-        .dropdown-user-info .user-phone {
-            color: #489FB5;
-            font-size: 12px;
-        }
-
-        /* Mobile Responsive Styles */
-        @media (max-width: 600px) {
-            .header-right {
-                gap: 10px;
-            }
-
-            .profile-icon-btn {
-                min-width: 40px;
-                font-size: 18px;
-                padding: 6px 8px;
-                gap: 2px;
-            }
-
-            .profile-icon-btn .button-label {
-                font-size: 9px;
-            }
-
-            .cart-icon-btn {
-                min-width: 40px;
-                font-size: 16px;
-                padding: 6px 8px;
-                gap: 2px;
-            }
-
-            .cart-icon-btn .button-label {
-                font-size: 9px;
-            }
-
-            .profile-dropdown-menu {
-                min-width: 200px;
-                right: -10px;
-            }
-
-            .profile-dropdown-menu .dropdown-item {
-                padding: 10px 16px;
-                font-size: 13px;
-            }
-        }
+        /* Header styles are centralized in style.css to ensure consistency across pages */
     </style>
 </head>
 <body>
@@ -552,11 +365,11 @@
                                 </div>
                                 <div class="dropdown-divider"></div>
                                 
-                                <a href="#" class="dropdown-item" onclick="viewProfile()">
+                                <a href="my-profile.html" class="dropdown-item" data-close-dropdown="true">
                                     <i class="fas fa-user-circle"></i>
                                     My Profile
                                 </a>
-                                <a href="#" class="dropdown-item" onclick="viewOrders()">
+                                <a href="my-orders.html" class="dropdown-item" data-close-dropdown="true">
                                     <i class="fas fa-box"></i>
                                     My Orders
                                 </a>
@@ -597,11 +410,6 @@
     </header>
 
     <div class="orders-container">
-        <a href="index.html" class="back-link">
-            <i class="fas fa-arrow-left"></i>
-            Back to Home
-        </a>
-
         <div class="page-header">
             <h1>My Orders</h1>
             <p>Track and manage your photo framing orders</p>
@@ -638,13 +446,68 @@
     <script src="otp-auth-firebase.js"></script>
     <script src="auth.js"></script>
     <script>
+        function setProfileDropdownState(isOpen) {
+            const dropdownContainer = document.getElementById('profileDropdown');
+            const dropdownMenu = document.getElementById('profileDropdownMenu');
+            const profileBtn = document.getElementById('profileBtn');
+
+            if (!dropdownContainer || !dropdownMenu || !profileBtn) {
+                return;
+            }
+
+            dropdownContainer.classList.toggle('open', isOpen);
+            profileBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            dropdownMenu.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+        }
+
+        function toggleProfileDropdown() {
+            const dropdownContainer = document.getElementById('profileDropdown');
+            if (!dropdownContainer) {
+                return;
+            }
+
+            const isOpen = dropdownContainer.classList.contains('open');
+            setProfileDropdownState(!isOpen);
+        }
+
+        function setupProfileDropdown() {
+            const dropdownContainer = document.getElementById('profileDropdown');
+            const dropdownMenu = document.getElementById('profileDropdownMenu');
+            const profileBtn = document.getElementById('profileBtn');
+
+            if (!dropdownContainer || !dropdownMenu || !profileBtn || dropdownContainer.dataset.dropdownInit === 'true') {
+                return;
+            }
+
+            dropdownContainer.dataset.dropdownInit = 'true';
+
+            profileBtn.setAttribute('aria-haspopup', 'true');
+            profileBtn.setAttribute('aria-expanded', 'false');
+            dropdownMenu.setAttribute('role', 'menu');
+            dropdownMenu.setAttribute('aria-hidden', 'true');
+
+            profileBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                toggleProfileDropdown();
+            });
+
+            dropdownMenu.addEventListener('click', function(event) {
+                const actionableItem = event.target.closest('a, button');
+                if (actionableItem && actionableItem.dataset.closeDropdown === 'true') {
+                    setProfileDropdownState(false);
+                }
+            });
+
+            setProfileDropdownState(false);
+        }
+
         let currentUser = null;
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('My Orders page loading...');
-            
-            // Profile dropdown is now handled by CSS hover - no JavaScript needed
+            setupProfileDropdown();
             
             // Listen for global auth state changes
             window.addEventListener('auth-state-changed', function(event) {
@@ -1020,23 +883,6 @@
             loadUserOrders();
         }
 
-        // Setup user dropdown - Fixed to use correct IDs
-        function setupUserDropdown() {
-            const profileBtn = document.getElementById('profileBtn');
-            const profileDropdown = document.getElementById('profileDropdown');
-
-            if (profileBtn && profileDropdown) {
-                profileBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    profileDropdown.classList.toggle('active');
-                });
-
-                document.addEventListener('click', function() {
-                    profileDropdown.classList.remove('active');
-                });
-            }
-        }
-
         // Sign out function
         function signOut() {
             // Clear user session
@@ -1112,24 +958,34 @@
         
         // View profile / toggle dropdown
         function viewProfile() {
-            const dropdown = document.getElementById('profileDropdownMenu');
-            if (dropdown) {
-                dropdown.style.opacity = dropdown.style.opacity === '1' ? '0' : '1';
-                dropdown.style.visibility = dropdown.style.visibility === 'visible' ? 'hidden' : 'visible';
-                dropdown.style.transform = dropdown.style.opacity === '1' ? 'translateY(0)' : 'translateY(-10px)';
-            }
+            window.location.href = 'my-profile.html';
         }
 
-        // Profile dropdown now uses CSS hover - no click handlers needed
+        document.addEventListener('click', function(event) {
+            const dropdownContainer = document.getElementById('profileDropdown');
+            if (!dropdownContainer) {
+                return;
+            }
+
+            if (!dropdownContainer.contains(event.target)) {
+                setProfileDropdownState(false);
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                setProfileDropdownState(false);
+            }
+        });
 
         // View orders (current page)
         function viewOrders() {
-            // Already on orders page
+            setProfileDropdownState(false);
         }
         
         // Contact us function
         function contactUs() {
-            alert('Contact Us\n\nEmail: info@jbcreations.com\nPhone: +91 98765 43210\nAddress: 123 Art Street, Creative City, India\n\nWe\'d love to hear from you!');
+            alert('Contact Us\n\nEmail: jbcreationssss@gmail.com\nPhone: 9424772998');
         }
 
         // About us function
@@ -1183,36 +1039,19 @@
                     <i class="fas fa-phone contact-icon"></i>
                     <div class="contact-text">
                         <strong>Call Us</strong>
-                        +91 98765 43210
+                        9424772998
                     </div>
                 </div>
                 <div class="contact-item">
                     <i class="fas fa-envelope contact-icon"></i>
                     <div class="contact-text">
                         <strong>Email Us</strong>
-                        info@jbcreations.com
+                        jbcreationssss@gmail.com
                     </div>
                 </div>
-                <div class="contact-item">
-                    <i class="fas fa-map-marker-alt contact-icon"></i>
-                    <div class="contact-text">
-                        <strong>Visit Us</strong>
-                        123 Art Street, Creative City, India 400001
-                    </div>
-                </div>
+                <!-- Visit Us removed as requested -->
                 
-                <!-- Social Media Links -->
-                <div class="social-links">
-                    <a href="https://facebook.com/jbcreations" class="social-icon" target="_blank" title="Follow us on Facebook">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    <a href="https://instagram.com/jbcreations" class="social-icon" target="_blank" title="Follow us on Instagram">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                    <a href="https://wa.me/919876543210" class="social-icon" target="_blank" title="Chat with us on WhatsApp">
-                        <i class="fab fa-whatsapp"></i>
-                    </a>
-                </div>
+                <!-- Social Media Links removed as requested -->
             </div>
         </div>
 

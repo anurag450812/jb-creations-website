@@ -6,6 +6,9 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 require('dotenv').config();
 
+// Import Fast2SMS service
+const fast2smsService = require('./services/fast2sms-service');
+
 const app = express();
 const PORT = process.env.AUTH_PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || 'jb-creations-secret-key-change-in-production';
@@ -108,8 +111,32 @@ app.post('/api/auth/register', async (req, res) => {
             });
         }
 
+        if (!otp) {
+            return res.status(400).json({
+                success: false,
+                message: 'OTP is required'
+            });
+        }
+
+        // Format phone number
+        let formattedPhone;
+        try {
+            formattedPhone = fast2smsService.formatPhoneNumber(phone);
+        } catch (error) {
+            return res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        // Verify OTP first
+        const verificationResult = fast2smsService.verifyOTP(formattedPhone, otp);
+        if (!verificationResult.success) {
+            return res.status(400).json(verificationResult);
+        }
+
         // Check if user already exists
-        db.get('SELECT phone FROM users WHERE phone = ?', [phone], async (err, row) => {
+        db.get('SELECT phone FROM users WHERE phone = ? OR phone = ?', [phone, '+91' + formattedPhone], async (err, row) => {
             if (err) {
                 console.error('Database error:', err);
                 return res.status(500).json({
@@ -125,23 +152,15 @@ app.post('/api/auth/register', async (req, res) => {
                 });
             }
 
-            // For demo purposes, we'll simulate OTP verification
-            // In production, verify the OTP against stored OTP
-            if (!otp || otp !== '123456') {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid OTP'
-                });
-            }
-
             // Create new user
             const userId = generateUserId();
+            const phoneWithCountryCode = '+91' + formattedPhone;
             const sql = `
                 INSERT INTO users (id, name, phone, email, created_at, updated_at)
                 VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))
             `;
 
-            db.run(sql, [userId, name.trim(), phone, email || null], function(err) {
+            db.run(sql, [userId, name.trim(), phoneWithCountryCode, email || null], function(err) {
                 if (err) {
                     console.error('Error creating user:', err);
                     return res.status(500).json({
@@ -152,7 +171,7 @@ app.post('/api/auth/register', async (req, res) => {
 
                 // Generate JWT token
                 const token = jwt.sign(
-                    { id: userId, phone, name },
+                    { id: userId, phone: phoneWithCountryCode, name },
                     JWT_SECRET,
                     { expiresIn: '7d' }
                 );
@@ -205,8 +224,33 @@ app.post('/api/auth/login', async (req, res) => {
             });
         }
 
+        if (!otp) {
+            return res.status(400).json({
+                success: false,
+                message: 'OTP is required'
+            });
+        }
+
+        // Format phone number
+        let formattedPhone;
+        try {
+            formattedPhone = fast2smsService.formatPhoneNumber(phone);
+        } catch (error) {
+            return res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        // Verify OTP first
+        const verificationResult = fast2smsService.verifyOTP(formattedPhone, otp);
+        if (!verificationResult.success) {
+            return res.status(400).json(verificationResult);
+        }
+
         // Find user by phone
-        db.get('SELECT * FROM users WHERE phone = ? AND is_active = 1', [phone], (err, user) => {
+        const phoneWithCountryCode = '+91' + formattedPhone;
+        db.get('SELECT * FROM users WHERE (phone = ? OR phone = ?) AND is_active = 1', [phone, phoneWithCountryCode], (err, user) => {
             if (err) {
                 console.error('Database error:', err);
                 return res.status(500).json({
@@ -220,15 +264,6 @@ app.post('/api/auth/login', async (req, res) => {
                     success: false,
                     message: 'User not found. Please register first.',
                     userExists: false
-                });
-            }
-
-            // For demo purposes, simulate OTP verification
-            // In production, verify against stored OTP
-            if (!otp || otp !== '123456') {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid OTP'
                 });
             }
 
@@ -267,8 +302,8 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
-// Send OTP (for both login and registration)
-app.post('/api/auth/send-otp', (req, res) => {
+// Send OTP (for both login and registration) - Fast2SMS Integration
+app.post('/api/auth/send-otp', async (req, res) => {
     try {
         const { phone, type } = req.body; // type: 'login' or 'register'
 
@@ -279,9 +314,20 @@ app.post('/api/auth/send-otp', (req, res) => {
             });
         }
 
+        // Format phone number
+        let formattedPhone;
+        try {
+            formattedPhone = fast2smsService.formatPhoneNumber(phone);
+        } catch (error) {
+            return res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        }
+
         // Check if user exists for login
         if (type === 'login') {
-            db.get('SELECT id FROM users WHERE phone = ?', [phone], (err, user) => {
+            db.get('SELECT id FROM users WHERE phone = ? OR phone = ?', [phone, '+91' + formattedPhone], (err, user) => {
                 if (err) {
                     return res.status(500).json({
                         success: false,
@@ -297,18 +343,29 @@ app.post('/api/auth/send-otp', (req, res) => {
                     });
                 }
 
-                // For demo purposes, always return success
-                // In production, integrate with SMS service
-                res.json({
-                    success: true,
-                    message: 'OTP sent successfully',
-                    demo: true,
-                    otp: '123456' // Remove this in production
-                });
+                // Send OTP via Fast2SMS
+                fast2smsService.sendOTP(formattedPhone)
+                    .then(result => {
+                        res.json({
+                            success: true,
+                            message: result.message,
+                            expiresAt: result.expiresAt,
+                            phone: result.phone,
+                            // Only include OTP in development
+                            ...(result.otp && { otp: result.otp })
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Fast2SMS Error:', error);
+                        res.status(500).json({
+                            success: false,
+                            message: error.message || 'Failed to send OTP'
+                        });
+                    });
             });
         } else {
             // For registration, check if user already exists
-            db.get('SELECT id FROM users WHERE phone = ?', [phone], (err, user) => {
+            db.get('SELECT id FROM users WHERE phone = ? OR phone = ?', [phone, '+91' + formattedPhone], (err, user) => {
                 if (err) {
                     return res.status(500).json({
                         success: false,
@@ -323,13 +380,25 @@ app.post('/api/auth/send-otp', (req, res) => {
                     });
                 }
 
-                // For demo purposes, always return success
-                res.json({
-                    success: true,
-                    message: 'OTP sent successfully',
-                    demo: true,
-                    otp: '123456' // Remove this in production
-                });
+                // Send OTP via Fast2SMS
+                fast2smsService.sendOTP(formattedPhone)
+                    .then(result => {
+                        res.json({
+                            success: true,
+                            message: result.message,
+                            expiresAt: result.expiresAt,
+                            phone: result.phone,
+                            // Only include OTP in development
+                            ...(result.otp && { otp: result.otp })
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Fast2SMS Error:', error);
+                        res.status(500).json({
+                            success: false,
+                            message: error.message || 'Failed to send OTP'
+                        });
+                    });
             });
         }
 
@@ -338,6 +407,100 @@ app.post('/api/auth/send-otp', (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Internal server error'
+        });
+    }
+});
+
+// Verify OTP - Fast2SMS Integration
+app.post('/api/auth/verify-otp', async (req, res) => {
+    try {
+        const { phone, otp } = req.body;
+
+        if (!phone || !otp) {
+            return res.status(400).json({
+                success: false,
+                message: 'Phone number and OTP are required'
+            });
+        }
+
+        // Format phone number
+        let formattedPhone;
+        try {
+            formattedPhone = fast2smsService.formatPhoneNumber(phone);
+        } catch (error) {
+            return res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        // Verify OTP using Fast2SMS service
+        const verificationResult = fast2smsService.verifyOTP(formattedPhone, otp);
+
+        if (!verificationResult.success) {
+            return res.status(400).json(verificationResult);
+        }
+
+        // OTP verified successfully
+        res.json({
+            success: true,
+            message: verificationResult.message,
+            phone: verificationResult.phone
+        });
+
+    } catch (error) {
+        console.error('Verify OTP error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+});
+
+// Resend OTP - Fast2SMS Integration
+app.post('/api/auth/resend-otp', async (req, res) => {
+    try {
+        const { phone } = req.body;
+
+        if (!phone) {
+            return res.status(400).json({
+                success: false,
+                message: 'Phone number is required'
+            });
+        }
+
+        // Format phone number
+        let formattedPhone;
+        try {
+            formattedPhone = fast2smsService.formatPhoneNumber(phone);
+        } catch (error) {
+            return res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        // Resend OTP via Fast2SMS
+        const result = await fast2smsService.resendOTP(formattedPhone);
+
+        if (!result.success) {
+            return res.status(400).json(result);
+        }
+
+        res.json({
+            success: true,
+            message: result.message,
+            expiresAt: result.expiresAt,
+            phone: result.phone,
+            // Only include OTP in development
+            ...(result.otp && { otp: result.otp })
+        });
+
+    } catch (error) {
+        console.error('Resend OTP error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Failed to resend OTP'
         });
     }
 });

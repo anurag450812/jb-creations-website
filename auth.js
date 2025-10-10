@@ -289,7 +289,7 @@ function goToHomePage() {
 }
 
 function goToProfile() {
-    window.location.href = 'profile.html'; // Adjust as needed
+    window.location.href = 'my-profile.html';
 }
 
 function goToOrders() {

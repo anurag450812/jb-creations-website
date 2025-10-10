@@ -208,6 +208,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Add special phone number event listeners
         addPhoneEventListeners();
+
+        // Initialize mobile order toggle
+        initMobileOrderToggle();
+
+        // Initialize mobile drawer for viewing items from sticky bar
+        initMobileDrawer();
     }
     
     // Check if auth utilities are ready, otherwise wait a bit
@@ -218,6 +224,42 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(initializeCheckout, 500);
     }
 });
+
+// Mobile drawer toggle logic
+function initMobileDrawer() {
+    const toggleBtn = document.getElementById('mobileItemsToggle');
+    const drawer = document.getElementById('mobileOrderDrawer');
+    const closeBtn = document.getElementById('mobileDrawerClose');
+    const backdrop = document.getElementById('mobileDrawerBackdrop');
+    if (!toggleBtn || !drawer || !closeBtn || !backdrop) return;
+
+    const openDrawer = () => {
+        drawer.classList.add('open');
+        backdrop.classList.add('open');
+        drawer.setAttribute('aria-hidden', 'false');
+        backdrop.setAttribute('aria-hidden', 'false');
+        toggleBtn.setAttribute('aria-expanded', 'true');
+    };
+    const closeDrawer = () => {
+        drawer.classList.remove('open');
+        backdrop.classList.remove('open');
+        drawer.setAttribute('aria-hidden', 'true');
+        backdrop.setAttribute('aria-hidden', 'true');
+        toggleBtn.setAttribute('aria-expanded', 'false');
+    };
+
+    toggleBtn.addEventListener('click', () => {
+        const isOpen = drawer.classList.contains('open');
+        if (isOpen) closeDrawer(); else openDrawer();
+    });
+    closeBtn.addEventListener('click', closeDrawer);
+    backdrop.addEventListener('click', closeDrawer);
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeDrawer();
+    });
+}
 
 // Pincode lookup functionality
 let pincodeTimeout;
@@ -873,17 +915,28 @@ function calculateTotals() {
 // Update order summary display
 function updateOrderSummary() {
     const summaryContainer = document.getElementById('orderSummary');
+    const mobileListContainer = document.getElementById('mobileOrderList');
     const subtotalElement = document.getElementById('subtotal');
     const deliveryChargeElement = document.getElementById('deliveryCharge');
     const finalTotalElement = document.getElementById('finalTotal');
     const orderCountElement = document.getElementById('orderCount');
+    const mobileFinalTotalElement = document.getElementById('mobileFinalTotal');
+    const mobileItemCountElement = document.getElementById('mobileItemCount');
+    const orderToggleCount = document.getElementById('orderToggleCount');
     
     // Clear existing content
-    summaryContainer.innerHTML = '';
+    if (summaryContainer) summaryContainer.innerHTML = '';
+    if (mobileListContainer) mobileListContainer.innerHTML = '';
     
     // Update order count
     if (orderCountElement) {
         orderCountElement.textContent = `${orderData.items.length} item${orderData.items.length !== 1 ? 's' : ''}`;
+    }
+    if (mobileItemCountElement) {
+        mobileItemCountElement.textContent = `${orderData.items.length} item${orderData.items.length !== 1 ? 's' : ''}`;
+    }
+    if (orderToggleCount) {
+        orderToggleCount.textContent = `(${orderData.items.length})`;
     }
     
     // Add each cart item
@@ -903,9 +956,7 @@ function updateOrderSummary() {
         // Create a placeholder image if no image is available
         const fallbackImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiBmaWxsPSIjZjhmOWZhIiBzdHJva2U9IiNlOWVjZWYiIHN0cm9rZS13aWR0aD0iMiIvPgo8cGF0aCBkPSJNNDAgNDBINDBWNDBINDBINDBaTTQwIDQwTDgwIDQwTDcwIDYwTDUwIDYwTDQwIDQwWiIgZmlsbD0iIzE2Njk3QSIgZmlsbC1vcGFjaXR5PSIwLjMiLz4KPGNpcmNsZSBjeD0iNTUiIGN5PSI1NSIgcj0iOCIgZmlsbD0iIzE2Njk3QSIgZmlsbC1vcGFjaXR5PSIwLjMiLz4KPHR5cGUgdGV4dD0iUGhvdG8iIHg9IjYwIiB5PSI5MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjMTY2OTdBIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5QaG90bzwvdGV4dD4KPC9zdmc+';
         
-        const itemElement = document.createElement('div');
-        itemElement.className = 'order-item';
-        itemElement.innerHTML = `
+        const itemHTML = `
             <img src="${imageSource || fallbackImage}" 
                  alt="Framed Photo" 
                  class="order-item-image" 
@@ -913,21 +964,38 @@ function updateOrderSummary() {
                  onload="console.log('Image loaded successfully for item ${index + 1}')">
             <div class="order-item-details">
                 <div class="order-item-title">Custom Framed Photo #${index + 1}</div>
+                <div class="order-item-meta">${item.frameSize?.size || 'N/A'} ${item.frameSize?.orientation || ''} • ${item.frameColor || 'Default'}${item.frameTexture ? ' ' + item.frameTexture : ''}</div>
                 <div class="order-item-specs">
-                    <strong>Size:</strong> ${item.frameSize?.size || 'N/A'} ${item.frameSize?.orientation || ''}<br>
+                    <strong>Size:</strong> ${item.frameSize?.size || 'N/A'}<br>
+                    <strong>Orientation:</strong> ${item.frameSize?.orientation || 'N/A'}<br>
                     <strong>Frame:</strong> ${item.frameColor || 'Default'} ${item.frameTexture || 'texture'}<br>
+                    <strong>Quantity:</strong> ${item.quantity || 1}<br>
                     <strong>Added:</strong> ${item.timestamp ? new Date(item.timestamp).toLocaleDateString() : new Date(item.orderDate || Date.now()).toLocaleDateString()}
                 </div>
                 <div class="order-item-price">₹${item.price || 349}</div>
             </div>
         `;
-        summaryContainer.appendChild(itemElement);
+        if (summaryContainer) {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'order-item';
+            itemElement.innerHTML = itemHTML;
+            summaryContainer.appendChild(itemElement);
+        }
+        if (mobileListContainer) {
+            const mobileItem = document.createElement('div');
+            mobileItem.className = 'order-item';
+            mobileItem.innerHTML = itemHTML;
+            mobileListContainer.appendChild(mobileItem);
+        }
     });
     
     // Update totals
-    subtotalElement.textContent = `₹${orderData.totals.subtotal}`;
-    deliveryChargeElement.textContent = `₹${orderData.totals.delivery}`;
-    finalTotalElement.textContent = `₹${orderData.totals.total}`;
+    if (subtotalElement) subtotalElement.textContent = `₹${orderData.totals.subtotal}`;
+    if (deliveryChargeElement) deliveryChargeElement.textContent = `₹${orderData.totals.delivery}`;
+    if (finalTotalElement) finalTotalElement.textContent = `₹${orderData.totals.total}`;
+    if (mobileFinalTotalElement) {
+        mobileFinalTotalElement.textContent = `₹${orderData.totals.total}`;
+    }
 }
 
 // Update estimated delivery date
@@ -1003,6 +1071,32 @@ function addFormValidationListeners() {
     inputs.forEach(input => {
         input.addEventListener('blur', validateInput);
         input.addEventListener('input', clearValidationError);
+    });
+}
+
+// Mobile: toggle order items list
+function initMobileOrderToggle() {
+    const toggleBtn = document.getElementById('orderToggleBtn');
+    const toggleText = document.getElementById('orderToggleText');
+    const summary = document.getElementById('orderSummary');
+    if (!toggleBtn || !summary || !toggleText) return;
+
+    // Start collapsed on mobile for longer lists
+    if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+        try {
+            const itemCount = (orderData && orderData.items) ? orderData.items.length : 0;
+            if (itemCount > 2) {
+                summary.classList.add('is-collapsed');
+                toggleText.textContent = 'View items';
+            }
+        } catch (_) {
+            // no-op
+        }
+    }
+
+    toggleBtn.addEventListener('click', () => {
+        const collapsed = summary.classList.toggle('is-collapsed');
+        toggleText.textContent = collapsed ? 'View items' : 'Hide items';
     });
 }
 
@@ -1733,6 +1827,8 @@ async function placeOrder() {
     // Show processing overlay
     document.getElementById('processingOverlay').style.display = 'flex';
     document.getElementById('placeOrderBtn').disabled = true;
+    const mobileBtn = document.getElementById('mobilePlaceOrderBtn');
+    if (mobileBtn) mobileBtn.disabled = true;
 
     try {
         // Prepare order data (includes guest customer information)
@@ -1749,8 +1845,9 @@ async function placeOrder() {
         const totalAmount = orderData.totals.total;
         
         // Hide processing overlay before showing Razorpay
-        document.getElementById('processingOverlay').style.display = 'none';
-        document.getElementById('placeOrderBtn').disabled = false;
+    document.getElementById('processingOverlay').style.display = 'none';
+    document.getElementById('placeOrderBtn').disabled = false;
+    if (mobileBtn) mobileBtn.disabled = false;
 
         // Simple direct payment (works for both guests and logged-in users)
         const paymentResult = await processSimplePayment(totalAmount, orderData, user);
@@ -1759,6 +1856,7 @@ async function placeOrder() {
             // Show processing overlay during order submission
             document.getElementById('processingOverlay').style.display = 'flex';
             document.getElementById('placeOrderBtn').disabled = true;
+            if (mobileBtn) mobileBtn.disabled = true;
             
             // Payment successful - now submit the order
             const result = await submitOrder({...orderData, paymentId: paymentResult.paymentId});
@@ -1818,6 +1916,7 @@ async function placeOrder() {
                     // Hide processing overlay
                     document.getElementById('processingOverlay').style.display = 'none';
                     document.getElementById('placeOrderBtn').disabled = false;
+                    if (mobileBtn) mobileBtn.disabled = false;
                     
                     alert('❌ Order Creation Failed!\n\nYour payment was successful, but there was an error creating the order in our system.\n\nPlease contact support with your payment details:\nPayment ID: ' + paymentResult.paymentId + '\nOrder Number: ' + orderData.orderNumber);
                     return;
@@ -1836,6 +1935,7 @@ async function placeOrder() {
                 // Hide processing overlay
                 document.getElementById('processingOverlay').style.display = 'none';
                 document.getElementById('placeOrderBtn').disabled = false;
+                if (mobileBtn) mobileBtn.disabled = false;
                 return;
             }
         }
@@ -1855,6 +1955,7 @@ async function placeOrder() {
         // Hide processing overlay
         document.getElementById('processingOverlay').style.display = 'none';
         document.getElementById('placeOrderBtn').disabled = false;
+        if (mobileBtn) mobileBtn.disabled = false;
     }
 }
 

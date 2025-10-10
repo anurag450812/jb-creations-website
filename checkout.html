@@ -1,8 +1,9 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#16697A">
     <title>Checkout - JB Creations</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -34,6 +35,7 @@
             min-height: 100vh;
             line-height: 1.6;
             padding-top: 80px; /* Add space for fixed header */
+            -webkit-tap-highlight-color: transparent;
         }
 
         .checkout-container {
@@ -570,7 +572,7 @@
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 6000; /* Above mobile sticky bar and dropdowns */
             backdrop-filter: blur(5px);
         }
 
@@ -1191,78 +1193,28 @@
                 gap: 10px;
             }
 
-            /* Enhanced mobile cart styling */
-            .order-header {
-                padding: 20px;
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-
-            .order-item {
-                flex-direction: column;
-                text-align: center;
-                padding: 20px;
-                gap: 15px;
-            }
-
-            .order-item:hover {
-                transform: none;
-            }
-
-            .order-item-image {
-                width: 120px;
-                height: 120px;
-                align-self: center;
-            }
-
-            .order-item-details {
-                align-items: center;
-                text-align: center;
-                min-height: auto;
-            }
-
-            .order-item-title {
-                font-size: 16px;
-                margin-bottom: 10px;
-            }
-
-            .order-item-specs {
-                font-size: 13px;
-                text-align: center;
-                margin: 10px 0;
-            }
-
-            .order-item-price {
-                font-size: 20px;
-                align-self: center;
-            }
-
-            .total-section {
-                padding: 20px;
-            }
-
-            .total-final {
-                margin: 15px -10px 0;
-                padding: 15px 10px;
-                font-size: 22px;
+            /* Hide order summary, promo code, subtotal on mobile; keep sticky bar visible */
+            #summarySection {
+                display: none !important;
             }
 
             .promo-code-section {
-                margin: 20px;
-                padding: 20px;
+                display: none !important;
             }
 
-            .promo-code-input {
-                flex-direction: column;
-                gap: 10px;
+            .total-section {
+                display: none !important;
             }
+
+            /* Keep sticky bar visible for price + place order */
+            .mobile-sticky-bar { display: block !important; }
 
             .place-order-btn {
-                font-size: 16px;
-                padding: 18px;
-                letter-spacing: 1px;
+                display: none !important;
             }
+
+            /* Ensure content not hidden behind sticky bar */
+            body { padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
         }
 
         @media (max-width: 480px) {
@@ -1380,7 +1332,7 @@
                 0 20px 60px rgba(0, 0, 0, 0.15),
                 inset 0 1px 0 rgba(255, 255, 255, 0.8);
             min-width: 220px;
-            z-index: 1000;
+            z-index: 3000;
             opacity: 0;
             visibility: hidden;
             transform: translateY(-10px);
@@ -1389,7 +1341,8 @@
             padding: 8px 0;
         }
 
-        .profile-dropdown:hover .profile-dropdown-menu {
+        .profile-dropdown:hover .profile-dropdown-menu,
+        .profile-dropdown.open .profile-dropdown-menu {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
@@ -1454,42 +1407,373 @@
         }
 
         /* Mobile Responsive Styles */
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
+            .site-header {
+                position: relative !important;
+                top: auto;
+                margin-bottom: 0;
+                background: var(--background-color);
+                padding: 10px 0;
+                box-shadow: none;
+                border-radius: 0;
+                z-index: 2500;
+            }
+
+            .header-content {
+                background: transparent;
+                border-radius: 0;
+                padding: 0 1rem;
+                border: none;
+                box-shadow: none;
+                gap: 0.75rem;
+            }
+
             .header-right {
                 gap: 10px;
             }
 
-            .profile-icon-btn {
-                min-width: 40px;
-                font-size: 18px;
-                padding: 6px 8px;
-                gap: 2px;
-            }
-
-            .profile-icon-btn .button-label {
-                font-size: 9px;
-            }
-
+            .profile-icon-btn,
             .cart-icon-btn {
+                background: transparent;
+                border: none;
+                border-radius: 0;
+                padding: 6px;
+                box-shadow: none;
+                color: #16697A;
+            }
+
+            .profile-icon-btn {
+                font-size: 20px;
                 min-width: 40px;
-                font-size: 16px;
-                padding: 6px 8px;
                 gap: 2px;
             }
 
+            .profile-icon-btn i {
+                font-size: 16px;
+            }
+
+            .profile-icon-btn:hover,
+            .cart-icon-btn:hover {
+                background: transparent;
+                color: #0f4f5d;
+                border: none;
+                box-shadow: none;
+            }
+
+            .profile-icon-btn .button-label,
             .cart-icon-btn .button-label {
-                font-size: 9px;
+                font-size: 0.62rem;
+                letter-spacing: 0.4px;
             }
 
-            .profile-dropdown-menu {
-                min-width: 200px;
-                right: -10px;
+            body {
+                padding-top: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .site-header {
+                padding: 10px 0;
             }
 
-            .profile-dropdown-menu .dropdown-item {
-                padding: 10px 16px;
-                font-size: 13px;
+            .header-content {
+                padding: 0 0.85rem;
+                gap: 0.55rem;
             }
+
+            .brand-name {
+                font-size: 1.65rem;
+                letter-spacing: 1px;
+            }
+
+            .profile-icon-btn,
+            .cart-icon-btn {
+                padding: 6px 9px;
+            }
+        }
+
+        /* Mobile sticky checkout bar */
+        .mobile-sticky-bar {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #ffffff;
+            box-shadow: 0 -8px 24px rgba(22, 105, 122, 0.12);
+            border-top: 1px solid rgba(22,105,122,0.12);
+            padding: 12px 14px;
+            display: none;
+            z-index: 3000;
+        }
+
+        .mobile-sticky-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .mobile-total-box {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .mobile-total-label {
+            font-size: 12px;
+            color: rgba(22,105,122,0.7);
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .mobile-total-value {
+            font-size: 18px;
+            color: var(--primary-color);
+            font-weight: 800;
+        }
+
+        .mobile-items-count {
+            font-size: 12px;
+            color: rgba(22,105,122,0.7);
+            font-weight: 600;
+        }
+
+        .mobile-place-order-btn {
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 15px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 22px rgba(22,105,122,0.32);
+            flex-shrink: 0;
+            min-height: 48px;
+        }
+
+        .mobile-place-order-btn i { font-size: 16px; }
+
+        @media (max-width: 768px) {
+            .mobile-sticky-bar { display: block; }
+        }
+
+        /* Mobile order drawer */
+        .mobile-items-toggle {
+            background: transparent;
+            border: none;
+            color: var(--primary-color);
+            border-radius: 0;
+            padding: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none;
+        }
+        .mobile-items-toggle:hover,
+        .mobile-items-toggle:focus,
+        .mobile-items-toggle:active {
+            background: transparent;
+            border: none;
+            outline: none;
+            box-shadow: none;
+        }
+        .mobile-items-toggle i { font-size: 14px; }
+
+        .mobile-order-drawer {
+            position: fixed;
+            left: 0; right: 0; bottom: 0;
+            background: #fff;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            box-shadow: 0 -10px 30px rgba(22,105,122,0.18);
+            transform: translateY(100%);
+            transition: transform .3s ease;
+            z-index: 3500;
+            max-height: 70vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .mobile-order-drawer.open { transform: translateY(0); }
+
+        .mobile-drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(22,105,122,0.12);
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+
+        .mobile-drawer-close {
+            background: transparent;
+            border: none;
+            color: var(--primary-color);
+            padding: 6px;
+            border-radius: 0;
+        }
+        .mobile-drawer-close:hover,
+        .mobile-drawer-close:focus,
+        .mobile-drawer-close:active {
+            background: transparent;
+            border: none;
+            outline: none;
+            box-shadow: none;
+        }
+
+        .mobile-drawer-content {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 8px 8px calc(84px + env(safe-area-inset-bottom));
+        }
+
+        .mobile-drawer-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.25);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s ease;
+            z-index: 3400;
+        }
+        .mobile-drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+
+        /* Reuse order item visuals inside drawer */
+    .mobile-order-drawer .order-item { border-bottom: 1px solid rgba(22,105,122,0.08); }
+    .mobile-order-drawer .order-item-image { width: 84px; height: 84px; }
+    .mobile-order-drawer .order-item-title { font-size: 15px; }
+    .mobile-order-drawer .order-item-meta { font-size: 12px; opacity: 0.9; }
+    .mobile-order-drawer .order-item-specs { display: block !important; font-size: 12px; color: rgba(22,105,122,0.85); margin-top: 4px; }
+
+        /* Mobile-first enhancements and reordering */
+        @media (max-width: 768px) {
+            /* Reduce heavy shadows, increase readability */
+            .checkout-section {
+                box-shadow: none;
+                border: 1px solid rgba(22, 105, 122, 0.12);
+                background: #fff;
+            }
+
+            /* Reorder sections for mobile: show summary first, then form */
+            #summarySection { order: 1; }
+            #customerSection { order: 2; }
+
+            .checkout-container {
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* Touch-friendly form controls */
+            .form-group input,
+            .form-group textarea,
+            .form-group select {
+                min-height: 48px;
+                font-size: 16px; /* Avoid iOS zoom */
+            }
+
+            .phone-input-container .phone-prefix { padding: 14px 12px; }
+            .phone-input-container input { padding: 14px 15px; }
+
+            /* Compact progress on mobile */
+            .checkout-progress { margin-bottom: 10px; }
+            .step-circle { width: 26px; height: 26px; font-size: 11px; }
+            .progress-step { font-size: 12px; }
+        }
+
+        /* Collapsible order items on mobile */
+        .order-toggle-row {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 0 20px 15px 20px;
+        }
+
+        .order-toggle-btn {
+            background: rgba(22,105,122,0.08);
+            color: var(--primary-color);
+            border: 1px solid rgba(22,105,122,0.18);
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .order-toggle-btn i { font-size: 14px; }
+
+        @media (max-width: 768px) {
+            /* Remove the View Items control and disable collapsing */
+            .order-toggle-row { display: none !important; }
+            .order-summary.is-collapsed { max-height: none !important; overflow: visible !important; padding: 0; margin: 0; border: none; }
+
+            /* Make the Order Summary title minimal and without icon */
+            #summarySection .section-title i { display: none; }
+            #summarySection .section-title { gap: 8px; padding-bottom: 6px; margin-bottom: 8px; font-size: 22px; }
+
+            /* Summary section and list: single card container with items inside */
+            #summarySection.checkout-section { background: transparent; border: none; box-shadow: none; padding: 10px 0 0 0; }
+            .order-header { background: transparent; border: none; box-shadow: none; padding: 0 2px; margin: 0 4px 8px 4px; /* widen */ }
+            .order-summary {
+                background: rgba(255, 255, 255, 0.75);
+                border: none;
+                border-radius: 16px;
+                padding: 6px;
+                margin: 0 4px; /* widen */
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+            }
+
+            /* Items are simple rows separated by a divider inside the single card */
+            .order-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                width: 100%;
+                padding: 12px 10px;
+                margin: 0;
+                background: transparent;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: none; /* remove grey divider line on mobile */
+                text-align: left;
+                transition: none;
+            }
+
+            .order-item-image {
+                width: 64px;
+                height: 64px;
+                border-radius: 12px;
+                padding: 0;
+                background: rgba(255, 255, 255, 0.6);
+            }
+
+            .order-item-title { font-size: 14px; margin: 0 0 6px 0; font-weight: 700; letter-spacing: 0.2px; }
+            .order-item-meta {
+                font-size: 12px;
+                color: rgba(22, 105, 122, 0.7);
+            }
+            .order-item-specs { display: none; border-left: none !important; padding-left: 0 !important; }
+            .order-item-price { font-size: 16px; margin-left: auto; color: var(--primary-color); font-weight: 800; }
+
+            /* Totals as a separate glass card */
+            .total-section {
+                margin: 12px 4px 8px 4px; /* widen */
+                background: #ffffff;
+                border: none;
+                border-radius: 12px;
+                box-shadow: none;
+                padding: 14px 16px;
+            }
+            .total-final { border-top: none; background: transparent; }
         }
     </style>
 </head>
@@ -1537,7 +1821,7 @@
                                 </div>
                                 <div class="dropdown-divider"></div>
                                 
-                                <a href="#" class="dropdown-item" onclick="viewProfile()">
+                                <a href="my-profile.html" class="dropdown-item" data-close-dropdown="true">
                                     <i class="fas fa-user-circle"></i>
                                     My Profile
                                 </a>
@@ -1602,13 +1886,8 @@
             </div>
         </div>
 
-        <!-- Customer Information Section -->
-        <div class="checkout-section">
-            <a href="cart.html" class="back-to-cart">
-                <i class="fas fa-arrow-left"></i>
-                Back to Cart
-            </a>
-            
+    <!-- Customer Information Section -->
+    <div class="checkout-section" id="customerSection">
             <!-- User Status Container -->
             <div id="userStatusContainer" style="display: none; margin-bottom: 20px;"></div>
             
@@ -1633,13 +1912,13 @@
                 <div class="form-row">
                     <div class="form-group required half-width">
                         <label for="customerName">Full Name</label>
-                        <input type="text" id="customerName" name="customerName" required>
+                        <input type="text" id="customerName" name="customerName" required autocomplete="name" inputmode="text" aria-required="true">
                         <div class="form-help-text">Enter your complete name as it should appear on the order</div>
                     </div>
 
                     <div class="form-group required half-width">
                         <label for="customerEmail">Email Address</label>
-                        <input type="email" id="customerEmail" name="customerEmail" required>
+                        <input type="email" id="customerEmail" name="customerEmail" required autocomplete="email" inputmode="email" aria-required="true">
                         <div class="form-help-text">We'll send order updates to this email</div>
                     </div>
                 </div>
@@ -1649,7 +1928,7 @@
                         <label for="customerPhone">Phone Number</label>
                         <div class="phone-input-container">
                             <span class="phone-prefix">+91</span>
-                            <input type="tel" id="customerPhone" name="customerPhone" required placeholder="XXXXXXXXXX" pattern="^[0-9]{10}$" maxlength="10" oninput="formatPhoneNumberNew(this)" onfocus="handlePhoneFocusNew(this)" onblur="handlePhoneBlurNew(this)">
+                            <input type="tel" id="customerPhone" name="customerPhone" required placeholder="XXXXXXXXXX" pattern="^[0-9]{10}$" maxlength="10" oninput="formatPhoneNumberNew(this)" onfocus="handlePhoneFocusNew(this)" onblur="handlePhoneBlurNew(this)" autocomplete="tel" inputmode="numeric" aria-required="true">
                         </div>
                         <div class="form-help-text">Enter 10-digit mobile number (Indian format)</div>
                     </div>
@@ -1658,7 +1937,7 @@
                         <label for="alternatePhone">Alternate Phone (Optional)</label>
                         <div class="phone-input-container">
                             <span class="phone-prefix">+91</span>
-                            <input type="tel" id="alternatePhone" name="alternatePhone" placeholder="XXXXXXXXXX" pattern="^[0-9]{10}$" maxlength="10" oninput="formatPhoneNumberNew(this)" onfocus="handlePhoneFocusNew(this)" onblur="handlePhoneBlurNew(this)">
+                            <input type="tel" id="alternatePhone" name="alternatePhone" placeholder="XXXXXXXXXX" pattern="^[0-9]{10}$" maxlength="10" oninput="formatPhoneNumberNew(this)" onfocus="handlePhoneFocusNew(this)" onblur="handlePhoneBlurNew(this)" autocomplete="tel" inputmode="numeric">
                         </div>
                         <div class="form-help-text">Backup contact number (Indian format)</div>
                     </div>
@@ -1667,7 +1946,7 @@
                 <!-- Address Fields -->
                 <div class="form-group">
                     <label for="customerPincode">Pincode (Optional)</label>
-                    <input type="text" id="customerPincode" name="customerPincode" placeholder="Enter 6-digit pincode for auto-fill" pattern="[0-9]{6}" maxlength="6" oninput="handlePincodeInput(this.value)">
+                    <input type="text" id="customerPincode" name="customerPincode" placeholder="Enter 6-digit pincode for auto-fill" pattern="[0-9]{6}" maxlength="6" oninput="handlePincodeInput(this.value)" inputmode="numeric" autocomplete="postal-code">
                     <div class="form-help-text">Enter pincode to auto-fill city and state, or fill manually below</div>
                     <div id="pincodeLoader" class="pincode-loader" style="display: none;">
                         <i class="fas fa-spinner fa-spin"></i> Fetching location...
@@ -1678,7 +1957,7 @@
                     <div class="form-group required half-width">
                         <label for="customerState">State</label>
                         <div class="autocomplete-container">
-                            <input type="text" id="customerState" name="customerState" required placeholder="Start typing state name..." oninput="handleStateInput(this.value)" onblur="hideStateSuggestions()" onfocus="showStateSuggestions()">
+                            <input type="text" id="customerState" name="customerState" required placeholder="Start typing state name..." oninput="handleStateInput(this.value)" onblur="hideStateSuggestions()" onfocus="showStateSuggestions()" autocomplete="address-level1" inputmode="text" aria-autocomplete="list" aria-controls="stateSuggestions" aria-expanded="false">
                             <div id="stateSuggestions" class="autocomplete-suggestions" style="display: none;"></div>
                         </div>
                         <div class="form-help-text">Type to search and select your state</div>
@@ -1687,7 +1966,7 @@
                     <div class="form-group required half-width">
                         <label for="customerCity">City</label>
                         <div class="autocomplete-container">
-                            <input type="text" id="customerCity" name="customerCity" required placeholder="Start typing city name..." oninput="handleCityInput(this.value)" onblur="hideCitySuggestions()" onfocus="showCitySuggestions()">
+                            <input type="text" id="customerCity" name="customerCity" required placeholder="Start typing city name..." oninput="handleCityInput(this.value)" onblur="hideCitySuggestions()" onfocus="showCitySuggestions()" autocomplete="address-level2" inputmode="text" aria-autocomplete="list" aria-controls="citySuggestions" aria-expanded="false">
                             <div id="citySuggestions" class="autocomplete-suggestions" style="display: none;"></div>
                         </div>
                         <div class="form-help-text">Type to search and select your city</div>
@@ -1696,13 +1975,13 @@
 
                 <div class="form-group required">
                     <label for="customerAddress">House/Flat No. & Street Address</label>
-                    <textarea id="customerAddress" name="customerAddress" rows="2" required placeholder="House/Flat Number, Building Name, Street Name"></textarea>
+                    <textarea id="customerAddress" name="customerAddress" rows="2" required placeholder="House/Flat Number, Building Name, Street Name" autocomplete="address-line1" aria-required="true"></textarea>
                     <div class="form-help-text">Enter your complete house/flat number and street address</div>
                 </div>
 
                 <div class="form-group">
                     <label for="customerLandmark">Landmark (Optional)</label>
-                    <input type="text" id="customerLandmark" name="customerLandmark" placeholder="Near school, mall, etc.">
+                    <input type="text" id="customerLandmark" name="customerLandmark" placeholder="Near school, mall, etc." autocomplete="address-line2">
                     <div class="form-help-text">Nearby landmark for easy location</div>
                 </div>
 
@@ -1737,14 +2016,23 @@
             </div>
         </div>
 
-        <!-- Order Summary Section -->
-        <div class="checkout-section">
+    <!-- Order Summary Section -->
+    <div class="checkout-section" id="summarySection">
             <div class="order-header">
                 <h2 class="section-title">
                     <i class="fas fa-receipt"></i>
                     Order Summary
                 </h2>
                 <div class="order-count" id="orderCount">0 items</div>
+            </div>
+
+            <!-- Mobile: toggle to show/hide items -->
+            <div class="order-toggle-row">
+                <button type="button" class="order-toggle-btn" id="orderToggleBtn">
+                    <i class="fas fa-list"></i>
+                    <span id="orderToggleText">View items</span>
+                    <span id="orderToggleCount" style="opacity:0.8;">(0)</span>
+                </button>
             </div>
 
             <div class="order-summary" id="orderSummary">
@@ -1803,6 +2091,39 @@
         </div>
     </div>
 
+    <!-- Mobile sticky checkout bar -->
+    <div class="mobile-sticky-bar" id="mobileStickyBar" aria-hidden="false" style="padding-bottom: calc(12px + env(safe-area-inset-bottom));">
+        <div class="mobile-sticky-content" role="region" aria-label="Checkout summary and place order">
+            <button type="button" class="mobile-items-toggle" id="mobileItemsToggle" aria-expanded="false" aria-controls="mobileOrderDrawer">
+                <i class="fas fa-chevron-up" aria-hidden="true"></i>
+                <span class="sr-only">View items</span>
+            </button>
+            <div class="mobile-total-box">
+                <div class="mobile-total-label">Total payable</div>
+                <div class="mobile-total-value" id="mobileFinalTotal">₹0</div>
+                <div class="mobile-items-count" id="mobileItemCount">0 items</div>
+            </div>
+            <button type="button" class="mobile-place-order-btn" id="mobilePlaceOrderBtn" onclick="placeOrder()" aria-disabled="false">
+                <i class="fas fa-lock"></i>
+                Place Order
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile bottom drawer for order items -->
+    <div class="mobile-order-drawer" id="mobileOrderDrawer" aria-hidden="true">
+        <div class="mobile-drawer-header">
+            <span>Your items</span>
+            <button type="button" class="mobile-drawer-close" id="mobileDrawerClose" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mobile-drawer-content" id="mobileOrderList">
+            <!-- Items will be injected here -->
+        </div>
+    </div>
+    <div class="mobile-drawer-backdrop" id="mobileDrawerBackdrop" aria-hidden="true"></div>
+
     <!-- Razorpay Integration Scripts -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <link rel="stylesheet" href="razorpay-styles.css">
@@ -1823,11 +2144,64 @@
     
     <!-- Authentication Check Script -->
     <script>
-        // Profile dropdown functionality
-        let profileDropdownTimeout;
+        function setProfileDropdownState(isOpen) {
+            const dropdownContainer = document.getElementById('profileDropdown');
+            const dropdownMenu = document.getElementById('profileDropdownMenu');
+            const profileBtn = document.getElementById('profileBtn');
+
+            if (!dropdownContainer || !dropdownMenu || !profileBtn) {
+                return;
+            }
+
+            dropdownContainer.classList.toggle('open', isOpen);
+            profileBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            dropdownMenu.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+        }
+
+        function toggleProfileDropdown() {
+            const dropdownContainer = document.getElementById('profileDropdown');
+            if (!dropdownContainer) {
+                return;
+            }
+
+            const isOpen = dropdownContainer.classList.contains('open');
+            setProfileDropdownState(!isOpen);
+        }
+
+        function setupProfileDropdown() {
+            const dropdownContainer = document.getElementById('profileDropdown');
+            const dropdownMenu = document.getElementById('profileDropdownMenu');
+            const profileBtn = document.getElementById('profileBtn');
+
+            if (!dropdownContainer || !dropdownMenu || !profileBtn || dropdownContainer.dataset.dropdownInit === 'true') {
+                return;
+            }
+
+            dropdownContainer.dataset.dropdownInit = 'true';
+
+            profileBtn.setAttribute('aria-haspopup', 'true');
+            profileBtn.setAttribute('aria-expanded', 'false');
+            dropdownMenu.setAttribute('role', 'menu');
+            dropdownMenu.setAttribute('aria-hidden', 'true');
+
+            profileBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                toggleProfileDropdown();
+            });
+
+            dropdownMenu.addEventListener('click', function(event) {
+                const actionableItem = event.target.closest('a, button');
+                if (actionableItem && actionableItem.dataset.closeDropdown === 'true') {
+                    setProfileDropdownState(false);
+                }
+            });
+
+            setProfileDropdownState(false);
+        }
 
         document.addEventListener('DOMContentLoaded', async function() {
-            // Profile dropdown is now handled by CSS hover - no JavaScript needed
+            setupProfileDropdown();
 
             // Check authentication status
             await checkAuthStatus();
@@ -1984,23 +2358,24 @@
 
         // View user profile / toggle dropdown
         async function viewProfile() {
-            const dropdown = document.getElementById('profileDropdownMenu');
-            if (dropdown) {
-                dropdown.style.opacity = dropdown.style.opacity === '1' ? '0' : '1';
-                dropdown.style.visibility = dropdown.style.visibility === 'visible' ? 'hidden' : 'visible';
-                dropdown.style.transform = dropdown.style.opacity === '1' ? 'translateY(0)' : 'translateY(-10px)';
-            }
+            window.location.href = 'my-profile.html';
         }
 
         // Close dropdown when clicking outside
         document.addEventListener('click', function(event) {
-            const dropdown = document.getElementById('profileDropdownMenu');
-            const profileBtn = document.getElementById('profileBtn');
-            
-            if (dropdown && profileBtn && !profileBtn.contains(event.target) && !dropdown.contains(event.target)) {
-                dropdown.style.opacity = '0';
-                dropdown.style.visibility = 'hidden';
-                dropdown.style.transform = 'translateY(-10px)';
+            const dropdownContainer = document.getElementById('profileDropdown');
+            if (!dropdownContainer) {
+                return;
+            }
+
+            if (!dropdownContainer.contains(event.target)) {
+                setProfileDropdownState(false);
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                setProfileDropdownState(false);
             }
         });
 
