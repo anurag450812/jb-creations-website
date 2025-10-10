@@ -2422,8 +2422,8 @@ input[type="range"]::-webkit-slider-thumb:hover {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-    /* Enable custom touch handling for pinch-to-zoom */
-    touch-action: none;
+    /* Allow normal touch actions on container (for scrolling) */
+    touch-action: auto;
 }
 
 .preview-image {
@@ -2448,7 +2448,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     will-change: transform;
     backface-visibility: hidden;
     transform-style: preserve-3d;
-    /* Enable pinch-to-zoom and disable default browser touch behaviors */
+    /* Enable pinch-to-zoom only on the image itself */
     touch-action: none;
 }
 

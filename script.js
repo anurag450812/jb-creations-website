@@ -1481,8 +1481,12 @@ function initializeDragAndZoom() {
     function handleTouchStart(e) {
         if (!state.image) return;
         
-        e.preventDefault();
-        e.stopPropagation();
+        // Only prevent default if touching the image directly
+        const target = e.target;
+        if (target === elements.previewImage || target.closest('.preview-image')) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
         
         if (e.touches.length === 1) {
             // Single touch - dragging
@@ -1509,8 +1513,11 @@ function initializeDragAndZoom() {
     function handleTouchMove(e) {
         if (!state.image) return;
 
-        e.preventDefault();
-        e.stopPropagation();
+        // Only prevent default if we're actually dragging or pinching
+        if (isDragging || isPinching) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
 
         if (e.touches.length === 1 && isDragging && !isPinching) {
             // Single touch dragging
