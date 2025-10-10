@@ -1256,6 +1256,18 @@ function initializeDragAndZoom() {
     let startPos = { x: 0, y: 0 };
     let animationFrameId = null;
     let pendingTransform = null;
+    
+    // Pinch-to-zoom variables
+    let isPinching = false;
+    let initialPinchDistance = 0;
+    let initialZoom = 1;
+
+    // Calculate distance between two touch points
+    function getDistance(touch1, touch2) {
+        const dx = touch1.clientX - touch2.clientX;
+        const dy = touch1.clientY - touch2.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
 
     // Optimized transform update using requestAnimationFrame
     function scheduleTransformUpdate() {
@@ -1473,7 +1485,9 @@ function initializeDragAndZoom() {
         e.stopPropagation();
         
         if (e.touches.length === 1) {
+            // Single touch - dragging
             isDragging = true;
+            isPinching = false;
             const touch = e.touches[0];
             startPos = {
                 x: touch.clientX - state.position.x,
@@ -1481,61 +1495,105 @@ function initializeDragAndZoom() {
             };
             elements.previewImage.classList.remove('smooth-transition');
             elements.previewImage.classList.add('dragging');
+        } else if (e.touches.length === 2) {
+            // Two touches - pinch to zoom
+            isDragging = false;
+            isPinching = true;
+            initialPinchDistance = getDistance(e.touches[0], e.touches[1]);
+            initialZoom = state.zoom;
+            elements.previewImage.classList.remove('dragging');
         }
     }
 
     // Enhanced touch move handler
     function handleTouchMove(e) {
-        if (!isDragging || e.touches.length !== 1 || !state.image) return;
+        if (!state.image) return;
 
         e.preventDefault();
         e.stopPropagation();
 
-        const touch = e.touches[0];
-        const newX = touch.clientX - startPos.x;
-        const newY = touch.clientY - startPos.y;
+        if (e.touches.length === 1 && isDragging && !isPinching) {
+            // Single touch dragging
+            const touch = e.touches[0];
+            const newX = touch.clientX - startPos.x;
+            const newY = touch.clientY - startPos.y;
 
-        // Get container bounds for boundary calculations
-        const container = elements.imageContainer.getBoundingClientRect();
-        const imageWidth = elements.previewImage.naturalWidth * state.zoom;
-        const imageHeight = elements.previewImage.naturalHeight * state.zoom;
-        
-        // Calculate maximum allowed movement
-        const maxX = Math.max(0, (imageWidth - container.width) / 2);
-        const maxY = Math.max(0, (imageHeight - container.height) / 2);
+            // Get container bounds for boundary calculations
+            const container = elements.imageContainer.getBoundingClientRect();
+            const imageWidth = elements.previewImage.naturalWidth * state.zoom;
+            const imageHeight = elements.previewImage.naturalHeight * state.zoom;
+            
+            // Calculate maximum allowed movement
+            const maxX = Math.max(0, (imageWidth - container.width) / 2);
+            const maxY = Math.max(0, (imageHeight - container.height) / 2);
 
-        // Apply smooth edge resistance for touch
-        const dampingFactor = 0.15; // Slightly more resistance for touch
-        let constrainedX = Math.max(Math.min(newX, maxX), -maxX);
-        let constrainedY = Math.max(Math.min(newY, maxY), -maxY);
+            // Apply smooth edge resistance for touch
+            const dampingFactor = 0.15; // Slightly more resistance for touch
+            let constrainedX = Math.max(Math.min(newX, maxX), -maxX);
+            let constrainedY = Math.max(Math.min(newY, maxY), -maxY);
 
-        if (newX > maxX) {
-            constrainedX = maxX + (newX - maxX) * dampingFactor;
-        } else if (newX < -maxX) {
-            constrainedX = -maxX + (newX + maxX) * dampingFactor;
+            if (newX > maxX) {
+                constrainedX = maxX + (newX - maxX) * dampingFactor;
+            } else if (newX < -maxX) {
+                constrainedX = -maxX + (newX + maxX) * dampingFactor;
+            }
+
+            if (newY > maxY) {
+                constrainedY = maxY + (newY - maxY) * dampingFactor;
+            } else if (newY < -maxY) {
+                constrainedY = -maxY + (newY + maxY) * dampingFactor;
+            }
+
+            state.position = {
+                x: constrainedX,
+                y: constrainedY
+            };
+
+            // Schedule transform update
+            pendingTransform = true;
+            scheduleTransformUpdate();
+        } else if (e.touches.length === 2 && isPinching) {
+            // Two-finger pinch to zoom
+            const currentDistance = getDistance(e.touches[0], e.touches[1]);
+            const scale = currentDistance / initialPinchDistance;
+            
+            // Calculate new zoom level
+            let newZoom = initialZoom * scale;
+            
+            // Apply zoom constraints
+            const imgWidth = elements.previewImage.naturalWidth;
+            const imgHeight = elements.previewImage.naturalHeight;
+            const frameContainer = elements.imageContainer.getBoundingClientRect();
+            const frameWidth = frameContainer.width;
+            const frameHeight = frameContainer.height;
+            
+            // Calculate minimum zoom (same as existing zoom logic)
+            const minZoom = Math.max(
+                frameWidth / imgWidth,
+                frameHeight / imgHeight
+            );
+            
+            const maxZoom = 3; // Maximum zoom level
+            
+            // Constrain zoom
+            newZoom = Math.max(minZoom, Math.min(newZoom, maxZoom));
+            
+            // Update zoom state
+            state.zoom = newZoom;
+            
+            // Schedule transform update
+            pendingTransform = true;
+            scheduleTransformUpdate();
         }
-
-        if (newY > maxY) {
-            constrainedY = maxY + (newY - maxY) * dampingFactor;
-        } else if (newY < -maxY) {
-            constrainedY = -maxY + (newY + maxY) * dampingFactor;
-        }
-
-        state.position = {
-            x: constrainedX,
-            y: constrainedY
-        };
-
-        // Schedule transform update
-        pendingTransform = true;
-        scheduleTransformUpdate();
     }
 
     // Touch end handler
     function handleTouchEnd(e) {
-        if (!isDragging) return;
+        if (!isDragging && !isPinching) return;
         
+        // Reset states
         isDragging = false;
+        isPinching = false;
         elements.previewImage.classList.remove('dragging');
         
         // Snap back to boundaries
@@ -1543,27 +1601,27 @@ function initializeDragAndZoom() {
         
         // Automatically trigger "Update Room Previews" functionality after touch drag operation
         setTimeout(() => {
-            console.log('🎯 Auto-triggering room preview update after touch drag operation...');
+            console.log('🎯 Auto-triggering room preview update after touch operation...');
             
             // Check if conditions are met (same logic as updateRoomPreviewsClick)
             const hasImage = !!(state.image);
             const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
             
             if (hasImage && hasActiveRoomSlider) {
-                console.log('✅ Auto-updating room previews after touch drag...');
+                console.log('✅ Auto-updating room previews after touch operation...');
                 
                 // Call the overlay function directly (same as updateRoomPreviewsClick but without UI feedback)
                 if (typeof overlayFrameOnRoomImages === 'function') {
                     overlayFrameOnRoomImages().then(() => {
-                        console.log('✅ Room previews auto-updated successfully after touch drag!');
+                        console.log('✅ Room previews auto-updated successfully after touch operation!');
                     }).catch((error) => {
-                        console.error('❌ Error auto-updating room previews after touch drag:', error);
+                        console.error('❌ Error auto-updating room previews after touch operation:', error);
                     });
                 } else {
-                    console.log('⚠️ overlayFrameOnRoomImages function not available for touch drag auto-update');
+                    console.log('⚠️ overlayFrameOnRoomImages function not available for touch operation auto-update');
                 }
             } else {
-                console.log('⚠️ Touch drag auto-update skipped - conditions not met (image:', hasImage, ', room slider:', hasActiveRoomSlider, ')');
+                console.log('⚠️ Touch operation auto-update skipped - conditions not met (image:', hasImage, ', room slider:', hasActiveRoomSlider, ')');
             }
         }, 300); // Brief delay to let snap animation complete
     }
