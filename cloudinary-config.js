@@ -1,15 +1,18 @@
 // cloudinary-config.js
-// This file contains configuration and helper functions for Cloudinary integration
+// OPTIMIZED Cloudinary configuration with performance improvements
 
 // Replace these with your actual Cloudinary credentials
 const CLOUDINARY_CLOUD_NAME = 'dfhxnpp9m';
 const CLOUDINARY_API_KEY = '629699618349166';
 const CLOUDINARY_API_SECRET = '-8gGXZCe-4ORvEQSPcdajA38yQQ';
 
-// Initialize the Cloudinary client (client-side)
+// Performance optimized Cloudinary client initialization
 const cl = window.cloudinary ? new cloudinary.Cloudinary({
   cloud_name: CLOUDINARY_CLOUD_NAME,
-  secure: true
+  secure: true,
+  // Add performance settings
+  use_cache: true,
+  secure_cdn_subdomain: true
 }) : null;
 
 // Helper function to generate a unique folder name for each order
@@ -17,60 +20,133 @@ function getCloudinaryOrderFolder(orderId) {
   return `jb-creations-orders/${orderId}`;
 }
 
-// Function to upload an image to Cloudinary (client-side)
-// This function uses the Upload Widget since direct uploads from browser 
-// require the unsigned upload preset to be set up on Cloudinary dashboard
-function uploadImageToCloudinary(imageData, orderId, itemIndex) {
+// OPTIMIZED: Create image transformations for different use cases
+const IMAGE_TRANSFORMATIONS = {
+  thumbnail: {
+    width: 200,
+    height: 200,
+    crop: 'fill',
+    quality: 'auto:low',
+    format: 'auto'
+  },
+  preview: {
+    width: 800,
+    height: 600,
+    crop: 'limit',
+    quality: 'auto:good',
+    format: 'auto'
+  },
+  fullsize: {
+    width: 1920,
+    height: 1440,
+    crop: 'limit',
+    quality: 'auto:best',
+    format: 'auto'
+  }
+};
+
+// OPTIMIZED: Function to upload an image to Cloudinary with retry logic
+function uploadImageToCloudinary(imageData, orderId, itemIndex, maxRetries = 3) {
   return new Promise((resolve, reject) => {
-    // Create a unique public_id (filename) for the image
     const timestamp = new Date().getTime();
     const publicId = `${getCloudinaryOrderFolder(orderId)}/item${itemIndex}_${timestamp}`;
     
-    // For client-side, we'll need to use a server endpoint to handle the actual upload
-    // This is a placeholder for now
-    fetch('/api/upload-to-cloudinary', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        image: imageData,
-        publicId: publicId
-      })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.secure_url) {
-        resolve({
-          url: data.secure_url,
-          publicId: data.public_id
+    // Retry function for failed uploads
+    async function attemptUpload(retryCount = 0) {
+      try {
+        const response = await fetch('/api/upload-to-cloudinary', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            image: imageData,
+            publicId: publicId,
+            // Add optimization parameters
+            transformations: IMAGE_TRANSFORMATIONS.preview
+          })
         });
-      } else {
-        reject(new Error('Failed to upload image to Cloudinary'));
+
+        if (!response.ok) {
+          throw new Error(`Upload failed with status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.secure_url) {
+          resolve({
+            url: data.secure_url,
+            publicId: data.public_id,
+            thumbnailUrl: getOptimizedUrl(data.public_id, 'thumbnail'),
+            previewUrl: getOptimizedUrl(data.public_id, 'preview')
+          });
+        } else {
+          throw new Error('Invalid response from Cloudinary');
+        }
+      } catch (error) {
+        console.error(`Upload attempt ${retryCount + 1} failed:`, error);
+        
+        if (retryCount < maxRetries) {
+          // Exponential backoff: wait 1s, 2s, 4s between retries
+          const delay = Math.pow(2, retryCount) * 1000;
+          setTimeout(() => attemptUpload(retryCount + 1), delay);
+        } else {
+          reject(new Error(`Failed to upload after ${maxRetries} attempts: ${error.message}`));
+        }
       }
-    })
-    .catch(error => {
-      console.error('Error uploading to Cloudinary:', error);
-      reject(error);
-    });
+    }
+    
+    attemptUpload();
   });
 }
 
-// Function to get a Cloudinary URL from a public ID
-function getCloudinaryUrl(publicId, transformation = {}) {
-  if (!cl) {
-    console.error('Cloudinary not initialized');
+// OPTIMIZED: Function to get optimized Cloudinary URLs
+function getOptimizedUrl(publicId, type = 'preview') {
+  if (!cl || !publicId) {
+    console.error('Cloudinary not initialized or invalid publicId');
     return null;
   }
   
+  const transformation = IMAGE_TRANSFORMATIONS[type] || IMAGE_TRANSFORMATIONS.preview;
   return cl.url(publicId, transformation);
 }
 
-// Export the functions and configuration
+// OPTIMIZED: Function to preload critical images
+function preloadImage(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`Failed to load image: ${url}`));
+    img.src = url;
+  });
+}
+
+// OPTIMIZED: Batch upload function for multiple images
+function batchUploadImages(imageDataArray, orderId) {
+  const uploadPromises = imageDataArray.map((imageData, index) => 
+    uploadImageToCloudinary(imageData, orderId, index)
+  );
+  
+  return Promise.allSettled(uploadPromises).then(results => {
+    const successful = results.filter(result => result.status === 'fulfilled');
+    const failed = results.filter(result => result.status === 'rejected');
+    
+    if (failed.length > 0) {
+      console.warn(`${failed.length} uploads failed:`, failed);
+    }
+    
+    return successful.map(result => result.value);
+  });
+}
+
+// Export the optimized functions and configuration
 window.cloudinaryConfig = {
   cloudName: CLOUDINARY_CLOUD_NAME,
   apiKey: CLOUDINARY_API_KEY,
   uploadImage: uploadImageToCloudinary,
-  getUrl: getCloudinaryUrl,
-  getOrderFolder: getCloudinaryOrderFolder
+  batchUpload: batchUploadImages,
+  getUrl: getOptimizedUrl,
+  getOrderFolder: getCloudinaryOrderFolder,
+  preloadImage: preloadImage,
+  transformations: IMAGE_TRANSFORMATIONS
 };
