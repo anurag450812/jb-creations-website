@@ -2161,8 +2161,20 @@
         }
 
     </style>
+    
+    <!-- Mobile Performance Optimization -->
+    <link rel="stylesheet" href="mobile-responsiveness-enhanced.css">
+    <script>
+        // Preload critical mobile optimizer script
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            const script = document.createElement('script');
+            script.src = 'mobile-performance-optimizer.js';
+            script.async = false; // Load synchronously for immediate optimization
+            document.head.appendChild(script);
+        }
+    </script>
 </head>
-<body class="landing-page">
+<body class="landing-page performance-optimized">
     <!-- Header -->
     <header class="site-header">
         <div class="header-content">
@@ -2972,6 +2984,70 @@
                 behavior: 'smooth'
             });
         }
+    </script>
+
+    <!-- Service Worker Registration for Offline Support -->
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registered:', registration.scope);
+                        
+                        // Check for updates periodically
+                        setInterval(() => {
+                            registration.update();
+                        }, 60000); // Check every minute
+                    })
+                    .catch(error => {
+                        console.warn('⚠️ Service Worker registration failed:', error);
+                    });
+            });
+
+            // Listen for service worker updates
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                console.log('🔄 Service Worker updated, reloading...');
+                window.location.reload();
+            });
+        }
+
+        // Utility functions for cache management (for debugging)
+        window.clearServiceWorkerCache = async () => {
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                const messageChannel = new MessageChannel();
+                
+                return new Promise((resolve) => {
+                    messageChannel.port1.onmessage = (event) => {
+                        console.log('✅ Cache cleared!', event.data);
+                        resolve(event.data);
+                    };
+                    
+                    navigator.serviceWorker.controller.postMessage(
+                        { type: 'CLEAR_CACHE' },
+                        [messageChannel.port2]
+                    );
+                });
+            }
+        };
+
+        window.checkCacheStatus = async () => {
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                const messageChannel = new MessageChannel();
+                
+                return new Promise((resolve) => {
+                    messageChannel.port1.onmessage = (event) => {
+                        console.log('📊 Cache Status:', event.data.size);
+                        resolve(event.data);
+                    };
+                    
+                    navigator.serviceWorker.controller.postMessage(
+                        { type: 'GET_CACHE_SIZE' },
+                        [messageChannel.port2]
+                    );
+                });
+            }
+        };
     </script>
 
 </body>

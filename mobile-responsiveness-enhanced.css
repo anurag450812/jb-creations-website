@@ -1,0 +1,259 @@
+/**
+ * Mobile Performance Optimization CSS
+ * Optimizes rendering and scrolling on mobile devices
+ */
+
+/* ===== CRITICAL MOBILE OPTIMIZATIONS ===== */
+
+/* Enable hardware acceleration */
+@media (max-width: 768px) {
+    * {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeSpeed;
+    }
+
+    /* Optimize scroll container */
+    html {
+        scroll-behavior: auto !important; /* Disable smooth scroll on mobile */
+        -webkit-overflow-scrolling: touch;
+    }
+
+    body {
+        overscroll-behavior-y: contain;
+        -webkit-tap-highlight-color: transparent;
+        transform: translateZ(0);
+        backface-visibility: hidden;
+    }
+
+    /* ===== LAYER PROMOTION FOR SCROLL ELEMENTS ===== */
+    .landing-content,
+    .hero-section,
+    .sub-section,
+    .features-section,
+    .stats-section,
+    .steps-container,
+    .preview-section {
+        transform: translateZ(0);
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        will-change: scroll-position;
+    }
+
+    /* ===== DISABLE EXPENSIVE ANIMATIONS ===== */
+    * {
+        animation-duration: 0s !important;
+        animation-delay: 0s !important;
+        transition-duration: 0.1s !important;
+        transition-delay: 0s !important;
+    }
+
+    /* Keep only essential transitions */
+    button,
+    a,
+    input,
+    select,
+    textarea {
+        transition-duration: 0.2s !important;
+    }
+
+    /* ===== OPTIMIZE IMAGES ===== */
+    img {
+        content-visibility: auto;
+        contain-intrinsic-size: 300px 200px;
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+
+    /* Lazy load images */
+    img[data-src] {
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    img[data-src].loaded {
+        opacity: 1;
+    }
+
+    /* ===== REDUCE PAINT OPERATIONS ===== */
+    .hero-section::before,
+    .sub-section::before {
+        content: none !important;
+    }
+
+    /* Disable backdrop filters on mobile */
+    * {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    /* ===== OPTIMIZE GLASS EFFECTS ===== */
+    .glass-effect,
+    .rain-glass {
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .raindrop,
+    .water-droplet {
+        display: none !important;
+    }
+
+    /* ===== REDUCE SHADOWS ===== */
+    * {
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    /* Keep minimal shadows for depth */
+    .feature-card,
+    .stat-card,
+    .step-card,
+    .hero-section,
+    .sub-section {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* ===== OPTIMIZE HOVER STATES ===== */
+    .feature-card:hover,
+    .stat-card:hover,
+    .step-card:hover,
+    .hero-section:hover,
+    .sub-section:hover {
+        transform: none !important;
+    }
+
+    /* ===== CONTENT VISIBILITY ===== */
+    .features-section,
+    .stats-section,
+    .steps-container,
+    .preview-section {
+        content-visibility: auto;
+        contain-intrinsic-size: auto 500px;
+    }
+
+    /* ===== SCROLLING OPTIMIZATIONS ===== */
+    .is-scrolling * {
+        pointer-events: none !important;
+    }
+
+    .is-scrolling img {
+        image-rendering: pixelated;
+    }
+
+    /* ===== REDUCE LAYOUT SHIFTS ===== */
+    .landing-content > * {
+        contain: layout style paint;
+    }
+
+    /* ===== OPTIMIZE FONTS ===== */
+    * {
+        font-display: swap;
+    }
+
+    /* Prevent text overflow */
+    h1, h2, h3, h4, h5, h6, p, span, div {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+    }
+
+    /* ===== TOUCH OPTIMIZATIONS ===== */
+    button,
+    a,
+    input,
+    select,
+    textarea {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    }
+
+    /* ===== REMOVE UNUSED VISUAL EFFECTS ===== */
+    @supports (filter: none) {
+        * {
+            filter: none !important;
+        }
+    }
+
+    /* ===== OPTIMIZE GRID/FLEX LAYOUTS ===== */
+    .features-grid,
+    .stats-grid,
+    .steps-container {
+        contain: layout;
+    }
+
+    /* ===== INSTANT CLICK FEEDBACK ===== */
+    button:active,
+    a:active {
+        opacity: 0.7;
+    }
+}
+
+/* ===== LOW-END DEVICE OPTIMIZATIONS ===== */
+@media (max-width: 768px) and (max-device-pixel-ratio: 1.5) {
+    /* Further reduce visual complexity on low-end devices */
+    * {
+        border-radius: 8px !important;
+    }
+
+    img {
+        image-rendering: auto;
+    }
+
+    .hero-section,
+    .sub-section {
+        background-attachment: scroll !important;
+        background-size: cover !important;
+    }
+}
+
+/* ===== REDUCE MOTION FOR USERS WHO PREFER IT ===== */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* ===== OPTIMIZE FOR SMALL SCREENS ===== */
+@media (max-width: 480px) {
+    .landing-content {
+        padding: 0 10px 40px;
+    }
+
+    /* Reduce spacing on small screens */
+    .hero-section,
+    .sub-section,
+    .features-section,
+    .stats-section {
+        margin-bottom: 1rem;
+        padding: 1.5rem 1rem;
+    }
+
+    /* Optimize text rendering */
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.3rem; }
+    h3 { font-size: 1.1rem; }
+    p { font-size: 0.9rem; }
+}
+
+/* ===== PERFORMANCE MONITORING ===== */
+@media (max-width: 768px) {
+    /* Show performance indicator during scroll */
+    body.is-scrolling::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #16697A, #82C0CC);
+        z-index: 9999;
+        opacity: 0.5;
+    }
+}
+
+/* ===== CRITICAL CSS LOADED INDICATOR ===== */
+.performance-optimized {
+    --performance-ready: true;
+}
