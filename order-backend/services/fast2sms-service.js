@@ -4,7 +4,8 @@
  */
 
 const axios = require('axios');
-const { fast2smsConfig, validateFast2SMSConfig } = require('../fast2sms-config');
+// Import config from parent directory
+const { fast2smsConfig, validateFast2SMSConfig } = require('../../fast2sms-config');
 
 // In-memory OTP storage (use Redis or database in production)
 const otpStore = new Map();
@@ -64,27 +65,25 @@ async function sendOTP(phoneNumber, otp = null) {
         // Generate OTP if not provided
         const otpCode = otp || generateOTP(fast2smsConfig.otpConfig.length);
         
-        // Prepare API request
-        const apiUrl = fast2smsConfig.apiEndpoint;
-        const headers = {
-            'authorization': fast2smsConfig.apiKey,
-            'Content-Type': 'application/json'
-        };
-        
-        // Prepare request body for DLT route
-        const requestBody = {
-            route: fast2smsConfig.messageConfig.route,
+        // Prepare API request - Using GET method as per your API details
+        const apiParams = new URLSearchParams({
+            authorization: fast2smsConfig.apiKey,
+            route: 'dlt',
             sender_id: fast2smsConfig.senderId,
             message: fast2smsConfig.templateId,
-            variables_values: otpCode,  // OTP value for template variable
-            flash: fast2smsConfig.messageConfig.flash,
-            numbers: formattedPhone
-        };
+            variables_values: `${otpCode}|`,  // OTP value for template variable with | separator
+            flash: '0',
+            numbers: formattedPhone,
+            schedule_time: ''
+        });
+        
+        const apiUrlWithParams = `${fast2smsConfig.apiEndpoint}?${apiParams.toString()}`;
         
         console.log('📱 Sending OTP via Fast2SMS to:', formattedPhone);
+        console.log('🔗 API URL:', apiUrlWithParams);
         
-        // Send API request
-        const response = await axios.post(apiUrl, requestBody, { headers });
+        // Send GET request (as per your API configuration)
+        const response = await axios.get(apiUrlWithParams);
         
         // Check response
         if (response.data && response.data.return === true) {

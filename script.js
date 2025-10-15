@@ -38,6 +38,14 @@ const state = {
 // DOM Elements - will be initialized in DOMContentLoaded
 let elements = {};
 
+// Mobile helpers and lock for live preview position
+function isMobileViewport() {
+    return window.innerWidth <= 768; // aligns with CSS breakpoint
+}
+
+// When true (on mobile), prevent incidental scroll from shifting the image; unlock only during drag/zoom
+let mobilePositionLocked = false;
+
 // Initialize application when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize DOM elements
@@ -405,31 +413,11 @@ function initializeEventListeners() {
             
             // Removed auto-scroll on mobile to prevent page from jumping to top/center
             
-            // Automatically trigger "Update Room Previews" functionality after frame size change
-            setTimeout(() => {
-                console.log('🎯 Auto-triggering room preview update after frame size change...');
-                
-                // Check if conditions are met (same logic as updateRoomPreviewsClick)
-                const hasImage = !!(state.image);
-                const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
-                
-                if (hasImage && hasActiveRoomSlider) {
-                    console.log('✅ Auto-updating room previews with new frame size...');
-                    
-                    // Call the overlay function directly (same as updateRoomPreviewsClick but without UI feedback)
-                    if (typeof overlayFrameOnRoomImages === 'function') {
-                        overlayFrameOnRoomImages().then(() => {
-                            console.log('✅ Room previews auto-updated successfully after frame size change!');
-                        }).catch((error) => {
-                            console.error('❌ Error auto-updating room previews:', error);
-                        });
-                    } else {
-                        console.log('⚠️ overlayFrameOnRoomImages function not available for auto-update');
-                    }
-                } else {
-                    console.log('⚠️ Auto-update skipped - conditions not met (image:', hasImage, ', room slider:', hasActiveRoomSlider, ')');
-                }
-            }, 1000); // Wait 1 second for room slider to initialize
+            // On mobile, do NOT auto-update room previews; user will click the update button
+            // Keep desktop behavior passive (no auto overlay) for consistency and performance
+            if (window.updateRoomPreviewButtonState) {
+                setTimeout(() => window.updateRoomPreviewButtonState(), 50);
+            }
         });
     });
 
@@ -452,31 +440,10 @@ function initializeEventListeners() {
             // Update frame color
             updateFrameColor();
             
-            // Automatically trigger "Update Room Previews" functionality after frame color change
-            setTimeout(() => {
-                console.log('🎯 Auto-triggering room preview update after frame color change...');
-                
-                // Check if conditions are met (same logic as updateRoomPreviewsClick)
-                const hasImage = !!(state.image);
-                const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
-                
-                if (hasImage && hasActiveRoomSlider) {
-                    console.log('✅ Auto-updating room previews with new frame color...');
-                    
-                    // Call the overlay function directly (same as updateRoomPreviewsClick but without UI feedback)
-                    if (typeof overlayFrameOnRoomImages === 'function') {
-                        overlayFrameOnRoomImages().then(() => {
-                            console.log('✅ Room previews auto-updated successfully after frame color change!');
-                        }).catch((error) => {
-                            console.error('❌ Error auto-updating room previews after color change:', error);
-                        });
-                    } else {
-                        console.log('⚠️ overlayFrameOnRoomImages function not available for color auto-update');
-                    }
-                } else {
-                    console.log('⚠️ Color auto-update skipped - conditions not met (image:', hasImage, ', room slider:', hasActiveRoomSlider, ')');
-                }
-            }, 500); // Wait 500ms for frame color update to complete
+            // No auto-update; let user press Update button
+            if (window.updateRoomPreviewButtonState) {
+                setTimeout(() => window.updateRoomPreviewButtonState(), 50);
+            }
         });
     });
 
@@ -672,31 +639,16 @@ function initializeEventListeners() {
                 console.log('No image loaded, zoom disabled');
                 return;
             }
+            if (isMobileViewport()) mobilePositionLocked = false;
             const zoomSpeed = 0.1;
             state.zoom = Math.min(state.zoom + zoomSpeed, 3);
             console.log('New zoom level:', state.zoom);
             elements.previewImage.classList.add('smooth-transition');
             updateImageTransform();
             setTimeout(() => elements.previewImage.classList.remove('smooth-transition'), 200);
+            if (isMobileViewport()) mobilePositionLocked = true;
             
-            // Auto-update room previews when zoom changes (simulation)
-            setTimeout(() => {
-                const hasImage = !!(state.image);
-                const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
-                
-                if (hasImage && hasActiveRoomSlider) {
-                    console.log('🔄 Auto-updating room previews after zoom in...');
-                    if (typeof overlayFrameOnRoomImages === 'function') {
-                        overlayFrameOnRoomImages().then(() => {
-                            console.log('✅ Room previews auto-updated after zoom in');
-                        }).catch((error) => {
-                            console.log('⚠️ Error in auto-update after zoom in:', error);
-                        });
-                    } else {
-                        console.log('⚠️ overlayFrameOnRoomImages function not available for zoom auto-update');
-                    }
-                }
-            }, 300); // Small delay to allow zoom transition to complete
+            // No auto room overlay; user triggers manually
         });
     }
     if (elements.zoomOut) {
@@ -706,6 +658,7 @@ function initializeEventListeners() {
                 console.log('No image or frame size, zoom disabled');
                 return;
             }
+            if (isMobileViewport()) mobilePositionLocked = false;
             const zoomSpeed = 0.1;
             const [width, height] = state.frameSize.size.split('x').map(Number);
             const isLandscape = state.frameSize.orientation === 'landscape';
@@ -719,61 +672,31 @@ function initializeEventListeners() {
             elements.previewImage.classList.add('smooth-transition');
             updateImageTransform();
             setTimeout(() => elements.previewImage.classList.remove('smooth-transition'), 200);
+            if (isMobileViewport()) mobilePositionLocked = true;
             
-            // Auto-update room previews when zoom changes (simulation)
-            setTimeout(() => {
-                const hasImage = !!(state.image);
-                const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
-                
-                if (hasImage && hasActiveRoomSlider) {
-                    console.log('🔄 Auto-updating room previews after zoom out...');
-                    if (typeof overlayFrameOnRoomImages === 'function') {
-                        overlayFrameOnRoomImages().then(() => {
-                            console.log('✅ Room previews auto-updated after zoom out');
-                        }).catch((error) => {
-                            console.log('⚠️ Error in auto-update after zoom out:', error);
-                        });
-                    } else {
-                        console.log('⚠️ overlayFrameOnRoomImages function not available for zoom auto-update');
-                    }
-                }
-            }, 300); // Small delay to allow zoom transition to complete
+            // No auto room overlay; user triggers manually
         });
     }
     if (elements.precisionZoomIn) {
         elements.precisionZoomIn.addEventListener('click', function() {
             console.log('Precision Zoom In clicked'); // Debug log
             if (!state.image) return;
+            if (isMobileViewport()) mobilePositionLocked = false;
             const precisionZoomSpeed = 0.02;
             state.zoom = Math.min(state.zoom + precisionZoomSpeed, 3);
             elements.previewImage.classList.add('smooth-transition');
             updateImageTransform();
             setTimeout(() => elements.previewImage.classList.remove('smooth-transition'), 150);
+            if (isMobileViewport()) mobilePositionLocked = true;
             
-            // Auto-update room previews when precision zoom changes (simulation)
-            setTimeout(() => {
-                const hasImage = !!(state.image);
-                const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
-                
-                if (hasImage && hasActiveRoomSlider) {
-                    console.log('🔄 Auto-updating room previews after precision zoom in...');
-                    if (typeof overlayFrameOnRoomImages === 'function') {
-                        overlayFrameOnRoomImages().then(() => {
-                            console.log('✅ Room previews auto-updated after precision zoom in');
-                        }).catch((error) => {
-                            console.log('⚠️ Error in auto-update after precision zoom in:', error);
-                        });
-                    } else {
-                        console.log('⚠️ overlayFrameOnRoomImages function not available for precision zoom auto-update');
-                    }
-                }
-            }, 200); // Smaller delay for precision zoom
+            // No auto room overlay; user triggers manually
         });
     }
     if (elements.precisionZoomOut) {
         elements.precisionZoomOut.addEventListener('click', function() {
             console.log('Precision Zoom Out clicked'); // Debug log
             if (!state.image || !state.frameSize) return;
+            if (isMobileViewport()) mobilePositionLocked = false;
             const precisionZoomSpeed = 0.02;
             const [width, height] = state.frameSize.size.split('x').map(Number);
             const isLandscape = state.frameSize.orientation === 'landscape';
@@ -787,24 +710,7 @@ function initializeEventListeners() {
             updateImageTransform();
             setTimeout(() => elements.previewImage.classList.remove('smooth-transition'), 150);
             
-            // Auto-update room previews when precision zoom changes (simulation)
-            setTimeout(() => {
-                const hasImage = !!(state.image);
-                const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
-                
-                if (hasImage && hasActiveRoomSlider) {
-                    console.log('🔄 Auto-updating room previews after precision zoom out...');
-                    if (typeof overlayFrameOnRoomImages === 'function') {
-                        overlayFrameOnRoomImages().then(() => {
-                            console.log('✅ Room previews auto-updated after precision zoom out');
-                        }).catch((error) => {
-                            console.log('⚠️ Error in auto-update after precision zoom out:', error);
-                        });
-                    } else {
-                        console.log('⚠️ overlayFrameOnRoomImages function not available for precision zoom auto-update');
-                    }
-                }
-            }, 200); // Smaller delay for precision zoom
+            // No auto room overlay; user triggers manually
         });
     }
 
@@ -1055,32 +961,10 @@ function handleImageUpload(file) {
                     // Update image transform
                     updateImageTransform();
                     
-                    // Automatically trigger "Update Room Previews" functionality after image upload
-                    setTimeout(() => {
-                        console.log('🎯 Auto-triggering room preview update after image upload...');
-                        
-                        // Check if conditions are met (same logic as updateRoomPreviewsClick)
-                        const hasImage = !!(state.image);
-                        const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
-                        
-                        if (hasImage && hasActiveRoomSlider) {
-                            console.log('✅ Auto-updating room previews with uploaded image...');
-                            
-                            // Call the overlay function directly (same as updateRoomPreviewsClick but without UI feedback)
-                            if (typeof overlayFrameOnRoomImages === 'function') {
-                                overlayFrameOnRoomImages().then(() => {
-                                    console.log('✅ Room previews auto-updated successfully after image upload!');
-                                }).catch((error) => {
-                                    console.error('❌ Error auto-updating room previews after image upload:', error);
-                                });
-                            } else {
-                                console.log('⚠️ overlayFrameOnRoomImages function not available for image upload auto-update');
-                            }
-                        } else {
-                            console.log('⚠️ Image upload auto-update skipped - conditions not met (image:', hasImage, ', room slider:', hasActiveRoomSlider, ')');
-                            console.log('   Note: If room slider is not active, please select a frame size first');
-                        }
-                    }, 1200); // Wait 1.2 seconds for all initialization to complete
+                    // No auto-update on load; just refresh button state
+                    if (window.updateRoomPreviewButtonState) {
+                        setTimeout(() => window.updateRoomPreviewButtonState(), 100);
+                    }
                 };
             };
             
@@ -1153,32 +1037,8 @@ if (sliders.length > 0) {
             mobileSlider.value = value;
         }
         
-        // Automatically trigger "Update Room Previews" functionality after adjustment change
-        clearTimeout(window.adjustmentUpdateTimeout); // Clear any existing timeout to prevent multiple rapid updates
-        window.adjustmentUpdateTimeout = setTimeout(() => {
-            console.log('🎯 Auto-triggering room preview update after adjustment change:', id);
-            
-            // Check if conditions are met (same logic as updateRoomPreviewsClick)
-            const hasImage = !!(state.image);
-            const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
-            
-            if (hasImage && hasActiveRoomSlider) {
-                console.log('✅ Auto-updating room previews with new adjustment:', id);
-                
-                // Call the overlay function directly (same as updateRoomPreviewsClick but without UI feedback)
-                if (typeof overlayFrameOnRoomImages === 'function') {
-                    overlayFrameOnRoomImages().then(() => {
-                        console.log('✅ Room previews auto-updated successfully after adjustment change:', id);
-                    }).catch((error) => {
-                        console.error('❌ Error auto-updating room previews after adjustment change:', error);
-                    });
-                } else {
-                    console.log('⚠️ overlayFrameOnRoomImages function not available for adjustment auto-update');
-                }
-            } else {
-                console.log('⚠️ Adjustment auto-update skipped - conditions not met (image:', hasImage, ', room slider:', hasActiveRoomSlider, ')');
-            }
-        }, 800); // Wait 800ms after user stops adjusting to prevent too many rapid updates
+        // No auto-update; allow user to click Update
+        if (window.updateRoomPreviewButtonState) window.updateRoomPreviewButtonState();
     });
 });
 }
@@ -1220,7 +1080,8 @@ function updateFrameAspectRatio() {
 
 function updateImageTransform() {
     if (!elements.previewImage.src) return;
-    
+    // If locked on mobile, we still render current state, but any incidental external calls shouldn't modify state.position.
+    // Position updates are already controlled in handlers; no-op here other than applying current state.
     // Use transform3d for better GPU acceleration
     const translateX = state.position.x;
     const translateY = state.position.y;
@@ -1287,6 +1148,7 @@ function initializeDragAndZoom() {
         e.preventDefault(); // Prevent page scrolling
         
         if (!state.image || !state.frameSize) return;
+        if (isMobileViewport()) mobilePositionLocked = false; // allow intentional wheel zoom then re-lock
         
         // Determine zoom direction and calculate new zoom
         const zoomSpeed = 0.08; // Slightly reduced for smoother control
@@ -1316,28 +1178,10 @@ function initializeDragAndZoom() {
 
         // Update transform to reflect new zoom
         updateImageTransform();
+    if (isMobileViewport()) mobilePositionLocked = true;
         
         // Auto-update room previews when mouse wheel zoom changes (simulation)
-        if (Math.abs(state.zoom - previousZoom) > 0.001) { // Only update if zoom actually changed
-            setTimeout(() => {
-                const hasImage = !!(state.image);
-                const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
-                
-                if (hasImage && hasActiveRoomSlider) {
-                    const zoomDirection = e.deltaY > 0 ? 'out' : 'in';
-                    console.log(`🔄 Auto-updating room previews after wheel zoom ${zoomDirection}...`);
-                    if (typeof overlayFrameOnRoomImages === 'function') {
-                        overlayFrameOnRoomImages().then(() => {
-                            console.log(`✅ Room previews auto-updated after wheel zoom ${zoomDirection}`);
-                        }).catch((error) => {
-                            console.log(`⚠️ Error in auto-update after wheel zoom ${zoomDirection}:`, error);
-                        });
-                    } else {
-                        console.log('⚠️ overlayFrameOnRoomImages function not available for wheel zoom auto-update');
-                    }
-                }
-            }, 300); // Small delay to allow zoom transition to complete
-        }
+        // No auto room overlay; user triggers manually
     }
 
     // Mouse down handler with improved responsiveness
@@ -1346,6 +1190,10 @@ function initializeDragAndZoom() {
         
         e.preventDefault(); // Prevent image dragging
         e.stopPropagation(); // Prevent event bubbling
+        if (isMobileViewport()) {
+            // Allow intentional drag to adjust position
+            mobilePositionLocked = false;
+        }
         
         isDragging = true;
         startPos = {
@@ -1426,32 +1274,12 @@ function initializeDragAndZoom() {
         
         // Snap back to boundaries if needed
         snapToBoundaries();
+        if (isMobileViewport()) {
+            // Re-lock after finishing interaction
+            mobilePositionLocked = true;
+        }
         
-        // Automatically trigger "Update Room Previews" functionality after drag operation
-        setTimeout(() => {
-            console.log('🎯 Auto-triggering room preview update after drag operation...');
-            
-            // Check if conditions are met (same logic as updateRoomPreviewsClick)
-            const hasImage = !!(state.image);
-            const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
-            
-            if (hasImage && hasActiveRoomSlider) {
-                console.log('✅ Auto-updating room previews after drag...');
-                
-                // Call the overlay function directly (same as updateRoomPreviewsClick but without UI feedback)
-                if (typeof overlayFrameOnRoomImages === 'function') {
-                    overlayFrameOnRoomImages().then(() => {
-                        console.log('✅ Room previews auto-updated successfully after drag!');
-                    }).catch((error) => {
-                        console.error('❌ Error auto-updating room previews after drag:', error);
-                    });
-                } else {
-                    console.log('⚠️ overlayFrameOnRoomImages function not available for drag auto-update');
-                }
-            } else {
-                console.log('⚠️ Drag auto-update skipped - conditions not met (image:', hasImage, ', room slider:', hasActiveRoomSlider, ')');
-            }
-        }, 300); // Brief delay to let snap animation complete
+        // No auto room overlay after drag; user triggers manually
     }
 
     // Snap to boundaries with smooth animation
@@ -1492,6 +1320,9 @@ function initializeDragAndZoom() {
             // Single touch - dragging
             isDragging = true;
             isPinching = false;
+            if (isMobileViewport()) {
+                mobilePositionLocked = false; // unlock during gesture
+            }
             const touch = e.touches[0];
             startPos = {
                 x: touch.clientX - state.position.x,
@@ -1503,6 +1334,9 @@ function initializeDragAndZoom() {
             // Two touches - pinch to zoom
             isDragging = false;
             isPinching = true;
+            if (isMobileViewport()) {
+                mobilePositionLocked = false; // unlock during gesture
+            }
             initialPinchDistance = getDistance(e.touches[0], e.touches[1]);
             initialZoom = state.zoom;
             elements.previewImage.classList.remove('dragging');
@@ -1605,32 +1439,12 @@ function initializeDragAndZoom() {
         
         // Snap back to boundaries
         snapToBoundaries();
+        if (isMobileViewport()) {
+            // Re-lock after finishing gesture
+            mobilePositionLocked = true;
+        }
         
-        // Automatically trigger "Update Room Previews" functionality after touch drag operation
-        setTimeout(() => {
-            console.log('🎯 Auto-triggering room preview update after touch operation...');
-            
-            // Check if conditions are met (same logic as updateRoomPreviewsClick)
-            const hasImage = !!(state.image);
-            const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
-            
-            if (hasImage && hasActiveRoomSlider) {
-                console.log('✅ Auto-updating room previews after touch operation...');
-                
-                // Call the overlay function directly (same as updateRoomPreviewsClick but without UI feedback)
-                if (typeof overlayFrameOnRoomImages === 'function') {
-                    overlayFrameOnRoomImages().then(() => {
-                        console.log('✅ Room previews auto-updated successfully after touch operation!');
-                    }).catch((error) => {
-                        console.error('❌ Error auto-updating room previews after touch operation:', error);
-                    });
-                } else {
-                    console.log('⚠️ overlayFrameOnRoomImages function not available for touch operation auto-update');
-                }
-            } else {
-                console.log('⚠️ Touch operation auto-update skipped - conditions not met (image:', hasImage, ', room slider:', hasActiveRoomSlider, ')');
-            }
-        }, 300); // Brief delay to let snap animation complete
+        // No auto room overlay after touch; user triggers manually
     }
 
     // Add event listeners with improved options
@@ -3361,8 +3175,11 @@ function updateFrameSize() {
                     state.zoom = minZoom;
                 }
                 
-                // Reset position to center when frame size changes
-                state.position = { x: 0, y: 0 };
+                // Avoid resetting position when locked on mobile to prevent scroll-induced shift
+                if (!(isMobileViewport() && mobilePositionLocked)) {
+                    // Reset position to center when frame size changes
+                    state.position = { x: 0, y: 0 };
+                }
                 updateImageTransform();
             }
         }
@@ -3618,6 +3435,7 @@ function updateFrameColor() {
             elements.previewImage.classList.add('smooth-transition');
             updateImageTransform();
             setTimeout(() => elements.previewImage.classList.remove('smooth-transition'), 150);
+            if (isMobileViewport()) mobilePositionLocked = true;
         };
 
         // Use ontouchend instead of addEventListener for better mobile compatibility
@@ -3797,9 +3615,11 @@ window.addEventListener('resize', () => {
                 const maxX = Math.max(0, (imageWidth - container.width) / 2);
                 const maxY = Math.max(0, (imageHeight - container.height) / 2);
 
-                // Constrain current position to new boundaries
-                state.position.x = Math.max(Math.min(state.position.x, maxX), -maxX);
-                state.position.y = Math.max(Math.min(state.position.y, maxY), -maxY);
+                // Constrain current position to new boundaries (skip when locked on mobile to avoid scroll-induced shifts)
+                if (!(isMobileViewport() && mobilePositionLocked)) {
+                    state.position.x = Math.max(Math.min(state.position.x, maxX), -maxX);
+                    state.position.y = Math.max(Math.min(state.position.y, maxY), -maxY);
+                }
                 
                 updateImageTransform();
             }
@@ -3812,6 +3632,7 @@ window.addEventListener('resize', () => {
         if (state.frameSize) {
             updateFrameSize();
             if (state.image) {
+                // Avoid incidental position jumps when locked on mobile
                 updateImageTransform();
             }
         }
@@ -3879,7 +3700,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize Update Room Previews button
     const updateRoomPreviewsBtn = document.getElementById('updateRoomPreviews');
-    if (updateRoomPreviewsBtn) {
+    const mobileUpdateRoomPreviewsBtn = document.getElementById('mobileUpdateRoomPreviews');
+    if (updateRoomPreviewsBtn || mobileUpdateRoomPreviewsBtn) {
         console.log('✅ Update Room Previews button found and initializing...');
         
         // Function to update button state based on conditions
@@ -3888,18 +3710,23 @@ document.addEventListener('DOMContentLoaded', function() {
             const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
             const isReady = hasImage && hasActiveRoomSlider;
             
-            if (isReady) {
-                updateRoomPreviewsBtn.style.opacity = '1';
-                updateRoomPreviewsBtn.style.cursor = 'pointer';
-                updateRoomPreviewsBtn.title = 'Click to update room preview images with current live preview';
-            } else {
-                updateRoomPreviewsBtn.style.opacity = '0.6';
-                updateRoomPreviewsBtn.style.cursor = 'not-allowed';
-                const reasons = [];
-                if (!hasImage) reasons.push('upload an image');
-                if (!hasActiveRoomSlider) reasons.push('select a frame size');
-                updateRoomPreviewsBtn.title = `Please ${reasons.join(' and ')} first`;
-            }
+            const targets = [updateRoomPreviewsBtn, mobileUpdateRoomPreviewsBtn].filter(Boolean);
+            targets.forEach(btn => {
+                if (isReady) {
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                    btn.title = 'Click to update room preview images with current live preview';
+                    btn.disabled = false;
+                } else {
+                    btn.style.opacity = '0.6';
+                    btn.style.cursor = 'not-allowed';
+                    const reasons = [];
+                    if (!hasImage) reasons.push('upload an image');
+                    if (!hasActiveRoomSlider) reasons.push('select a frame size');
+                    btn.title = `Please ${reasons.join(' and ')} first`;
+                    btn.disabled = true;
+                }
+            });
         }
         
         // Make the button state update function globally accessible
@@ -3909,18 +3736,18 @@ document.addEventListener('DOMContentLoaded', function() {
         updateButtonState();
         
         // Add click event listener
-        updateRoomPreviewsBtn.addEventListener('click', () => {
+        const handleClick = (btn) => {
             console.log('🎯 Update Room Previews button clicked!');
             
             if (state.image && state.roomSlider && state.roomSlider.isActive) {
                 console.log('✅ Conditions met, starting room preview update...');
                 
                 // Show loading feedback with better styling
-                const originalText = updateRoomPreviewsBtn.textContent;
-                updateRoomPreviewsBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Updating...';
-                updateRoomPreviewsBtn.disabled = true;
-                updateRoomPreviewsBtn.style.background = '#6c757d';
-                updateRoomPreviewsBtn.style.opacity = '1';
+                const originalText = btn.textContent;
+                btn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Updating...';
+                btn.disabled = true;
+                btn.style.background = '#6c757d';
+                btn.style.opacity = '1';
                 
                 console.log('Updating room previews with current live preview...');
                 
@@ -3929,27 +3756,27 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log('✅ Room previews updated successfully!');
                     // Reset button with success feedback
                     setTimeout(() => {
-                        updateRoomPreviewsBtn.innerHTML = '<i class="fas fa-check"></i> Updated!';
-                        updateRoomPreviewsBtn.style.background = '#28a745';
+                        btn.innerHTML = '<i class="fas fa-check"></i> Updated!';
+                        btn.style.background = '#28a745';
                         
                         // Reset to original state after showing success
                         setTimeout(() => {
-                            updateRoomPreviewsBtn.innerHTML = originalText;
-                            updateRoomPreviewsBtn.style.background = '#82C0CC';
-                            updateRoomPreviewsBtn.disabled = false;
+                            btn.innerHTML = originalText;
+                            btn.style.background = '#82C0CC';
+                            btn.disabled = false;
                             updateButtonState(); // Restore proper state
                         }, 1500);
                     }, 500);
                 }).catch((error) => {
                     console.error('❌ Error updating room previews:', error);
                     // Reset button with error feedback
-                    updateRoomPreviewsBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
-                    updateRoomPreviewsBtn.style.background = '#dc3545';
+                    btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                    btn.style.background = '#dc3545';
                     
                     setTimeout(() => {
-                        updateRoomPreviewsBtn.innerHTML = originalText;
-                        updateRoomPreviewsBtn.style.background = '#82C0CC';
-                        updateRoomPreviewsBtn.disabled = false;
+                        btn.innerHTML = originalText;
+                        btn.style.background = '#82C0CC';
+                        btn.disabled = false;
                         updateButtonState(); // Restore proper state
                     }, 2000);
                 });
@@ -3964,7 +3791,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Enhanced alert with more helpful information
                 alert(`Update Room Previews Button\n\nTo use this button, you need to:\n\n${reasons.map(r => `• ${r.charAt(0).toUpperCase() + r.slice(1)}`).join('\n')}\n\nOnce you've completed these steps, the button will capture your current live preview (with all your customizations) and apply it to all room preview images.`);
             }
-        });
+        };
+        if (updateRoomPreviewsBtn) updateRoomPreviewsBtn.addEventListener('click', () => handleClick(updateRoomPreviewsBtn));
+        if (mobileUpdateRoomPreviewsBtn) mobileUpdateRoomPreviewsBtn.addEventListener('click', () => handleClick(mobileUpdateRoomPreviewsBtn));
         
         console.log('✅ Update Room Previews button event listener attached');
     } else {
@@ -4395,146 +4224,7 @@ function syncMobileSlidersWithState() {
     window.captureFramePreview = captureFramePreview;
     window.overlayFrameOnRoomImages = overlayFrameOnRoomImages;
     
-    // Initialize Update Room Previews button with multiple attempts - only on customize page
-    function initUpdateRoomPreviewsButton() {
-        // Only try to initialize on customize page
-        if (!window.location.pathname.includes('customize.html')) {
-            return true; // Return true to prevent retry attempts on wrong pages
-        }
-        
-        console.log('🔍 Looking for Update Room Previews button...');
-        const updateRoomPreviewsBtn = document.getElementById('updateRoomPreviews');
-        
-        if (updateRoomPreviewsBtn) {
-            console.log('✅ Update Room Previews button found! Attaching event listener...');
-            
-            // Function to update button state based on conditions
-            function updateButtonState() {
-                const hasImage = !!(state.image);
-                const hasActiveRoomSlider = !!(state.roomSlider && state.roomSlider.isActive);
-                const isReady = hasImage && hasActiveRoomSlider;
-                
-                if (isReady) {
-                    updateRoomPreviewsBtn.style.opacity = '1';
-                    updateRoomPreviewsBtn.style.cursor = 'pointer';
-                    updateRoomPreviewsBtn.title = 'Click to update room preview images with current live preview';
-                } else {
-                    updateRoomPreviewsBtn.style.opacity = '0.6';
-                    updateRoomPreviewsBtn.style.cursor = 'not-allowed';
-                    const reasons = [];
-                    if (!hasImage) reasons.push('upload an image');
-                    if (!hasActiveRoomSlider) reasons.push('select a frame size');
-                    updateRoomPreviewsBtn.title = `Please ${reasons.join(' and ')} first`;
-                }
-            }
-            
-            // Make the button state update function globally accessible
-            window.updateRoomPreviewButtonState = updateButtonState;
-            
-            // Update button state initially
-            updateButtonState();
-            
-            // Remove any existing listeners to avoid duplicates
-            const newBtn = updateRoomPreviewsBtn.cloneNode(true);
-            updateRoomPreviewsBtn.parentNode.replaceChild(newBtn, updateRoomPreviewsBtn);
-            
-            // Add click event listener to the new button
-            newBtn.addEventListener('click', function(e) {
-                // Add alert to ensure we see the click
-                alert('Button clicked! Check console for details.');
-                console.log('🎯 Update Room Previews button clicked!');
-                console.log('Event details:', e);
-                
-                if (state.image && state.roomSlider && state.roomSlider.isActive) {
-                    console.log('✅ Conditions met, starting room preview update...');
-                    
-                    // Show loading feedback with better styling
-                    const originalText = newBtn.textContent;
-                    newBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Updating...';
-                    newBtn.disabled = true;
-                    newBtn.style.background = '#6c757d';
-                    newBtn.style.opacity = '1';
-                    
-                    console.log('📸 Capturing current live preview...');
-                    console.log('🏠 Applying to room preview images...');
-                    
-                    // Capture and apply the current live preview to all room images
-                    overlayFrameOnRoomImages().then(() => {
-                        console.log('✅ Room previews updated successfully!');
-                        // Reset button with success feedback
-                        setTimeout(() => {
-                            newBtn.innerHTML = '<i class="fas fa-check"></i> Updated!';
-                            newBtn.style.background = '#28a745';
-                            
-                            // Reset to original state after showing success
-                            setTimeout(() => {
-                                newBtn.innerHTML = originalText;
-                                newBtn.style.background = '#82C0CC';
-                                newBtn.disabled = false;
-                                updateButtonState(); // Restore proper state
-                            }, 1500);
-                        }, 500);
-                    }).catch((error) => {
-                        console.error('❌ Error updating room previews:', error);
-                        // Reset button with error feedback
-                        newBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
-                        newBtn.style.background = '#dc3545';
-                        
-                        setTimeout(() => {
-                            newBtn.innerHTML = originalText;
-                            newBtn.style.background = '#82C0CC';
-                            newBtn.disabled = false;
-                            updateButtonState(); // Restore proper state
-                        }, 2000);
-                    });
-                } else {
-                    // Show helpful message for when button can't be used
-                    const reasons = [];
-                    if (!state.image) reasons.push('upload an image');
-                    if (!state.roomSlider || !state.roomSlider.isActive) reasons.push('select a frame size');
-                    
-                    console.log(`⚠️ Button clicked but conditions not met. Missing: ${reasons.join(', ')}`);
-                    console.log('Current state:', {
-                        hasImage: !!state.image,
-                        hasRoomSlider: !!state.roomSlider,
-                        roomSliderActive: state.roomSlider?.isActive
-                    });
-                    
-                    // Enhanced alert with more helpful information
-                    alert(`Update Room Previews Button\n\nTo use this button, you need to:\n\n${reasons.map(r => `• ${r.charAt(0).toUpperCase() + r.slice(1)}`).join('\n')}\n\nOnce you've completed these steps, the button will capture your current live preview (with all your customizations) and apply it to all room preview images.`);
-                }
-            });
-            
-            console.log('✅ Update Room Previews button event listener attached successfully!');
-            return true;
-        } else {
-            console.log('❌ Update Room Previews button not found in DOM yet...');
-            return false;
-        }
-    }
-    
-    // Try to initialize immediately
-    if (!initUpdateRoomPreviewsButton()) {
-        // If button not found, try again after DOM is loaded
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                console.log('📄 DOM loaded, trying to initialize button again...');
-                if (!initUpdateRoomPreviewsButton()) {
-                    // Try one more time after a delay
-                    setTimeout(() => {
-                        console.log('⏰ Final attempt to initialize button...');
-                        initUpdateRoomPreviewsButton();
-                    }, 1000);
-                }
-            });
-        } else {
-            // DOM already loaded, try after a short delay
-            setTimeout(() => {
-                console.log('⏰ Delayed attempt to initialize button...');
-                initUpdateRoomPreviewsButton();
-            }, 500);
-        }
-    }
+    // Removed duplicate late-initialization block for Update Room Previews button
     
 })();
 

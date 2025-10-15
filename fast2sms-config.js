@@ -14,10 +14,10 @@
 
 const fast2smsConfig = {
     // Your Fast2SMS API Key (get from dashboard)
-    apiKey: 'YOUR_FAST2SMS_API_KEY',
+    apiKey: '9EgVuLYNlo0skRw46pq3Tvy7SZ5PcWJniz2rGCAmbeUfDBhxXMs80pKcFeEdNLRqkfv34TPa7tjgWiQx',
     
     // Your DLT registered template ID
-    templateId: 'YOUR_DLT_TEMPLATE_ID',
+    templateId: '200214',
     
     // Sender ID (registered with DLT)
     senderId: 'JBCREA',  // Update with your registered sender ID

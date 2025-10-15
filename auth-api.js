@@ -54,16 +54,7 @@ class AuthAPI {
 
             const data = await this.handleResponse(response);
             
-            // For demo purposes, show the OTP in console
-            if (data.demo && data.otp) {
-                console.log('🔓 Demo OTP:', data.otp);
-                
-                // Create mock SMS notification for demo
-                if (window.showNotification) {
-                    window.showNotification(`📱 SMS: Your JB Creations OTP is ${data.otp}. Valid for 10 minutes.`);
-                }
-            }
-
+            // Real OTP sent via Fast2SMS - no demo logic needed
             return data;
         } catch (error) {
             console.error('Send OTP error:', error);
@@ -216,36 +207,6 @@ class AuthAPI {
 
 // Create global instance
 window.authAPI = new AuthAPI();
-
-// Mock notification function for demo
-window.showNotification = function(message) {
-    // Create temporary notification div
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #28a745;
-        color: white;
-        padding: 15px 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        z-index: 10000;
-        font-family: Arial, sans-serif;
-        max-width: 300px;
-        word-wrap: break-word;
-    `;
-    notification.textContent = message;
-    
-    document.body.appendChild(notification);
-    
-    // Remove after 5 seconds
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.parentNode.removeChild(notification);
-        }
-    }, 5000);
-};
 
 console.log('🔐 JB Creations Auth API Client loaded');
 console.log('💡 Use window.authAPI to interact with the server');

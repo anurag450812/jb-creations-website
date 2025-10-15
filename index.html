@@ -2459,17 +2459,37 @@
         </div>
     </div>
 
-    <!-- Firebase CDN -->
+    <!-- Firebase CDN (Backup) -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     
-    <!-- JB Creations Firebase Backend -->
-    <script src="firebase-client-new.js"></script>
-    <script src="api-client.js"></script>
-    <script src="otp-auth-firebase.js"></script>
-    <script src="auth.js"></script>
-    <script src="script.js"></script>
+    <!-- Fast2SMS OTP System (Primary) -->
+    <script src="fast2sms-client.js?v=4.0"></script>
+    
+    <!-- JB Creations Backend Scripts -->
+    <script src="firebase-client-new.js?v=4.0"></script>
+    <script src="api-client.js?v=4.0"></script>
+    <script src="otp-auth-realsms.js?v=4.0"></script>
+    <script src="auth.js?v=4.0"></script>
+    <script src="script.js?v=4.0"></script>
     <script>
+        // Initialize Fast2SMS OTP Client for homepage
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                console.log('🔧 Initializing Fast2SMS OTP Client for homepage...');
+                window.otpClient = new Fast2SMSOTPClient('http://localhost:3001');
+                console.log('✅ Fast2SMS OTP Client initialized successfully');
+                
+                // Update OTP Auth with the client
+                if (window.otpAuth) {
+                    window.otpAuth.otpClient = window.otpClient;
+                    console.log('✅ OTP Auth updated with Fast2SMS client');
+                }
+            } catch (error) {
+                console.error('❌ Failed to initialize Fast2SMS client:', error);
+            }
+        });
+        
         function setProfileDropdownState(isOpen) {
             const dropdownContainer = document.getElementById('profileDropdown');
             const dropdownMenu = document.getElementById('profileDropdownMenu');

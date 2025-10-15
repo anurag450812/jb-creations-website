@@ -245,6 +245,25 @@
                 padding: 6px 9px;
             }
         }
+
+        /* Mobile-only Update Room Previews button styling */
+        #mobileUpdateRoomPreviews {
+            display: none;
+            width: 100%;
+            margin: 8px 0 12px 0;
+            padding: 10px 12px;
+            background: #82C0CC;
+            color: #0b3a45;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        }
+        @media (max-width: 768px) {
+            /* Show mobile button above room images; hide desktop header button on mobile */
+            #mobileUpdateRoomPreviews { display: block; }
+            #updateRoomPreviews { display: none !important; }
+        }
     </style>
 </head>
 <body class="customize-page">
@@ -646,6 +665,10 @@
                         <h2>Room Preview</h2>
                     </div>
                 </div>
+                <!-- Mobile-only: manual update trigger placed above room images -->
+                <button id="mobileUpdateRoomPreviews" onclick="updateRoomPreviewsClick()">
+                    <i class="fas fa-sync-alt"></i> Update Room Previews
+                </button>
                 <div class="room-preview-container">
                     <!-- Default room preview image (shown when no frame size is selected) -->
                     <img src="Room-previewbackground.png" alt="Room Preview" class="room-preview-image default-preview" id="defaultRoomPreview">
@@ -772,14 +795,31 @@
         </template>
     </div>
 
-    <!-- Firebase Backend Integration -->
+    <!-- Firebase Backend Integration (Backup) -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-    <script type="module" src="firebase-client-new.js?v=3"></script>
-    <script src="otp-auth-firebase.js"></script>
-    <script src="auth.js"></script>
-    <script src="script.js"></script>
+    
+    <!-- Fast2SMS OTP System (Primary) -->
+    <script src="fast2sms-client.js?v=4.0"></script>
+    
+    <!-- Main Scripts -->
+    <script type="module" src="firebase-client-new.js?v=4.0"></script>
+    <script src="otp-auth-realsms.js?v=4.0"></script>
+    <script src="auth.js?v=4.0"></script>
+    <script src="script.js?v=4.0"></script>
     <script>
+        // Initialize Fast2SMS OTP Client
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                window.otpClient = new Fast2SMSOTPClient('http://localhost:3001');
+                if (window.otpAuth) {
+                    window.otpAuth.otpClient = window.otpClient;
+                }
+            } catch (error) {
+                console.error('❌ Failed to initialize Fast2SMS client:', error);
+            }
+        });
+        
         function setProfileDropdownState(isOpen) {
             const dropdownContainer = document.getElementById('profileDropdown');
             const dropdownMenu = document.getElementById('profileDropdownMenu');

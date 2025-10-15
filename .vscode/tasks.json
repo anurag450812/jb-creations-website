@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Serve static site on LAN (http-server)",
+			"type": "shell",
+			"command": "npx -y http-server . -p 5500 -a 0.0.0.0 --cors -c-1",
+			"args": [],
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}

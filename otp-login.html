@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Authentication - JB Creations</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -148,6 +151,13 @@
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
             color: white;
             border: 2px solid rgba(22, 105, 122, 0.2);
+        }
+
+        .welcome-message.login-mode {
+            background: linear-gradient(135deg, #ff8f00 0%, var(--highlight-color) 100%);
+            color: white;
+            border: 2px solid rgba(255, 166, 43, 0.3);
+            animation: slideIn 0.5s ease-out;
         }
 
         .welcome-message i {
@@ -750,14 +760,34 @@
         </div>
     </div>
 
-    <!-- Firebase CDN -->
+    <!-- Firebase CDN (Backup) -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     
-    <!-- Scripts -->
-    <script src="firebase-client-new.js"></script>
-    <script src="otp-auth-firebase.js"></script>
+    <!-- Fast2SMS OTP System (Primary) -->
+    <script src="fast2sms-client.js?v=3.0"></script>
+    
+    <!-- Scripts (OTP Auth with Fast2SMS Integration) -->
+    <script src="firebase-client-new.js?v=3.0"></script>
+    <script src="otp-auth-realsms.js?v=3.0"></script>
     <script>
+        // Wait for DOM to be ready, then initialize Fast2SMS OTP Client
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                console.log('🔧 Initializing Fast2SMS OTP Client...');
+                window.otpClient = new Fast2SMSOTPClient('http://localhost:3001');
+                console.log('✅ Fast2SMS OTP Client initialized successfully');
+                
+                // Reinitialize OTP Auth with the client
+                if (window.otpAuth) {
+                    window.otpAuth.otpClient = window.otpClient;
+                    console.log('✅ OTP Auth updated with Fast2SMS client');
+                }
+            } catch (error) {
+                console.error('❌ Failed to initialize Fast2SMS client:', error);
+            }
+        });
+        
         // Enhanced OTP Authentication with Tabbed Interface
         class TabbedOTPAuth {
             constructor() {
@@ -767,6 +797,7 @@
                 this.signupTimeLeft = 0;
                 this.signinTimeLeft = 0;
                 this.tempUserData = null; // Store user data during signup flow
+                this.otpClient = otpClient; // Use Fast2SMS client
                 this.init();
             }
 
@@ -809,10 +840,20 @@
                 const signupSendBtn = document.getElementById('signupSendOtpBtn');
                 console.log('signupSendOtpBtn found:', !!signupSendBtn);
                 if (signupSendBtn) {
-                    signupSendBtn.addEventListener('click', (e) => {
+                    let isSignupSending = false; // Debounce flag
+                    signupSendBtn.addEventListener('click', async (e) => {
                         e.preventDefault();
+                        if (isSignupSending) {
+                            console.log('⏳ Sign Up OTP already being sent, ignoring duplicate click');
+                            return;
+                        }
+                        isSignupSending = true;
                         console.log('Send OTP button clicked!');
-                        this.sendOTP('signup');
+                        try {
+                            await this.sendOTP('signup');
+                        } finally {
+                            setTimeout(() => { isSignupSending = false; }, 2000); // Reset after 2 seconds
+                        }
                     });
                 }
                 
@@ -825,10 +866,20 @@
                 const signinSendBtn = document.getElementById('signinSendOtpBtn');
                 console.log('signinSendOtpBtn found:', !!signinSendBtn);
                 if (signinSendBtn) {
-                    signinSendBtn.addEventListener('click', (e) => {
+                    let isSigninSending = false; // Debounce flag
+                    signinSendBtn.addEventListener('click', async (e) => {
                         e.preventDefault();
+                        if (isSigninSending) {
+                            console.log('⏳ Sign In OTP already being sent, ignoring duplicate click');
+                            return;
+                        }
+                        isSigninSending = true;
                         console.log('Sign In Send OTP button clicked!');
-                        this.sendOTP('signin');
+                        try {
+                            await this.sendOTP('signin');
+                        } finally {
+                            setTimeout(() => { isSigninSending = false; }, 2000); // Reset after 2 seconds
+                        }
                     });
                 }
                 
@@ -1013,8 +1064,28 @@
                 try {
                     let result;
                     if (type === 'signup') {
-                        // For signup, pass user data to be saved immediately
+                        // For signup, try to send OTP for registration
                         result = await window.otpAuth.sendOTP(phone, this.tempUserData);
+                        
+                        // If user already exists, switch to login mode automatically
+                        if (!result.success && result.error && result.error.includes('User already exists')) {
+                            console.log('👤 User exists during signup, switching to login mode...');
+                            
+                            // Show message that we're logging them in instead
+                            const welcomeMsg = document.getElementById('signupWelcomeMessage');
+                            welcomeMsg.innerHTML = `
+                                <i class="fas fa-sign-in-alt"></i>
+                                Welcome back! We found your account. Sending login OTP...
+                            `;
+                            welcomeMsg.className = 'welcome-message login-mode';
+                            
+                            // Send OTP for login instead (without user data)
+                            result = await window.otpAuth.sendOTP(phone);
+                            
+                            if (result.success) {
+                                console.log('✅ Successfully switched to login mode for existing user');
+                            }
+                        }
                     } else {
                         // For signin, just send OTP
                         result = await window.otpAuth.sendOTP(phone);
@@ -1024,7 +1095,6 @@
                         this.showStep(type, 'otp');
                         this.startTimer(type);
                         this.updateStepStatus(type, 2, 'active');
-                        console.log(`Demo OTP for ${type}: ${result.otp}`);
                     } else {
                         throw new Error(result.message);
                     }
@@ -1255,7 +1325,7 @@
                         btn.style.display = 'none';
                         btn.disabled = false;
                         btn.innerHTML = '<i class="fas fa-redo"></i> Resend OTP';
-                        console.log(`Demo OTP for ${type}: ${result.otp}`);
+
                     }
                 } catch (error) {
                     this.showError('Failed to resend OTP. Please try again.');
@@ -1434,9 +1504,13 @@
                 }
                 console.log('OTP Auth service available');
 
-                // Initialize the tabbed auth system
-                window.tabbedOTPAuth = new TabbedOTPAuth();
-                console.log('Tabbed OTP Auth initialized');
+                // Initialize the tabbed auth system only once
+                if (!window.tabbedOTPAuth) {
+                    window.tabbedOTPAuth = new TabbedOTPAuth();
+                    console.log('Tabbed OTP Auth initialized');
+                } else {
+                    console.log('Tabbed OTP Auth already exists, skipping initialization');
+                }
             }
 
             // Check if Firebase is already ready

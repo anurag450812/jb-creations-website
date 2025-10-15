@@ -1,7 +1,16 @@
 /*
  * Enhanced Authentication JavaScript for JB Creations
- * Handles both traditional auth and new OTP authentication system
+ * Handles both traditional auth and new OTP authentication system with Fast2SMS
  */
+
+// Initialize Fast2SMS OTP Client
+let otpClient;
+if (typeof Fast2SMSOTPClient !== 'undefined') {
+    otpClient = new Fast2SMSOTPClient('http://localhost:3001');
+    console.log('🔐 Fast2SMS OTP Client initialized');
+} else {
+    console.warn('⚠️ Fast2SMS OTP Client not available, check if fast2sms-client.js is loaded');
+}
 
 // Enhanced Authentication utilities for OTP system
 const otpAuthUtils = {
@@ -993,9 +1002,19 @@ async function firebaseVerifyOtp(otp) {
     });
 }
 
-// Legacy functions for backward compatibility (now use Demo OTP)
+// Legacy functions for backward compatibility (now use Fast2SMS)
 async function simulateOtpSend(phone) {
-    return await sendDemoOTP(phone);
+    if (otpClient) {
+        try {
+            const result = await otpClient.sendOTP(phone, 'login');
+            return result.success;
+        } catch (error) {
+            console.error('Error sending OTP:', error);
+            return false;
+        }
+    }
+    console.warn('Fast2SMS OTP client not available');
+    return false;
 }
 
 async function simulateOtpVerify(otp) {
@@ -1004,7 +1023,18 @@ async function simulateOtpVerify(otp) {
     if (!phoneNumber) {
         throw new Error('No phone number found for OTP verification');
     }
-    return await verifyDemoOTP(phoneNumber, otp);
+    
+    if (otpClient) {
+        try {
+            const result = await otpClient.verifyOTP(phoneNumber, otp);
+            return result.success;
+        } catch (error) {
+            console.error('Error verifying OTP:', error);
+            return false;
+        }
+    }
+    console.warn('Fast2SMS OTP client not available');
+    return false;
 }
 
 // UI Helper functions
