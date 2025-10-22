@@ -1,18 +1,20 @@
 /**
  * Netlify Function: Send OTP via Fast2SMS
- * Production-ready serverless OTP sender
+ * Production-ready serverless OTP sender with JWT-based OTP storage
  */
 
 const axios = require('axios');
-
-// In-memory OTP store (use Firebase in production for persistence)
-const otpStore = new Map();
+const jwt = require('jsonwebtoken');
 
 // Configuration
 const FAST2SMS_API_KEY = process.env.FAST2SMS_API_KEY;
 const FAST2SMS_TEMPLATE_ID = process.env.FAST2SMS_TEMPLATE_ID;
 const FAST2SMS_SENDER_ID = process.env.FAST2SMS_SENDER_ID || 'JBCREA';
+const JWT_SECRET = process.env.JWT_SECRET || 'jb-creations-secret-key-change-in-production';
 const OTP_EXPIRY_MINUTES = 5;
+
+// In-memory store for rate limiting only
+const rateLimitStore = new Map();
 
 /**
  * Generate random OTP
@@ -101,7 +103,7 @@ exports.handler = async (event, context) => {
         const formattedPhone = formatPhoneNumber(phoneNumber);
 
         // Check rate limiting (prevent spam)
-        const lastSent = otpStore.get(`last_${formattedPhone}`);
+        const lastSent = rateLimitStore.get(`last_${formattedPhone}`);
         if (lastSent && Date.now() - lastSent < 60000) {
             return {
                 statusCode: 429,
@@ -118,13 +120,23 @@ exports.handler = async (event, context) => {
         const otp = generateOTP();
         const expiresAt = Date.now() + (OTP_EXPIRY_MINUTES * 60 * 1000);
 
+        // Create JWT token containing OTP info (for verification)
+        const otpToken = jwt.sign(
+            { 
+                phone: formattedPhone,
+                otp: otp,
+                expiresAt: expiresAt
+            },
+            JWT_SECRET,
+            { expiresIn: OTP_EXPIRY_MINUTES * 60 }
+        );
+
         // Check if Fast2SMS is configured
         if (!FAST2SMS_API_KEY || FAST2SMS_API_KEY === 'YOUR_FAST2SMS_API_KEY') {
             console.warn('⚠️ Fast2SMS not configured. Using demo mode.');
             
-            // Demo mode - store OTP but don't send SMS
-            otpStore.set(formattedPhone, { otp, expiresAt });
-            otpStore.set(`last_${formattedPhone}`, Date.now());
+            // Demo mode - return OTP token
+            rateLimitStore.set(`last_${formattedPhone}`, Date.now());
             
             return {
                 statusCode: 200,
@@ -133,6 +145,7 @@ exports.handler = async (event, context) => {
                     success: true,
                     message: 'OTP sent successfully!',
                     expiresIn: OTP_EXPIRY_MINUTES * 60,
+                    otpToken: otpToken,
                     demo_mode: true,
                     demo_otp: otp // Remove this in production!
                 })
@@ -142,9 +155,8 @@ exports.handler = async (event, context) => {
         // Send OTP via Fast2SMS
         await sendOTPViaSMS(formattedPhone, otp);
 
-        // Store OTP in memory (consider using Firebase Firestore for persistence)
-        otpStore.set(formattedPhone, { otp, expiresAt, attempts: 0 });
-        otpStore.set(`last_${formattedPhone}`, Date.now());
+        // Update rate limit tracker
+        rateLimitStore.set(`last_${formattedPhone}`, Date.now());
 
         return {
             statusCode: 200,
@@ -152,7 +164,8 @@ exports.handler = async (event, context) => {
             body: JSON.stringify({
                 success: true,
                 message: 'OTP sent successfully to ' + formattedPhone,
-                expiresIn: OTP_EXPIRY_MINUTES * 60
+                expiresIn: OTP_EXPIRY_MINUTES * 60,
+                otpToken: otpToken // Token to verify OTP later
             })
         };
 

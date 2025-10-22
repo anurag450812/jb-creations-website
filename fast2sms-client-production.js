@@ -93,6 +93,14 @@ class Fast2SMSOTPClient {
                 this.otpExpiresAt = Date.now() + (data.expiresIn * 1000);
             }
 
+            // Store OTP token for verification
+            if (data.otpToken) {
+                this.otpToken = data.otpToken;
+                // Also store in sessionStorage for persistence
+                sessionStorage.setItem('jb_otp_token', data.otpToken);
+                sessionStorage.setItem('jb_otp_phone', phoneNumber);
+            }
+
             console.log('✅ OTP sent successfully:', data.message);
 
             // In development/demo mode, show OTP if provided
@@ -109,6 +117,7 @@ class Fast2SMSOTPClient {
                 message: data.message,
                 phone: phoneNumber,
                 expiresIn: data.expiresIn,
+                otpToken: data.otpToken,
                 demo_otp: data.demo_otp // Only in demo mode
             };
 
@@ -138,6 +147,13 @@ class Fast2SMSOTPClient {
 
             console.log('🔍 Verifying OTP for:', phoneNumber);
 
+            // Get OTP token from instance or sessionStorage
+            const otpToken = this.otpToken || sessionStorage.getItem('jb_otp_token');
+            
+            if (!otpToken) {
+                throw new Error('OTP session expired. Please request a new OTP.');
+            }
+
             const response = await fetch(`${this.apiBaseURL}/verify-otp`, {
                 method: 'POST',
                 headers: {
@@ -145,7 +161,8 @@ class Fast2SMSOTPClient {
                 },
                 body: JSON.stringify({
                     phoneNumber: phoneNumber,
-                    otp: otp
+                    otp: otp,
+                    otpToken: otpToken
                 })
             });
 
@@ -156,6 +173,11 @@ class Fast2SMSOTPClient {
             }
 
             console.log('✅ OTP verified successfully');
+
+            // Clear OTP token after successful verification
+            this.otpToken = null;
+            sessionStorage.removeItem('jb_otp_token');
+            sessionStorage.removeItem('jb_otp_phone');
 
             // Store user data and token in localStorage
             if (data.token) {

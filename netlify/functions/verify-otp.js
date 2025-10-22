@@ -1,19 +1,14 @@
 /**
  * Netlify Function: Verify OTP
- * Production-ready serverless OTP verification
+ * Production-ready serverless OTP verification with JWT tokens
  */
 
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const jwt = require('jsonwebtoken');
 
-// In-memory OTP store (shared with send-otp function)
-// In production, use Firebase Firestore for persistence
-const otpStore = new Map();
-
 // Configuration
 const JWT_SECRET = process.env.JWT_SECRET || 'jb-creations-secret-key-change-in-production';
-const MAX_ATTEMPTS = 3;
 
 // Initialize Firebase Admin (if not already initialized)
 let db;
@@ -125,7 +120,7 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        const { phoneNumber, otp } = JSON.parse(event.body);
+        const { phoneNumber, otp, otpToken } = JSON.parse(event.body);
 
         // Validate input
         if (!phoneNumber || !otp) {
@@ -139,25 +134,24 @@ exports.handler = async (event, context) => {
             };
         }
 
-        const formattedPhone = formatPhoneNumber(phoneNumber);
-
-        // Get stored OTP
-        const storedData = otpStore.get(formattedPhone);
-
-        if (!storedData) {
+        if (!otpToken) {
             return {
                 statusCode: 400,
                 headers,
                 body: JSON.stringify({ 
                     success: false, 
-                    message: 'OTP not found or expired. Please request a new OTP.' 
+                    message: 'OTP token is required. Please request a new OTP.' 
                 })
             };
         }
 
-        // Check if OTP is expired
-        if (Date.now() > storedData.expiresAt) {
-            otpStore.delete(formattedPhone);
+        const formattedPhone = formatPhoneNumber(phoneNumber);
+
+        // Verify JWT token and extract OTP data
+        let otpData;
+        try {
+            otpData = jwt.verify(otpToken, JWT_SECRET);
+        } catch (error) {
             return {
                 statusCode: 400,
                 headers,
@@ -168,38 +162,43 @@ exports.handler = async (event, context) => {
             };
         }
 
-        // Check attempts
-        if (storedData.attempts >= MAX_ATTEMPTS) {
-            otpStore.delete(formattedPhone);
+        // Verify phone number matches
+        if (otpData.phone !== formattedPhone) {
             return {
                 statusCode: 400,
                 headers,
                 body: JSON.stringify({ 
                     success: false, 
-                    message: 'Maximum verification attempts exceeded. Please request a new OTP.' 
+                    message: 'Invalid OTP verification request.' 
                 })
             };
         }
 
-        // Verify OTP
-        if (otp !== storedData.otp) {
-            storedData.attempts = (storedData.attempts || 0) + 1;
-            otpStore.set(formattedPhone, storedData);
-            
+        // Check if OTP is expired (double check)
+        if (Date.now() > otpData.expiresAt) {
             return {
                 statusCode: 400,
                 headers,
                 body: JSON.stringify({ 
                     success: false, 
-                    message: 'Invalid OTP. Please try again.',
-                    attemptsRemaining: MAX_ATTEMPTS - storedData.attempts
+                    message: 'OTP has expired. Please request a new OTP.' 
                 })
             };
         }
 
-        // OTP verified successfully - remove from store
-        otpStore.delete(formattedPhone);
+        // Verify OTP matches
+        if (otp !== otpData.otp) {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({ 
+                    success: false, 
+                    message: 'Invalid OTP. Please try again.'
+                })
+            };
+        }
 
+        // OTP verified successfully!
         // Get or create user
         const user = await getOrCreateUser(formattedPhone);
 
