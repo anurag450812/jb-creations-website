@@ -1,12 +1,15 @@
 [build]
   functions = "netlify/functions"
-  # No build command needed for static site
   publish = "."
-  command = "echo 'No build required - static site'"
+  command = "cd netlify/functions && npm install && cd ../.."
 
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["cloudinary", "firebase-admin"]
+  
+# Install function dependencies automatically
+[[plugins]]
+  package = "@netlify/plugin-functions-install-core"
 
 [[redirects]]
   from = "/api/*"
