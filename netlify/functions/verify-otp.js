@@ -3,25 +3,39 @@
  * Production-ready serverless OTP verification with JWT tokens
  */
 
-const { initializeApp, cert } = require('firebase-admin/app');
-const { getFirestore } = require('firebase-admin/firestore');
 const jwt = require('jsonwebtoken');
 
 // Configuration
 const JWT_SECRET = process.env.JWT_SECRET || 'jb-creations-secret-key-change-in-production';
 
-// Initialize Firebase Admin (if not already initialized)
+// Firebase Admin - Optional (will be initialized if credentials provided)
 let db;
-try {
-    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-        initializeApp({
-            credential: cert(serviceAccount)
-        });
-        db = getFirestore();
+let admin;
+
+async function initializeFirebase() {
+    if (db) return db; // Already initialized
+    
+    if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
+        console.log('Firebase not configured - using fallback user creation');
+        return null;
     }
-} catch (error) {
-    console.log('Firebase Admin not initialized:', error.message);
+    
+    try {
+        admin = require('firebase-admin');
+        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        
+        if (!admin.apps.length) {
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount)
+            });
+        }
+        
+        db = admin.firestore();
+        return db;
+    } catch (error) {
+        console.error('Firebase initialization error:', error.message);
+        return null;
+    }
 }
 
 /**
@@ -49,11 +63,15 @@ function generateUserId() {
 }
 
 /**
- * Get or create user in Firebase
+ * Get or create user (with or without Firebase)
  */
 async function getOrCreateUser(phone) {
-    if (!db) {
+    // Try to initialize Firebase
+    const firestore = await initializeFirebase();
+    
+    if (!firestore) {
         // Fallback if Firebase is not configured
+        console.log('Creating user without Firebase (fallback mode)');
         return {
             id: generateUserId(),
             phone: phone,
@@ -63,7 +81,7 @@ async function getOrCreateUser(phone) {
     }
 
     try {
-        const usersRef = db.collection('users');
+        const usersRef = firestore.collection('users');
         const snapshot = await usersRef.where('phone', '==', phone).limit(1).get();
 
         if (!snapshot.empty) {
