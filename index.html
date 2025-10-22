@@ -11,6 +11,7 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <link rel="stylesheet" href="razorpay-styles.css">
     <style>
+        /* Video Background Update - v2.0 - Lighter overlays for better visibility */
         /* Base Mobile Optimizations */
         html {
             scroll-behavior: smooth;
@@ -178,10 +179,20 @@
             }
         }
 
+        /* Ensure all sub-sections are visible on mobile */
+        @media (max-width: 768px) {
+            .landing-content,
+            .landing-content > * {
+                overflow: visible !important;
+                contain: none !important;
+            }
+        }
+
         /* Glass Hero Image */
         .hero-section {
             position: relative;
-            background: url('room-preview-images/13X19 LANDSCAPE/1.jpg') center/cover;
+            /* Use blue background instead of black so initial paint is blue */
+            background: linear-gradient(135deg, #82C0CC 0%, #489FB5 100%);
             border-radius: 20px;
             overflow: hidden;
             padding: 4rem 2rem; /* Desktop default */
@@ -193,10 +204,109 @@
             transition: transform 0.3s ease;
         }
 
+        /* Video Background Styling */
+        .hero-video-background {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: 50%;
+            height: 50%;
+            transform: translate(-50%, -50%) scale(2);
+            z-index: 1;
+            object-fit: cover;
+            will-change: transform;
+            /* Start hidden; we'll reveal after the video is ready */
+            opacity: 0;
+            transition: opacity 600ms ease-in !important;
+        }
+
+        /* We no longer use the desktop keyframe animation to avoid showing before ready */
+        @keyframes fadeInVideoDesktop { }
+
+        /* Mobile video loading animation */
+        @media (max-width: 768px) {
+            video {
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: crisp-edges;
+            }
+        }
+
+        /* Mobile video - proper sizing */
+        @media (max-width: 768px) {
+            .hero-video-background {
+                width: 100%;
+                height: 100%;
+                min-width: 100%;
+                min-height: 100%;
+                transform: translate(-50%, -50%) scale(1);
+                /* Keep hidden on mobile as well until ready */
+                opacity: 0;
+                animation: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-video-background {
+                width: 100%;
+                height: 100%;
+                min-width: 100%;
+                min-height: 100%;
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0;
+                animation: none;
+            }
+
+        /* Reveal the hero video only when it's ready, with a smooth fade */
+        .hero-section.video-ready .hero-video-background {
+            opacity: 1 !important;
+            transition: opacity 600ms ease-in;
+        }
+        }
+
+        /* Vignette Effect Overlay - Blue Theme */
+        .hero-vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 2;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(130, 192, 204, 0.2) 25%, rgba(130, 192, 204, 0.5) 50%, rgba(22, 105, 122, 0.7) 75%, rgba(22, 105, 122, 0.9) 100%);
+            border-radius: inherit;
+            pointer-events: none;
+            /* Keep vignette hidden until video is ready so initial paint is just blue */
+            opacity: 0;
+            transition: opacity 600ms ease-in !important;
+        }
+
+        /* Reveal elements when the video is ready */
+        .hero-section.video-ready .hero-video-background { opacity: 1 !important; }
+        .hero-section.video-ready .hero-vignette { opacity: 1 !important; }
+
+        /* Mobile vignette - lighter blue for better video visibility */
+        @media (max-width: 768px) {
+            .hero-vignette {
+                background: radial-gradient(ellipse at center, transparent 0%, rgba(130, 192, 204, 0.15) 25%, rgba(130, 192, 204, 0.35) 50%, rgba(22, 105, 122, 0.55) 75%, rgba(22, 105, 122, 0.75) 100%);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-vignette {
+                background: radial-gradient(ellipse at center, transparent 0%, rgba(130, 192, 204, 0.18) 25%, rgba(130, 192, 204, 0.4) 50%, rgba(22, 105, 122, 0.6) 75%, rgba(22, 105, 122, 0.8) 100%);
+            }
+        }
+
         /* Mobile responsive hero section */
         @media (max-width: 768px) {
             .hero-section {
                 padding: 2.5rem 1.5rem;
+                border-radius: 15px;
+                overflow: hidden;
+            }
+            
+            .hero-video-background {
                 border-radius: 15px;
             }
         }
@@ -204,6 +314,11 @@
         @media (max-width: 480px) {
             .hero-section {
                 padding: 2rem 1rem;
+                border-radius: 15px;
+                overflow: hidden;
+            }
+            
+            .hero-video-background {
                 border-radius: 15px;
             }
         }
@@ -219,26 +334,27 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(130, 192, 204, 0.4);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            z-index: 1;
+            background: rgba(130, 192, 204, 0.08);
+            backdrop-filter: blur(0px);
+            -webkit-backdrop-filter: blur(0px);
+            border-radius: inherit;
+            z-index: 3;
         }
 
-        /* Maximum blur for mobile hero section */
+        /* Lighter blue overlay for mobile */
         @media (max-width: 768px) {
             .hero-section::before {
-                backdrop-filter: blur(200px) saturate(250%);
-                -webkit-backdrop-filter: blur(200px) saturate(250%);
-                background: rgba(130, 192, 204, 0.85);
+                backdrop-filter: blur(0px);
+                -webkit-backdrop-filter: blur(0px);
+                background: rgba(130, 192, 204, 0.12);
             }
         }
 
         @media (max-width: 480px) {
             .hero-section::before {
-                backdrop-filter: blur(250px) saturate(300%);
-                -webkit-backdrop-filter: blur(250px) saturate(300%);
-                background: rgba(130, 192, 204, 0.9);
+                backdrop-filter: blur(0px);
+                -webkit-backdrop-filter: blur(0px);
+                background: rgba(130, 192, 204, 0.15);
             }
         }
 
@@ -249,33 +365,36 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(130, 192, 204, 0.6) 0%, rgba(130, 192, 204, 0.3) 100%);
-            z-index: 2;
+            background: transparent;
+            border-radius: inherit;
+            z-index: 4;
         }
 
-        /* Much darker overlay for mobile to improve text readability */
+        /* Very light blue gradient overlay for mobile */
         @media (max-width: 768px) {
             .hero-section::after {
-                background: linear-gradient(135deg, rgba(130, 192, 204, 0.92) 0%, rgba(130, 192, 204, 0.75) 100%);
+                background: linear-gradient(135deg, rgba(130, 192, 204, 0.08) 0%, rgba(130, 192, 204, 0.04) 100%);
             }
         }
 
         @media (max-width: 480px) {
             .hero-section::after {
-                background: linear-gradient(135deg, rgba(130, 192, 204, 0.95) 0%, rgba(130, 192, 204, 0.85) 100%);
+                background: linear-gradient(135deg, rgba(130, 192, 204, 0.12) 0%, rgba(130, 192, 204, 0.08) 100%);
             }
         }
 
-        /* Rain on Glass Effect */
+        /* Rain on Glass Effect - Hidden on Desktop */
         .rain-glass {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 2;
+            border-radius: inherit;
+            z-index: 5;
             pointer-events: none;
             overflow: hidden;
+            display: none; /* Hidden on desktop */
         }
 
         .raindrop {
@@ -491,21 +610,21 @@
 
         .hero-content {
             position: relative;
-            z-index: 3;
+            z-index: 6;
         }
 
         .hero-title {
             font-size: 3.5rem;
             font-weight: 700;
             margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 0, 0, 0.4);
         }
 
         .hero-subtitle {
             font-size: 1.5rem;
             margin-bottom: 1.5rem;
             opacity: 0.95;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 0, 0, 0.4);
         }
 
         .hero-description {
@@ -516,7 +635,7 @@
             margin-right: auto;
             line-height: 1.7;
             opacity: 0.9;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 0, 0, 0.3);
         }
 
         /* Default: Show full descriptions, hide mobile versions */
@@ -561,10 +680,11 @@
             color: white;
         }
 
-        /* CTA Sub-section with glass effect */
+        /* CTA Sub-section with video background */
         .cta-sub-section {
             position: relative;
-            background: url('room-preview-images/13X19 PORTRAIT/2.jpg') center/cover;
+            /* Blue background first paint for CTA */
+            background: linear-gradient(135deg, #82C0CC 0%, #489FB5 100%);
             border-radius: 25px;
             overflow: hidden;
             color: white;
@@ -572,8 +692,100 @@
             transition: transform 0.3s ease;
         }
 
+        /* Restore gradient background on mobile for CTA */
+        @media (max-width: 768px) {
+            .cta-sub-section {
+                background: linear-gradient(135deg, #82C0CC 0%, #489FB5 50%, #82C0CC 100%) !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                display: block !important;
+                min-height: 220px !important; /* slightly smaller but ensures space */
+                height: auto !important;
+                transform: none !important;
+                will-change: auto !important;
+                animation: none !important;
+                transition: none !important;
+                contain: none !important;
+                position: relative !important;
+                overflow: hidden !important; /* keep rounded corners, avoid paint leaks */
+                content-visibility: visible; /* force paint */
+            }
+            
+            .cta-sub-section::after {
+                display: none !important; /* avoid extra stacking context */
+            }
+            
+            .cta-sub-section .rain-glass {
+                display: none !important;
+            }
+        }
+
+        /* Video background for CTA section */
+        .cta-video-background {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(2);
+            min-width: 100%;
+            min-height: 100%;
+            width: 50%;
+            height: 50%;
+            z-index: 1;
+            object-fit: cover;
+            /* Hide until ready; avoid autoplay animation */
+            opacity: 0;
+            transition: opacity 600ms ease-in !important;
+        }
+
+        @keyframes fadeInVideoCTADesktop { }
+
+        /* Hide CTA video on mobile */
+        @media (max-width: 768px) {
+            .cta-video-background {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cta-video-background {
+                display: none;
+            }
+        }
+
         .cta-sub-section:hover {
             transform: translateY(-5px);
+        }
+
+        /* Vignette for CTA section - Blue Theme */
+        .cta-vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 2;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(130, 192, 204, 0.15) 30%, rgba(130, 192, 204, 0.35) 55%, rgba(22, 105, 122, 0.55) 75%, rgba(22, 105, 122, 0.75) 100%);
+            pointer-events: none;
+            /* Keep vignette hidden until the video is ready */
+            opacity: 0;
+            transition: opacity 600ms ease-in !important;
+        }
+
+        /* Reveal CTA video and vignette when ready */
+        .cta-sub-section.video-ready .cta-video-background { opacity: 1 !important; }
+        .cta-sub-section.video-ready .cta-vignette { opacity: 1 !important; }
+
+        /* Hide vignette on mobile for CTA section */
+        @media (max-width: 768px) {
+            .cta-vignette {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cta-vignette {
+                display: none;
+            }
         }
 
         .cta-sub-section::before {
@@ -583,10 +795,18 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(130, 192, 204, 0.4);
+            background: rgba(130, 192, 204, 0.08);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            z-index: 1;
+            z-index: 3;
+        }
+
+        /* Hide overlays on mobile for instant visibility */
+        @media (max-width: 768px) {
+            .cta-sub-section::before,
+            .cta-sub-section::after {
+                display: none;
+            }
         }
 
         .cta-sub-section::after {
@@ -596,13 +816,32 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(130, 192, 204, 0.6) 0%, rgba(130, 192, 204, 0.3) 100%);
-            z-index: 2;
+            background: linear-gradient(135deg, rgba(130, 192, 204, 0.15) 0%, rgba(130, 192, 204, 0.08) 100%);
+            z-index: 4;
         }
 
         .cta-sub-section .sub-section-content {
             position: relative;
-            z-index: 3;
+            z-index: 5;
+        }
+
+        /* Ensure content is visible immediately on mobile */
+        @media (max-width: 768px) {
+            .cta-sub-section .sub-section-content {
+                opacity: 1 !important;
+                visibility: visible !important;
+                display: block !important;
+                transform: none !important;
+                animation: none !important;
+            }
+            
+            .cta-sub-section .sub-section-title,
+            .cta-sub-section .sub-section-subtitle,
+            .cta-sub-section .cta-button {
+                opacity: 1 !important;
+                visibility: visible !important;
+                animation: none !important;
+            }
         }
 
         .cta-sub-section .sub-section-title,
@@ -874,6 +1113,270 @@
                 transparent 70%
             );
         }
+
+        /* Make info cards act like buttons (clickable + focus styles) */
+        #services-section .feature-card,
+        .track-record-section .stat-card,
+        #how-it-works-section .step-card {
+            cursor: pointer;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #services-section .feature-card:focus,
+        .track-record-section .stat-card:focus,
+        #how-it-works-section .step-card:focus {
+            outline: 2px solid rgba(130, 192, 204, 0.9);
+            outline-offset: 2px;
+        }
+
+        /* On mobile, these are informational only (no popups): show default cursor */
+        @media (max-width: 768px) {
+            #services-section .feature-card,
+            .track-record-section .stat-card,
+            #how-it-works-section .step-card {
+                cursor: default;
+            }
+        }
+
+        /* Inline Info Panel (Glass card) */
+        .info-panel-container {
+            margin-top: 1rem;
+        }
+        .info-panel {
+            position: relative;
+            border-radius: 16px;
+            background: linear-gradient(
+                160deg,
+                rgba(255,255,255,0.78) 0%,
+                rgba(255,255,255,0.72) 45%,
+                rgba(130,192,204,0.12) 100%
+            );
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            color: #163A5F;
+            padding: 1.25rem 1.25rem 1rem;
+            overflow: hidden;
+            animation: panelPopIn 180ms ease-out;
+        }
+        .info-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(120% 120% at 0% 0%, rgba(130,192,204,0.25) 0%, rgba(130,192,204,0.05) 40%, transparent 70%);
+            pointer-events: none;
+        }
+        .info-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+            position: sticky;
+            top: 0;
+            padding-bottom: 8px;
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            z-index: 1;
+            border-bottom: none;
+        }
+        .info-panel-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #16697A;
+            margin: 0;
+        }
+        .info-panel-close {
+            border: none;
+            background: transparent;
+            color: #16697A;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: grid; place-items: center;
+            font-size: 22px;
+            transition: transform 0.15s ease, opacity 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+        .info-panel-close:hover { transform: scale(1.06); opacity: 0.9; background: transparent !important; box-shadow: none; }
+        .info-panel-close:active { transform: scale(0.96); opacity: 0.9; background: transparent !important; box-shadow: none; }
+        .info-panel-close:focus, .info-panel-close:focus-visible { outline: none; box-shadow: none; background: transparent !important; }
+        .info-panel-body {
+            color: #1d2a30;
+            line-height: 1.55;
+        }
+        .info-panel-body ul { padding-left: 1.1rem; margin: 0.5rem 0 0; }
+        .info-panel-body li { margin: 0.2rem 0; }
+        @keyframes panelPopIn { from { opacity: 0; transform: translateY(6px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+        /* Fullscreen overlay for info panel (centered modal) */
+        .info-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 12000;
+            background: radial-gradient(120% 120% at 50% 0%, rgba(4, 32, 43, 0.35) 0%, rgba(3, 20, 28, 0.45) 60%, rgba(0, 10, 14, 0.55) 100%);
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+            opacity: 1;
+            visibility: visible;
+        }
+        .info-overlay .info-panel {
+            width: min(92vw, 760px);
+            max-height: 82vh;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            will-change: transform;
+            pointer-events: auto;
+            opacity: 1;
+            display: block;
+            z-index: 12001;
+        }
+        @media (max-width: 768px) {
+            .info-overlay .info-panel {
+                width: 96vw;
+                max-height: 88vh;
+                border-radius: 14px;
+                padding: 1rem 1rem 0.75rem;
+            }
+        }
+
+        /* Mobile: native <dialog> modal (reliable and simple) */
+        @media (max-width: 768px) {
+            dialog.mobile-dialog {
+                width: 96vw;
+                max-width: 760px;
+                max-height: 88vh;
+                margin: 0 auto;
+                border: none;
+                border-radius: 16px;
+                padding: 0;
+                overflow: hidden;
+                background: #ffffff;
+                color: #163A5F;
+                box-shadow: 0 18px 48px rgba(0,0,0,0.25);
+            }
+            dialog.mobile-dialog::backdrop {
+                background: rgba(0, 10, 14, 0.55);
+            }
+            .mobile-dialog__header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                padding: 12px 14px;
+                border-bottom: 1px solid rgba(22,105,122,0.12);
+                position: sticky;
+                top: 0;
+                background: #ffffff;
+                z-index: 1;
+            }
+            .mobile-dialog__title {
+                font-size: 1.05rem;
+                font-weight: 700;
+                color: #16697A;
+                margin: 0;
+            }
+            .mobile-dialog__close {
+                border: none;
+                background: transparent;
+                color: #16697A;
+                width: 36px; height: 36px;
+                border-radius: 50%;
+                cursor: pointer;
+                display: grid; place-items: center;
+                font-size: 22px;
+                -webkit-tap-highlight-color: transparent;
+            }
+            .mobile-dialog__body {
+                padding: 12px 14px 14px;
+                overflow: auto;
+                max-height: calc(88vh - 50px);
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* Fallback for mobile dialog if <dialog> unsupported */
+        .mobile-dialog-fallback__overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 14000;
+            background: rgba(0, 10, 14, 0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+        }
+        .mobile-dialog-fallback__panel {
+            width: 96vw;
+            max-width: 760px;
+            max-height: 88vh;
+            border-radius: 16px;
+            background: #ffffff;
+            color: #163A5F;
+            overflow: hidden;
+            box-shadow: 0 18px 48px rgba(0,0,0,0.25);
+            display: flex;
+            flex-direction: column;
+        }
+        .mobile-dialog-fallback__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(22,105,122,0.12);
+            background: #ffffff;
+        }
+        .mobile-dialog-fallback__title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #16697A;
+            margin: 0;
+        }
+        .mobile-dialog-fallback__close {
+            border: none;
+            background: transparent;
+            color: #16697A;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: grid; place-items: center;
+            font-size: 22px;
+        }
+        .mobile-dialog-fallback__body {
+            padding: 12px 14px 14px;
+            overflow: auto;
+            max-height: calc(88vh - 50px);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Mobile bottom-sheet redesign */
+        .info-overlay.mobile-sheet { align-items: flex-end; }
+        .info-overlay.mobile-sheet .info-panel--mobile {
+            width: 100vw;
+            max-height: calc(90vh - env(safe-area-inset-bottom, 0px));
+            min-height: 40vh;
+            border-radius: 18px 18px 0 0;
+            padding: 12px 14px 10px;
+            animation: sheetIn 220ms cubic-bezier(.2,.8,.2,1);
+        }
+        .sheet-handle {
+            width: 44px; height: 5px; border-radius: 999px;
+            background: rgba(22,105,122,0.25);
+            margin: 4px auto 8px;
+        }
+        @keyframes sheetIn { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         /* Profile Dropdown Styles are centralized in style.css */
 
@@ -1151,6 +1654,125 @@
             line-height: 1.6;
         }
 
+        /* Track Record Section with Video Background */
+        .track-record-section {
+            position: relative;
+            /* Blue background first paint for Track Record */
+            background: linear-gradient(135deg, #82C0CC 0%, #489FB5 100%);
+            border-radius: 20px;
+            overflow: hidden;
+            padding: 4rem 2rem;
+            margin-bottom: 1rem;
+            margin-top: 0;
+            color: white;
+            box-shadow: 0 20px 60px rgba(130, 192, 204, 0.3);
+        }
+
+        /* Restore gradient background on mobile */
+        @media (max-width: 768px) {
+            .track-record-section {
+                background: linear-gradient(135deg, #82C0CC 0%, #489FB5 50%, #82C0CC 100%);
+            }
+        }
+
+        /* Video Background for Track Record */
+        .track-record-video-background {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: 50%;
+            height: 50%;
+            transform: translate(-50%, -50%) scale(2);
+            z-index: 1;
+            object-fit: cover;
+            /* Hide until ready; avoid autoplay animation */
+            opacity: 0;
+            transition: opacity 600ms ease-in !important;
+        }
+
+        @keyframes fadeInVideoTrackDesktop { }
+
+        /* Hide Track Record video on mobile */
+        @media (max-width: 768px) {
+            .track-record-video-background {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .track-record-video-background {
+                display: none;
+            }
+        }
+
+        /* Vignette for Track Record - Blue Theme (matching hero) */
+        .track-record-vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 2;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(130, 192, 204, 0.2) 25%, rgba(130, 192, 204, 0.5) 50%, rgba(22, 105, 122, 0.7) 75%, rgba(22, 105, 122, 0.9) 100%);
+            pointer-events: none;
+            /* Keep vignette hidden until the video is ready */
+            opacity: 0;
+            transition: opacity 600ms ease-in !important;
+        }
+
+        /* Reveal Track Record video and vignette when ready */
+        .track-record-section.video-ready .track-record-video-background { opacity: 1 !important; }
+        .track-record-section.video-ready .track-record-vignette { opacity: 1 !important; }
+
+        /* Hide vignette on mobile for Track Record */
+        @media (max-width: 768px) {
+            .track-record-vignette {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .track-record-vignette {
+                display: none;
+            }
+        }
+
+        .track-record-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            z-index: 3;
+        }
+
+        @media (max-width: 768px) {
+            .track-record-section::before {
+                background: transparent;
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .track-record-section::before {
+                background: transparent;
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+            }
+        }
+
+        .track-record-section .sub-section-content {
+            position: relative;
+            z-index: 4;
+        }
+
         /* Stats Section */
         .stats-section {
             display: grid;
@@ -1165,6 +1787,7 @@
             color: white;
             background: linear-gradient(145deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 2px solid rgba(255,255,255,0.3);
             border-radius: 20px;
             padding: 40px 25px;
@@ -1180,6 +1803,7 @@
             justify-content: center;
             text-align: center;
             min-height: 140px;
+            z-index: 5;
         }
 
         .stat-card::before {
@@ -1521,18 +2145,18 @@
             }
 
             .hero-title {
-                font-size: 2.2rem;
+                font-size: 1.8rem;
                 margin-bottom: 0.8rem;
                 line-height: 1.2;
             }
 
             .hero-subtitle {
-                font-size: 1.1rem;
+                font-size: 0.95rem;
                 margin-bottom: 1rem;
             }
 
             .hero-description {
-                font-size: 0.95rem;
+                font-size: 0.85rem;
                 max-width: 95%;
                 margin-bottom: 1.8rem;
                 line-height: 1.5;
@@ -1546,8 +2170,11 @@
                 display: none;
             }
 
-            /* Show mobile descriptions */
-            .hero-description-mobile,
+            /* Hide hero description completely on mobile, show other mobile descriptions */
+            .hero-description {
+                display: none !important;
+            }
+            
             .feature-description-mobile,
             .step-description-mobile,
             .subtitle-mobile {
@@ -2198,7 +2825,7 @@
         // Preload critical mobile optimizer script
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
             const script = document.createElement('script');
-            script.src = 'mobile-performance-optimizer.js';
+            script.src = 'mobile-performance-optimizer.js?v=1.0.1';
             script.async = false; // Load synchronously for immediate optimization
             document.head.appendChild(script);
         }
@@ -2296,6 +2923,15 @@
     <div class="landing-content">
         <!-- Hero Section -->
         <section class="hero-section">
+            <!-- Video Background -->
+            <video class="hero-video-background" autoplay muted loop playsinline preload="auto" loading="eager">
+                <source src="homepagevideos/2.mov" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            
+            <!-- Vignette Overlay -->
+            <div class="hero-vignette"></div>
+            
             <div class="rain-glass">
                 <div class="raindrop"></div>
                 <div class="raindrop"></div>
@@ -2376,11 +3012,22 @@
                         </p>
                     </div>
                 </section>
+                <!-- Inline Info Panel (Services) -->
+                <div class="info-panel-container" id="services-info-panel" aria-live="polite"></div>
             </div>
         </div>
 
         <!-- Stats Sub-Section -->
-        <div class="sub-section">
+        <div class="sub-section track-record-section">
+            <!-- Video Background -->
+            <video class="track-record-video-background" autoplay muted loop playsinline preload="metadata" loading="lazy">
+                <source src="homepagevideos/3.mov" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            
+            <!-- Vignette Overlay -->
+            <div class="track-record-vignette"></div>
+            
             <div class="sub-section-content">
                 <h2 class="sub-section-title">Our Track Record</h2>
                 <p class="sub-section-subtitle hide-on-mobile">Numbers that speak for our quality and service</p>
@@ -2403,6 +3050,8 @@
                         <span class="stat-label">Processing Time</span>
                     </div>
                 </section>
+                <!-- Inline Info Panel (Track Record) -->
+                <div class="info-panel-container" id="track-info-panel" aria-live="polite"></div>
             </div>
         </div>
 
@@ -2463,11 +3112,19 @@
                         </div>
                     </div>
                 </section>
+                <!-- Inline Info Panel (How It Works) -->
+                <div class="info-panel-container" id="how-info-panel" aria-live="polite"></div>
             </div>
         </div>
 
         <!-- Call to Action Sub-Section -->
-        <div class="sub-section cta-sub-section">
+        <div class="sub-section cta-sub-section" style="display: block !important; opacity: 1 !important; visibility: visible !important;">
+            <!-- Video Background -->
+            <video class="cta-video-background" autoplay muted loop playsinline preload="none">
+                <source src="homepagevideos/4.mov" type="video/mp4">
+            </video>
+            <!-- Blue Vignette Overlay -->
+            <div class="cta-vignette"></div>
             <div class="rain-glass">
                 <div class="raindrop"></div>
                 <div class="raindrop"></div>
@@ -2515,6 +3172,41 @@
     <script src="auth.js?v=4.0"></script>
     <script src="script.js?v=4.0"></script>
     <script>
+        // Ensure section videos fade in only after they're ready (hero, track, cta)
+        (function() {
+            function wireVideo(sectionSelector, videoSelector) {
+                const section = document.querySelector(sectionSelector);
+                const video = document.querySelector(videoSelector);
+                if (!section || !video) return;
+
+                let applied = false;
+                const markReady = () => {
+                    if (applied) return;
+                    applied = true;
+                    section.classList.add('video-ready');
+                };
+
+                if (video.readyState >= 2) {
+                    markReady();
+                } else {
+                    video.addEventListener('loadeddata', markReady, { once: true });
+                    video.addEventListener('canplay', markReady, { once: true });
+                }
+            }
+
+            const onDomReady = () => {
+                wireVideo('.hero-section', '.hero-video-background');
+                wireVideo('.track-record-section', '.track-record-video-background');
+                wireVideo('.cta-sub-section', '.cta-video-background');
+            };
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', onDomReady);
+            } else {
+                onDomReady();
+            }
+        })();
+
         // Initialize Fast2SMS OTP Client for homepage
         document.addEventListener('DOMContentLoaded', function() {
             try {
@@ -2768,6 +3460,405 @@
         function aboutUs() {
             alert('About JB Creations\n\nWe are passionate about turning your precious memories into beautiful wall art. With years of experience in custom photo framing, we use premium materials and professional craftsmanship to create frames that last a lifetime.\n\nOur mission is to help you showcase your most cherished moments in style.');
         }
+
+        /* -----------------------------
+           Section Info Panels (Inline Glass)
+           Renders within section containers with rounded/glass style
+        ------------------------------*/
+        function openMobileDialog({ title, htmlBody }) {
+            const supportsDialog = typeof HTMLDialogElement !== 'undefined' && 'showModal' in HTMLDialogElement.prototype;
+            const mmMobile = window.matchMedia('(max-width: 768px)').matches;
+            const mmCoarse = window.matchMedia('(pointer: coarse)').matches;
+            const uaMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+            const isMobileEnv = mmMobile || mmCoarse || uaMobile;
+            if (!isMobileEnv) return false;
+
+            // Close any existing instances
+            document.querySelectorAll('dialog.mobile-dialog').forEach(d => d.close());
+            document.querySelectorAll('.mobile-dialog-fallback__overlay').forEach(el => el.remove());
+
+            // Lock scroll (simpler than transform tricks)
+            const scrollY = window.scrollY || document.documentElement.scrollTop;
+            const restore = () => {
+                document.body.style.position = '';
+                document.body.style.top = '';
+                document.body.style.width = '';
+                window.scrollTo(0, scrollY);
+            };
+
+            if (supportsDialog) {
+                const dlg = document.createElement('dialog');
+                dlg.className = 'mobile-dialog';
+                dlg.setAttribute('aria-label', title);
+                dlg.innerHTML = `
+                    <div class="mobile-dialog__header">
+                        <h4 class="mobile-dialog__title">${title}</h4>
+                        <button class="mobile-dialog__close" aria-label="Close">&times;</button>
+                    </div>
+                    <div class="mobile-dialog__body">${htmlBody}</div>
+                `;
+                document.body.appendChild(dlg);
+                const closeBtn = dlg.querySelector('.mobile-dialog__close');
+                const doClose = () => { try { dlg.close(); } catch(_){} dlg.remove(); restore(); };
+                closeBtn.addEventListener('click', doClose);
+                dlg.addEventListener('cancel', (e) => { e.preventDefault(); doClose(); });
+                // Prevent backdrop tap from closing immediately causing a flicker; use explicit close
+                dlg.addEventListener('click', (e) => {
+                    const rect = dlg.getBoundingClientRect();
+                    const inBounds = e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom;
+                    if (!inBounds) doClose();
+                });
+                // Scroll lock
+                document.body.style.position = 'fixed';
+                document.body.style.top = `-${scrollY}px`;
+                document.body.style.width = '100%';
+                try { dlg.showModal(); } catch(_) { try { dlg.show(); } catch(__) {} }
+                // Runtime visibility check; if dialog isn't painting, fall back
+                requestAnimationFrame(() => {
+                    try {
+                        const rect = dlg.getBoundingClientRect();
+                        const cs = window.getComputedStyle(dlg);
+                        const notVisible = !rect || rect.height < 20 || cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0';
+                        if (notVisible) {
+                            console.warn('[MOBILE-DIALOG] Dialog not visible, applying fallback. rect:', rect, 'display:', cs.display);
+                            try { dlg.close(); } catch(_) {}
+                            dlg.remove();
+                            // Fallback overlay path
+                            const overlay = document.createElement('div');
+                            overlay.className = 'mobile-dialog-fallback__overlay';
+                            overlay.innerHTML = `
+                                <div class="mobile-dialog-fallback__panel" role="dialog" aria-modal="true" aria-label="${title}">
+                                    <div class="mobile-dialog-fallback__header">
+                                        <h4 class="mobile-dialog-fallback__title">${title}</h4>
+                                        <button class="mobile-dialog-fallback__close" aria-label="Close">&times;</button>
+                                    </div>
+                                    <div class="mobile-dialog-fallback__body">${htmlBody}</div>
+                                </div>
+                            `;
+                            document.body.appendChild(overlay);
+                            const closeBtn2 = overlay.querySelector('.mobile-dialog-fallback__close');
+                            const doClose2 = () => { overlay.remove(); restore(); };
+                            closeBtn2.addEventListener('click', doClose2);
+                            overlay.addEventListener('click', (e) => { if (e.target === overlay) doClose2(); });
+                        }
+                    } catch(_) {}
+                });
+                return true;
+            }
+
+            // Fallback
+            const overlay = document.createElement('div');
+            overlay.className = 'mobile-dialog-fallback__overlay';
+            overlay.innerHTML = `
+                <div class="mobile-dialog-fallback__panel" role="dialog" aria-modal="true" aria-label="${title}">
+                    <div class="mobile-dialog-fallback__header">
+                        <h4 class="mobile-dialog-fallback__title">${title}</h4>
+                        <button class="mobile-dialog-fallback__close" aria-label="Close">&times;</button>
+                    </div>
+                    <div class="mobile-dialog-fallback__body">${htmlBody}</div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            const closeBtn = overlay.querySelector('.mobile-dialog-fallback__close');
+            const doClose = () => { overlay.remove(); restore(); };
+            closeBtn.addEventListener('click', doClose);
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) doClose(); });
+            // Scroll lock
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollY}px`;
+            document.body.style.width = '100%';
+            return true;
+        }
+        function renderInfoPanel(_containerId, { title, htmlBody }) {
+            // If mobile: popups are disabled per requirement
+            const isMobileEnv = window.matchMedia('(max-width: 768px)').matches || window.matchMedia('(pointer: coarse)').matches || /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+            if (isMobileEnv) {
+                try { console.log('[INFO] Mobile detected: popups disabled'); } catch(_) {}
+                return;
+            }
+            // Clear any existing info overlays
+            document.querySelectorAll('.info-overlay').forEach(el => el.remove());
+
+            const overlay = document.createElement('div');
+            overlay.className = 'info-overlay';
+            const useMobileSheet = false; // Force centered dialog on mobile for maximum compatibility
+            const isMobile = isMobileEnv && useMobileSheet;
+            if (isMobile) overlay.classList.add('mobile-sheet');
+            overlay.innerHTML = `
+                <div class="info-panel ${isMobile ? 'info-panel--mobile' : ''}" role="dialog" aria-modal="true" aria-label="${title}">
+                    ${isMobile ? '<div class="sheet-handle" aria-hidden="true"></div>' : ''}
+                    <div class="info-panel-header">
+                        <h4 class="info-panel-title">${title}</h4>
+                        <button class="info-panel-close" aria-label="Close">&times;</button>
+                    </div>
+                    <div class="info-panel-body">${htmlBody}</div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            try { console.log('[INFO] Overlay created, mobileSheet=', isMobileEnv && useMobileSheet); } catch (_) {}
+            const openedAt = (window.performance && performance.now) ? performance.now() : Date.now();
+            window.__jbLastInfoOpenTs = openedAt;
+            // Lock body scroll while open without causing reflow jumps
+            const prevStyle = {
+                overflow: document.body.style.overflow,
+                position: document.body.style.position,
+                width: document.body.style.width,
+                top: document.body.style.top,
+                transform: document.body.style.transform,
+                backfaceVisibility: document.body.style.backfaceVisibility,
+                webkitBackfaceVisibility: document.body.style.webkitBackfaceVisibility
+            };
+            const scrollY = window.scrollY || document.documentElement.scrollTop;
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollY}px`;
+            document.body.style.width = '100%';
+            document.body.style.overflow = 'hidden';
+            // Neutralize transforms on body to avoid fixed-position containment bugs on some Android devices
+            document.body.style.transform = 'none';
+            document.body.style.backfaceVisibility = 'visible';
+            document.body.style.webkitBackfaceVisibility = 'visible';
+
+            const panel = overlay.querySelector('.info-panel');
+            if (panel) {
+                panel.style.opacity = '1';
+                panel.style.transform = 'translateZ(0)';
+                // Force a visible centered style for mobile environments
+                if (isMobileEnv) {
+                    panel.style.width = '96vw';
+                    panel.style.maxWidth = '760px';
+                    panel.style.maxHeight = '88vh';
+                    panel.style.margin = '0 auto';
+                    panel.style.borderRadius = '16px';
+                }
+            }
+
+            // Runtime visibility fallback for certain Android browsers
+            requestAnimationFrame(() => {
+                try {
+                    const rect = panel.getBoundingClientRect();
+                    const cs = window.getComputedStyle(panel);
+                    try { console.log('[INFO] Panel rect:', rect, 'display:', cs.display, 'visibility:', cs.visibility, 'opacity:', cs.opacity); } catch (_) {}
+                    const notVisible = !rect || rect.height < 20 || cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0';
+                    if (notVisible) {
+                        console.warn('[INFO] Panel not visible, applying centered fallback');
+                        overlay.classList.remove('mobile-sheet');
+                        panel.classList.remove('info-panel--mobile');
+                        // Force a centered fixed fallback panel
+                        panel.style.position = 'relative';
+                        panel.style.margin = '0 auto';
+                        panel.style.width = '96vw';
+                        panel.style.maxWidth = '760px';
+                        panel.style.maxHeight = '88vh';
+                        panel.style.borderRadius = '16px';
+                        panel.style.opacity = '1';
+                        panel.style.visibility = 'visible';
+                        // Ensure a solid background is painted even if filters are disabled by mobile CSS
+                        panel.style.background = 'linear-gradient(160deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.96) 60%, rgba(130,192,204,0.12) 100%)';
+                        panel.style.color = '#163A5F';
+                        panel.style.padding = panel.style.padding || '1.1rem';
+                    }
+                } catch (e) { /* ignore */ }
+            });
+            const closeBtn = overlay.querySelector('.info-panel-close');
+
+            const close = () => {
+                overlay.remove();
+                // Restore scroll and position precisely where user was
+                document.body.style.overflow = prevStyle.overflow || '';
+                document.body.style.position = prevStyle.position || '';
+                document.body.style.width = prevStyle.width || '';
+                const topVal = document.body.style.top;
+                document.body.style.top = prevStyle.top || '';
+                // Restore body transform/backface after closing
+                document.body.style.transform = prevStyle.transform || '';
+                document.body.style.backfaceVisibility = prevStyle.backfaceVisibility || '';
+                document.body.style.webkitBackfaceVisibility = prevStyle.webkitBackfaceVisibility || '';
+                if (topVal) {
+                    const y = Math.abs(parseInt(topVal, 10)) || 0;
+                    window.scrollTo(0, y);
+                }
+            };
+            closeBtn.addEventListener('click', close);
+            // Arm outside-click; also ensure a minimum time since open to avoid immediate close on the same tap (mobile delayed click)
+            let outsideArmed = false;
+            setTimeout(() => { outsideArmed = true; }, 700);
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    const nowTs = (window.performance && performance.now) ? performance.now() : Date.now();
+                    if (outsideArmed && (nowTs - openedAt > 700)) close();
+                }
+            });
+            const onEsc = (e) => { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onEsc); document.removeEventListener('click', suppressOnce, true); } };
+            document.addEventListener('keydown', onEsc);
+            // Suppress the very first click in capture phase to avoid ghost clicks closing the overlay
+            const suppressOnce = (ev) => { ev.stopPropagation(); ev.preventDefault(); document.removeEventListener('click', suppressOnce, true); };
+            document.addEventListener('click', suppressOnce, true);
+            // Avoid focus jump on mobile to reduce bounce; desktop focuses close button
+            if (!isMobileEnv && window.matchMedia('(hover: hover)').matches) {
+                setTimeout(() => { try { closeBtn.focus(); } catch (_) {} }, 0);
+            } else {
+                // Ensure panel is scrolled to top on mobile
+                try { panel.scrollTop = 0; } catch (_) {}
+            }
+        }
+
+        function servicesPopup(kind) {
+            const contentMap = {
+                upload: {
+                    title: 'Easy Upload',
+                    body: `
+                        <p>Upload high-quality photos directly from your phone or computer. We support JPG and PNG formats. For best print results, use images that are at least 1500px on the shortest side.</p>
+                        <ul>
+                            <li>Drag & drop or use the upload button</li>
+                            <li>Automatic smart cropping with manual controls</li>
+                            <li>Secure, private uploads</li>
+                        </ul>`
+                },
+                design: {
+                    title: 'Custom Design',
+                    body: `
+                        <p>Choose frame size, color, and texture to match your decor. Our designer ensures perfect proportions and premium finish.</p>
+                        <ul>
+                            <li>Multiple standard sizes and aspect ratios</li>
+                            <li>Modern textures and timeless colors</li>
+                            <li>Precision fit for your photo</li>
+                        </ul>`
+                },
+                preview: {
+                    title: 'Live Preview',
+                    body: `
+                        <p>See your framed photo in realistic room settings before buying. Adjust zoom and placement to visualize the final look.</p>
+                        <ul>
+                            <li>Room mockups for different styles</li>
+                            <li>True-to-scale preview guidance</li>
+                            <li>Instant updates as you tweak</li>
+                        </ul>`
+                },
+                delivery: {
+                    title: 'Fast Delivery',
+                    body: `
+                        <p>Your frame is crafted with care and shipped quickly. We use protective packaging so it arrives ready to hang.</p>
+                        <ul>
+                            <li>Quality print and premium materials</li>
+                            <li>QC checked before dispatch</li>
+                            <li>Doorstep delivery with tracking</li>
+                        </ul>`
+                }
+            };
+            const item = contentMap[kind];
+            if (!item) return;
+            renderInfoPanel('services-info-panel', { title: item.title, htmlBody: item.body });
+        }
+
+        function trackRecordPopup(metric) {
+            const map = {
+                customers: {
+                    title: 'Happy Customers',
+                    body: `<p>Trusted by 5,000+ customers across India. We take pride in prompt support and reliable service.</p>
+                           <ul><li>Responsive assistance</li><li>Careful handling of your memories</li><li>Thousands of positive experiences</li></ul>`
+                },
+                photos: {
+                    title: 'Photos Framed',
+                    body: `<p>Over 10,000 photos framed with consistent quality control and craftsmanship.</p>
+                           <ul><li>Premium paper and inks</li><li>Durable, elegant frames</li><li>Attention to detail</li></ul>`
+                },
+                satisfaction: {
+                    title: 'Satisfaction Rate',
+                    body: `<p>99% satisfaction comes from listening to feedback and improving continuously.</p>
+                           <ul><li>Transparent process</li><li>Care and craftsmanship</li><li>After-sales support</li></ul>`
+                },
+                time: {
+                    title: 'Processing Time',
+                    body: `<p>Average 24h processing time before dispatch for most orders. Complex customizations may vary.</p>
+                           <ul><li>Fast-turnaround pipeline</li><li>Careful packaging</li><li>Tracking updates shared</li></ul>`
+                }
+            };
+            const item = map[metric];
+            if (!item) return;
+            renderInfoPanel('track-info-panel', { title: item.title, htmlBody: item.body });
+        }
+
+        function howItWorksPopup(step) {
+            const map = {
+                step1: {
+                    title: 'Upload Your Photo',
+                    body: `<p>Pick your favorite image. We recommend high-resolution files for sharp prints. You can crop and align after upload.</p>
+                           <ul><li>Supported: JPG, PNG</li><li>Guided crop and alignment</li><li>Privacy-first handling</li></ul>`
+                },
+                step2: {
+                    title: 'Customize Frame',
+                    body: `<p>Tune size, color and texture to fit your space. Our preview helps you balance margins and composition.</p>
+                           <ul><li>Multiple sizes and aspect ratios</li><li>Color and texture palettes</li><li>Guided margin controls</li></ul>`
+                },
+                step3: {
+                    title: 'Place Order',
+                    body: `<p>Secure checkout with major payment options. Review your design before paying.</p>
+                           <ul><li>Clear order summary</li><li>Secure payments</li><li>Instant confirmation</li></ul>`
+                },
+                step4: {
+                    title: 'Receive & Enjoy',
+                    body: `<p>Frames arrive ready to hang with protective packaging. Unbox, place, and enjoy your memories.</p>
+                           <ul><li>QC checked products</li><li>Doorstep delivery</li><li>Hassle-free setup</li></ul>`
+                }
+            };
+            const item = map[step];
+            if (!item) return;
+            renderInfoPanel('how-info-panel', { title: item.title, htmlBody: item.body });
+        }
+
+        // Wire click handlers once DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            const isMobileEnv = window.matchMedia('(max-width: 768px)').matches || window.matchMedia('(pointer: coarse)').matches || /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+            const supportsPointer = window.PointerEvent !== undefined;
+            const bindOpenHandlers = (nodeList, getId, openFn) => {
+                nodeList.forEach((el, idx) => {
+                    const id = getId(idx);
+                    el.tabIndex = 0;
+                    const handler = (e) => {
+                        e.stopPropagation();
+                        const nowTs = (window.performance && performance.now) ? performance.now() : Date.now();
+                        if (window.__jbLastInfoOpenTs && (nowTs - window.__jbLastInfoOpenTs) < 350) return;
+                        openFn(id);
+                    };
+                    if (supportsPointer) {
+                        const coarse = window.matchMedia('(pointer: coarse)').matches;
+                        // Use pointerup for both; it's more consistent across mobile browsers once we debounce
+                        el.addEventListener('pointerup', handler, { passive: true });
+                        // Fallback click for odd devices where pointerup is suppressed
+                        el.addEventListener('click', handler);
+                    } else {
+                        el.addEventListener('touchend', handler, { passive: true });
+                        el.addEventListener('click', handler);
+                    }
+                    el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFn(id); } });
+                });
+            };
+            if (isMobileEnv) {
+                try { console.log('[INFO] Skipping popup bindings on mobile'); } catch(_) {}
+                return; // Do not wire popups on mobile
+            }
+
+            // Our Services cards (desktop only)
+            bindOpenHandlers(
+                document.querySelectorAll('#services-section .feature-card'),
+                (idx) => ['upload','design','preview','delivery'][idx] || 'upload',
+                (kind) => servicesPopup(kind)
+            );
+
+            // Our Track Record stats (desktop only)
+            bindOpenHandlers(
+                document.querySelectorAll('.track-record-section .stat-card'),
+                (idx) => ['customers','photos','satisfaction','time'][idx] || 'customers',
+                (metric) => trackRecordPopup(metric)
+            );
+
+            // How It Works steps (desktop only)
+            bindOpenHandlers(
+                document.querySelectorAll('#how-it-works-section .step-card'),
+                (idx) => ['step1','step2','step3','step4'][idx] || 'step1',
+                (step) => howItWorksPopup(step)
+            );
+        });
     </script>
 
     <!-- Professional Footer -->

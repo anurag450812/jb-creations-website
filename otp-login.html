@@ -764,19 +764,21 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     
-    <!-- Fast2SMS OTP System (Primary) -->
-    <script src="fast2sms-client.js?v=3.0"></script>
+    <!-- Fast2SMS OTP System (Production - Netlify Functions) -->
+    <script src="fast2sms-client-production.js?v=4.0"></script>
     
     <!-- Scripts (OTP Auth with Fast2SMS Integration) -->
     <script src="firebase-client-new.js?v=3.0"></script>
     <script src="otp-auth-realsms.js?v=3.0"></script>
     <script>
-        // Wait for DOM to be ready, then initialize Fast2SMS OTP Client
+        // Wait for DOM to be ready, then initialize Fast2SMS OTP Client (Production)
         document.addEventListener('DOMContentLoaded', function() {
             try {
-                console.log('🔧 Initializing Fast2SMS OTP Client...');
-                window.otpClient = new Fast2SMSOTPClient('http://localhost:3001');
+                console.log('🔧 Initializing Fast2SMS OTP Client (Production - Serverless)...');
+                // No need to pass URL - auto-detects local vs production
+                window.otpClient = new Fast2SMSOTPClient();
                 console.log('✅ Fast2SMS OTP Client initialized successfully');
+                console.log('📡 API Endpoint:', window.otpClient.apiBaseURL);
                 
                 // Reinitialize OTP Auth with the client
                 if (window.otpAuth) {

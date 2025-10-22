@@ -134,8 +134,27 @@
     }
 
     /* ===== SCROLLING OPTIMIZATIONS ===== */
-    .is-scrolling * {
+    /* Do NOT disable pointer events globally; it blocks taps after scrolling on some devices. */
+    /* Only disable pointer events on heavy, non-interactive visual layers during momentum scroll. */
+    .is-scrolling .rain-glass,
+    .is-scrolling video,
+    .is-scrolling .hero-video-background,
+    .is-scrolling .track-record-video-background,
+    .is-scrolling .cta-video-background {
         pointer-events: none !important;
+    }
+
+    /* Always keep interactive controls responsive, even while scrolling */
+    .is-scrolling a,
+    .is-scrolling button,
+    .is-scrolling [role="button"],
+    .is-scrolling .feature-card,
+    .is-scrolling .stat-card,
+    .is-scrolling .step-card,
+    .is-scrolling .info-overlay,
+    .is-scrolling .info-panel,
+    .is-scrolling [tabindex] {
+        pointer-events: auto !important;
     }
 
     .is-scrolling img {

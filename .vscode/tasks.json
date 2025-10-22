@@ -9,6 +9,25 @@
 			"isBackground": true,
 			"problemMatcher": [],
 			"group": "build"
+		},
+		{
+			"label": "Serve static site on LAN (http-server)",
+			"type": "shell",
+			"command": "npx -y http-server . -p 5500 -a 0.0.0.0 --cors -c-1",
+			"args": [],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "Serve static site on LAN (http-server)",
+			"type": "shell",
+			"command": "npx -y http-server . -p 5500 -a 0.0.0.0 --cors -c-1",
+			"args": [],
+			"isBackground": true,
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
+			"group": "build"
 		}
 	]
 }

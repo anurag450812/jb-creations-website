@@ -4,8 +4,8 @@
  * Version: 1.0.0
  */
 
-const CACHE_NAME = 'jb-creations-v1.0';
-const RUNTIME_CACHE = 'jb-creations-runtime-v1.0';
+const CACHE_NAME = 'jb-creations-v1.1';
+const RUNTIME_CACHE = 'jb-creations-runtime-v1.1';
 
 // Critical assets to cache immediately
 const CRITICAL_ASSETS = [
@@ -79,7 +79,7 @@ self.addEventListener('fetch', (event) => {
                         return cachedResponse;
                     }
                     return fetch(request).then((response) => {
-                        if (response.ok) {
+                        if (response.ok && response.status === 200 && !isPartialOrRange(request, response)) {
                             return caches.open(RUNTIME_CACHE).then((cache) => {
                                 cache.put(request, response.clone());
                                 return response;
@@ -118,7 +118,7 @@ async function handleImageRequest(request) {
 
     try {
         const networkResponse = await fetch(request);
-        if (networkResponse.ok) {
+        if (networkResponse.ok && networkResponse.status === 200 && !isPartialOrRange(request, networkResponse)) {
             cache.put(request, networkResponse.clone());
         }
         return networkResponse;
@@ -142,7 +142,7 @@ async function handleAssetRequest(request) {
 
     try {
         const networkResponse = await fetch(request);
-        if (networkResponse.ok) {
+        if (networkResponse.ok && networkResponse.status === 200 && !isPartialOrRange(request, networkResponse)) {
             cache.put(request, networkResponse.clone());
         }
         return networkResponse;
@@ -176,7 +176,7 @@ async function handleOtherRequest(request) {
     
     try {
         const networkResponse = await fetch(request);
-        if (networkResponse.ok) {
+        if (networkResponse.ok && networkResponse.status === 200 && !isPartialOrRange(request, networkResponse)) {
             cache.put(request, networkResponse.clone());
         }
         return networkResponse;
@@ -190,12 +190,20 @@ async function handleOtherRequest(request) {
 async function fetchAndCache(request, cache) {
     try {
         const response = await fetch(request);
-        if (response.ok) {
+        if (response.ok && response.status === 200 && !isPartialOrRange(request, response)) {
             cache.put(request, response.clone());
         }
     } catch (error) {
         // Silently fail - we already have cached version
     }
+}
+
+// Utilities to detect partial/range requests and responses
+function isPartialOrRange(request, response) {
+    const reqRange = request.headers && request.headers.get('range');
+    const isReqRange = !!reqRange;
+    const is206 = response && response.status === 206;
+    return isReqRange || is206;
 }
 
 // Handle messages from clients

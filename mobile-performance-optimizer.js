@@ -280,14 +280,30 @@ class MobilePerformanceOptimizer {
     // ===== INTERSECTION OBSERVER FOR VISIBILITY =====
     setupIntersectionObserver() {
         const sections = document.querySelectorAll('.hero-section, .sub-section, .features-section, .stats-section');
-        
+
+        // Ensure critical CTA is never hidden on mobile
+        const ctaSection = document.querySelector('.cta-sub-section');
+        if (ctaSection) {
+            ctaSection.style.contentVisibility = 'visible';
+            ctaSection.classList.add('visible');
+        }
+
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('visible');
+                    entry.target.style.contentVisibility = 'visible';
                 } else {
-                    // Remove non-critical elements from paint when out of view
-                    if (entry.boundingClientRect.top > window.innerHeight * 2) {
+                    // Never hide CTA section; keep it paint-ready
+                    if (entry.target.classList.contains('cta-sub-section')) {
+                        entry.target.style.contentVisibility = 'visible';
+                        return;
+                    }
+
+                    // Remove non-critical elements from paint when far out of view
+                    // Be less aggressive on mobile to avoid late reveals
+                    const farBelowViewport = entry.boundingClientRect.top > window.innerHeight * 3;
+                    if (farBelowViewport) {
                         entry.target.style.contentVisibility = 'hidden';
                     } else {
                         entry.target.style.contentVisibility = 'visible';
@@ -295,8 +311,9 @@ class MobilePerformanceOptimizer {
                 }
             });
         }, {
-            rootMargin: '100px 0px',
-            threshold: 0.1
+            // Reveal earlier on mobile to avoid multiple scrolls before visible
+            rootMargin: '400px 0px',
+            threshold: 0.01
         });
 
         sections.forEach(section => observer.observe(section));
