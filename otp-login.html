@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -25,12 +25,19 @@
         }
 
         .otp-auth-container {
+            /* Use small viewport height on mobile to avoid keyboard jump */
             min-height: 100vh;
+            min-height: 100svh;
             background: var(--background-color);
             display: flex;
             align-items: center;
             justify-content: center;
+            /* Respect notches and safe areas on iOS */
             padding: 20px;
+            padding-left: max(20px, env(safe-area-inset-left));
+            padding-right: max(20px, env(safe-area-inset-right));
+            padding-top: calc(20px + env(safe-area-inset-top));
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
             position: relative;
             overflow: hidden;
         }
@@ -116,6 +123,8 @@
 
         .auth-content {
             padding: 30px 40px 40px 40px;
+            max-width: 480px;
+            margin: 0 auto;
         }
 
         .tab-content {
@@ -500,12 +509,12 @@
         /* Responsive Design */
         @media (max-width: 768px) {
             .auth-card {
-                max-width: 400px;
-                margin: 10px;
+                max-width: 420px;
+                margin: 10px auto;
             }
 
             .auth-content {
-                padding: 30px 25px;
+                padding: 24px 20px 28px 20px;
             }
 
             .auth-tab {
@@ -615,7 +624,7 @@
                         
                         <div class="form-group">
                             <label for="signupPhone" class="form-label">Mobile Number *</label>
-                            <input type="tel" id="signupPhone" class="form-input" placeholder="Enter 10-digit mobile number" maxlength="10" required>
+                            <input type="tel" id="signupPhone" class="form-input" placeholder="Enter 10-digit mobile number" maxlength="10" required inputmode="numeric" pattern="[0-9]*" autocomplete="tel" autocapitalize="off" autocorrect="off" enterkeyhint="next">
                         </div>
                         
                         <button type="button" id="signupSendOtpBtn" class="auth-button">
@@ -629,12 +638,12 @@
                         <div class="form-group">
                             <label class="form-label">Enter 6-Digit OTP</label>
                             <div class="otp-input-container">
-                                <input type="text" class="otp-digit" maxlength="1" id="signupOtp1">
-                                <input type="text" class="otp-digit" maxlength="1" id="signupOtp2">
-                                <input type="text" class="otp-digit" maxlength="1" id="signupOtp3">
-                                <input type="text" class="otp-digit" maxlength="1" id="signupOtp4">
-                                <input type="text" class="otp-digit" maxlength="1" id="signupOtp5">
-                                <input type="text" class="otp-digit" maxlength="1" id="signupOtp6">
+                                <input type="tel" class="otp-digit" maxlength="1" id="signupOtp1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" autocapitalize="off" autocorrect="off" aria-label="OTP digit 1">
+                                    <input type="tel" class="otp-digit" maxlength="1" id="signupOtp2" inputmode="numeric" pattern="[0-9]*" autocapitalize="off" autocorrect="off" aria-label="OTP digit 2">
+                                    <input type="tel" class="otp-digit" maxlength="1" id="signupOtp3" inputmode="numeric" pattern="[0-9]*" autocapitalize="off" autocorrect="off" aria-label="OTP digit 3">
+                                    <input type="tel" class="otp-digit" maxlength="1" id="signupOtp4" inputmode="numeric" pattern="[0-9]*" autocapitalize="off" autocorrect="off" aria-label="OTP digit 4">
+                                    <input type="tel" class="otp-digit" maxlength="1" id="signupOtp5" inputmode="numeric" pattern="[0-9]*" autocapitalize="off" autocorrect="off" aria-label="OTP digit 5">
+                                    <input type="tel" class="otp-digit" maxlength="1" id="signupOtp6" inputmode="numeric" pattern="[0-9]*" autocapitalize="off" autocorrect="off" aria-label="OTP digit 6" enterkeyhint="done">
                             </div>
                         </div>
                         
@@ -695,7 +704,7 @@
                     <div id="signinPhoneStep" class="auth-form">
                         <div class="form-group">
                             <label for="signinPhone" class="form-label">Mobile Number</label>
-                            <input type="tel" id="signinPhone" class="form-input" placeholder="Enter your registered mobile number" maxlength="10">
+                            <input type="tel" id="signinPhone" class="form-input" placeholder="Enter your registered mobile number" maxlength="10" inputmode="numeric" pattern="[0-9]*" autocomplete="tel" autocapitalize="off" autocorrect="off" enterkeyhint="next">
                         </div>
                         <button type="button" id="signinSendOtpBtn" class="auth-button">
                             <i class="fas fa-paper-plane"></i>
@@ -708,12 +717,12 @@
                         <div class="form-group">
                             <label class="form-label">Enter 6-Digit OTP</label>
                             <div class="otp-input-container">
-                                <input type="text" class="otp-digit" maxlength="1" id="signinOtp1">
-                                <input type="text" class="otp-digit" maxlength="1" id="signinOtp2">
-                                <input type="text" class="otp-digit" maxlength="1" id="signinOtp3">
-                                <input type="text" class="otp-digit" maxlength="1" id="signinOtp4">
-                                <input type="text" class="otp-digit" maxlength="1" id="signinOtp5">
-                                <input type="text" class="otp-digit" maxlength="1" id="signinOtp6">
+                                <input type="tel" class="otp-digit" maxlength="1" id="signinOtp1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" autocapitalize="off" autocorrect="off" aria-label="OTP digit 1">
+                                <input type="tel" class="otp-digit" maxlength="1" id="signinOtp2" inputmode="numeric" pattern="[0-9]*" autocapitalize="off" autocorrect="off" aria-label="OTP digit 2">
+                                <input type="tel" class="otp-digit" maxlength="1" id="signinOtp3" inputmode="numeric" pattern="[0-9]*" autocapitalize="off" autocorrect="off" aria-label="OTP digit 3">
+                                <input type="tel" class="otp-digit" maxlength="1" id="signinOtp4" inputmode="numeric" pattern="[0-9]*" autocapitalize="off" autocorrect="off" aria-label="OTP digit 4">
+                                <input type="tel" class="otp-digit" maxlength="1" id="signinOtp5" inputmode="numeric" pattern="[0-9]*" autocapitalize="off" autocorrect="off" aria-label="OTP digit 5">
+                                <input type="tel" class="otp-digit" maxlength="1" id="signinOtp6" inputmode="numeric" pattern="[0-9]*" autocapitalize="off" autocorrect="off" aria-label="OTP digit 6" enterkeyhint="done">
                             </div>
                         </div>
                         
@@ -1225,7 +1234,19 @@
 
                 // Show the requested step
                 const stepElement = document.getElementById(`${type}${step.charAt(0).toUpperCase() + step.slice(1)}Step`);
-                if (stepElement) stepElement.style.display = 'block';
+                if (stepElement) {
+                    stepElement.style.display = 'block';
+                    // Smart focus to improve mobile UX
+                    setTimeout(() => {
+                        if (step === 'otp') {
+                            const firstOtp = document.getElementById(`${type}Otp1`);
+                            if (firstOtp) firstOtp.focus();
+                        } else if (step === 'phone') {
+                            const phoneInput = document.getElementById(`${type}Phone`);
+                            if (phoneInput) phoneInput.focus();
+                        }
+                    }, 50);
+                }
             }
 
             updateStepStatus(type, stepNumber, status) {
