@@ -1,17 +1,14 @@
 {
-  "name": "jb-creations-minimal-wrapper",
+  "name": "jb-creations-website",
   "version": "1.0.0",
-  "description": "Minimal wrapper for JB Creations backend deployment",
+  "description": "JB Creations - Custom Photo Frame Website with Serverless OTP",
   "scripts": {
-    "start": "cd order-backend && node minimal-server.js",
-    "install": "cd order-backend && cp package-minimal.json package.json && npm install"
+    "dev": "netlify dev",
+    "build": "echo 'Static site - no build needed'",
+    "deploy": "netlify deploy --prod"
   },
   "engines": {
     "node": ">=18.0.0"
   },
-  "dependencies": {
-    "axios": "^1.12.2",
-    "cloudinary": "^1.41.3",
-    "cloudinary-core": "^2.14.0"
-  }
+  "dependencies": {}
 }
