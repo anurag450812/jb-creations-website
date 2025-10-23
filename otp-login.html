@@ -533,6 +533,93 @@
             }
         }
 
+        /* More compact layout for small phones */
+        @media (max-width: 480px) {
+            .auth-header {
+                margin-bottom: 12px;
+                padding-bottom: 10px;
+            }
+            .auth-header h1 {
+                font-size: 22px;
+            }
+            .auth-header p {
+                font-size: 12px;
+            }
+            .auth-tabs {
+                border-radius: 18px 18px 0 0;
+            }
+            .auth-tab {
+                padding: 12px 8px;
+                font-size: 13px;
+                gap: 6px;
+            }
+            .auth-content {
+                padding: 18px 14px 20px 14px;
+                max-width: 420px;
+            }
+            .welcome-message {
+                padding: 12px 14px;
+                margin-bottom: 12px;
+                font-size: 13.5px;
+            }
+            .auth-steps {
+                margin: 16px 0;
+                padding: 14px;
+            }
+            .step {
+                margin: 8px 0;
+                font-size: 13px;
+            }
+            .form-group {
+                margin-bottom: 14px;
+            }
+            .form-input {
+                padding: 12px 14px;
+                font-size: 15px;
+            }
+            .auth-button {
+                padding: 14px;
+                font-size: 14px;
+                letter-spacing: 0.3px;
+            }
+            .otp-input-container {
+                gap: 6px;
+                margin: 16px 0;
+            }
+            .otp-digit {
+                width: 40px;
+                height: 48px;
+                font-size: 18px;
+            }
+            .otp-timer {
+                font-size: 12px;
+                margin: 8px 0;
+            }
+            #signinResendOtpBtn, #signupResendOtpBtn {
+                margin-top: 10px !important;
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+            .auth-footer {
+                padding: 16px 20px 20px;
+            }
+        }
+
+        /* Ultra-compact for very narrow screens */
+        @media (max-width: 380px) {
+            .auth-steps { display: none; }
+            .auth-header h1 { font-size: 20px; }
+            .auth-tab { font-size: 12px; padding: 10px 6px; }
+            .otp-digit { width: 38px; height: 46px; font-size: 17px; }
+            .auth-button { padding: 12px; font-size: 13px; }
+        }
+
+        @media (max-width: 360px) {
+            .otp-digit { width: 36px; height: 44px; font-size: 16px; }
+            .form-input { padding: 10px 12px; font-size: 14px; }
+            .welcome-message { font-size: 13px; padding: 10px 12px; }
+        }
+
         /* Loading Animation */
         .loading {
             display: inline-block;
@@ -926,7 +1013,10 @@
                         const user = await window.otpAuth.getUserByPhone(phone);
                         if (user) {
                             const welcomeMsg = document.getElementById('signinWelcomeMessage');
-                            welcomeMsg.innerHTML = `
+                            const compact = window.innerWidth <= 480;
+                            welcomeMsg.innerHTML = compact
+                                ? `Welcome back, ${user.name}!`
+                                : `
                                 <i class="fas fa-heart"></i>
                                 Welcome back, ${user.name}! We're happy to see you again.
                             `;
@@ -991,7 +1081,10 @@
                                 
                                 // Update signup welcome message to show existing user
                                 const welcomeMsg = document.getElementById('signupWelcomeMessage');
-                                welcomeMsg.innerHTML = `
+                                const compact = window.innerWidth <= 480;
+                                welcomeMsg.innerHTML = compact
+                                    ? `Welcome back, <strong>${existingUser.name}</strong>!`
+                                    : `
                                     <i class="fas fa-user-check"></i>
                                     Welcome back, <strong>${existingUser.name}</strong>! We found your account.
                                 `;
@@ -1013,7 +1106,10 @@
                                 
                                 // Show regular signup welcome message for new users
                                 const welcomeMsg = document.getElementById('signupWelcomeMessage');
-                                welcomeMsg.innerHTML = `
+                                const compact = window.innerWidth <= 480;
+                                welcomeMsg.innerHTML = compact
+                                    ? `Welcome! Create your account.`
+                                    : `
                                     <i class="fas fa-star"></i>
                                     Welcome to JB Creations! Let's create your account.
                                 `;
@@ -1084,7 +1180,10 @@
                             
                             // Show message that we're logging them in instead
                             const welcomeMsg = document.getElementById('signupWelcomeMessage');
-                            welcomeMsg.innerHTML = `
+                            const compact = window.innerWidth <= 480;
+                            welcomeMsg.innerHTML = compact
+                                ? `Welcome back! Sending login OTP...`
+                                : `
                                 <i class="fas fa-sign-in-alt"></i>
                                 Welcome back! We found your account. Sending login OTP...
                             `;
@@ -1140,13 +1239,18 @@
                         if (type === 'signup') {
                             // Update success message based on whether user was existing or new
                             const successMessage = document.querySelector('#signupSuccessStep .success-message');
+                            const compact = window.innerWidth <= 480;
                             if (this.tempUserData && this.tempUserData.isExistingUser) {
-                                successMessage.innerHTML = `
+                                successMessage.innerHTML = compact
+                                    ? `Welcome back, <strong>${this.tempUserData.name}</strong>!`
+                                    : `
                                     <i class="fas fa-user-check"></i>
                                     Welcome back, <strong>${this.tempUserData.name}</strong>! Successfully signed in.
                                 `;
                             } else {
-                                successMessage.innerHTML = `
+                                successMessage.innerHTML = compact
+                                    ? `You're in! Welcome, <strong>${this.tempUserData.name}</strong>.`
+                                    : `
                                     <i class="fas fa-party-horn"></i>
                                     Account created successfully! Welcome to JB Creations, <strong>${this.tempUserData.name}</strong>!
                                 `;
