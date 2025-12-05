@@ -2607,14 +2607,17 @@ function processRoomImageOverlay(roomImg, index, frameImg) {
             desynchronized: true 
         });
 
-        // Process immediately if image is loaded, otherwise wait
-        const doProcess = () => {
+        // Load the ORIGINAL room image to avoid stacking old frame overlays
+        const originalRoomImg = new Image();
+        originalRoomImg.crossOrigin = 'anonymous';
+        
+        originalRoomImg.onload = () => {
             try {
                 // Set canvas size to match room image (limit max size for performance)
                 // OPTIMIZED: Reduced max size for faster processing on mobile
                 const maxSize = window.innerWidth <= 768 ? 800 : 1200;
-                let width = roomImg.naturalWidth || roomImg.width || 800;
-                let height = roomImg.naturalHeight || roomImg.height || 600;
+                let width = originalRoomImg.naturalWidth || originalRoomImg.width || 800;
+                let height = originalRoomImg.naturalHeight || originalRoomImg.height || 600;
                 
                 // Scale down if too large
                 if (width > maxSize || height > maxSize) {
@@ -2630,8 +2633,8 @@ function processRoomImageOverlay(roomImg, index, frameImg) {
                 ctx.imageSmoothingEnabled = true;
                 ctx.imageSmoothingQuality = window.innerWidth <= 768 ? 'medium' : 'high';
 
-                // Draw the room background image
-                ctx.drawImage(roomImg, 0, 0, canvas.width, canvas.height);
+                // Draw the ORIGINAL room background image (not the one with old frame overlay)
+                ctx.drawImage(originalRoomImg, 0, 0, canvas.width, canvas.height);
 
                 // Calculate frame position
                 let frameX, frameY, frameWidth, frameHeight;
@@ -2788,13 +2791,14 @@ function processRoomImageOverlay(roomImg, index, frameImg) {
                 completeWithCleanup(); // Still resolve to not block other images
             }
         };
-
-        if (roomImg.complete && roomImg.naturalWidth > 0) {
-            doProcess();
-        } else {
-            roomImg.onload = doProcess;
-            roomImg.onerror = () => completeWithCleanup(); // Resolve even on error
-        }
+        
+        originalRoomImg.onerror = () => {
+            console.error('Failed to load original room image for overlay');
+            completeWithCleanup();
+        };
+        
+        // Load from the ORIGINAL source, not the current (potentially overlaid) source
+        originalRoomImg.src = roomImg.originalSrc;
     });
 }
 
