@@ -4562,13 +4562,27 @@ function updateRoomPreviewsClick() {
 // ===========================
 
 function initMobileRoomPreview() {
+    console.log('📱 initMobileRoomPreview called');
+    
     const mobileSeeRoomPreviewBtn = document.getElementById('mobileSeeRoomPreview');
     const mobileRoomPreviewPage = document.getElementById('mobileRoomPreviewPage');
     const backToEditBtn = document.getElementById('backToEdit');
     const mobileRoomAddToCartBtn = document.getElementById('mobileRoomAddToCart');
     const container = document.getElementById('mainCustomizeContainer') || document.querySelector('.container');
     
-    if (!mobileSeeRoomPreviewBtn || !mobileRoomPreviewPage) return;
+    console.log('📱 Elements found:', {
+        mobileSeeRoomPreviewBtn: !!mobileSeeRoomPreviewBtn,
+        mobileRoomPreviewPage: !!mobileRoomPreviewPage,
+        backToEditBtn: !!backToEditBtn,
+        container: !!container
+    });
+    
+    if (!mobileSeeRoomPreviewBtn || !mobileRoomPreviewPage) {
+        console.warn('📱 initMobileRoomPreview: Required elements not found, exiting');
+        return;
+    }
+    
+    console.log('📱 Setting up See Room Preview button click handler...');
     
     // Update See Room Preview button state - always enabled, validation happens on click
     function updateMobileSeeRoomPreviewBtn() {
@@ -4586,7 +4600,10 @@ function initMobileRoomPreview() {
     
     // See Room Preview button click
     if (mobileSeeRoomPreviewBtn) {
-        mobileSeeRoomPreviewBtn.addEventListener('click', async function() {
+        console.log('📱 Adding click event listener to See Room Preview button');
+        mobileSeeRoomPreviewBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             console.log('📱 See Room Preview button clicked');
             
             if (!state.image || !state.frameSize) {
