@@ -4587,15 +4587,26 @@ function initMobileRoomPreview() {
     // See Room Preview button click
     if (mobileSeeRoomPreviewBtn) {
         mobileSeeRoomPreviewBtn.addEventListener('click', async function() {
+            console.log('📱 See Room Preview button clicked');
+            
             if (!state.image || !state.frameSize) {
                 alert('Please upload an image and select a frame size first.');
                 return;
             }
+            
+            console.log('📱 State check passed, proceeding with room preview...');
 
             // Hide bottom customization bar if it exists (use ID for specificity)
             const bottomBar = document.getElementById('mobileBottomBar') || document.querySelector('.mobile-bottom-bar');
             if (bottomBar) {
                 bottomBar.style.setProperty('display', 'none', 'important');
+            }
+            
+            // Also hide the dropup if open
+            const dropup = document.getElementById('mobileDropup');
+            if (dropup) {
+                dropup.classList.remove('open');
+                dropup.style.setProperty('display', 'none', 'important');
             }
 
             // Hide any other potential floating elements
@@ -4608,14 +4619,9 @@ function initMobileRoomPreview() {
             mobileSeeRoomPreviewBtn.innerHTML = '<i class=\"fas fa-spinner fa-spin\"></i> Generating Preview...';
             mobileSeeRoomPreviewBtn.disabled = true;
             
-            // Add overall timeout to prevent the button from being stuck forever
-            const overallTimeout = setTimeout(() => {
-                console.warn('Mobile room preview generation timed out, forcing completion...');
-                finishMobileRoomPreview();
-            }, 15000); // 15 second maximum
-            
+            // Define finishMobileRoomPreview BEFORE using it
             const finishMobileRoomPreview = () => {
-                clearTimeout(overallTimeout);
+                console.log('📱 finishMobileRoomPreview called');
                 
                 // Load room images into mobile view
                 loadMobileRoomImages();
@@ -4624,9 +4630,15 @@ function initMobileRoomPreview() {
                 updateMobileSpecs();
                 
                 // Hide main container and show mobile room preview page
-                console.log('Switching to room preview mode. Container:', container);
-                if (container) container.style.display = 'none';
-                mobileRoomPreviewPage.style.display = 'block';
+                console.log('📱 Switching to room preview mode. Container:', container, 'mobileRoomPreviewPage:', mobileRoomPreviewPage);
+                if (container) {
+                    container.style.display = 'none';
+                    console.log('📱 Main container hidden');
+                }
+                if (mobileRoomPreviewPage) {
+                    mobileRoomPreviewPage.style.display = 'block';
+                    console.log('📱 Mobile room preview page shown');
+                }
                 document.body.classList.add('room-preview-active');
                 
                 // Explicitly hide bottom bar and close drawers to ensure they don't overlap
@@ -4636,6 +4648,7 @@ function initMobileRoomPreview() {
                 const mobileDropup = document.getElementById('mobileDropup');
                 if (mobileDropup) {
                     mobileDropup.classList.remove('active');
+                    mobileDropup.classList.remove('open');
                     mobileDropup.setAttribute('aria-hidden', 'true');
                 }
                 
@@ -4645,7 +4658,15 @@ function initMobileRoomPreview() {
                 // Reset button
                 mobileSeeRoomPreviewBtn.innerHTML = '<i class=\"fas fa-home\"></i> See Room Preview';
                 mobileSeeRoomPreviewBtn.disabled = false;
+                
+                console.log('📱 Room preview transition complete!');
             };
+            
+            // Add overall timeout to prevent the button from being stuck forever
+            const overallTimeout = setTimeout(() => {
+                console.warn('📱 Mobile room preview generation timed out, forcing completion...');
+                finishMobileRoomPreview();
+            }, 15000); // 15 second maximum
             
             try {
                 // Capture images needed for cart BEFORE hiding the main container
@@ -4674,13 +4695,18 @@ function initMobileRoomPreview() {
                 // Update room previews - this is now optimized with parallel processing
                 const overlayStartTime = performance.now();
                 await overlayFrameOnRoomImages();
-                console.log('Room overlays completed in', (performance.now() - overlayStartTime).toFixed(0), 'ms');
+                console.log('📱 Room overlays completed in', (performance.now() - overlayStartTime).toFixed(0), 'ms');
+                
+                // Clear timeout since we're finishing normally
+                clearTimeout(overallTimeout);
                 
                 // Complete the transition
                 finishMobileRoomPreview();
                 
             } catch (error) {
-                console.error('Error generating room preview:', error);
+                console.error('📱 Error generating room preview:', error);
+                // Clear timeout
+                clearTimeout(overallTimeout);
                 // Still try to show the room preview page even if there's an error
                 finishMobileRoomPreview();
             }
@@ -4690,6 +4716,7 @@ function initMobileRoomPreview() {
     // Back to Edit button click
     if (backToEditBtn) {
         backToEditBtn.addEventListener('click', function() {
+            console.log('📱 Back to Edit button clicked');
             // Hide mobile room preview page and show main container
             mobileRoomPreviewPage.style.display = 'none';
             document.body.classList.remove('room-preview-active');
@@ -4709,6 +4736,7 @@ function initMobileRoomPreview() {
 
             // Scroll to top
             window.scrollTo(0, 0);
+            console.log('📱 Back to customize page complete');
         });
     }
     
