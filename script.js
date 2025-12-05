@@ -4570,21 +4570,18 @@ function initMobileRoomPreview() {
     
     if (!mobileSeeRoomPreviewBtn || !mobileRoomPreviewPage) return;
     
-    // Update See Room Preview button state
+    // Update See Room Preview button state - always enabled, validation happens on click
     function updateMobileSeeRoomPreviewBtn() {
+        // Button is always enabled - we validate on click instead
         if (mobileSeeRoomPreviewBtn) {
-            const hasImage = !!(state.image);
-            const hasFrameSize = !!(state.frameSize && state.frameSize.size);
-            console.log('📱 updateMobileSeeRoomPreviewBtn: hasImage=', hasImage, 'hasFrameSize=', hasFrameSize);
-            mobileSeeRoomPreviewBtn.disabled = !(hasImage && hasFrameSize);
-            console.log('📱 Button disabled:', mobileSeeRoomPreviewBtn.disabled);
+            mobileSeeRoomPreviewBtn.disabled = false;
         }
     }
     
     // Call this when image is loaded or frame size changes
     window.updateMobileSeeRoomPreviewBtn = updateMobileSeeRoomPreviewBtn;
     
-    // Also call it initially in case state is already set
+    // Enable the button immediately
     updateMobileSeeRoomPreviewBtn();
     
     // See Room Preview button click
