@@ -266,26 +266,34 @@ function initMobileBottomBar() {
         });
     });
 
+    const dropupHeader = document.querySelector('.dropup-header');
+    function toggleDropup() {
+        const willOpen = !dropup.classList.contains('open');
+        if (willOpen) {
+            dropup.classList.add('open');
+            dropup.setAttribute('aria-hidden', 'false');
+            toggleBtn.setAttribute('aria-expanded', 'true');
+            bottomBar.classList.add('hidden-for-dropup');
+        } else {
+            dropup.classList.remove('open');
+            dropup.setAttribute('aria-hidden', 'true');
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            bottomBar.classList.remove('hidden-for-dropup');
+        }
+        const icon = toggleBtn.querySelector('i');
+        if (icon) {
+            icon.className = willOpen ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+        }
+    }
     if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-            const willOpen = !dropup.classList.contains('open');
-            if (willOpen) {
-                dropup.classList.add('open');
-                dropup.setAttribute('aria-hidden', 'false');
-                toggleBtn.setAttribute('aria-expanded', 'true');
-                // Hide bottom bar for minimalistic look
-                bottomBar.classList.add('hidden-for-dropup');
-            } else {
-                dropup.classList.remove('open');
-                dropup.setAttribute('aria-hidden', 'true');
-                toggleBtn.setAttribute('aria-expanded', 'false');
-                // Show bottom bar again
-                bottomBar.classList.remove('hidden-for-dropup');
-            }
-            const icon = toggleBtn.querySelector('i');
-            if (icon) {
-                icon.className = willOpen ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
-            }
+        toggleBtn.addEventListener('click', toggleDropup);
+    }
+    if (dropupHeader) {
+        dropupHeader.style.cursor = 'pointer';
+        dropupHeader.addEventListener('click', function(e) {
+            // Prevent double toggle if button is clicked
+            if (e.target.closest('button')) return;
+            toggleDropup();
         });
     }
 
