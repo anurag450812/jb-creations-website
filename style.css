@@ -6147,12 +6147,13 @@ button i {
 }
 
 /* Mobile See Room Preview Button */
+
 .mobile-see-room-preview-btn {
     display: none;
     width: calc(100% - 2rem);
     margin: 1rem auto;
-    background: linear-gradient(135deg, #82C0CC, #489FB5);
-    color: white;
+    background: var(--highlight-color) !important;
+    color: #0b3a45 !important;
     border: none;
     border-radius: 12px;
     padding: 1rem;
@@ -6160,7 +6161,7 @@ button i {
     font-weight: 600;
     cursor: pointer;
     gap: 0.5rem;
-    box-shadow: 0 4px 15px rgba(130, 192, 204, 0.3);
+    box-shadow: 0 4px 15px rgba(255, 166, 43, 0.18);
     transition: all 0.3s ease;
 }
 
