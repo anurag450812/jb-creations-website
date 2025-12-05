@@ -405,7 +405,7 @@ const GlobalWebsiteHeader = {
         <div class="header-content">
             <div class="header-left"></div>
             <div class="header-brand">
-                <h1 class="brand-name">JB Creations</h1>
+                <a href="index.html" style="text-decoration: none; color: inherit;"><h1 class="brand-name">JB Creations</h1></a>
             </div>
             <div class="header-right">
                 <div class="auth-section" id="authSection">

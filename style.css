@@ -3312,26 +3312,73 @@ button i {
         display: none !important;
     }
 
-    /* Upload and Preview Section Mobile Width */
+    /* Upload Section Mobile - Centered card with equal padding on all sides */
     .customize-page .upload-section {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 0 0.9rem !important;
-        padding: 1.2rem 1rem !important;
+        width: calc(100% - 2rem) !important; /* Leave 1rem margin on each side */
+        max-width: calc(100% - 2rem) !important;
+        height: auto !important; /* Let content determine height */
+        min-height: auto !important;
+        max-height: none !important;
+        margin: 1rem !important; /* Equal margin on all sides */
+        padding: 1.5rem !important; /* Equal padding inside */
         box-sizing: border-box !important;
-        border-radius: 18px;
+        border-radius: 20px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+
+    .customize-page .upload-section .upload-header {
+        margin-bottom: 1.25rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    .customize-page .upload-section .upload-header h2 {
+        font-size: 1.3rem !important;
+    }
+
+    .customize-page .upload-section .upload-header i {
+        font-size: 1.5rem !important;
     }
 
     .customize-page .upload-section .frame {
-        height: 300px !important;
+        height: auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        flex-shrink: 0 !important;
+        aspect-ratio: 13 / 19 !important;
+        margin: 0 !important;
     }
 
     .customize-page .upload-section .image-container {
-        min-height: 300px;
+        min-height: 100% !important;
+        height: 100% !important;
     }
 
     .customize-page .upload-overlay {
-        padding: 1.5rem;
+        padding: 1.25rem !important;
+    }
+
+    .customize-page .upload-overlay i {
+        font-size: 2.5rem !important;
+        margin-bottom: 0.75rem !important;
+    }
+
+    .customize-page .upload-overlay p {
+        font-size: 0.95rem !important;
+        margin-bottom: 0.4rem !important;
+    }
+
+    .customize-page .upload-overlay .upload-hint {
+        font-size: 0.8rem !important;
+    }
+
+    /* Hide rain glass effects on mobile to reduce visual clutter */
+    .customize-page .upload-section .rain-glass {
+        display: none !important;
     }
 
     .customize-page .preview-section {
