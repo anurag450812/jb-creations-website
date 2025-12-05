@@ -5660,6 +5660,17 @@ button i {
     grid-column: 1;
 }
 
+/* Floating back button for room preview */
+.back-to-edit-btn.floating-back-btn {
+    position: fixed;
+    top: 70px;
+    left: 10px;
+    z-index: 1000;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
 .back-to-edit-btn:active {
     background: rgba(22, 105, 122, 0.1);
     transform: scale(0.95);
