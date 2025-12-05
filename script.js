@@ -268,31 +268,35 @@ function initMobileBottomBar() {
 
     const dropupHeader = document.querySelector('.dropup-header');
     function toggleDropup() {
-        const willOpen = !dropup.classList.contains('open');
-        if (willOpen) {
-            dropup.classList.add('open');
-            dropup.setAttribute('aria-hidden', 'false');
-            toggleBtn.setAttribute('aria-expanded', 'true');
-            bottomBar.classList.add('hidden-for-dropup');
-        } else {
+        const isOpen = dropup.classList.contains('open');
+        if (isOpen) {
+            // Close the dropup
             dropup.classList.remove('open');
             dropup.setAttribute('aria-hidden', 'true');
-            toggleBtn.setAttribute('aria-expanded', 'false');
+            if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
             bottomBar.classList.remove('hidden-for-dropup');
-        }
-        const icon = toggleBtn.querySelector('i');
-        if (icon) {
-            icon.className = willOpen ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+            const icon = toggleBtn ? toggleBtn.querySelector('i') : null;
+            if (icon) icon.className = 'fas fa-chevron-up';
+        } else {
+            // Open the dropup
+            dropup.classList.add('open');
+            dropup.setAttribute('aria-hidden', 'false');
+            if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'true');
+            bottomBar.classList.add('hidden-for-dropup');
+            const icon = toggleBtn ? toggleBtn.querySelector('i') : null;
+            if (icon) icon.className = 'fas fa-chevron-down';
         }
     }
     if (toggleBtn) {
-        toggleBtn.addEventListener('click', toggleDropup);
+        toggleBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleDropup();
+        });
     }
     if (dropupHeader) {
         dropupHeader.style.cursor = 'pointer';
         dropupHeader.addEventListener('click', function(e) {
-            // Prevent double toggle if button is clicked
-            if (e.target.closest('button')) return;
+            e.stopPropagation();
             toggleDropup();
         });
     }
