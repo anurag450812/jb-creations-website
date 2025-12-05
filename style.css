@@ -6152,8 +6152,8 @@ button i {
     display: none;
     width: calc(100% - 2rem);
     margin: 1rem auto;
-    background: var(--highlight-color) !important;
-    color: #0b3a45 !important;
+    background: #FFA62B !important;
+    color: #fff !important;
     border: none;
     border-radius: 12px;
     padding: 1rem;
