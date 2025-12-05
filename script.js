@@ -209,6 +209,7 @@ function initMobileBottomBar() {
 
     // Tabs behavior
     const tabs = bottomBar.querySelectorAll('.bar-tab');
+    const dots = bottomBar.querySelectorAll('.bar-dots .dot');
     const titleEl = document.getElementById('dropupTitle');
     const toggleBtn = document.getElementById('dropupToggle');
 
@@ -224,12 +225,17 @@ function initMobileBottomBar() {
             if (!el) return;
             el.classList.toggle('active', key === name);
         });
+        // dots state
+        const order = ['size','color','texture','adjust'];
+        order.forEach((key, idx) => {
+            if (dots[idx]) dots[idx].classList.toggle('active', key === name);
+        });
         // title
         if (titleEl) {
             const map = { size: 'Size', color: 'Color', texture: 'Texture', adjust: 'Adjust' };
             titleEl.textContent = map[name] || 'Customize';
         }
-        // Hide the bottom bar when dropup opens
+        // Hide bottom bar for minimalistic look
         bottomBar.classList.add('hidden-for-dropup');
         // open dropup
         dropup.classList.add('open');
@@ -247,118 +253,45 @@ function initMobileBottomBar() {
             e.stopPropagation();
             const target = tab.dataset.target;
             if (!target) return;
-            // Always open the dropup and hide the bar when a tab is clicked
+            const alreadyOpen = dropup.classList.contains('open');
+            const thisActive = tab.classList.contains('active');
+            if (alreadyOpen && thisActive) {
+                dropup.classList.remove('open');
+                dropup.setAttribute('aria-hidden', 'true');
+                // Show bottom bar again
+                bottomBar.classList.remove('hidden-for-dropup');
+                return;
+            }
             setActiveDrawer(target);
         });
     });
 
-    // Make the entire dropup header clickable for toggle only (no option selection)
-    const dropupHeader = dropup.querySelector('.dropup-header');
-    
-    function toggleDropup(e) {
-        // Prevent event bubbling issues
-        if (e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        
-        const willOpen = !dropup.classList.contains('open');
-        if (willOpen) {
-            // Hide bottom bar and open dropup
-            bottomBar.classList.add('hidden-for-dropup');
-            dropup.classList.add('open');
-            dropup.setAttribute('aria-hidden', 'false');
-            if (toggleBtn) {
-                toggleBtn.setAttribute('aria-expanded', 'true');
-                const icon = toggleBtn.querySelector('i');
-                if (icon) {
-                    icon.className = 'fas fa-chevron-down';
-                }
-            }
-        } else {
-            // Close the dropup and show bottom bar
-            dropup.classList.remove('open');
-            dropup.setAttribute('aria-hidden', 'true');
-            bottomBar.classList.remove('hidden-for-dropup');
-            if (toggleBtn) {
-                toggleBtn.setAttribute('aria-expanded', 'false');
-                const icon = toggleBtn.querySelector('i');
-                if (icon) {
-                    icon.className = 'fas fa-chevron-up';
-                }
-            }
-        }
-    }
-    
-    // Function to close the dropup
-    function closeDropup() {
-        if (dropup.classList.contains('open')) {
-            dropup.classList.remove('open');
-            dropup.setAttribute('aria-hidden', 'true');
-            bottomBar.classList.remove('hidden-for-dropup');
-            if (toggleBtn) {
-                toggleBtn.setAttribute('aria-expanded', 'false');
-                const icon = toggleBtn.querySelector('i');
-                if (icon) {
-                    icon.className = 'fas fa-chevron-up';
-                }
-            }
-        }
-    }
-    
-    // Add click listener to the entire header
-    if (dropupHeader) {
-        dropupHeader.addEventListener('click', toggleDropup);
-    }
-    
     if (toggleBtn) {
-        toggleBtn.addEventListener('click', (e) => {
-            // Stop propagation to prevent double-triggering from header click
-            e.stopPropagation();
-            toggleDropup(e);
+        toggleBtn.addEventListener('click', () => {
+            const willOpen = !dropup.classList.contains('open');
+            if (willOpen) {
+                dropup.classList.add('open');
+                dropup.setAttribute('aria-hidden', 'false');
+                toggleBtn.setAttribute('aria-expanded', 'true');
+                // Hide bottom bar for minimalistic look
+                bottomBar.classList.add('hidden-for-dropup');
+            } else {
+                dropup.classList.remove('open');
+                dropup.setAttribute('aria-hidden', 'true');
+                toggleBtn.setAttribute('aria-expanded', 'false');
+                // Show bottom bar again
+                bottomBar.classList.remove('hidden-for-dropup');
+            }
+            const icon = toggleBtn.querySelector('i');
+            if (icon) {
+                icon.className = willOpen ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+            }
         });
     }
-    
-    // Close dropup when clicking outside of it
-    document.addEventListener('click', (e) => {
-        // Check if the dropup is open
-        if (!dropup.classList.contains('open')) return;
-        
-        // Check if the click is outside the dropup and bottom bar
-        const isInsideDropup = dropup.contains(e.target);
-        const isInsideBottomBar = bottomBar.contains(e.target);
-        
-        if (!isInsideDropup && !isInsideBottomBar) {
-            closeDropup();
-        }
-    });
-    
-    // Also close on touch outside for mobile devices
-    document.addEventListener('touchstart', (e) => {
-        // Check if the dropup is open
-        if (!dropup.classList.contains('open')) return;
-        
-        // Check if the touch is outside the dropup and bottom bar
-        const isInsideDropup = dropup.contains(e.target);
-        const isInsideBottomBar = bottomBar.contains(e.target);
-        
-        if (!isInsideDropup && !isInsideBottomBar) {
-            closeDropup();
-        }
-    }, { passive: true });
 
-    // Ensure Size drawer is the default active drawer (but don't auto-open the dropup)
+    // Ensure a default drawer is prepared (but don't auto-open)
     Object.values(drawers).forEach(el => el && el.classList.remove('active'));
     if (drawers.size) drawers.size.classList.add('active');
-    // Set Size tab as active by default
-    tabs.forEach(t => {
-        const isSize = t.dataset.target === 'size';
-        t.classList.toggle('active', isSize);
-        t.setAttribute('aria-selected', isSize ? 'true' : 'false');
-    });
-    // Set first dot as active
-    if (dots[0]) dots[0].classList.add('active');
-    if (titleEl) titleEl.textContent = 'Size';
 }
 
 // Listen for storage changes to update cart count across tabs
@@ -1108,9 +1041,7 @@ function processCompressedImage(imageDataURL) {
                     // Update mobile See Room Preview button state
                     if (window.updateMobileSeeRoomPreviewBtn) {
                         window.updateMobileSeeRoomPreviewBtn();
-                    }
-                    
-                    // Set default frame color to black if not set
+                    }                // Set default frame color to black if not set
                 if (!state.frameColor) {
                     state.frameColor = 'black';
                 }
@@ -4562,68 +4493,38 @@ function updateRoomPreviewsClick() {
 // ===========================
 
 function initMobileRoomPreview() {
-    console.log('📱 initMobileRoomPreview called');
-    
     const mobileSeeRoomPreviewBtn = document.getElementById('mobileSeeRoomPreview');
     const mobileRoomPreviewPage = document.getElementById('mobileRoomPreviewPage');
     const backToEditBtn = document.getElementById('backToEdit');
     const mobileRoomAddToCartBtn = document.getElementById('mobileRoomAddToCart');
     const container = document.getElementById('mainCustomizeContainer') || document.querySelector('.container');
     
-    console.log('📱 Elements found:', {
-        mobileSeeRoomPreviewBtn: !!mobileSeeRoomPreviewBtn,
-        mobileRoomPreviewPage: !!mobileRoomPreviewPage,
-        backToEditBtn: !!backToEditBtn,
-        container: !!container
-    });
+    if (!mobileSeeRoomPreviewBtn || !mobileRoomPreviewPage) return;
     
-    if (!mobileSeeRoomPreviewBtn || !mobileRoomPreviewPage) {
-        console.warn('📱 initMobileRoomPreview: Required elements not found, exiting');
-        return;
-    }
-    
-    console.log('📱 Setting up See Room Preview button click handler...');
-    
-    // Update See Room Preview button state - always enabled, validation happens on click
+    // Update See Room Preview button state
     function updateMobileSeeRoomPreviewBtn() {
-        // Button is always enabled - we validate on click instead
         if (mobileSeeRoomPreviewBtn) {
-            mobileSeeRoomPreviewBtn.disabled = false;
+            const hasImage = !!(state.image);
+            const hasFrameSize = !!(state.frameSize);
+            mobileSeeRoomPreviewBtn.disabled = !(hasImage && hasFrameSize);
         }
     }
     
     // Call this when image is loaded or frame size changes
     window.updateMobileSeeRoomPreviewBtn = updateMobileSeeRoomPreviewBtn;
     
-    // Enable the button immediately
-    updateMobileSeeRoomPreviewBtn();
-    
     // See Room Preview button click
     if (mobileSeeRoomPreviewBtn) {
-        console.log('📱 Adding click event listener to See Room Preview button');
-        mobileSeeRoomPreviewBtn.addEventListener('click', async function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('📱 See Room Preview button clicked');
-            
+        mobileSeeRoomPreviewBtn.addEventListener('click', async function() {
             if (!state.image || !state.frameSize) {
                 alert('Please upload an image and select a frame size first.');
                 return;
             }
-            
-            console.log('📱 State check passed, proceeding with room preview...');
 
             // Hide bottom customization bar if it exists (use ID for specificity)
             const bottomBar = document.getElementById('mobileBottomBar') || document.querySelector('.mobile-bottom-bar');
             if (bottomBar) {
                 bottomBar.style.setProperty('display', 'none', 'important');
-            }
-            
-            // Also hide the dropup if open
-            const dropup = document.getElementById('mobileDropup');
-            if (dropup) {
-                dropup.classList.remove('open');
-                dropup.style.setProperty('display', 'none', 'important');
             }
 
             // Hide any other potential floating elements
@@ -4636,9 +4537,14 @@ function initMobileRoomPreview() {
             mobileSeeRoomPreviewBtn.innerHTML = '<i class=\"fas fa-spinner fa-spin\"></i> Generating Preview...';
             mobileSeeRoomPreviewBtn.disabled = true;
             
-            // Define finishMobileRoomPreview BEFORE using it
+            // Add overall timeout to prevent the button from being stuck forever
+            const overallTimeout = setTimeout(() => {
+                console.warn('Mobile room preview generation timed out, forcing completion...');
+                finishMobileRoomPreview();
+            }, 15000); // 15 second maximum
+            
             const finishMobileRoomPreview = () => {
-                console.log('📱 finishMobileRoomPreview called');
+                clearTimeout(overallTimeout);
                 
                 // Load room images into mobile view
                 loadMobileRoomImages();
@@ -4647,15 +4553,9 @@ function initMobileRoomPreview() {
                 updateMobileSpecs();
                 
                 // Hide main container and show mobile room preview page
-                console.log('📱 Switching to room preview mode. Container:', container, 'mobileRoomPreviewPage:', mobileRoomPreviewPage);
-                if (container) {
-                    container.style.display = 'none';
-                    console.log('📱 Main container hidden');
-                }
-                if (mobileRoomPreviewPage) {
-                    mobileRoomPreviewPage.style.display = 'block';
-                    console.log('📱 Mobile room preview page shown');
-                }
+                console.log('Switching to room preview mode. Container:', container);
+                if (container) container.style.display = 'none';
+                mobileRoomPreviewPage.style.display = 'block';
                 document.body.classList.add('room-preview-active');
                 
                 // Explicitly hide bottom bar and close drawers to ensure they don't overlap
@@ -4665,7 +4565,6 @@ function initMobileRoomPreview() {
                 const mobileDropup = document.getElementById('mobileDropup');
                 if (mobileDropup) {
                     mobileDropup.classList.remove('active');
-                    mobileDropup.classList.remove('open');
                     mobileDropup.setAttribute('aria-hidden', 'true');
                 }
                 
@@ -4675,15 +4574,7 @@ function initMobileRoomPreview() {
                 // Reset button
                 mobileSeeRoomPreviewBtn.innerHTML = '<i class=\"fas fa-home\"></i> See Room Preview';
                 mobileSeeRoomPreviewBtn.disabled = false;
-                
-                console.log('📱 Room preview transition complete!');
             };
-            
-            // Add overall timeout to prevent the button from being stuck forever
-            const overallTimeout = setTimeout(() => {
-                console.warn('📱 Mobile room preview generation timed out, forcing completion...');
-                finishMobileRoomPreview();
-            }, 15000); // 15 second maximum
             
             try {
                 // Capture images needed for cart BEFORE hiding the main container
@@ -4712,18 +4603,13 @@ function initMobileRoomPreview() {
                 // Update room previews - this is now optimized with parallel processing
                 const overlayStartTime = performance.now();
                 await overlayFrameOnRoomImages();
-                console.log('📱 Room overlays completed in', (performance.now() - overlayStartTime).toFixed(0), 'ms');
-                
-                // Clear timeout since we're finishing normally
-                clearTimeout(overallTimeout);
+                console.log('Room overlays completed in', (performance.now() - overlayStartTime).toFixed(0), 'ms');
                 
                 // Complete the transition
                 finishMobileRoomPreview();
                 
             } catch (error) {
-                console.error('📱 Error generating room preview:', error);
-                // Clear timeout
-                clearTimeout(overallTimeout);
+                console.error('Error generating room preview:', error);
                 // Still try to show the room preview page even if there's an error
                 finishMobileRoomPreview();
             }
@@ -4733,7 +4619,6 @@ function initMobileRoomPreview() {
     // Back to Edit button click
     if (backToEditBtn) {
         backToEditBtn.addEventListener('click', function() {
-            console.log('📱 Back to Edit button clicked');
             // Hide mobile room preview page and show main container
             mobileRoomPreviewPage.style.display = 'none';
             document.body.classList.remove('room-preview-active');
@@ -4753,7 +4638,6 @@ function initMobileRoomPreview() {
 
             // Scroll to top
             window.scrollTo(0, 0);
-            console.log('📱 Back to customize page complete');
         });
     }
     
