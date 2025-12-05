@@ -2457,7 +2457,19 @@ function captureFramePreview() {
 
 function overlayFrameOnRoomImages() {
     return new Promise((resolve, reject) => {
+        // Add overall timeout to prevent hanging indefinitely
+        const overallTimeout = setTimeout(() => {
+            console.warn('overlayFrameOnRoomImages timed out after 10 seconds, continuing anyway...');
+            resolve();
+        }, 10000);
+        
+        const completeWithCleanup = () => {
+            clearTimeout(overallTimeout);
+            resolve();
+        };
+        
         if (!state.image || !state.frameSize) {
+            clearTimeout(overallTimeout);
             reject(new Error('No image or frame size selected'));
             return;
         }
@@ -2465,6 +2477,7 @@ function overlayFrameOnRoomImages() {
         // Capture the current frame preview
         captureFramePreview().then(frameDataURL => {
             if (!frameDataURL) {
+                clearTimeout(overallTimeout);
                 reject(new Error('Failed to capture frame preview'));
                 return;
             }
@@ -2474,275 +2487,294 @@ function overlayFrameOnRoomImages() {
             // Get all room slider images
             const roomSlider = document.getElementById('roomSlider');
             if (!roomSlider) {
-                reject(new Error('Room slider not found'));
+                console.warn('Room slider not found, skipping overlay');
+                completeWithCleanup();
                 return;
             }
 
             const roomImages = roomSlider.querySelectorAll('img');
             console.log(`Applying frame overlay to ${roomImages.length} room images`);
             
-            let completedImages = 0;
             const totalImages = roomImages.length;
             
             if (totalImages === 0) {
-                resolve();
+                console.warn('No room images found, skipping overlay');
+                completeWithCleanup();
                 return;
             }
-        
-            roomImages.forEach((roomImg, index) => {
-                // Skip the fifth image (index === 4) from having frame overlay for all cases
-                if (index === 4) {
-                    completedImages++;
-                    if (completedImages === totalImages) {
-                        resolve();
-                    }
-                    return;
-                }
-
-                // Skip if image doesn't exist or is broken
-                if (!roomImg.src || roomImg.style.display === 'none') {
-                    completedImages++;
-                    if (completedImages === totalImages) {
-                        resolve();
-                    }
-                    return;
-                }
-
-                // Store original source for potential restoration
-                if (!roomImg.originalSrc) {
-                    roomImg.originalSrc = roomImg.src;
-                }
-
-                // Create a canvas for each room image with the frame overlay
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d', { 
-                    alpha: false, 
-                    willReadFrequently: false,
-                    desynchronized: true 
+            
+            // Pre-load the frame image ONCE for all room images (major optimization)
+            const sharedFrameImg = new Image();
+            
+            // Add timeout for frame image loading
+            const frameLoadTimeout = setTimeout(() => {
+                console.warn('Frame image load timed out, continuing anyway...');
+                completeWithCleanup();
+            }, 5000);
+            
+            sharedFrameImg.onload = () => {
+                clearTimeout(frameLoadTimeout);
+                console.log('Frame image pre-loaded, processing all room images in parallel...');
+                
+                // Process all images in parallel using Promise.all
+                const imagePromises = Array.from(roomImages).map((roomImg, index) => {
+                    return processRoomImageOverlay(roomImg, index, sharedFrameImg);
                 });
-
-                // Wait for room image to load if it hasn't already
-                const processRoomImage = () => {
-                    try {
-                        // Set canvas size to match room image (limit max size for performance)
-                        const maxSize = 1200;
-                        let width = roomImg.naturalWidth || roomImg.width || 800;
-                        let height = roomImg.naturalHeight || roomImg.height || 600;
-                        
-                        // Scale down if too large
-                        if (width > maxSize || height > maxSize) {
-                            const scale = maxSize / Math.max(width, height);
-                            width = Math.round(width * scale);
-                            height = Math.round(height * scale);
-                        }
-                        
-                        canvas.width = width;
-                        canvas.height = height;
-                        
-                        // Enable high-quality image smoothing
-                        ctx.imageSmoothingEnabled = true;
-                        ctx.imageSmoothingQuality = 'high';
-
-                        // Draw the room background image
-                        ctx.drawImage(roomImg, 0, 0, canvas.width, canvas.height);
-
-                        // Load and overlay the frame preview
-                        const frameImg = new Image();
-                        frameImg.onload = () => {
-                            try {
-                                // Position the frame in different locations for variety
-                                let frameX, frameY, frameWidth, frameHeight;
-                                
-                                // Special positioning for 13x19 portrait on first, second, third, and fourth room images
-                                if ((index === 0 || index === 1 || index === 2 || index === 3) && state.frameSize && 
-                                    state.frameSize.size === '13x19' && 
-                                    state.frameSize.orientation === 'portrait') {
-                                    
-                                    // Use specific coordinates for first, second, third, and fourth images
-                                    // Scale coordinates based on actual canvas size vs original image size
-                                    const originalImageWidth = 800;
-                                    const originalImageHeight = 600;
-                                    
-                                    const scaleX = canvas.width / originalImageWidth;
-                                    const scaleY = canvas.height / originalImageHeight;
-                                    
-                                    if (index === 0) {
-                                        frameX = 308 * scaleX;
-                                        frameY = 48 * scaleY;
-                                        frameWidth = (506 - 308) * scaleX;
-                                        frameHeight = (255 - 48) * scaleY;
-                                    } else if (index === 1) {
-                                        frameX = 288 * scaleX;
-                                        frameY = 61 * scaleY;
-                                        frameWidth = (486 - 288) * scaleX;
-                                        frameHeight = (268 - 61) * scaleY;
-                                    } else if (index === 2) {
-                                        frameX = 404 * scaleX;
-                                        frameY = 49 * scaleY;
-                                        frameWidth = (602 - 404) * scaleX;
-                                        frameHeight = (256 - 49) * scaleY;
-                                    } else if (index === 3) {
-                                        frameX = 190 * scaleX;
-                                        frameY = 63 * scaleY;
-                                        frameWidth = (401 - 190) * scaleX;
-                                        frameHeight = (285 - 63) * scaleY;
-                                    }
-                                    
-                                } else if ((index === 0 || index === 1 || index === 2 || index === 3) && state.frameSize && 
-                                    state.frameSize.size === '13x19' && 
-                                    state.frameSize.orientation === 'landscape') {
-                                    
-                                    const originalImageWidth = 800;
-                                    const originalImageHeight = 600;
-                                    
-                                    const scaleX = canvas.width / originalImageWidth;
-                                    const scaleY = canvas.height / originalImageHeight;
-                                    
-                                    if (index === 0) {
-                                        frameX = 275 * scaleX;
-                                        frameY = 64 * scaleY;
-                                        frameWidth = (565 - 275) * scaleX;
-                                        frameHeight = (208 - 64) * scaleY;
-                                    } else if (index === 1) {
-                                        frameX = 239 * scaleX;
-                                        frameY = 66 * scaleY;
-                                        frameWidth = (547 - 239) * scaleX;
-                                        frameHeight = (218 - 66) * scaleY;
-                                    } else if (index === 2) {
-                                        frameX = 252 * scaleX;
-                                        frameY = 52 * scaleY;
-                                        frameWidth = (557 - 252) * scaleX;
-                                        frameHeight = (201 - 52) * scaleY;
-                                    } else if (index === 3) {
-                                        frameX = 76 * scaleX;
-                                        frameY = 68 * scaleY;
-                                        frameWidth = (416 - 76) * scaleX;
-                                        frameHeight = (236 - 68) * scaleY;
-                                    }
-                                    
-                                } else if ((index === 0 || index === 1 || index === 2 || index === 3) && state.frameSize && 
-                                    state.frameSize.size === '13x10' && 
-                                    state.frameSize.orientation === 'portrait') {
-                                    
-                                    const originalImageWidth = 800;
-                                    const originalImageHeight = 600;
-                                    
-                                    const scaleX = canvas.width / originalImageWidth;
-                                    const scaleY = canvas.height / originalImageHeight;
-                                    
-                                    if (index === 0) {
-                                        frameX = 330 * scaleX;
-                                        frameY = 76 * scaleY;
-                                        frameWidth = (485 - 330) * scaleX;
-                                        frameHeight = (222 - 76) * scaleY;
-                                    } else if (index === 3) {
-                                        frameX = 205 * scaleX;
-                                        frameY = 65 * scaleY;
-                                        frameWidth = (450 - 205) * scaleX;
-                                        frameHeight = (296 - 65) * scaleY;
-                                    }
-                                    
-                                } else if ((index === 0 || index === 1 || index === 2 || index === 3) && state.frameSize && 
-                                    state.frameSize.size === '13x10' && 
-                                    state.frameSize.orientation === 'landscape') {
-                                    
-                                    const originalImageWidth = 800;
-                                    const originalImageHeight = 600;
-                                    
-                                    const scaleX = canvas.width / originalImageWidth;
-                                    const scaleY = canvas.height / originalImageHeight;
-                                    
-                                    if (index === 0) {
-                                        frameX = 325 * scaleX;
-                                        frameY = 95 * scaleY;
-                                        frameWidth = (530 - 325) * scaleX;
-                                        frameHeight = (210 - 95) * scaleY;
-                                    } else if (index === 3) {
-                                        frameX = 179 * scaleX;
-                                        frameY = 121 * scaleY;
-                                        frameWidth = (490 - 179) * scaleX;
-                                        frameHeight = (292 - 121) * scaleY;
-                                    }
-                                    
-                                } else {
-                                    // Use dynamic scaling for other cases
-                                    const frameScale = Math.min(0.3, 350 / Math.min(canvas.width, canvas.height));
-                                    frameWidth = canvas.width * frameScale;
-                                    frameHeight = frameWidth * (frameImg.height / frameImg.width);
-                                    
-                                    // Use index to vary frame position across different room images
-                                    switch (index % 3) {
-                                        case 0:
-                                            frameX = canvas.width * 0.55;
-                                            frameY = canvas.height * 0.25;
-                                            break;
-                                        case 1:
-                                            frameX = canvas.width * 0.15;
-                                            frameY = canvas.height * 0.3;
-                                            break;
-                                        case 2:
-                                            frameX = canvas.width * 0.35;
-                                            frameY = canvas.height * 0.2;
-                                            break;
-                                        default:
-                                            frameX = canvas.width * 0.4;
-                                            frameY = canvas.height * 0.3;
-                                    }
-                                }
-
-                                // Draw the frame with antialiasing
-                                ctx.imageSmoothingEnabled = true;
-                                ctx.imageSmoothingQuality = 'high';
-                                ctx.drawImage(frameImg, frameX, frameY, frameWidth, frameHeight);
-
-                                // Convert the composite image to data URL with optimized quality
-                                const compositeDataURL = canvas.toDataURL('image/jpeg', 0.85);
-                                roomImg.src = compositeDataURL;
-                                
-                                // Track completion
-                                completedImages++;
-                                if (completedImages === totalImages) {
-                                    resolve();
-                                }
-                                
-                            } catch (error) {
-                                console.error('Error overlaying frame on room image:', error);
-                                completedImages++;
-                                if (completedImages === totalImages) {
-                                    resolve();
-                                }
-                            }
-                        };
-
-                        frameImg.onerror = () => {
-                            console.error('Error loading frame image for overlay');
-                            completedImages++;
-                            if (completedImages === totalImages) {
-                                resolve();
-                            }
-                        };
-
-                        frameImg.src = frameDataURL;
-                        
-                    } catch (error) {
-                        console.error('Error processing room image:', error);
-                        completedImages++;
-                        if (completedImages === totalImages) {
-                            resolve();
-                        }
-                    }
-                };
-
-                if (roomImg.complete && roomImg.naturalWidth > 0) {
-                    processRoomImage();
-                } else {
-                    roomImg.onload = processRoomImage;
-                }
-            });
+                
+                Promise.all(imagePromises)
+                    .then(() => {
+                        console.log('All room image overlays completed');
+                        completeWithCleanup();
+                    })
+                    .catch(error => {
+                        console.error('Error in parallel image processing:', error);
+                        completeWithCleanup(); // Still resolve to not block the flow
+                    });
+            };
+            
+            sharedFrameImg.onerror = () => {
+                clearTimeout(frameLoadTimeout);
+                console.error('Failed to pre-load frame image');
+                completeWithCleanup(); // Don't reject, just continue
+            };
+            
+            sharedFrameImg.src = frameDataURL;
+            
         }).catch(error => {
+            clearTimeout(overallTimeout);
             console.error('Error capturing frame preview:', error);
-            reject(error);
+            resolve(); // Don't reject, just continue
         });
+    });
+}
+
+// Helper function to process a single room image overlay
+function processRoomImageOverlay(roomImg, index, frameImg) {
+    return new Promise((resolve) => {
+        // Add timeout to prevent hanging - resolve after 3 seconds max
+        const timeout = setTimeout(() => {
+            console.warn(`Room image ${index} processing timed out, skipping...`);
+            resolve();
+        }, 3000);
+        
+        const completeWithCleanup = () => {
+            clearTimeout(timeout);
+            resolve();
+        };
+        
+        // Skip the fifth image (index === 4) from having frame overlay
+        if (index === 4) {
+            completeWithCleanup();
+            return;
+        }
+
+        // Skip if image doesn't exist or is broken
+        if (!roomImg.src || roomImg.style.display === 'none') {
+            completeWithCleanup();
+            return;
+        }
+
+        // Store original source for potential restoration
+        if (!roomImg.originalSrc) {
+            roomImg.originalSrc = roomImg.src;
+        }
+
+        // Create a canvas for each room image with the frame overlay
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d', { 
+            alpha: false, 
+            willReadFrequently: false,
+            desynchronized: true 
+        });
+
+        // Process immediately if image is loaded, otherwise wait
+        const doProcess = () => {
+            try {
+                // Set canvas size to match room image (limit max size for performance)
+                // OPTIMIZED: Reduced max size for faster processing on mobile
+                const maxSize = window.innerWidth <= 768 ? 800 : 1200;
+                let width = roomImg.naturalWidth || roomImg.width || 800;
+                let height = roomImg.naturalHeight || roomImg.height || 600;
+                
+                // Scale down if too large
+                if (width > maxSize || height > maxSize) {
+                    const scale = maxSize / Math.max(width, height);
+                    width = Math.round(width * scale);
+                    height = Math.round(height * scale);
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                // OPTIMIZED: Use medium quality for faster processing
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = window.innerWidth <= 768 ? 'medium' : 'high';
+
+                // Draw the room background image
+                ctx.drawImage(roomImg, 0, 0, canvas.width, canvas.height);
+
+                // Calculate frame position
+                let frameX, frameY, frameWidth, frameHeight;
+                
+                // Special positioning for 13x19 portrait on first, second, third, and fourth room images
+                if ((index === 0 || index === 1 || index === 2 || index === 3) && state.frameSize && 
+                    state.frameSize.size === '13x19' && 
+                    state.frameSize.orientation === 'portrait') {
+                    
+                    const originalImageWidth = 800;
+                    const originalImageHeight = 600;
+                    
+                    const scaleX = canvas.width / originalImageWidth;
+                    const scaleY = canvas.height / originalImageHeight;
+                    
+                    if (index === 0) {
+                        frameX = 308 * scaleX;
+                        frameY = 48 * scaleY;
+                        frameWidth = (506 - 308) * scaleX;
+                        frameHeight = (255 - 48) * scaleY;
+                    } else if (index === 1) {
+                        frameX = 288 * scaleX;
+                        frameY = 61 * scaleY;
+                        frameWidth = (486 - 288) * scaleX;
+                        frameHeight = (268 - 61) * scaleY;
+                    } else if (index === 2) {
+                        frameX = 404 * scaleX;
+                        frameY = 49 * scaleY;
+                        frameWidth = (602 - 404) * scaleX;
+                        frameHeight = (256 - 49) * scaleY;
+                    } else if (index === 3) {
+                        frameX = 190 * scaleX;
+                        frameY = 63 * scaleY;
+                        frameWidth = (401 - 190) * scaleX;
+                        frameHeight = (285 - 63) * scaleY;
+                    }
+                    
+                } else if ((index === 0 || index === 1 || index === 2 || index === 3) && state.frameSize && 
+                    state.frameSize.size === '13x19' && 
+                    state.frameSize.orientation === 'landscape') {
+                    
+                    const originalImageWidth = 800;
+                    const originalImageHeight = 600;
+                    
+                    const scaleX = canvas.width / originalImageWidth;
+                    const scaleY = canvas.height / originalImageHeight;
+                    
+                    if (index === 0) {
+                        frameX = 275 * scaleX;
+                        frameY = 64 * scaleY;
+                        frameWidth = (565 - 275) * scaleX;
+                        frameHeight = (208 - 64) * scaleY;
+                    } else if (index === 1) {
+                        frameX = 239 * scaleX;
+                        frameY = 66 * scaleY;
+                        frameWidth = (547 - 239) * scaleX;
+                        frameHeight = (218 - 66) * scaleY;
+                    } else if (index === 2) {
+                        frameX = 252 * scaleX;
+                        frameY = 52 * scaleY;
+                        frameWidth = (557 - 252) * scaleX;
+                        frameHeight = (201 - 52) * scaleY;
+                    } else if (index === 3) {
+                        frameX = 76 * scaleX;
+                        frameY = 68 * scaleY;
+                        frameWidth = (416 - 76) * scaleX;
+                        frameHeight = (236 - 68) * scaleY;
+                    }
+                    
+                } else if ((index === 0 || index === 1 || index === 2 || index === 3) && state.frameSize && 
+                    state.frameSize.size === '13x10' && 
+                    state.frameSize.orientation === 'portrait') {
+                    
+                    const originalImageWidth = 800;
+                    const originalImageHeight = 600;
+                    
+                    const scaleX = canvas.width / originalImageWidth;
+                    const scaleY = canvas.height / originalImageHeight;
+                    
+                    if (index === 0) {
+                        frameX = 330 * scaleX;
+                        frameY = 76 * scaleY;
+                        frameWidth = (485 - 330) * scaleX;
+                        frameHeight = (222 - 76) * scaleY;
+                    } else if (index === 3) {
+                        frameX = 205 * scaleX;
+                        frameY = 65 * scaleY;
+                        frameWidth = (450 - 205) * scaleX;
+                        frameHeight = (296 - 65) * scaleY;
+                    }
+                    
+                } else if ((index === 0 || index === 1 || index === 2 || index === 3) && state.frameSize && 
+                    state.frameSize.size === '13x10' && 
+                    state.frameSize.orientation === 'landscape') {
+                    
+                    const originalImageWidth = 800;
+                    const originalImageHeight = 600;
+                    
+                    const scaleX = canvas.width / originalImageWidth;
+                    const scaleY = canvas.height / originalImageHeight;
+                    
+                    if (index === 0) {
+                        frameX = 325 * scaleX;
+                        frameY = 95 * scaleY;
+                        frameWidth = (530 - 325) * scaleX;
+                        frameHeight = (210 - 95) * scaleY;
+                    } else if (index === 3) {
+                        frameX = 179 * scaleX;
+                        frameY = 121 * scaleY;
+                        frameWidth = (490 - 179) * scaleX;
+                        frameHeight = (292 - 121) * scaleY;
+                    }
+                    
+                } else {
+                    // Use dynamic scaling for other cases
+                    const frameScale = Math.min(0.3, 350 / Math.min(canvas.width, canvas.height));
+                    frameWidth = canvas.width * frameScale;
+                    frameHeight = frameWidth * (frameImg.height / frameImg.width);
+                    
+                    // Use index to vary frame position across different room images
+                    switch (index % 3) {
+                        case 0:
+                            frameX = canvas.width * 0.55;
+                            frameY = canvas.height * 0.25;
+                            break;
+                        case 1:
+                            frameX = canvas.width * 0.15;
+                            frameY = canvas.height * 0.3;
+                            break;
+                        case 2:
+                            frameX = canvas.width * 0.35;
+                            frameY = canvas.height * 0.2;
+                            break;
+                        default:
+                            frameX = canvas.width * 0.4;
+                            frameY = canvas.height * 0.3;
+                    }
+                }
+
+                // Draw the frame (frameImg is already loaded, no need to wait)
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = window.innerWidth <= 768 ? 'medium' : 'high';
+                ctx.drawImage(frameImg, frameX, frameY, frameWidth, frameHeight);
+
+                // OPTIMIZED: Use lower JPEG quality on mobile for faster processing
+                const jpegQuality = window.innerWidth <= 768 ? 0.75 : 0.85;
+                const compositeDataURL = canvas.toDataURL('image/jpeg', jpegQuality);
+                roomImg.src = compositeDataURL;
+                
+                completeWithCleanup();
+                
+            } catch (error) {
+                console.error('Error processing room image:', error);
+                completeWithCleanup(); // Still resolve to not block other images
+            }
+        };
+
+        if (roomImg.complete && roomImg.naturalWidth > 0) {
+            doProcess();
+        } else {
+            roomImg.onload = doProcess;
+            roomImg.onerror = () => completeWithCleanup(); // Resolve even on error
+        }
     });
 }
 
@@ -4497,25 +4529,17 @@ function initMobileRoomPreview() {
             mobileSeeRoomPreviewBtn.innerHTML = '<i class=\"fas fa-spinner fa-spin\"></i> Generating Preview...';
             mobileSeeRoomPreviewBtn.disabled = true;
             
-            try {
-                // Capture images needed for cart BEFORE hiding the main container
-                // This ensures we have valid images even when elements are hidden
-                console.log('Capturing images for cart before switching view...');
-                state.cachedCartImages = {
-                    preview: await captureFramePreview().catch(e => { console.warn('Preview capture failed', e); return null; }),
-                    print: await getCanvasImageData().catch(e => { console.warn('Print capture failed', e); return null; }),
-                    admin: await captureFramedImage().catch(e => { console.warn('Admin capture failed', e); return null; })
-                };
-                console.log('Images captured:', {
-                    preview: !!state.cachedCartImages.preview,
-                    print: !!state.cachedCartImages.print
-                });
-
-                // Update room previews first
-                await overlayFrameOnRoomImages();
+            // Add overall timeout to prevent the button from being stuck forever
+            const overallTimeout = setTimeout(() => {
+                console.warn('Mobile room preview generation timed out, forcing completion...');
+                finishMobileRoomPreview();
+            }, 15000); // 15 second maximum
+            
+            const finishMobileRoomPreview = () => {
+                clearTimeout(overallTimeout);
                 
                 // Load room images into mobile view
-                await loadMobileRoomImages();
+                loadMobileRoomImages();
                 
                 // Update specs display
                 updateMobileSpecs();
@@ -4527,8 +4551,8 @@ function initMobileRoomPreview() {
                 document.body.classList.add('room-preview-active');
                 
                 // Explicitly hide bottom bar and close drawers to ensure they don't overlap
-                const bottomBar = document.getElementById('mobileBottomBar');
-                if (bottomBar) bottomBar.style.display = 'none';
+                const bottomBarEl = document.getElementById('mobileBottomBar');
+                if (bottomBarEl) bottomBarEl.style.display = 'none';
                 
                 const mobileDropup = document.getElementById('mobileDropup');
                 if (mobileDropup) {
@@ -4539,13 +4563,47 @@ function initMobileRoomPreview() {
                 // Scroll to top
                 window.scrollTo(0, 0);
                 
-            } catch (error) {
-                console.error('Error generating room preview:', error);
-                alert('Failed to generate room preview. Please try again.');
-            } finally {
                 // Reset button
                 mobileSeeRoomPreviewBtn.innerHTML = '<i class=\"fas fa-home\"></i> See Room Preview';
                 mobileSeeRoomPreviewBtn.disabled = false;
+            };
+            
+            try {
+                // Capture images needed for cart BEFORE hiding the main container
+                // This ensures we have valid images even when elements are hidden
+                // Run all captures in PARALLEL for much faster execution
+                console.log('Capturing images for cart before switching view (parallel)...');
+                const captureStartTime = performance.now();
+                
+                const [previewResult, printResult, adminResult] = await Promise.all([
+                    captureFramePreview().catch(e => { console.warn('Preview capture failed', e); return null; }),
+                    getCanvasImageData().catch(e => { console.warn('Print capture failed', e); return null; }),
+                    captureFramedImage().catch(e => { console.warn('Admin capture failed', e); return null; })
+                ]);
+                
+                state.cachedCartImages = {
+                    preview: previewResult,
+                    print: printResult,
+                    admin: adminResult
+                };
+                
+                console.log('Images captured in', (performance.now() - captureStartTime).toFixed(0), 'ms:', {
+                    preview: !!state.cachedCartImages.preview,
+                    print: !!state.cachedCartImages.print
+                });
+
+                // Update room previews - this is now optimized with parallel processing
+                const overlayStartTime = performance.now();
+                await overlayFrameOnRoomImages();
+                console.log('Room overlays completed in', (performance.now() - overlayStartTime).toFixed(0), 'ms');
+                
+                // Complete the transition
+                finishMobileRoomPreview();
+                
+            } catch (error) {
+                console.error('Error generating room preview:', error);
+                // Still try to show the room preview page even if there's an error
+                finishMobileRoomPreview();
             }
         });
     }
