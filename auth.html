@@ -817,62 +817,8 @@
             }
         }
 
-        /* Profile Dropdown Styles */
-        .profile-dropdown {
-            position: relative;
-        }
+        /* Profile Dropdown Styles - Centralized in style.css */
 
-        .profile-dropdown-menu {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 8px;
-            background: rgba(237, 231, 227, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(22, 105, 122, 0.2);
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-            padding: 8px;
-            min-width: 180px;
-            z-index: 1001;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            pointer-events: none;
-        }
-
-        .profile-dropdown-menu.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-            pointer-events: auto;
-        }
-
-        .dropdown-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 12px;
-            color: var(--text-color);
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            font-size: 14px;
-        }
-
-        .dropdown-item:hover {
-            background: rgba(22, 105, 122, 0.1);
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        .dropdown-divider {
-            height: 1px;
-            background: rgba(22, 105, 122, 0.2);
-            margin: 8px 0;
-        }
 
         .cart-icon-btn {
             background: transparent;
@@ -952,206 +898,16 @@
         }
 
         /* Header and Dropdown Styles - Matching Homepage */
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
+        /* Profile Dropdown Styles are now centralized in style.css */
 
-        .auth-section {
-            display: flex;
-            align-items: center;
-        }
 
-        .profile-dropdown {
-            position: relative;
-        }
-
-        /* header button styles are in style.css */
-
-        .profile-icon-btn:hover {
-            background: rgba(22, 105, 122, 0.25);
-            border: 1px solid rgba(22, 105, 122, 0.4);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-            color: white;
-        }
-        /* header mobile tweaks use style.css defaults */
-
-        .profile-icon-btn .button-label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            line-height: 1;
-            margin: 0;
-            width: 100%;
-            text-align: center;
-        }
-
-        .profile-dropdown-menu {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 15px;
-            box-shadow: 
-                0 20px 60px rgba(0, 0, 0, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.8);
-            min-width: 220px;
-            z-index: 3000;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            margin-top: 10px;
-            padding: 8px 0;
-        }
-
-        .profile-dropdown:hover .profile-dropdown-menu,
-        .profile-dropdown.open .profile-dropdown-menu {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .profile-dropdown-menu .dropdown-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 20px;
-            color: #333;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            font-weight: 500;
-            border-radius: 8px;
-            margin: 2px 8px;
-        }
-
-        .profile-dropdown-menu .dropdown-item:hover {
-            background: linear-gradient(135deg, rgba(72, 159, 181, 0.1), rgba(72, 159, 181, 0.05));
-            color: #489FB5;
-            transform: translateX(5px);
-        }
-
-        .profile-dropdown-menu .dropdown-divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(72, 159, 181, 0.3), transparent);
-            margin: 8px 16px;
-        }
-
-        /* User Info Section in Dropdown */
-        .dropdown-user-info {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            background: rgba(22, 105, 122, 0.05);
-            border-radius: 8px;
-            margin: 8px;
-        }
-
-        .dropdown-user-info .user-avatar {
-            font-size: 24px;
-            color: #16697A;
-            margin-right: 12px;
-        }
-
-        .dropdown-user-info .user-details {
-            flex: 1;
-        }
-
-        .dropdown-user-info .user-name {
-            font-weight: 600;
-            color: #16697A;
-            font-size: 14px;
-            margin-bottom: 2px;
-        }
-
-        .dropdown-user-info .user-phone {
-            color: #489FB5;
-            font-size: 12px;
-        }
-
-        /* Mobile Responsive Styles */
-        @media (max-width: 768px) {
-            .site-header {
-                position: relative !important;
-                top: auto;
-                margin-bottom: 0;
-                background: var(--background-color);
-                padding: 10px 0;
-                box-shadow: none;
-                border-radius: 0;
-                z-index: 2500;
-            }
-
-            .header-content {
-                background: transparent;
-                border-radius: 0;
-                padding: 0 1rem;
-                border: none;
-                box-shadow: none;
-                gap: 0.75rem;
-            }
-
-            .header-right {
-                gap: 10px;
-            }
-
-            .profile-icon-btn,
-            .cart-icon-btn {
-                background: transparent;
-                border: none;
-                border-radius: 0;
-                padding: 6px;
-                box-shadow: none;
-                color: #16697A;
-            }
-
-            .profile-icon-btn {
-                font-size: 20px;
-                min-width: 40px;
-                gap: 2px;
-            }
-
-            .profile-icon-btn i {
-                font-size: 16px;
-            }
-
-            .profile-icon-btn:hover,
-            .cart-icon-btn:hover {
-                background: transparent;
-                color: #0f4f5d;
-                border: none;
-                box-shadow: none;
-            }
-
-            .profile-icon-btn .button-label,
-            .cart-icon-btn .button-label {
-                font-size: 0.62rem;
-                letter-spacing: 0.4px;
-            }
-
-            body {
-                padding-top: 0;
-            }
-        }
 
         @media (max-width: 480px) {
-            .site-header {
-                padding: 10px 0;
-            }
-
             .header-content {
                 padding: 0 0.85rem;
                 gap: 0.55rem;
             }
+
 
             .brand-name {
                 font-size: 1.65rem;
@@ -1164,94 +920,17 @@
             }
         }
     </style>
+    <!-- Global Header Component -->
+    <script src="global-header.js"></script>
 </head>
 <body>
-    <!-- Header -->
-    <header class="site-header">
-        <div class="header-content">
-            <div class="header-left"></div>
-            <div class="header-brand">
-                <h1 class="brand-name">JB Creations</h1>
-            </div>
-            <div class="header-right">
-                <div class="auth-section" id="authSection">
-                    <!-- Profile dropdown button (always visible) -->
-                    <div class="profile-dropdown" id="profileDropdown">
-                        <button class="profile-icon-btn" id="profileBtn">
-                            <i class="fas fa-user-alt"></i>
-                            <span class="button-label">Profile</span>
-                        </button>
-                        <div class="profile-dropdown-menu" id="profileDropdownMenu">
-                            <!-- Guest user options -->
-                            <div class="guest-options" id="guestOptions">
-                                <a href="otp-login.html?redirect=auth.html" class="dropdown-item">
-                                    <i class="fas fa-sign-in-alt"></i>
-                                    Sign In
-                                </a>
-                                <a href="otp-login.html?redirect=auth.html" class="dropdown-item">
-                                    <i class="fas fa-user-plus"></i>
-                                    Sign Up
-                                </a>
-                                <div class="dropdown-divider"></div>
-                            </div>
-                            
-                            <!-- Authenticated user options (hidden by default) -->
-                            <div class="authenticated-options" id="authenticatedOptions" style="display: none;">
-                                <!-- User Info Section -->
-                                <div class="dropdown-user-info" id="dropdownUserInfo">
-                                    <div class="user-avatar">
-                                        <i class="fas fa-user-circle"></i>
-                                    </div>
-                                    <div class="user-details">
-                                        <div class="user-name" id="dropdownUserName">User</div>
-                                        <div class="user-phone" id="dropdownUserPhone">Phone</div>
-                                    </div>
-                                </div>
-                                <div class="dropdown-divider"></div>
-                                
-                                <a href="my-profile.html" class="dropdown-item" data-close-dropdown="true">
-                                    <i class="fas fa-user-circle"></i>
-                                    My Profile
-                                </a>
-                                <a href="#" class="dropdown-item" onclick="viewOrders()">
-                                    <i class="fas fa-box"></i>
-                                    My Orders
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <a href="#" class="dropdown-item" onclick="authUtils.logout()">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                    Sign Out
-                                </a>
-                                <div class="dropdown-divider"></div>
-                            </div>
-                            
-                            <!-- Common options for all users -->
-                            <a href="track-order.html" class="dropdown-item">
-                                <i class="fas fa-search"></i>
-                                Track Order
-                            </a>
-                            <a href="#" class="dropdown-item" onclick="contactUs()">
-                                <i class="fas fa-envelope"></i>
-                                Contact Us
-                            </a>
-                            <a href="#" class="dropdown-item" onclick="aboutUs()">
-                                <i class="fas fa-info-circle"></i>
-                                About Us
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="header-cart">
-                    <button class="cart-icon-btn" id="headerCartBtn" onclick="window.location.href='cart.html'">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span class="cart-count" id="cartCount">0</span>
-                        <span class="button-label">Cart</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
+    <!-- GlobalWebsiteHeader Component Container -->
+    <div id="global-header-container"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            GlobalWebsiteHeader.init();
+        });
+    </script>
 
     <div class="auth-container">
         <div class="auth-box">

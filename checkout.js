@@ -941,12 +941,12 @@ function updateOrderSummary() {
     
     // Add each cart item
     orderData.items.forEach((item, index) => {
-        // Use thumbnail for lightweight cart items, fallback to full images if available
-        const imageSource = item.thumbnailImage || item.previewImage || item.displayImage || item.printImage;
+        // Prioritize previewImage (framed version) for checkout display, then fallback to thumbnail
+        const imageSource = item.previewImage || item.thumbnailImage || item.displayImage || item.printImage;
         
         console.log(`Item ${index + 1} image sources:`, {
+            previewImage: item.previewImage ? 'Available (FRAMED)' : 'Not available',
             thumbnailImage: item.thumbnailImage ? 'Available' : 'Not available',
-            previewImage: item.previewImage ? 'Available' : 'Not available',
             displayImage: item.displayImage ? 'Available' : 'Not available', 
             printImage: item.printImage ? 'Available' : 'Not available',
             selectedSource: imageSource ? 'Found' : 'None found',

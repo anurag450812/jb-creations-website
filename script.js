@@ -76,6 +76,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize mobile bottom bar/drop-up if present
     initMobileBottomBar();
+    
+    // Initialize mobile room preview page functionality
+    initMobileRoomPreview();
 });
 
 // Also update cart count on window load as a fallback
@@ -887,85 +890,16 @@ function handleImageUpload(file) {
                 mobileSection.style.display = 'block';
             }
 
-            // Create a temporary image to get dimensions
+            // Create a temporary image to get dimensions and compress if needed
             const tempImg = new Image();
             tempImg.onload = () => {
-                const imgWidth = tempImg.width;
-                const imgHeight = tempImg.height;
-
-                // Validate image dimensions
-                if (imgWidth === 0 || imgHeight === 0) {
-                    console.error('Invalid image dimensions');
-                    return;
-                }
-
-                // Set default frame size to 13x19 portrait if not already set
-                if (!state.frameSize) {
-                    state.frameSize = {
-                        size: '13x19',
-                        orientation: 'portrait'
-                    };
-                }
-
-                // Calculate frame dimensions using actual container pixel dimensions
-                const containerRect = elements.imageContainer.getBoundingClientRect();
-                const containerWidth = containerRect.width;
-                const containerHeight = containerRect.height;
-
-                // Calculate required zoom to fit the image to the width of the frame container
-                state.zoom = calculateRequiredZoom(imgWidth, imgHeight, containerWidth, containerHeight);
-
-                // Set image and update UI
-                state.image = e.target.result;
-                elements.previewImage.src = state.image;
-                elements.previewImage.onload = () => {
-                    // Enable add to cart button and mark container as having image
-                    elements.addToCartBtn.disabled = false;
-                    elements.imageContainer.classList.add('has-image');
-                    // Show mobile customization bar/drop-up
-                    document.body.classList.add('has-upload');
-                    if (typeof window.recomputeMobileBarHeight === 'function') {
-                        // wait a tick so layout applies display changes
-                        setTimeout(() => window.recomputeMobileBarHeight(), 50);
-                    }
-                    // Ensure mobile total price and button state update
-                    if (typeof updateMobileTotalPrice === 'function') {
-                        updateMobileTotalPrice();
-                    }
-                    
-                    // Update room preview button state
-                    if (window.updateRoomPreviewButtonState) {
-                        window.updateRoomPreviewButtonState();
-                    }
-                    
-                    // Set default frame color to black if not set
-                    if (!state.frameColor) {
-                        state.frameColor = 'black';
-                    }
-                    
-                    // Center the image initially
-                    state.position = {
-                        x: 0, // Center relative to container center
-                        y: 0  // Center relative to container center
-                    };
-                    
-                    // Reset image styles for proper positioning
-                    elements.previewImage.style.cursor = 'grab';
-                    
-                    // Update frame size and aspect ratio
-                    updateFrameSize();
-                    
-                    // Initialize drag and zoom
-                    initializeDragAndZoom();
-
-                    // Update image transform
-                    updateImageTransform();
-                    
-                    // No auto-update on load; just refresh button state
-                    if (window.updateRoomPreviewButtonState) {
-                        setTimeout(() => window.updateRoomPreviewButtonState(), 100);
-                    }
-                };
+                // Compress high-res images for better performance
+                compressImageForPreview(tempImg).then(compressedDataURL => {
+                    processCompressedImage(compressedDataURL);
+                }).catch(error => {
+                    console.error('Error compressing image, using original:', error);
+                    processCompressedImage(e.target.result);
+                });
             };
             
             tempImg.onerror = () => {
@@ -986,6 +920,160 @@ function handleImageUpload(file) {
     };
     
     reader.readAsDataURL(file);
+}
+
+// Compress image for preview to improve performance with high-res images
+function compressImageForPreview(img, maxDimension = 2400, quality = 0.92) {
+    return new Promise((resolve) => {
+        try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d', { alpha: false, willReadFrequently: false });
+            
+            let { width, height } = img;
+            
+            // Only compress if image is larger than max dimension
+            if (width <= maxDimension && height <= maxDimension) {
+                // Image is already small enough, convert to JPEG for consistency
+                const smallCanvas = document.createElement('canvas');
+                const smallCtx = smallCanvas.getContext('2d', { alpha: false });
+                smallCanvas.width = width;
+                smallCanvas.height = height;
+                smallCtx.drawImage(img, 0, 0);
+                resolve(smallCanvas.toDataURL('image/jpeg', quality));
+                return;
+            }
+            
+            // Calculate new dimensions maintaining aspect ratio
+            const aspectRatio = width / height;
+            
+            if (width > height) {
+                width = maxDimension;
+                height = maxDimension / aspectRatio;
+            } else {
+                height = maxDimension;
+                width = maxDimension * aspectRatio;
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            // Use better image smoothing
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            
+            // Draw compressed image
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Convert to JPEG with quality setting
+            const compressedDataURL = canvas.toDataURL('image/jpeg', quality);
+            console.log(`Image compressed: ${img.width}x${img.height} -> ${width}x${height}`);
+            resolve(compressedDataURL);
+            
+        } catch (error) {
+            console.error('Error in compressImageForPreview:', error);
+            resolve(img.src); // Fallback to original
+        }
+    });
+}
+
+// Process the compressed image and set up the preview
+function processCompressedImage(imageDataURL) {
+    try {
+        const tempImg = new Image();
+        tempImg.onload = () => {
+            const imgWidth = tempImg.width;
+            const imgHeight = tempImg.height;
+
+            // Validate image dimensions
+            if (imgWidth === 0 || imgHeight === 0) {
+                console.error('Invalid image dimensions');
+                return;
+            }
+
+            // Set default frame size to 13x19 portrait if not already set
+            if (!state.frameSize) {
+                state.frameSize = {
+                    size: '13x19',
+                    orientation: 'portrait'
+                };
+            }
+
+            // Calculate frame dimensions using actual container pixel dimensions
+            const containerRect = elements.imageContainer.getBoundingClientRect();
+            const containerWidth = containerRect.width;
+            const containerHeight = containerRect.height;
+
+            // Calculate required zoom to fit the image to the width of the frame container
+            state.zoom = calculateRequiredZoom(imgWidth, imgHeight, containerWidth, containerHeight);
+
+            // Set image and update UI
+            state.image = imageDataURL;
+            state.originalImage = imageDataURL;
+            elements.previewImage.src = state.image;
+                elements.previewImage.onload = () => {
+                    // Enable add to cart button and mark container as having image
+                    elements.addToCartBtn.disabled = false;
+                    elements.imageContainer.classList.add('has-image');
+                    // Show mobile customization bar/drop-up
+                    document.body.classList.add('has-upload');
+                    if (typeof window.recomputeMobileBarHeight === 'function') {
+                        // wait a tick so layout applies display changes
+                        setTimeout(() => window.recomputeMobileBarHeight(), 50);
+                    }
+                    // Ensure mobile total price and button state update
+                    if (typeof updateMobileTotalPrice === 'function') {
+                        updateMobileTotalPrice();
+                    }
+                    
+                    // Update room preview button state
+                    if (window.updateRoomPreviewButtonState) {
+                        window.updateRoomPreviewButtonState();
+                    }
+                    
+                    // Update mobile See Room Preview button state
+                    if (window.updateMobileSeeRoomPreviewBtn) {
+                        window.updateMobileSeeRoomPreviewBtn();
+                    }                // Set default frame color to black if not set
+                if (!state.frameColor) {
+                    state.frameColor = 'black';
+                }
+                
+                // Center the image initially
+                state.position = {
+                    x: 0, // Center relative to container center
+                    y: 0  // Center relative to container center
+                };
+                
+                // Reset image styles for proper positioning
+                elements.previewImage.style.cursor = 'grab';
+                
+                // Update frame size and aspect ratio
+                updateFrameSize();
+                
+                // Initialize drag and zoom
+                initializeDragAndZoom();
+
+                // Update image transform
+                updateImageTransform();
+                
+                // No auto-update on load; just refresh button state
+                if (window.updateRoomPreviewButtonState) {
+                    setTimeout(() => window.updateRoomPreviewButtonState(), 100);
+                }
+            };
+        };
+        
+        tempImg.onerror = () => {
+            console.error('Failed to load processed image');
+            // Reset to upload state
+            document.getElementById('uploadSection').classList.remove('hidden');
+            document.getElementById('previewSection').classList.add('hidden');
+        };
+        
+        tempImg.src = imageDataURL;
+    } catch (error) {
+        console.error('Error processing compressed image:', error);
+    }
 }
 
 // Add hover effect to buttons
@@ -1010,6 +1098,17 @@ document.querySelectorAll('button').forEach(button => {
     });
 });
 
+// Debounce filter updates for better performance
+let filterUpdateTimeout = null;
+function debouncedUpdateImageFilters() {
+    if (filterUpdateTimeout) {
+        clearTimeout(filterUpdateTimeout);
+    }
+    filterUpdateTimeout = setTimeout(() => {
+        updateImageFilters();
+    }, 16); // ~60fps
+}
+
 // Enhance slider interaction - only if sliders exist
 if (sliders.length > 0) {
     sliders.forEach(({ id, element }) => {
@@ -1025,7 +1124,7 @@ if (sliders.length > 0) {
             console.log('Adjustment slider changed:', id, 'to', e.target.value);
             
             state.adjustments[id] = e.target.value;
-            updateImageFilters();
+            debouncedUpdateImageFilters();
         
         // Update label with value
         const value = e.target.value;
@@ -1078,26 +1177,36 @@ function updateFrameAspectRatio() {
     elements.frame.style.aspectRatio = aspectRatio;
 }
 
+// Use requestAnimationFrame for smoother transform updates
+let transformUpdatePending = false;
 function updateImageTransform() {
     if (!elements.previewImage.src) return;
-    // If locked on mobile, we still render current state, but any incidental external calls shouldn't modify state.position.
-    // Position updates are already controlled in handlers; no-op here other than applying current state.
-    // Use transform3d for better GPU acceleration
-    const translateX = state.position.x;
-    const translateY = state.position.y;
     
-    // Apply transform with hardware acceleration and container center as reference point
-    elements.previewImage.style.transform = `translate3d(calc(-50% + ${translateX}px), calc(-50% + ${translateY}px), 0) scale(${state.zoom})`;
-    elements.previewImage.style.transformOrigin = '50% 50%';
-    elements.previewImage.style.position = 'absolute';
-    elements.previewImage.style.top = '50%';
-    elements.previewImage.style.left = '50%';
-    elements.previewImage.style.width = 'auto';
-    elements.previewImage.style.height = 'auto';
-    elements.previewImage.style.maxWidth = 'none';
-    elements.previewImage.style.maxHeight = 'none';
+    if (transformUpdatePending) return;
+    transformUpdatePending = true;
     
-    // Room preview overlays are now automatically updated when zoom changes
+    requestAnimationFrame(() => {
+        transformUpdatePending = false;
+        
+        // If locked on mobile, we still render current state, but any incidental external calls shouldn't modify state.position.
+        // Position updates are already controlled in handlers; no-op here other than applying current state.
+        // Use transform3d for better GPU acceleration
+        const translateX = state.position.x;
+        const translateY = state.position.y;
+        
+        // Apply transform with hardware acceleration and container center as reference point
+        elements.previewImage.style.transform = `translate3d(calc(-50% + ${translateX}px), calc(-50% + ${translateY}px), 0) scale(${state.zoom})`;
+        elements.previewImage.style.transformOrigin = '50% 50%';
+        elements.previewImage.style.position = 'absolute';
+        elements.previewImage.style.top = '50%';
+        elements.previewImage.style.left = '50%';
+        elements.previewImage.style.width = 'auto';
+        elements.previewImage.style.height = 'auto';
+        elements.previewImage.style.maxWidth = 'none';
+        elements.previewImage.style.maxHeight = 'none';
+        
+        // Room preview overlays are now automatically updated when zoom changes
+    });
     // Users can still manually trigger updates via the "Update Room Previews" button
 }
 
@@ -1488,9 +1597,13 @@ function captureFramedImage() {
             
             // Create high-resolution canvas for print quality
             const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext('2d', { 
+                alpha: false, 
+                willReadFrequently: false,
+                desynchronized: true 
+            });
             
-            // Set high resolution for printing (maintain aspect ratio)
+            // Set resolution for printing (optimized for performance vs quality)
             const printResolution = 1200; // High resolution for printing
             const aspectRatio = visibleWidth / visibleHeight;
             
@@ -1513,6 +1626,10 @@ function captureFramedImage() {
                     // Clear canvas with white background
                     ctx.fillStyle = '#ffffff';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Enable high-quality image smoothing
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
                     
                     // Calculate scale factor from preview to canvas
                     const scaleX = canvas.width / visibleWidth;
@@ -1565,8 +1682,8 @@ function captureFramedImage() {
                     // Reset filter for any additional operations
                     ctx.filter = 'none';
                     
-                    // Convert to data URL
-                    const dataURL = canvas.toDataURL('image/jpeg', 0.95);
+                    // Convert to data URL with optimized quality
+                    const dataURL = canvas.toDataURL('image/jpeg', 0.90);
                     
                     console.log('✅ Frame image captured successfully with exact positioning');
                     resolve(dataURL);
@@ -1605,13 +1722,20 @@ function captureFramePreviewForDisplay() {
         
         try {
             const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext('2d', { 
+                alpha: false, 
+                willReadFrequently: false 
+            });
             
-            // Set canvas size for display preview (smaller)
-            const canvasWidth = 300;
-            const canvasHeight = 300;
+            // Set canvas size for display preview (optimized size)
+            const canvasWidth = 400; // Increased slightly for better quality
+            const canvasHeight = 400;
             canvas.width = canvasWidth;
             canvas.height = canvasHeight;
+            
+            // Enable high-quality image smoothing
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
             
             // Get frame aspect ratio
             const [width, height] = state.frameSize.size.split('x').map(Number);
@@ -1956,7 +2080,10 @@ async function addToCart(item) {
         }
         
         // Create lightweight cart item (without large base64 images)
-        const thumbSource = item.displayImage || item.previewImage || item.printImage || item.originalImage || null;
+        const isValidImage = (img) => img && img.length > 100 && img !== 'data:,';
+        
+        const thumbSource = [item.displayImage, item.previewImage, item.printImage, item.originalImage].find(isValidImage) || null;
+        
         const lightweightItem = {
             id: item.id,
             timestamp: item.timestamp || new Date().toISOString(),
@@ -1965,7 +2092,7 @@ async function addToCart(item) {
             frameTexture: item.frameTexture,
             price: item.price,
             // Store only essential image metadata, not base64 data
-            hasImage: !!(item.originalImage || item.printImage || item.displayImage || item.previewImage),
+            hasImage: !!thumbSource,
             imageSize: {
                 original: item.originalImage ? item.originalImage.length : 0,
                 print: item.printImage ? item.printImage.length : 0,
@@ -2207,6 +2334,12 @@ function captureFramePreview() {
             const rect = framePreview.getBoundingClientRect();
             
             // Set canvas size to match the visible frame preview
+            if (rect.width === 0 || rect.height === 0) {
+                console.warn('Frame preview has 0 dimensions (is it hidden?)');
+                resolve(null);
+                return;
+            }
+            
             canvas.width = Math.floor(rect.width);
             canvas.height = Math.floor(rect.height);
             
@@ -2382,14 +2515,33 @@ function overlayFrameOnRoomImages() {
 
                 // Create a canvas for each room image with the frame overlay
                 const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
+                const ctx = canvas.getContext('2d', { 
+                    alpha: false, 
+                    willReadFrequently: false,
+                    desynchronized: true 
+                });
 
                 // Wait for room image to load if it hasn't already
                 const processRoomImage = () => {
                     try {
-                        // Set canvas size to match room image
-                        canvas.width = roomImg.naturalWidth || roomImg.width || 800;
-                        canvas.height = roomImg.naturalHeight || roomImg.height || 600;
+                        // Set canvas size to match room image (limit max size for performance)
+                        const maxSize = 1200;
+                        let width = roomImg.naturalWidth || roomImg.width || 800;
+                        let height = roomImg.naturalHeight || roomImg.height || 600;
+                        
+                        // Scale down if too large
+                        if (width > maxSize || height > maxSize) {
+                            const scale = maxSize / Math.max(width, height);
+                            width = Math.round(width * scale);
+                            height = Math.round(height * scale);
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        // Enable high-quality image smoothing
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
 
                         // Draw the room background image
                         ctx.drawImage(roomImg, 0, 0, canvas.width, canvas.height);
@@ -2538,11 +2690,13 @@ function overlayFrameOnRoomImages() {
                                     }
                                 }
 
-                                // Draw the frame
+                                // Draw the frame with antialiasing
+                                ctx.imageSmoothingEnabled = true;
+                                ctx.imageSmoothingQuality = 'high';
                                 ctx.drawImage(frameImg, frameX, frameY, frameWidth, frameHeight);
 
-                                // Convert the composite image to data URL and update the room image
-                                const compositeDataURL = canvas.toDataURL('image/jpeg', 0.9);
+                                // Convert the composite image to data URL with optimized quality
+                                const compositeDataURL = canvas.toDataURL('image/jpeg', 0.85);
                                 roomImg.src = compositeDataURL;
                                 
                                 // Track completion
@@ -2655,6 +2809,11 @@ function initializeRoomSlider(frameSize, orientation) {
     // Update room preview button state since room slider is now active
     if (window.updateRoomPreviewButtonState) {
         setTimeout(() => window.updateRoomPreviewButtonState(), 100);
+    }
+    
+    // Update mobile See Room Preview button state
+    if (window.updateMobileSeeRoomPreviewBtn) {
+        setTimeout(() => window.updateMobileSeeRoomPreviewBtn(), 100);
     }
     
     // Replace slider node to remove any previously attached touch/click handlers
@@ -4286,5 +4445,322 @@ function updateRoomPreviewsClick() {
         
         console.log(`⚠️ Button clicked but conditions not met. Missing: ${reasons.join(', ')}`);
         alert(`Please ${reasons.join(' and ')} first to update room previews.`);
+    }
+}
+
+// ===========================
+// MOBILE ROOM PREVIEW PAGE
+// ===========================
+
+function initMobileRoomPreview() {
+    const mobileSeeRoomPreviewBtn = document.getElementById('mobileSeeRoomPreview');
+    const mobileRoomPreviewPage = document.getElementById('mobileRoomPreviewPage');
+    const backToEditBtn = document.getElementById('backToEdit');
+    const mobileRoomAddToCartBtn = document.getElementById('mobileRoomAddToCart');
+    const container = document.getElementById('mainCustomizeContainer') || document.querySelector('.container');
+    
+    if (!mobileSeeRoomPreviewBtn || !mobileRoomPreviewPage) return;
+    
+    // Update See Room Preview button state
+    function updateMobileSeeRoomPreviewBtn() {
+        if (mobileSeeRoomPreviewBtn) {
+            const hasImage = !!(state.image);
+            const hasFrameSize = !!(state.frameSize);
+            mobileSeeRoomPreviewBtn.disabled = !(hasImage && hasFrameSize);
+        }
+    }
+    
+    // Call this when image is loaded or frame size changes
+    window.updateMobileSeeRoomPreviewBtn = updateMobileSeeRoomPreviewBtn;
+    
+    // See Room Preview button click
+    if (mobileSeeRoomPreviewBtn) {
+        mobileSeeRoomPreviewBtn.addEventListener('click', async function() {
+            if (!state.image || !state.frameSize) {
+                alert('Please upload an image and select a frame size first.');
+                return;
+            }
+
+            // Hide bottom customization bar if it exists (use ID for specificity)
+            const bottomBar = document.getElementById('mobileBottomBar') || document.querySelector('.mobile-bottom-bar');
+            if (bottomBar) {
+                bottomBar.style.setProperty('display', 'none', 'important');
+            }
+
+            // Hide any other potential floating elements
+            const adjustmentsContainer = document.querySelector('.mobile-adjustments-container');
+            if (adjustmentsContainer) {
+                adjustmentsContainer.style.setProperty('display', 'none', 'important');
+            }
+            
+            // Show loading state
+            mobileSeeRoomPreviewBtn.innerHTML = '<i class=\"fas fa-spinner fa-spin\"></i> Generating Preview...';
+            mobileSeeRoomPreviewBtn.disabled = true;
+            
+            try {
+                // Capture images needed for cart BEFORE hiding the main container
+                // This ensures we have valid images even when elements are hidden
+                console.log('Capturing images for cart before switching view...');
+                state.cachedCartImages = {
+                    preview: await captureFramePreview().catch(e => { console.warn('Preview capture failed', e); return null; }),
+                    print: await getCanvasImageData().catch(e => { console.warn('Print capture failed', e); return null; }),
+                    admin: await captureFramedImage().catch(e => { console.warn('Admin capture failed', e); return null; })
+                };
+                console.log('Images captured:', {
+                    preview: !!state.cachedCartImages.preview,
+                    print: !!state.cachedCartImages.print
+                });
+
+                // Update room previews first
+                await overlayFrameOnRoomImages();
+                
+                // Load room images into mobile view
+                await loadMobileRoomImages();
+                
+                // Update specs display
+                updateMobileSpecs();
+                
+                // Hide main container and show mobile room preview page
+                console.log('Switching to room preview mode. Container:', container);
+                if (container) container.style.display = 'none';
+                mobileRoomPreviewPage.style.display = 'block';
+                document.body.classList.add('room-preview-active');
+                
+                // Explicitly hide bottom bar and close drawers to ensure they don't overlap
+                const bottomBar = document.getElementById('mobileBottomBar');
+                if (bottomBar) bottomBar.style.display = 'none';
+                
+                const mobileDropup = document.getElementById('mobileDropup');
+                if (mobileDropup) {
+                    mobileDropup.classList.remove('active');
+                    mobileDropup.setAttribute('aria-hidden', 'true');
+                }
+                
+                // Scroll to top
+                window.scrollTo(0, 0);
+                
+            } catch (error) {
+                console.error('Error generating room preview:', error);
+                alert('Failed to generate room preview. Please try again.');
+            } finally {
+                // Reset button
+                mobileSeeRoomPreviewBtn.innerHTML = '<i class=\"fas fa-home\"></i> See Room Preview';
+                mobileSeeRoomPreviewBtn.disabled = false;
+            }
+        });
+    }
+    
+    // Back to Edit button click
+    if (backToEditBtn) {
+        backToEditBtn.addEventListener('click', function() {
+            // Hide mobile room preview page and show main container
+            mobileRoomPreviewPage.style.display = 'none';
+            document.body.classList.remove('room-preview-active');
+            if (container) container.style.display = '';
+            
+            // Show bottom customization bar again if it exists and we have an upload
+            const bottomBar = document.getElementById('mobileBottomBar') || document.querySelector('.mobile-bottom-bar');
+            if (bottomBar && document.body.classList.contains('has-upload')) {
+                bottomBar.style.display = ''; // Reset to CSS default (flex)
+            }
+
+            // Show adjustments container if it exists
+            const adjustmentsContainer = document.querySelector('.mobile-adjustments-container');
+            if (adjustmentsContainer) {
+                adjustmentsContainer.style.display = ''; // Reset to CSS default
+            }
+
+            // Scroll to top
+            window.scrollTo(0, 0);
+        });
+    }
+    
+    // Mobile Room Add to Cart button
+    if (mobileRoomAddToCartBtn) {
+        mobileRoomAddToCartBtn.addEventListener('click', async function() {
+            if (!state.image || !state.frameSize) {
+                alert('Please upload an image and select a frame size first.');
+                return;
+            }
+            
+            // Disable button and show loading
+            mobileRoomAddToCartBtn.disabled = true;
+            mobileRoomAddToCartBtn.innerHTML = '<i class=\"fas fa-spinner fa-spin\"></i> Adding...';
+            
+            try {
+                // Use cached images if available, otherwise try to capture (might fail if hidden)
+                const cached = state.cachedCartImages || {};
+                
+                const printImageData = cached.print || await getCanvasImageData().catch(err => {
+                    console.warn('Print image capture failed:', err);
+                    return null;
+                });
+                
+                const previewImageData = cached.preview || await captureFramePreview().catch(err => {
+                    console.warn('Preview image capture failed:', err);
+                    return null;
+                });
+                
+                const adminCroppedImage = cached.admin || await captureFramedImage().catch(err => {
+                    console.warn('Admin cropped image capture failed:', err);
+                    return null;
+                });
+                
+                // Create cart item
+                const cartItem = {
+                    id: Date.now(),
+                    printImage: printImageData || state.originalImage || state.image,
+                    previewImage: previewImageData || state.originalImage || state.image,
+                    displayImage: previewImageData || state.originalImage || state.image,
+                    adminCroppedImage: adminCroppedImage || state.originalImage || state.image,
+                    frameSize: state.frameSize,
+                    frameColor: state.frameColor || 'black',
+                    frameTexture: state.frameTexture || 'smooth',
+                    adjustments: { ...state.adjustments },
+                    position: { ...state.position },
+                    zoom: state.zoom,
+                    price: state.price || 349,
+                    orderDate: new Date().toISOString(),
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Add to cart
+                const success = await addToCart(cartItem);
+                
+                if (success) {
+                    // Show success
+                    mobileRoomAddToCartBtn.innerHTML = '<i class=\"fas fa-check\"></i> Added to Cart!';
+                    mobileRoomAddToCartBtn.style.background = '#27ae60';
+                    
+                    setTimeout(() => {
+                        // Redirect to cart page
+                        window.location.href = 'cart.html';
+                    }, 1000);
+                } else {
+                    throw new Error('Failed to add to cart');
+                }
+                
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                alert('Failed to add to cart. Please try again.');
+                
+                // Reset button
+                const price = state.price || 349;
+                mobileRoomAddToCartBtn.innerHTML = `<i class=\"fas fa-shopping-cart\"></i> <span>Add to Cart</span> <span class=\"btn-price\">₹${price}</span>`;
+                mobileRoomAddToCartBtn.disabled = false;
+                mobileRoomAddToCartBtn.style.background = '';
+            }
+        });
+    }
+}
+
+async function loadMobileRoomImages() {
+    const mobileRoomImagesList = document.getElementById('mobileRoomImagesList');
+    const sliderDots = document.getElementById('sliderDots');
+    if (!mobileRoomImagesList) return;
+    
+    // Clear existing images and dots
+    mobileRoomImagesList.innerHTML = '';
+    if (sliderDots) sliderDots.innerHTML = '';
+    
+    // Get room slider images
+    const roomSlider = document.getElementById('roomSlider');
+    if (!roomSlider) return;
+    
+    const roomImages = roomSlider.querySelectorAll('img');
+    let imageCount = 0;
+    
+    // Create horizontal sliding product images
+    roomImages.forEach((img, index) => {
+        const imageItem = document.createElement('div');
+        imageItem.className = 'mobile-product-image-item';
+        
+        const imageEl = document.createElement('img');
+        imageEl.src = img.src;
+        imageEl.alt = `Room Preview ${index + 1}`;
+        imageEl.loading = 'lazy';
+        
+        imageItem.appendChild(imageEl);
+        mobileRoomImagesList.appendChild(imageItem);
+        
+        // Create dot indicator
+        if (sliderDots) {
+            const dot = document.createElement('div');
+            dot.className = 'slider-dot';
+            if (imageCount === 0) dot.classList.add('active');
+            sliderDots.appendChild(dot);
+        }
+        
+        imageCount++;
+    });
+    
+    // Add scroll listener to update active dot
+    const sliderContainer = mobileRoomImagesList.parentElement;
+    if (sliderContainer && sliderDots) {
+        sliderContainer.addEventListener('scroll', () => {
+            const scrollLeft = sliderContainer.scrollLeft;
+            const itemWidth = sliderContainer.offsetWidth;
+            const activeIndex = Math.round(scrollLeft / itemWidth);
+            
+            const dots = sliderDots.querySelectorAll('.slider-dot');
+            dots.forEach((dot, index) => {
+                if (index === activeIndex) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        });
+    }
+}
+
+function updateMobileSpecs() {
+    // Update listing page elements
+    const mobileListingSize = document.getElementById('mobileListingSize');
+    const mobileListingColor = document.getElementById('mobileListingColor');
+    const mobileListingTexture = document.getElementById('mobileListingTexture');
+    const mobileListingPrice = document.getElementById('mobileListingPrice');
+    const mobileListingCartCount = document.getElementById('mobileListingCartCount');
+    const mobileRoomAddToCartBtn = document.getElementById('mobileRoomAddToCart');
+    
+    // Update size
+    if (state.frameSize && mobileListingSize) {
+        const sizeText = `${state.frameSize.size}\" ${state.frameSize.orientation.charAt(0).toUpperCase() + state.frameSize.orientation.slice(1)}`;
+        mobileListingSize.textContent = sizeText;
+    }
+    
+    // Update color
+    if (state.frameColor && mobileListingColor) {
+        const colorText = state.frameColor.charAt(0).toUpperCase() + state.frameColor.slice(1);
+        mobileListingColor.textContent = colorText;
+    }
+    
+    // Update texture
+    if (state.frameTexture && mobileListingTexture) {
+        const textureText = state.frameTexture.charAt(0).toUpperCase() + state.frameTexture.slice(1);
+        mobileListingTexture.textContent = textureText;
+    }
+    
+    // Update price
+    const price = state.price || 349;
+    if (mobileListingPrice) {
+        mobileListingPrice.textContent = `₹${price}`;
+    }
+    
+    // Update cart count badge
+    if (mobileListingCartCount) {
+        const cart = JSON.parse(sessionStorage.getItem('photoFramingCart') || '[]');
+        const count = cart.length;
+        mobileListingCartCount.textContent = count;
+        if (count > 0) {
+            mobileListingCartCount.classList.add('has-items');
+        } else {
+            mobileListingCartCount.classList.remove('has-items');
+        }
+    }
+    
+    // Enable add to cart button if image exists
+    if (mobileRoomAddToCartBtn && state.image && state.frameSize) {
+        mobileRoomAddToCartBtn.disabled = false;
     }
 }

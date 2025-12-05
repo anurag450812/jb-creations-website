@@ -7,25 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Add CSS root variables for consistency */
-        :root {
-            --primary-color: #16697A; /* Caribbean Current - Teal */
-            --secondary-color: #EDE7E3; /* Isabelline - Light Beige */
-            --accent-color: #489FB5; /* Moonstone - Blue */
-            --background-color: #EDE7E3; /* Isabelline - Light Beige */
-            --text-color: #16697A; /* Caribbean Current for text */
-            --card-background: #FFFFFF;
-            --success-color: #82C0CC; /* Sky Blue */
-            --highlight-color: #FFA62B; /* Orange Peel */
-            --border-radius: 12px;
-            --shadow: 0 4px 16px rgba(22, 105, 122, 0.1);
-        }
-
-        body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-        }
-
+        /* Page-specific styles for Orders page */
         .orders-container {
             max-width: 1000px;
             margin: 0 auto;
@@ -320,94 +302,17 @@
 
         /* Header styles are centralized in style.css to ensure consistency across pages */
     </style>
+    <!-- Global Header Component -->
+    <script src="global-header.js"></script>
 </head>
 <body>
-    <!-- Header -->
-    <header class="site-header">
-        <div class="header-content">
-            <div class="header-left"></div>
-            <div class="header-brand">
-                <h1 class="brand-name">JB Creations</h1>
-            </div>
-            <div class="header-right">
-                <div class="auth-section" id="authSection">
-                    <!-- Profile dropdown button (always visible) -->
-                    <div class="profile-dropdown" id="profileDropdown">
-                        <button class="profile-icon-btn" id="profileBtn">
-                            <i class="fas fa-user-alt"></i>
-                            <span class="button-label">Profile</span>
-                        </button>
-                        <div class="profile-dropdown-menu" id="profileDropdownMenu">
-                            <!-- Guest user options -->
-                            <div class="guest-options" id="guestOptions">
-                                <a href="otp-login.html?redirect=my-orders.html" class="dropdown-item">
-                                    <i class="fas fa-sign-in-alt"></i>
-                                    Sign In
-                                </a>
-                                <a href="otp-login.html?redirect=my-orders.html" class="dropdown-item">
-                                    <i class="fas fa-user-plus"></i>
-                                    Sign Up
-                                </a>
-                                <div class="dropdown-divider"></div>
-                            </div>
-                            
-                            <!-- Authenticated user options (hidden by default) -->
-                            <div class="authenticated-options" id="authenticatedOptions" style="display: none;">
-                                <!-- User Info Section -->
-                                <div class="dropdown-user-info" id="dropdownUserInfo">
-                                    <div class="user-avatar">
-                                        <i class="fas fa-user-circle"></i>
-                                    </div>
-                                    <div class="user-details">
-                                        <div class="user-name" id="dropdownUserName">User</div>
-                                        <div class="user-phone" id="dropdownUserPhone">Phone</div>
-                                    </div>
-                                </div>
-                                <div class="dropdown-divider"></div>
-                                
-                                <a href="my-profile.html" class="dropdown-item" data-close-dropdown="true">
-                                    <i class="fas fa-user-circle"></i>
-                                    My Profile
-                                </a>
-                                <a href="my-orders.html" class="dropdown-item" data-close-dropdown="true">
-                                    <i class="fas fa-box"></i>
-                                    My Orders
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <a href="#" class="dropdown-item" onclick="authUtils.logout()">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                    Sign Out
-                                </a>
-                                <div class="dropdown-divider"></div>
-                            </div>
-                            
-                            <!-- Common options for all users -->
-                            <a href="track-order.html" class="dropdown-item">
-                                <i class="fas fa-search"></i>
-                                Track Order
-                            </a>
-                            <a href="#" class="dropdown-item" onclick="contactUs()">
-                                <i class="fas fa-envelope"></i>
-                                Contact Us
-                            </a>
-                            <a href="#" class="dropdown-item" onclick="aboutUs()">
-                                <i class="fas fa-info-circle"></i>
-                                About Us
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="header-cart">
-                    <button class="cart-icon-btn" id="headerCartBtn" onclick="window.location.href='cart.html'">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span class="cart-count" id="cartCount">0</span>
-                        <span class="button-label">Cart</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
+    <!-- GlobalWebsiteHeader Component Container -->
+    <div id="global-header-container"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            GlobalWebsiteHeader.init();
+        });
+    </script>
 
     <div class="orders-container">
         <div class="page-header">

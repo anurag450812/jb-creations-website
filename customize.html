@@ -8,244 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
-        /* Header and Dropdown Styles - Matching Homepage */
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .auth-section {
-            display: flex;
-            align-items: center;
-        }
-
-        .profile-dropdown {
-            position: relative;
-        }
-
-        .profile-icon-btn {
-            background: transparent;
-            border: none;
-            backdrop-filter: none;
-            -webkit-backdrop-filter: none;
-            box-shadow: none;
-            color: #16697A;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 22px;
-            transition: all 0.3s ease;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            min-width: 50px;
-            text-align: center;
-        }
-
-        .profile-icon-btn:hover {
-            background: rgba(22, 105, 122, 0.25);
-            border: 1px solid rgba(22, 105, 122, 0.4);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-            color: white;
-        }
-
-        .profile-icon-btn i {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            margin: 0;
-            line-height: 1;
-            font-size: 20px;
-        }
-
-        .profile-icon-btn .button-label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            line-height: 1;
-            margin: 0;
-            width: 100%;
-            text-align: center;
-        }
-
-        .profile-dropdown-menu {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 15px;
-            box-shadow: 
-                0 20px 60px rgba(0, 0, 0, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.8);
-            min-width: 220px;
-            z-index: 3000;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            margin-top: 10px;
-            padding: 8px 0;
-        }
-
-        .profile-dropdown:hover .profile-dropdown-menu,
-        .profile-dropdown.open .profile-dropdown-menu {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .profile-dropdown-menu .dropdown-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 20px;
-            color: #333;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            font-weight: 500;
-            border-radius: 8px;
-            margin: 2px 8px;
-        }
-
-        .profile-dropdown-menu .dropdown-item:hover {
-            background: linear-gradient(135deg, rgba(72, 159, 181, 0.1), rgba(72, 159, 181, 0.05));
-            color: #489FB5;
-            transform: translateX(5px);
-        }
-
-        .profile-dropdown-menu .dropdown-divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(72, 159, 181, 0.3), transparent);
-            margin: 8px 16px;
-        }
-
-        /* User Info Section in Dropdown */
-        .dropdown-user-info {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            background: rgba(22, 105, 122, 0.05);
-            border-radius: 8px;
-            margin: 8px;
-        }
-
-        .dropdown-user-info .user-avatar {
-            font-size: 24px;
-            color: #16697A;
-            margin-right: 12px;
-        }
-
-        .dropdown-user-info .user-details {
-            flex: 1;
-        }
-
-        .dropdown-user-info .user-name {
-            font-weight: 600;
-            color: #16697A;
-            font-size: 14px;
-            margin-bottom: 2px;
-        }
-
-        .dropdown-user-info .user-phone {
-            color: #489FB5;
-            font-size: 12px;
-        }
-
-        /* Mobile Responsive Styles */
-        @media (max-width: 768px) {
-            .site-header {
-                position: relative !important;
-                top: auto;
-                margin-bottom: 0;
-                background: var(--background-color);
-                padding: 10px 0;
-                box-shadow: none;
-                border-radius: 0;
-                z-index: 2500;
-            }
-
-            .header-content {
-                background: transparent;
-                border-radius: 0;
-                padding: 0 1rem;
-                border: none;
-                box-shadow: none;
-                gap: 0.75rem;
-            }
-
-            .header-right {
-                gap: 10px;
-            }
-
-            .profile-icon-btn,
-            .cart-icon-btn {
-                background: transparent;
-                border: none;
-                border-radius: 0;
-                padding: 6px;
-                box-shadow: none;
-                color: #16697A;
-            }
-
-            .profile-icon-btn {
-                font-size: 20px;
-                min-width: 40px;
-                gap: 2px;
-            }
-
-            .profile-icon-btn i {
-                font-size: 16px;
-            }
-
-            .profile-icon-btn:hover,
-            .cart-icon-btn:hover {
-                background: transparent;
-                color: #0f4f5d;
-                border: none;
-                box-shadow: none;
-            }
-
-            .profile-icon-btn .button-label,
-            .cart-icon-btn .button-label {
-                font-size: 0.62rem;
-                letter-spacing: 0.4px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .site-header {
-                padding: 10px 0;
-            }
-
-            .header-content {
-                padding: 0 0.85rem;
-                gap: 0.55rem;
-            }
-
-            .brand-name {
-                font-size: 1.65rem;
-                letter-spacing: 1px;
-            }
-
-            .profile-icon-btn,
-            .cart-icon-btn {
-                padding: 6px 9px;
-            }
-        }
-
         /* Mobile-only Update Room Previews button styling */
         #mobileUpdateRoomPreviews {
             display: none;
@@ -264,98 +26,30 @@
             #mobileUpdateRoomPreviews { display: block; }
             #updateRoomPreviews { display: none !important; }
         }
+        
+        /* Ensure bottom bar is hidden in room preview mode - Critical Override */
+        body.room-preview-active .mobile-bottom-bar,
+        body.room-preview-active #mobileBottomBar {
+            display: none !important;
+        }
+        body.room-preview-active .mobile-adjustments-container {
+            display: none !important;
+        }
     </style>
+    <!-- Global Header Component -->
+    <script src="global-header.js"></script>
 </head>
 <body class="customize-page">
-    <!-- Header -->
-    <header class="site-header">
-        <div class="header-content">
-            <div class="header-left"></div>
-            <div class="header-brand">
-                <h1 class="brand-name">JB Creations</h1>
-            </div>
-            <div class="header-right">
-                <div class="auth-section" id="authSection">
-                    <!-- Profile dropdown button (always visible) -->
-                    <div class="profile-dropdown" id="profileDropdown">
-                        <button class="profile-icon-btn" id="profileBtn">
-                            <i class="fas fa-user-alt"></i>
-                            <span class="button-label">Profile</span>
-                        </button>
-                        <div class="profile-dropdown-menu" id="profileDropdownMenu">
-                            <!-- Guest user options -->
-                            <div class="guest-options" id="guestOptions">
-                                <a href="otp-login.html?redirect=customize.html" class="dropdown-item">
-                                    <i class="fas fa-sign-in-alt"></i>
-                                    Sign In
-                                </a>
-                                <a href="otp-login.html?redirect=customize.html" class="dropdown-item">
-                                    <i class="fas fa-user-plus"></i>
-                                    Sign Up
-                                </a>
-                                <div class="dropdown-divider"></div>
-                            </div>
-                            
-                            <!-- Authenticated user options (hidden by default) -->
-                            <div class="authenticated-options" id="authenticatedOptions" style="display: none;">
-                                <!-- User Info Section -->
-                                <div class="dropdown-user-info" id="dropdownUserInfo">
-                                    <div class="user-avatar">
-                                        <i class="fas fa-user-circle"></i>
-                                    </div>
-                                    <div class="user-details">
-                                        <div class="user-name" id="dropdownUserName">User</div>
-                                        <div class="user-phone" id="dropdownUserPhone">Phone</div>
-                                    </div>
-                                </div>
-                                <div class="dropdown-divider"></div>
-                                
-                                <a href="my-profile.html" class="dropdown-item" data-close-dropdown="true">
-                                    <i class="fas fa-user-circle"></i>
-                                    My Profile
-                                </a>
-                                <a href="#" class="dropdown-item" onclick="viewOrders()">
-                                    <i class="fas fa-box"></i>
-                                    My Orders
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <a href="#" class="dropdown-item" onclick="authUtils.logout()">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                    Sign Out
-                                </a>
-                                <div class="dropdown-divider"></div>
-                            </div>
-                            
-                            <!-- Common options for all users -->
-                            <a href="track-order.html" class="dropdown-item">
-                                <i class="fas fa-search"></i>
-                                Track Order
-                            </a>
-                            <a href="#" class="dropdown-item" onclick="contactUs()">
-                                <i class="fas fa-envelope"></i>
-                                Contact Us
-                            </a>
-                            <a href="#" class="dropdown-item" onclick="aboutUs()">
-                                <i class="fas fa-info-circle"></i>
-                                About Us
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="header-cart">
-                    <button class="cart-icon-btn" id="headerCartBtn" onclick="window.location.href='cart.html'">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span class="cart-count" id="cartCount">0</span>
-                        <span class="button-label">Cart</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
+    <!-- GlobalWebsiteHeader Component Container -->
+    <div id="global-header-container"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            GlobalWebsiteHeader.init();
+        });
+    </script>
 
     <!-- Main Container -->
-    <div class="container">
+    <div class="container" id="mainCustomizeContainer">
         <!-- Left Side: Upload and Preview Section -->
         <div class="left-section">
             <!-- Upload Section -->
@@ -463,6 +157,12 @@
                         </button>
                     </div>
                 </div>
+                
+                <!-- Mobile See Room Preview Button (shown only on mobile) -->
+                <button id="mobileSeeRoomPreview" class="mobile-see-room-preview-btn" disabled>
+                    <i class="fas fa-home"></i>
+                    <span>See Room Preview</span>
+                </button>
             </div>
         </div>
 
@@ -698,19 +398,111 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Mobile Add to Cart below Room Preview section (mobile only) -->
-            <div class="mobile-room-add">
-                <div class="mobile-total-price">
-                    <i class="fas fa-tag" aria-hidden="true"></i>
-                    <span class="label">Total:</span>
-                    <span class="value" id="mobileTotalPrice">₹0</span>
-                </div>
-                <button id="mobileAddToCart" class="mobile-add-btn" disabled>
-                    <i class="fas fa-shopping-cart" aria-hidden="true"></i>
-                    <span>Add to Cart</span>
-                </button>
             </div>
+        </div>
+        
+        <!-- Mobile Room Preview Page - Flipkart Style Listing (Hidden by default, shown when user clicks See Room Preview) -->
+        <div id="mobileRoomPreviewPage" class="mobile-room-preview-page" style="display: none;">
+            
+            <!-- Main Content Container -->
+            <div class="mobile-listing-content">
+                <!-- Product Images Section (Horizontal Slider) -->
+                <div class="product-images-section">
+                    <div class="product-images-slider-container">
+                        <div id="mobileRoomImagesList" class="mobile-product-images-slider">
+                            <!-- Room images will be dynamically loaded here in horizontal slider format -->
+                        </div>
+                    </div>
+                    <div class="slider-dots" id="sliderDots"></div>
+                </div>
+                
+                <!-- Product Info Section -->
+                <div class="product-info-section">
+                    <!-- Title and Rating -->
+                    <div class="product-header">
+                        <h2 class="product-title">Customized Photo Frame</h2>
+                        <div class="product-rating">
+                            <span class="rating-stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </span>
+                            <span class="rating-text">4.5 (1,234 reviews)</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Price Section -->
+                    <div class="product-price-section">
+                        <div class="price-container">
+                            <span class="current-price" id="mobileListingPrice">₹349</span>
+                            <span class="original-price">₹699</span>
+                            <span class="discount-badge">50% off</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Specifications Section -->
+                    <div class="product-specs-section">
+                        <h3 class="section-title">Your Selections</h3>
+                        <div class="specs-list">
+                            <div class="spec-row">
+                                <span class="spec-key">Size</span>
+                                <span class="spec-value" id="mobileListingSize">13×19" Portrait</span>
+                            </div>
+                            <div class="spec-row">
+                                <span class="spec-key">Frame Color</span>
+                                <span class="spec-value" id="mobileListingColor">Black</span>
+                            </div>
+                            <div class="spec-row">
+                                <span class="spec-key">Frame Texture</span>
+                                <span class="spec-value" id="mobileListingTexture">Smooth</span>
+                            </div>
+                            <div class="spec-row">
+                                <span class="spec-key">Quality</span>
+                                <span class="spec-value">Premium HD Print</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Features Section -->
+                    <div class="product-features-section">
+                        <h3 class="section-title">Key Features</h3>
+                        <ul class="features-list">
+                            <li><i class="fas fa-check-circle"></i> High-quality photo printing</li>
+                            <li><i class="fas fa-check-circle"></i> Premium frame material</li>
+                            <li><i class="fas fa-check-circle"></i> Easy wall mounting</li>
+                            <li><i class="fas fa-check-circle"></i> Scratch resistant</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Delivery Info -->
+                    <div class="delivery-info-section">
+                        <h3 class="section-title">Delivery & Returns</h3>
+                        <div class="delivery-item">
+                            <i class="fas fa-truck"></i>
+                            <div class="delivery-text">
+                                <span class="delivery-label">Free Delivery</span>
+                                <span class="delivery-desc">Estimated delivery by Dec 10</span>
+                            </div>
+                        </div>
+                        <div class="delivery-item">
+                            <i class="fas fa-undo"></i>
+                            <div class="delivery-text">
+                                <span class="delivery-label">Cancellation & Refund Policy</span>
+                                <span class="delivery-desc">Delivery charges apply on cancellation or return as these are customized orders</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Fixed Bottom Add to Cart Bar -->
+            <div class="mobile-listing-footer">
+                <button id="mobileRoomAddToCart" class="add-to-cart-btn" disabled>
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>ADD TO CART</span>
+                </button>
             </div>
         </div>
 
