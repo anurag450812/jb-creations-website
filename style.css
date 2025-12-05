@@ -6366,13 +6366,20 @@ button i {
 }
 
 
-/* Room Preview Mode - Hide Bottom Bar */
-body.room-preview-active .mobile-bottom-bar {
+/* Room Preview Mode - Hide Bottom Bar and Dropup */
+body.room-preview-active .mobile-bottom-bar,
+body.room-preview-active #mobileBottomBar {
     display: none !important;
 }
 
 body.room-preview-active .mobile-adjustments-container {
     display: none !important;
 }
+
+body.room-preview-active .mobile-dropup,
+body.room-preview-active #mobileDropup {
+    display: none !important;
+}
+
 
 
