@@ -4824,6 +4824,7 @@ button i {
     border-radius: 20px;
     overflow: hidden;
     background: transparent; /* Ensure no background */
+    display: block !important; /* Ensure single layout mode, not flex/grid */
 }
 
 .room-slider img {
@@ -4837,11 +4838,13 @@ button i {
     transition: opacity 0.4s ease;
     border-radius: 20px;
     pointer-events: none;
+    z-index: 1; /* Ensure layering */
 }
 
 .room-slider img.active {
-    opacity: 1;
+    opacity: 1 !important; /* Force opacity to ensure visibility */
     pointer-events: auto;
+    z-index: 10; /* Bring active image to front */
 }
 
 /* Simple Controls - Below the Image */
@@ -5847,6 +5850,7 @@ button i {
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    width: 100%;
 }
 
 .product-images-slider-container::-webkit-scrollbar {
@@ -5857,14 +5861,16 @@ button i {
     display: flex;
     gap: 0;
     width: fit-content;
+    scroll-snap-type: x mandatory;
 }
 
 .mobile-product-image-item {
     flex-shrink: 0;
-    width: 100vw;
+    width: calc(100vw - 2rem); /* Account for padding to ensure only 1 image per scroll */
     position: relative;
     background: transparent;
     scroll-snap-align: start;
+    scroll-snap-stop: always; /* Stop on each image */
     display: flex;
     align-items: center;
     justify-content: center;
