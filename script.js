@@ -209,7 +209,6 @@ function initMobileBottomBar() {
 
     // Tabs behavior
     const tabs = bottomBar.querySelectorAll('.bar-tab');
-    const dots = bottomBar.querySelectorAll('.bar-dots .dot');
     const titleEl = document.getElementById('dropupTitle');
     const toggleBtn = document.getElementById('dropupToggle');
 
@@ -225,16 +224,13 @@ function initMobileBottomBar() {
             if (!el) return;
             el.classList.toggle('active', key === name);
         });
-        // dots state
-        const order = ['size','color','texture','adjust'];
-        order.forEach((key, idx) => {
-            if (dots[idx]) dots[idx].classList.toggle('active', key === name);
-        });
         // title
         if (titleEl) {
             const map = { size: 'Size', color: 'Color', texture: 'Texture', adjust: 'Adjust' };
             titleEl.textContent = map[name] || 'Customize';
         }
+        // Hide the bottom bar when dropup opens
+        bottomBar.classList.add('hidden-for-dropup');
         // open dropup
         dropup.classList.add('open');
         dropup.setAttribute('aria-hidden', 'false');
@@ -251,39 +247,118 @@ function initMobileBottomBar() {
             e.stopPropagation();
             const target = tab.dataset.target;
             if (!target) return;
-            const alreadyOpen = dropup.classList.contains('open');
-            const thisActive = tab.classList.contains('active');
-            if (alreadyOpen && thisActive) {
-                dropup.classList.remove('open');
-                dropup.setAttribute('aria-hidden', 'true');
-                return;
-            }
+            // Always open the dropup and hide the bar when a tab is clicked
             setActiveDrawer(target);
         });
     });
 
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-            const willOpen = !dropup.classList.contains('open');
-            if (willOpen) {
-                dropup.classList.add('open');
-                dropup.setAttribute('aria-hidden', 'false');
+    // Make the entire dropup header clickable for toggle only (no option selection)
+    const dropupHeader = dropup.querySelector('.dropup-header');
+    
+    function toggleDropup(e) {
+        // Prevent event bubbling issues
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        const willOpen = !dropup.classList.contains('open');
+        if (willOpen) {
+            // Hide bottom bar and open dropup
+            bottomBar.classList.add('hidden-for-dropup');
+            dropup.classList.add('open');
+            dropup.setAttribute('aria-hidden', 'false');
+            if (toggleBtn) {
                 toggleBtn.setAttribute('aria-expanded', 'true');
-            } else {
-                dropup.classList.remove('open');
-                dropup.setAttribute('aria-hidden', 'true');
+                const icon = toggleBtn.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-chevron-down';
+                }
+            }
+        } else {
+            // Close the dropup and show bottom bar
+            dropup.classList.remove('open');
+            dropup.setAttribute('aria-hidden', 'true');
+            bottomBar.classList.remove('hidden-for-dropup');
+            if (toggleBtn) {
                 toggleBtn.setAttribute('aria-expanded', 'false');
+                const icon = toggleBtn.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-chevron-up';
+                }
             }
-            const icon = toggleBtn.querySelector('i');
-            if (icon) {
-                icon.className = willOpen ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+        }
+    }
+    
+    // Function to close the dropup
+    function closeDropup() {
+        if (dropup.classList.contains('open')) {
+            dropup.classList.remove('open');
+            dropup.setAttribute('aria-hidden', 'true');
+            bottomBar.classList.remove('hidden-for-dropup');
+            if (toggleBtn) {
+                toggleBtn.setAttribute('aria-expanded', 'false');
+                const icon = toggleBtn.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-chevron-up';
+                }
             }
+        }
+    }
+    
+    // Add click listener to the entire header
+    if (dropupHeader) {
+        dropupHeader.addEventListener('click', toggleDropup);
+    }
+    
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', (e) => {
+            // Stop propagation to prevent double-triggering from header click
+            e.stopPropagation();
+            toggleDropup(e);
         });
     }
+    
+    // Close dropup when clicking outside of it
+    document.addEventListener('click', (e) => {
+        // Check if the dropup is open
+        if (!dropup.classList.contains('open')) return;
+        
+        // Check if the click is outside the dropup and bottom bar
+        const isInsideDropup = dropup.contains(e.target);
+        const isInsideBottomBar = bottomBar.contains(e.target);
+        
+        if (!isInsideDropup && !isInsideBottomBar) {
+            closeDropup();
+        }
+    });
+    
+    // Also close on touch outside for mobile devices
+    document.addEventListener('touchstart', (e) => {
+        // Check if the dropup is open
+        if (!dropup.classList.contains('open')) return;
+        
+        // Check if the touch is outside the dropup and bottom bar
+        const isInsideDropup = dropup.contains(e.target);
+        const isInsideBottomBar = bottomBar.contains(e.target);
+        
+        if (!isInsideDropup && !isInsideBottomBar) {
+            closeDropup();
+        }
+    }, { passive: true });
 
-    // Ensure a default drawer is prepared (but don't auto-open)
+    // Ensure Size drawer is the default active drawer (but don't auto-open the dropup)
     Object.values(drawers).forEach(el => el && el.classList.remove('active'));
     if (drawers.size) drawers.size.classList.add('active');
+    // Set Size tab as active by default
+    tabs.forEach(t => {
+        const isSize = t.dataset.target === 'size';
+        t.classList.toggle('active', isSize);
+        t.setAttribute('aria-selected', isSize ? 'true' : 'false');
+    });
+    // Set first dot as active
+    if (dots[0]) dots[0].classList.add('active');
+    if (titleEl) titleEl.textContent = 'Size';
 }
 
 // Listen for storage changes to update cart count across tabs
@@ -1033,7 +1108,9 @@ function processCompressedImage(imageDataURL) {
                     // Update mobile See Room Preview button state
                     if (window.updateMobileSeeRoomPreviewBtn) {
                         window.updateMobileSeeRoomPreviewBtn();
-                    }                // Set default frame color to black if not set
+                    }
+                    
+                    // Set default frame color to black if not set
                 if (!state.frameColor) {
                     state.frameColor = 'black';
                 }
@@ -4497,13 +4574,18 @@ function initMobileRoomPreview() {
     function updateMobileSeeRoomPreviewBtn() {
         if (mobileSeeRoomPreviewBtn) {
             const hasImage = !!(state.image);
-            const hasFrameSize = !!(state.frameSize);
+            const hasFrameSize = !!(state.frameSize && state.frameSize.size);
+            console.log('📱 updateMobileSeeRoomPreviewBtn: hasImage=', hasImage, 'hasFrameSize=', hasFrameSize);
             mobileSeeRoomPreviewBtn.disabled = !(hasImage && hasFrameSize);
+            console.log('📱 Button disabled:', mobileSeeRoomPreviewBtn.disabled);
         }
     }
     
     // Call this when image is loaded or frame size changes
     window.updateMobileSeeRoomPreviewBtn = updateMobileSeeRoomPreviewBtn;
+    
+    // Also call it initially in case state is already set
+    updateMobileSeeRoomPreviewBtn();
     
     // See Room Preview button click
     if (mobileSeeRoomPreviewBtn) {

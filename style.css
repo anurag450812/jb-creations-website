@@ -2614,12 +2614,20 @@ button i {
         border-top: 1px solid rgba(0,0,0,0.06);
         padding: 8px 10px calc(12px + env(safe-area-inset-bottom, 0px));
         z-index: 5000;
-    display: none; /* hidden until body.has-upload */
+        display: none; /* hidden until body.has-upload */
         flex-direction: column;
         gap: 6px;
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         width: 100%;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    
+    /* Hide bottom bar when dropup is open - slide down animation */
+    .customize-page .mobile-bottom-bar.hidden-for-dropup {
+        transform: translateY(100%);
+        opacity: 0;
+        pointer-events: none;
     }
 
     .customize-page .bar-tabs {
@@ -2676,16 +2684,16 @@ button i {
         position: fixed;
         left: 0;
         right: 0;
-        bottom: calc(var(--mobile-bar-height, 80px) + env(safe-area-inset-bottom, 0px)); /* above the bar */
+        bottom: env(safe-area-inset-bottom, 0px); /* Now sits at the very bottom since bar is hidden when open */
         background: #fff;
         border-top-left-radius: 14px;
         border-top-right-radius: 14px;
         box-shadow: 0 -10px 30px rgba(0,0,0,0.18);
         z-index: 6000;
         transform: translateY(100%);
-        transition: transform 0.28s ease;
+        transition: transform 0.28s ease, bottom 0.28s ease;
         max-height: 55vh;
-    display: none; /* hidden until body.has-upload */
+        display: none; /* hidden until body.has-upload */
         flex-direction: column;
         overflow: hidden;
         width: 100%;
@@ -2705,10 +2713,31 @@ button i {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 10px 14px;
+        padding: 16px 14px 10px 14px;
         border-bottom: 1px solid rgba(0,0,0,0.06);
         font-weight: 700;
         color: #16697A;
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        transition: background-color 0.15s ease;
+        position: relative;
+    }
+    .customize-page .dropup-header:active {
+        background-color: rgba(22, 105, 122, 0.08);
+    }
+    /* Add a subtle drag handle indicator that header is tappable */
+    .customize-page .dropup-header::before {
+        content: '';
+        position: absolute;
+        top: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 36px;
+        height: 4px;
+        background: rgba(0,0,0,0.15);
+        border-radius: 2px;
     }
     .customize-page .dropup-header .dropup-close {
         display: inline-flex;

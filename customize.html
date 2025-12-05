@@ -877,10 +877,10 @@
         }
     </script>
 
-        <!-- Mobile Fixed Bottom Customization Bar -->
+        <!-- Mobile Fixed Bottom Customization Bar (always visible after image upload) -->
         <div class="mobile-bottom-bar" id="mobileBottomBar" aria-hidden="false">
             <div class="bar-tabs" role="tablist">
-                <button class="bar-tab active" data-target="size" role="tab" aria-selected="true">
+                <button class="bar-tab" data-target="size" role="tab" aria-selected="false">
                     <i class="fas fa-ruler-combined"></i>
                     <span>Size</span>
                 </button>
@@ -897,19 +897,13 @@
                     <span>Adjust</span>
                 </button>
             </div>
-            <div class="bar-dots" aria-hidden="true">
-                <span class="dot active"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
-            </div>
         </div>
 
         <!-- Mobile Drop-up Drawer Container -->
         <div class="mobile-dropup" id="mobileDropup" aria-hidden="true">
             <div class="dropup-header">
                 <span id="dropupTitle">Customize</span>
-                <button id="dropupToggle" class="dropup-close" aria-label="Toggle drawer" aria-expanded="true">
+                <button id="dropupToggle" class="dropup-close" aria-label="Close and go back" aria-expanded="true">
                     <i class="fas fa-chevron-down"></i>
                 </button>
             </div>
