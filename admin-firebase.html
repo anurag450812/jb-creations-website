@@ -492,6 +492,356 @@
             transform: scale(1.1);
         }
 
+        /* Checkbox styling for order selection */
+        .order-checkbox {
+            width: 1.125rem;
+            height: 1.125rem;
+            accent-color: var(--primary);
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .order-checkbox:hover {
+            transform: scale(1.1);
+        }
+
+        .select-all-checkbox {
+            width: 1.125rem;
+            height: 1.125rem;
+            accent-color: var(--primary);
+            cursor: pointer;
+            margin: 0;
+        }
+
+        /* Bulk actions bar */
+        .bulk-actions-bar {
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary-light), #c7d2fe);
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            animation: slideDown 0.2s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .bulk-actions-bar.show {
+            display: flex;
+        }
+
+        .bulk-actions-bar .selected-count {
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        .bulk-actions-bar .btn-delete-selected {
+            background: var(--danger);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .bulk-actions-bar .btn-delete-selected:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .bulk-actions-bar .btn-clear-selection {
+            background: transparent;
+            color: var(--primary-dark);
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--primary-dark);
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .bulk-actions-bar .btn-clear-selection:hover {
+            background: rgba(79, 70, 229, 0.1);
+        }
+
+        /* Confirmation modal */
+        .confirm-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .confirm-modal-overlay.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .confirm-modal {
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: var(--shadow-xl);
+            animation: scaleIn 0.2s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .confirm-modal-icon {
+            width: 4rem;
+            height: 4rem;
+            margin: 0 auto 1.5rem;
+            background: #fee2e2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--danger);
+        }
+
+        .confirm-modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .confirm-modal-message {
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .confirm-modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .confirm-modal-buttons .btn-cancel {
+            padding: 0.75rem 1.5rem;
+            background: var(--gray-200);
+            color: var(--text-secondary);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .confirm-modal-buttons .btn-cancel:hover {
+            background: var(--gray-300);
+        }
+
+        .confirm-modal-buttons .btn-confirm-delete {
+            padding: 0.75rem 1.5rem;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .confirm-modal-buttons .btn-confirm-delete:hover {
+            background: #dc2626;
+        }
+
+        /* Order Status Tabs */
+        .order-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-light);
+        }
+
+        .order-tab {
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: none;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .order-tab:hover {
+            color: var(--primary);
+        }
+
+        .order-tab.active {
+            color: var(--primary);
+        }
+
+        .order-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .order-tab .tab-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 1.5rem;
+            height: 1.5rem;
+            padding: 0 0.5rem;
+            margin-left: 0.5rem;
+            background: var(--gray-200);
+            color: var(--text-secondary);
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .order-tab.active .tab-count {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Pagination Controls */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-top: 1px solid var(--border-light);
+            margin-top: 1rem;
+        }
+
+        .pagination-info {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pagination-btn {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-medium);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--bg-tertiary);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-pages {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .page-btn {
+            min-width: 2.5rem;
+            height: 2.5rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-medium);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: var(--transition);
+        }
+
+        .page-btn:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .page-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .items-per-page {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .items-per-page label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .items-per-page select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
         /* Loading */
         .loading {
             display: flex;
@@ -710,7 +1060,7 @@
         /* Image grid and cards */
         .image-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
         }
 
@@ -720,14 +1070,23 @@
             border-radius: var(--radius-md);
             padding: 15px;
             text-align: center;
+            position: relative;
         }
 
         .image-card img {
             width: 100%;
-            height: 180px;
-            object-fit: cover;
+            height: 250px;
+            object-fit: contain;
             border-radius: var(--radius-sm);
             border: 2px solid var(--border-light);
+            background: var(--bg-tertiary);
+        }
+
+        .image-card.empty {
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* Download buttons */
@@ -735,13 +1094,13 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 8px 16px;
-            background: var(--primary);
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border: none;
             border-radius: var(--radius-sm);
-            font-size: 0.85em;
-            font-weight: 500;
+            font-size: 0.9em;
+            font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
             margin-top: 10px;
@@ -985,32 +1344,22 @@
                         </div>
                     </div>
 
-                    <!-- Recent Orders -->
+                    <!-- Quick Actions -->
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Recent Orders</h3>
-                            <button class="btn btn-secondary btn-sm" onclick="showView('orders')">View All</button>
+                            <h3 class="card-title">Quick Actions</h3>
                         </div>
                         <div class="card-body">
-                            <div class="loading" id="orders-loading">
-                                <div class="spinner"></div>
-                            </div>
-                            <div class="table-container" id="orders-table-container" style="display: none;">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Order ID</th>
-                                            <th>Customer</th>
-                                            <th>Date</th>
-                                            <th>Amount</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="orders-table-body">
-                                        <!-- Orders will be populated here -->
-                                    </tbody>
-                                </table>
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <button class="btn btn-primary" onclick="showView('orders')">
+                                    <i class="fas fa-shopping-bag"></i> View All Orders
+                                </button>
+                                <button class="btn btn-secondary" onclick="showView('customers')">
+                                    <i class="fas fa-users"></i> View Customers
+                                </button>
+                                <button class="btn btn-secondary" onclick="exportOrdersCSV()">
+                                    <i class="fas fa-download"></i> Export Orders
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1020,7 +1369,7 @@
                 <div id="orders-view" class="view" style="display: none;">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">All Orders</h3>
+                            <h3 class="card-title">Orders Management</h3>
                             <div class="header-right">
                                 <button class="btn btn-secondary btn-sm" onclick="exportOrdersCSV()">
                                     <i class="fas fa-download"></i>
@@ -1029,21 +1378,47 @@
                             </div>
                         </div>
                         <div class="card-body">
+                            <!-- Order Status Tabs -->
+                            <div class="order-tabs">
+                                <button class="order-tab" data-tab="all" onclick="switchOrderTab('all')">
+                                    All Orders <span class="tab-count" id="tab-count-all">0</span>
+                                </button>
+                                <button class="order-tab active" data-tab="pending-labels" onclick="switchOrderTab('pending-labels')">
+                                    Pending Labels <span class="tab-count" id="tab-count-pending-labels">0</span>
+                                </button>
+                                <button class="order-tab" data-tab="pending-rtd" onclick="switchOrderTab('pending-rtd')">
+                                    Pending RTD <span class="tab-count" id="tab-count-pending-rtd">0</span>
+                                </button>
+                                <button class="order-tab" data-tab="pending-handover" onclick="switchOrderTab('pending-handover')">
+                                    Pending Handover <span class="tab-count" id="tab-count-pending-handover">0</span>
+                                </button>
+                                <button class="order-tab" data-tab="completed" onclick="switchOrderTab('completed')">
+                                    Completed <span class="tab-count" id="tab-count-completed">0</span>
+                                </button>
+                            </div>
+                            
                             <!-- Search and Filter -->
                             <div class="search-filter-bar">
                                 <input type="text" class="search-input" placeholder="Search orders..." id="order-search">
-                                <select class="filter-select" id="status-filter">
-                                    <option value="">All Status</option>
-                                    <option value="pending">Pending</option>
-                                    <option value="processing">Processing</option>
-                                    <option value="shipped">Shipped</option>
-                                    <option value="delivered">Delivered</option>
-                                    <option value="completed">Completed</option>
-                                </select>
                                 <select class="filter-select" id="date-sort-filter">
                                     <option value="latest">Latest First</option>
                                     <option value="oldest">Oldest First</option>
+                                    <option value="email-asc">Sort by Email (A-Z)</option>
+                                    <option value="email-desc">Sort by Email (Z-A)</option>
+                                    <option value="name-asc">Sort by Name (A-Z)</option>
+                                    <option value="name-desc">Sort by Name (Z-A)</option>
+                                    <option value="phone-asc">Sort by Mobile (Asc)</option>
+                                    <option value="phone-desc">Sort by Mobile (Desc)</option>
                                 </select>
+                            </div>
+                            
+                            <!-- Bulk Actions Bar for All Orders -->
+                            <div class="bulk-actions-bar" id="all-orders-bulk-actions">
+                                <span class="selected-count"><span id="all-selected-count">0</span> orders selected</span>
+                                <button class="btn-delete-selected" onclick="deleteSelectedAllOrders()">
+                                    <i class="fas fa-trash"></i> Delete Selected
+                                </button>
+                                <button class="btn-clear-selection" onclick="clearAllOrdersSelection()">Clear Selection</button>
                             </div>
                             
                             <div class="loading" id="all-orders-loading">
@@ -1053,9 +1428,11 @@
                                 <table class="table">
                                     <thead>
                                         <tr>
+                                            <th><input type="checkbox" class="select-all-checkbox" id="all-select-all" onchange="toggleSelectAllOrders(this)"></th>
                                             <th>Order ID</th>
                                             <th>Customer</th>
                                             <th>Email</th>
+                                            <th>Qty</th>
                                             <th>Date</th>
                                             <th>Amount</th>
                                             <th>Status</th>
@@ -1066,6 +1443,32 @@
                                         <!-- All orders will be populated here -->
                                     </tbody>
                                 </table>
+                                
+                                <!-- Pagination Controls -->
+                                <div class="pagination-container">
+                                    <div class="pagination-info">
+                                        Showing <span id="showing-start">1</span> - <span id="showing-end">10</span> of <span id="total-orders-count">0</span> orders
+                                    </div>
+                                    <div class="pagination-controls">
+                                        <div class="items-per-page">
+                                            <label>Show:</label>
+                                            <select id="items-per-page" onchange="changeItemsPerPage(this.value)">
+                                                <option value="10">10</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                            </select>
+                                        </div>
+                                        <button class="pagination-btn" id="prev-page-btn" onclick="goToPage(currentPage - 1)" disabled>
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+                                        <div class="pagination-pages" id="pagination-pages">
+                                            <!-- Page buttons will be generated here -->
+                                        </div>
+                                        <button class="pagination-btn" id="next-page-btn" onclick="goToPage(currentPage + 1)">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1073,23 +1476,392 @@
 
                 <!-- Other views placeholder -->
                 <div id="customers-view" class="view" style="display: none;">
-                    <div class="card">
+                    <!-- Customer Stats Grid -->
+                    <div class="stats-grid" style="margin-bottom: 2rem;">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-label">Total Customers</div>
+                                    <div class="stat-value" id="total-customers-stat">-</div>
+                                </div>
+                                <div class="stat-icon primary">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                            </div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Unique email addresses</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-label">Repeat Customers</div>
+                                    <div class="stat-value" id="repeat-customers-stat">-</div>
+                                </div>
+                                <div class="stat-icon success">
+                                    <i class="fas fa-redo"></i>
+                                </div>
+                            </div>
+                            <div class="stat-change positive" style="flex-direction: column; align-items: flex-start; gap: 0.25rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-users"></i>
+                                    <span id="repeat-percentage-stat">0% of customers</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-shopping-bag"></i>
+                                    <span id="repeat-orders-percentage-stat">0% of orders</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-label">Total Orders</div>
+                                    <div class="stat-value" id="customer-total-orders-stat">-</div>
+                                </div>
+                                <div class="stat-icon warning">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </div>
+                            </div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-chart-line"></i>
+                                <span id="orders-from-repeat-stat">0 from repeat customers</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-label">Avg Orders/Customer</div>
+                                    <div class="stat-value" id="avg-orders-stat">-</div>
+                                </div>
+                                <div class="stat-icon info">
+                                    <i class="fas fa-calculator"></i>
+                                </div>
+                            </div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Order frequency</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-label">Avg Order Value</div>
+                                    <div class="stat-value" id="avg-order-value-stat">₹0</div>
+                                </div>
+                                <div class="stat-icon secondary" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                                    <i class="fas fa-rupee-sign"></i>
+                                </div>
+                            </div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-receipt"></i>
+                                <span>Per order average</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                        <!-- Top Frame Types Chart -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-chart-pie" style="margin-right: 0.5rem; color: var(--primary);"></i>Popular Frame Types</h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="frame-types-chart" height="250"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Customer Distribution Chart -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-chart-bar" style="margin-right: 0.5rem; color: var(--success);"></i>Customer Order Distribution</h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="customer-distribution-chart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top 5 Customers Card -->
+                    <div class="card" style="margin-bottom: 2rem;">
                         <div class="card-header">
-                            <h3 class="card-title">Customers</h3>
+                            <h3 class="card-title"><i class="fas fa-trophy" style="margin-right: 0.5rem; color: gold;"></i>Top 5 Customers (Most Orders)</h3>
+                            <button class="btn btn-secondary btn-sm" onclick="toggleAllCustomers()">
+                                <i class="fas fa-list"></i> <span id="view-all-btn-text">View All</span>
+                            </button>
                         </div>
                         <div class="card-body">
-                            <p style="text-align: center; color: var(--text-muted); padding: 3rem;">Customer management coming soon...</p>
+                            <div class="table-container">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>Email</th>
+                                            <th>Name</th>
+                                            <th>Phone</th>
+                                            <th>Total Orders</th>
+                                            <th>Total Spent</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="top-customers-table-body">
+                                        <!-- Top customers will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- All Customers Card (Initially Hidden) -->
+                    <div class="card" id="all-customers-card" style="display: none;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-users" style="margin-right: 0.5rem; color: var(--info);"></i>All Customers</h3>
+                            <div style="display: flex; gap: 1rem; align-items: center;">
+                                <input type="text" class="search-input" placeholder="Search by email..." id="customer-search" style="min-width: 250px;">
+                                <select class="filter-select" id="customer-sort">
+                                    <option value="orders-desc">Most Orders First</option>
+                                    <option value="orders-asc">Least Orders First</option>
+                                    <option value="email-asc">Email (A-Z)</option>
+                                    <option value="email-desc">Email (Z-A)</option>
+                                    <option value="spent-desc">Highest Spent First</option>
+                                    <option value="spent-asc">Lowest Spent First</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>Email</th>
+                                            <th>Name</th>
+                                            <th>Phone</th>
+                                            <th>Total Orders</th>
+                                            <th>Total Spent</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="all-customers-table-body">
+                                        <!-- All customers will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div id="analytics-view" class="view" style="display: none;">
-                    <div class="card">
+                    <!-- Analytics Stats Grid -->
+                    <div class="stats-grid" style="margin-bottom: 2rem;">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-label">Total Revenue</div>
+                                    <div class="stat-value" id="analytics-total-revenue">₹0</div>
+                                </div>
+                                <div class="stat-icon success">
+                                    <i class="fas fa-rupee-sign"></i>
+                                </div>
+                            </div>
+                            <div class="stat-change positive" id="analytics-revenue-change">
+                                <i class="fas fa-chart-line"></i>
+                                <span>All time earnings</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-label">Total Items Sold</div>
+                                    <div class="stat-value" id="analytics-total-items">0</div>
+                                </div>
+                                <div class="stat-icon primary">
+                                    <i class="fas fa-shopping-bag"></i>
+                                </div>
+                            </div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-box"></i>
+                                <span>Individual frames</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-label">Avg Order Value</div>
+                                    <div class="stat-value" id="analytics-avg-order">₹0</div>
+                                </div>
+                                <div class="stat-icon warning">
+                                    <i class="fas fa-receipt"></i>
+                                </div>
+                            </div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-calculator"></i>
+                                <span>Per transaction</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-label">Conversion Rate</div>
+                                    <div class="stat-value" id="analytics-conversion-rate">0%</div>
+                                </div>
+                                <div class="stat-icon info">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                            </div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Completed orders</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-label">This Month Revenue</div>
+                                    <div class="stat-value" id="analytics-month-revenue">₹0</div>
+                                </div>
+                                <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                            </div>
+                            <div class="stat-change positive" id="analytics-month-orders">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>0 orders this month</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-label">Today's Orders</div>
+                                    <div class="stat-value" id="analytics-today-orders">0</div>
+                                </div>
+                                <div class="stat-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                            </div>
+                            <div class="stat-change positive" id="analytics-today-revenue">
+                                <i class="fas fa-rupee-sign"></i>
+                                <span>₹0 revenue today</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row 1 -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-chart-line" style="margin-right: 0.5rem; color: var(--primary);"></i>Revenue Over Time</h3>
+                                <select class="filter-select" id="revenue-chart-period" onchange="updateRevenueChart()">
+                                    <option value="7">Last 7 Days</option>
+                                    <option value="30" selected>Last 30 Days</option>
+                                    <option value="90">Last 90 Days</option>
+                                </select>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="revenue-over-time-chart" height="280"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-chart-bar" style="margin-right: 0.5rem; color: var(--success);"></i>Orders by Status</h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="orders-by-status-chart" height="280"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row 2 -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-chart-pie" style="margin-right: 0.5rem; color: var(--warning);"></i>Popular Frame Sizes</h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="analytics-frame-sizes-chart" height="280"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-palette" style="margin-right: 0.5rem; color: var(--info);"></i>Popular Frame Colors</h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="analytics-frame-colors-chart" height="280"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Products & Best Selling Times -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-trophy" style="margin-right: 0.5rem; color: gold;"></i>Top 5 Best Sellers</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-container">
+                                    <table class="table" id="top-products-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Rank</th>
+                                                <th>Frame Configuration</th>
+                                                <th>Units Sold</th>
+                                                <th>Revenue</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="top-products-table-body">
+                                            <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Loading...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-clock" style="margin-right: 0.5rem; color: var(--secondary);"></i>Orders by Day of Week</h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="orders-by-day-chart" height="280"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location Analytics -->
+                    <div class="card" style="margin-bottom: 2rem;">
                         <div class="card-header">
-                            <h3 class="card-title">Analytics</h3>
+                            <h3 class="card-title"><i class="fas fa-map-marker-alt" style="margin-right: 0.5rem; color: var(--danger);"></i>Orders by Location (Top Cities)</h3>
                         </div>
                         <div class="card-body">
-                            <p style="text-align: center; color: var(--text-muted); padding: 3rem;">Analytics dashboard coming soon...</p>
+                            <div class="table-container">
+                                <table class="table" id="location-analytics-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>City/Location</th>
+                                            <th>State</th>
+                                            <th>Orders</th>
+                                            <th>Revenue</th>
+                                            <th>Avg Order Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="location-analytics-table-body">
+                                        <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Loading...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1175,6 +1947,12 @@
         let filteredOrders = [];
         let customers = [];
         let stats = {};
+        
+        // Pagination variables
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        let currentTab = 'pending-labels';
+        let tabFilteredOrders = [];
 
         // Navigation handling
         document.addEventListener('DOMContentLoaded', function() {
@@ -1277,15 +2055,10 @@
 
         function setupSearchAndFilter() {
             const searchInput = document.getElementById('order-search');
-            const statusFilter = document.getElementById('status-filter');
             const dateSortFilter = document.getElementById('date-sort-filter');
             
             if (searchInput) {
                 searchInput.addEventListener('input', filterOrders);
-            }
-            
-            if (statusFilter) {
-                statusFilter.addEventListener('change', filterOrders);
             }
             
             if (dateSortFilter) {
@@ -1295,33 +2068,45 @@
 
         function filterOrders() {
             const searchTerm = document.getElementById('order-search')?.value.toLowerCase() || '';
-            const statusFilter = document.getElementById('status-filter')?.value || '';
             const dateSortFilter = document.getElementById('date-sort-filter')?.value || 'latest';
             
             filteredOrders = orders.filter(order => {
                 const matchesSearch = !searchTerm || 
                     order.orderNumber.toLowerCase().includes(searchTerm) ||
-                    order.customerName?.toLowerCase().includes(searchTerm) ||
-                    order.email?.toLowerCase().includes(searchTerm);
+                    order.customer?.name?.toLowerCase().includes(searchTerm) ||
+                    order.customer?.email?.toLowerCase().includes(searchTerm) ||
+                    order.customer?.phone?.toLowerCase().includes(searchTerm);
                 
-                const matchesStatus = !statusFilter || order.status === statusFilter;
-                
-                return matchesSearch && matchesStatus;
+                return matchesSearch;
             });
             
-            // Sort orders by date
+            // Sort orders based on selected option
             filteredOrders.sort((a, b) => {
-                const dateA = getOrderDate(a.orderDate);
-                const dateB = getOrderDate(b.orderDate);
-                
-                if (dateSortFilter === 'oldest') {
-                    return dateA - dateB; // Oldest first
-                } else {
-                    return dateB - dateA; // Latest first (default)
+                switch(dateSortFilter) {
+                    case 'oldest':
+                        return getOrderDate(a.orderDate) - getOrderDate(b.orderDate);
+                    case 'email-asc':
+                        return (a.customer?.email || '').localeCompare(b.customer?.email || '');
+                    case 'email-desc':
+                        return (b.customer?.email || '').localeCompare(a.customer?.email || '');
+                    case 'name-asc':
+                        return (a.customer?.name || '').localeCompare(b.customer?.name || '');
+                    case 'name-desc':
+                        return (b.customer?.name || '').localeCompare(a.customer?.name || '');
+                    case 'phone-asc':
+                        return (a.customer?.phone || '').localeCompare(b.customer?.phone || '');
+                    case 'phone-desc':
+                        return (b.customer?.phone || '').localeCompare(a.customer?.phone || '');
+                    default: // 'latest'
+                        return getOrderDate(b.orderDate) - getOrderDate(a.orderDate);
                 }
             });
             
-            updateAllOrdersTable(filteredOrders);
+            // Reset to first page when filtering
+            currentPage = 1;
+            
+            // Apply tab filter and update table
+            applyTabFilter();
         }
         
         // Helper function to get comparable date from various date formats
@@ -1354,19 +2139,15 @@
                     if (result.success && result.orders) {
                         // Transform Firebase data to match expected format
                         orders = result.orders.map(order => ({
-                            orderNumber: order.orderNumber || order.id, // Use actual orderNumber, fallback to document ID
-                            id: order.id, // Keep document ID as id
+                            orderNumber: order.orderNumber || order.orderId, // Use actual orderNumber, fallback to document ID
+                            id: order.orderId, // Use orderId (the Firebase document ID) as the id for deletion
+                            orderId: order.orderId, // Also keep orderId explicitly
                             customer: {
                                 name: order.customerName || order.customer?.name || 'Guest',
                                 email: order.customerEmail || order.customer?.email || '',
                                 phone: order.customerPhone || order.customer?.phone || '',
                                 address: order.customerAddress || order.customer?.address || '',
                                 specialInstructions: order.specialInstructions || order.customer?.specialInstructions || ''
-                            },
-                            status: order.status || 'pending',
-                            orderDate: order.createdAt,
-                            totals: {
-                                total: order.totalAmount || 299
                             },
                             status: order.status || 'pending',
                             orderDate: order.orderDate || order.createdAt,
@@ -1393,7 +2174,8 @@
                         
                         updateDashboardStats();
                         updateRecentOrdersTable();
-                        updateAllOrdersTable(filteredOrders); // Update all orders table with sorted data
+                        updateTabCounts(); // Update tab counts
+                        applyTabFilter(); // Apply current tab filter
                         debugAfterLoad(); // Debug the loaded data
                         return;
                     } else {
@@ -1440,53 +2222,9 @@
             document.getElementById('new-customers').textContent = newCustomers.toLocaleString();
         }
 
+        // No longer needed - dashboard doesn't show recent orders table
         function updateRecentOrdersTable() {
-            const tableBody = document.getElementById('orders-table-body');
-            const loading = document.getElementById('orders-loading');
-            const tableContainer = document.getElementById('orders-table-container');
-            
-            if (!tableBody || !loading || !tableContainer) return;
-            
-            // Hide loading, show table
-            loading.style.display = 'none';
-            tableContainer.style.display = 'block';
-            
-            // Get recent orders (last 10) sorted by date (latest first)
-            const sortedOrders = [...orders].sort((a, b) => {
-                const dateA = getOrderDate(a.orderDate);
-                const dateB = getOrderDate(b.orderDate);
-                return dateB - dateA; // Latest first
-            });
-            
-            const recentOrders = sortedOrders.slice(0, 10);
-            
-            if (recentOrders.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">No orders found</td></tr>';
-                return;
-            }
-            
-            tableBody.innerHTML = recentOrders.map(order => `
-                <tr>
-                    <td><strong>#${order.orderNumber}</strong></td>
-                    <td>${order.customer.name || 'N/A'}</td>
-                    <td>${formatDate(order.orderDate)}</td>
-                    <td>₹${parseFloat(order.totals.total || 0).toFixed(2)}</td>
-                    <td>${getStatusBadge(order.status)}</td>
-                    <td>
-                        <div class="action-btns">
-                            <button class="action-btn view" onclick="viewOrder('${order.orderNumber}')" title="View">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="action-btn edit" onclick="editOrder('${order.orderNumber}')" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-btn delete" onclick="deleteOrder('${order.orderNumber}')" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+            // Empty function - recent orders table removed from dashboard
         }
 
         async function loadAllOrders() {
@@ -1500,28 +2238,165 @@
             loading.style.display = 'flex';
             tableContainer.style.display = 'none';
             
-            // Use existing orders data
-            updateAllOrdersTable(filteredOrders);
+            // Update tab counts and apply filter
+            updateTabCounts();
+            applyTabFilter();
             
             // Hide loading, show table
             loading.style.display = 'none';
             tableContainer.style.display = 'block';
         }
 
+        // Track selected orders for All Orders table
+        let selectedAllOrders = new Set();
+        
+        // ============ TAB AND PAGINATION FUNCTIONS ============
+        
+        function switchOrderTab(tab) {
+            currentTab = tab;
+            currentPage = 1; // Reset to first page when switching tabs
+            
+            // Update tab active state
+            document.querySelectorAll('.order-tab').forEach(t => {
+                t.classList.remove('active');
+                if (t.dataset.tab === tab) {
+                    t.classList.add('active');
+                }
+            });
+            
+            // Apply filter and update table
+            applyTabFilter();
+        }
+        
+        function applyTabFilter() {
+            // First apply search filters
+            const searchTerm = document.getElementById('order-search')?.value.toLowerCase() || '';
+            const dateSortFilter = document.getElementById('date-sort-filter')?.value || 'latest';
+            
+            let baseOrders = orders.filter(order => {
+                const matchesSearch = !searchTerm || 
+                    order.orderNumber.toLowerCase().includes(searchTerm) ||
+                    order.customer?.name?.toLowerCase().includes(searchTerm) ||
+                    order.customer?.email?.toLowerCase().includes(searchTerm) ||
+                    order.customer?.phone?.toLowerCase().includes(searchTerm);
+                
+                return matchesSearch;
+            });
+            
+            // Then apply tab filter
+            switch(currentTab) {
+                case 'pending-labels':
+                    tabFilteredOrders = baseOrders.filter(o => o.status === 'pending');
+                    break;
+                case 'pending-rtd':
+                    tabFilteredOrders = baseOrders.filter(o => o.status === 'processing');
+                    break;
+                case 'pending-handover':
+                    tabFilteredOrders = baseOrders.filter(o => o.status === 'shipped');
+                    break;
+                case 'completed':
+                    tabFilteredOrders = baseOrders.filter(o => o.status === 'completed' || o.status === 'delivered');
+                    break;
+                default:
+                    tabFilteredOrders = baseOrders;
+            }
+            
+            // Sort orders based on selected option
+            tabFilteredOrders.sort((a, b) => {
+                switch(dateSortFilter) {
+                    case 'oldest':
+                        return getOrderDate(a.orderDate) - getOrderDate(b.orderDate);
+                    case 'email-asc':
+                        return (a.customer?.email || '').localeCompare(b.customer?.email || '');
+                    case 'email-desc':
+                        return (b.customer?.email || '').localeCompare(a.customer?.email || '');
+                    case 'name-asc':
+                        return (a.customer?.name || '').localeCompare(b.customer?.name || '');
+                    case 'name-desc':
+                        return (b.customer?.name || '').localeCompare(a.customer?.name || '');
+                    case 'phone-asc':
+                        return (a.customer?.phone || '').localeCompare(b.customer?.phone || '');
+                    case 'phone-desc':
+                        return (b.customer?.phone || '').localeCompare(a.customer?.phone || '');
+                    default: // 'latest'
+                        return getOrderDate(b.orderDate) - getOrderDate(a.orderDate);
+                }
+            });
+            
+            // Update table with pagination
+            updateAllOrdersTable(tabFilteredOrders);
+            
+            // Ensure loading is hidden and table is shown
+            const loading = document.getElementById('all-orders-loading');
+            const tableContainer = document.getElementById('all-orders-table-container');
+            if (loading) loading.style.display = 'none';
+            if (tableContainer) tableContainer.style.display = 'block';
+        }
+        
+        function updateTabCounts() {
+            // All orders
+            document.getElementById('tab-count-all').textContent = orders.length;
+            
+            // Pending Labels (pending status)
+            const pendingLabelsCount = orders.filter(o => o.status === 'pending').length;
+            document.getElementById('tab-count-pending-labels').textContent = pendingLabelsCount;
+            
+            // Pending RTD (processing status)
+            const pendingRTDCount = orders.filter(o => o.status === 'processing').length;
+            document.getElementById('tab-count-pending-rtd').textContent = pendingRTDCount;
+            
+            // Pending Handover (shipped status)
+            const pendingHandoverCount = orders.filter(o => o.status === 'shipped').length;
+            document.getElementById('tab-count-pending-handover').textContent = pendingHandoverCount;
+            
+            // Completed (completed or delivered status)
+            const completedCount = orders.filter(o => o.status === 'completed' || o.status === 'delivered').length;
+            document.getElementById('tab-count-completed').textContent = completedCount;
+        }
+        
         function updateAllOrdersTable(ordersToShow) {
             const tableBody = document.getElementById('all-orders-table-body');
             if (!tableBody) return;
             
-            if (ordersToShow.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No orders found</td></tr>';
+            // Clear selection when table updates
+            selectedAllOrders.clear();
+            updateAllBulkActionsBar();
+            
+            // Calculate pagination
+            const totalOrders = ordersToShow.length;
+            const totalPages = Math.ceil(totalOrders / itemsPerPage);
+            
+            // Make sure current page is valid
+            if (currentPage > totalPages) currentPage = totalPages || 1;
+            if (currentPage < 1) currentPage = 1;
+            
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, totalOrders);
+            const paginatedOrders = ordersToShow.slice(startIndex, endIndex);
+            
+            // Update pagination info
+            document.getElementById('showing-start').textContent = totalOrders > 0 ? startIndex + 1 : 0;
+            document.getElementById('showing-end').textContent = endIndex;
+            document.getElementById('total-orders-count').textContent = totalOrders;
+            
+            // Update pagination buttons
+            updatePaginationButtons(totalPages);
+            
+            if (paginatedOrders.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">No orders found</td></tr>';
                 return;
             }
             
-            tableBody.innerHTML = ordersToShow.map(order => `
-                <tr>
+            tableBody.innerHTML = paginatedOrders.map(order => {
+                const orderId = order.id || order.orderId || order.orderNumber;
+                const quantity = order.items ? order.items.length : (order.quantity || 1);
+                return `
+                <tr data-order-id="${orderId}" data-order-number="${order.orderNumber}">
+                    <td><input type="checkbox" class="order-checkbox all-order-checkbox" data-order-id="${orderId}" data-order-number="${order.orderNumber}" onchange="toggleAllOrderSelection(this)"></td>
                     <td><strong>#${order.orderNumber}</strong></td>
                     <td>${order.customer.name || 'N/A'}</td>
                     <td>${order.customer.email || 'N/A'}</td>
+                    <td><span class="badge badge-info">${quantity}</span></td>
                     <td>${formatDate(order.orderDate)}</td>
                     <td>₹${parseFloat(order.totals.total || 0).toFixed(2)}</td>
                     <td>${getStatusBadge(order.status)}</td>
@@ -1530,16 +2405,78 @@
                             <button class="action-btn view" onclick="viewOrder('${order.orderNumber}')" title="View">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="action-btn edit" onclick="editOrder('${order.orderNumber}')" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-btn delete" onclick="deleteOrder('${order.orderNumber}')" title="Delete">
+                            <button class="action-btn delete" onclick="deleteOrder('${orderId}', '${order.orderNumber}')" title="Delete">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </td>
                 </tr>
-            `).join('');
+            `;
+            }).join('');
+            
+            // Reset select all checkbox
+            const selectAllCheckbox = document.getElementById('all-select-all');
+            if (selectAllCheckbox) selectAllCheckbox.checked = false;
+        }
+        
+        function updatePaginationButtons(totalPages) {
+            const paginationPages = document.getElementById('pagination-pages');
+            const prevBtn = document.getElementById('prev-page-btn');
+            const nextBtn = document.getElementById('next-page-btn');
+            
+            if (!paginationPages) return;
+            
+            // Update prev/next buttons
+            if (prevBtn) prevBtn.disabled = currentPage <= 1;
+            if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+            
+            // Generate page buttons
+            let pagesHTML = '';
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage < maxVisiblePages - 1) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            if (startPage > 1) {
+                pagesHTML += `<button class="page-btn" onclick="goToPage(1)">1</button>`;
+                if (startPage > 2) {
+                    pagesHTML += `<span style="padding: 0 0.5rem; color: var(--text-muted);">...</span>`;
+                }
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const activeClass = i === currentPage ? 'active' : '';
+                pagesHTML += `<button class="page-btn ${activeClass}" onclick="goToPage(${i})">${i}</button>`;
+            }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    pagesHTML += `<span style="padding: 0 0.5rem; color: var(--text-muted);">...</span>`;
+                }
+                pagesHTML += `<button class="page-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+            }
+            
+            paginationPages.innerHTML = pagesHTML;
+        }
+        
+        function goToPage(page) {
+            currentPage = page;
+            applyTabFilter();
+            
+            // Scroll to top of table
+            const tableContainer = document.getElementById('all-orders-table-container');
+            if (tableContainer) {
+                tableContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+        
+        function changeItemsPerPage(value) {
+            itemsPerPage = parseInt(value);
+            currentPage = 1; // Reset to first page
+            applyTabFilter();
         }
 
         // Utility functions
@@ -1680,8 +2617,19 @@
                 if (order.images && order.images.length > index) {
                     const orderImage = order.images[index];
                     
-                    // Check for Cloudinary URL in multiple possible locations
-                    if (orderImage.originalImage && orderImage.originalImage.startsWith('https://res.cloudinary.com/')) {
+                    // Check for Cloudinary URL in multiple possible locations (new structure uses 'original', 'print', 'display')
+                    if (orderImage.original && orderImage.original.startsWith('https://res.cloudinary.com/')) {
+                        cloudinaryUrl = orderImage.original;
+                        console.log(`- Found Cloudinary URL in original:`, cloudinaryUrl);
+                    } else if (orderImage.print && orderImage.print.startsWith('https://res.cloudinary.com/')) {
+                        cloudinaryUrl = orderImage.print;
+                        console.log(`- Found Cloudinary URL in print:`, cloudinaryUrl);
+                    } else if (orderImage.display && orderImage.display.startsWith('https://res.cloudinary.com/')) {
+                        cloudinaryUrl = orderImage.display;
+                        console.log(`- Found Cloudinary URL in display:`, cloudinaryUrl);
+                    }
+                    // Also check old structure (originalImage, printImage, displayImage)
+                    else if (orderImage.originalImage && orderImage.originalImage.startsWith('https://res.cloudinary.com/')) {
                         cloudinaryUrl = orderImage.originalImage;
                         console.log(`- Found Cloudinary URL in originalImage:`, cloudinaryUrl);
                     } else if (orderImage.printImage && orderImage.printImage.startsWith('https://res.cloudinary.com/')) {
@@ -1692,22 +2640,27 @@
                         console.log(`- Found Cloudinary URL in displayImage:`, cloudinaryUrl);
                     }
                     
-                    // Check for base64 image data
+                    // Check for base64 image data (both new and old structures)
                     if (!cloudinaryUrl) {
-                        if (orderImage.originalImage && orderImage.originalImage.startsWith('data:')) {
-                            base64Image = orderImage.originalImage;
-                            console.log(`- Found base64 in originalImage:`, base64Image.substring(0, 50) + '...');
-                        } else if (orderImage.printImage && orderImage.printImage.startsWith('data:')) {
-                            base64Image = orderImage.printImage;
-                            console.log(`- Found base64 in printImage:`, base64Image.substring(0, 50) + '...');
-                        } else if (orderImage.displayImage && orderImage.displayImage.startsWith('data:')) {
-                            base64Image = orderImage.displayImage;
-                            console.log(`- Found base64 in displayImage:`, base64Image.substring(0, 50) + '...');
-                        } else if (orderImage.data) {
-                            base64Image = orderImage.data;
-                            console.log(`- Found base64 in data:`, base64Image.substring(0, 50) + '...');
+                        const base64Sources = [
+                            orderImage.original, orderImage.print, orderImage.display,
+                            orderImage.originalImage, orderImage.printImage, orderImage.displayImage,
+                            orderImage.data
+                        ];
+                        for (const src of base64Sources) {
+                            if (src && src.startsWith('data:')) {
+                                base64Image = src;
+                                console.log(`- Found base64 image:`, base64Image.substring(0, 50) + '...');
+                                break;
+                            }
                         }
                     }
+                }
+                
+                // Also check item.cloudinaryUrl (direct cloudinary URL on item)
+                if (!cloudinaryUrl && item.cloudinaryUrl && item.cloudinaryUrl.startsWith('https://res.cloudinary.com/')) {
+                    cloudinaryUrl = item.cloudinaryUrl;
+                    console.log(`- Found Cloudinary URL in item.cloudinaryUrl:`, cloudinaryUrl);
                 }
                 
                 // Also check the item itself for image data
@@ -1785,33 +2738,48 @@
                     </div>
                     
                     <div class="image-section">
-                        <h5 style="color: var(--text-secondary); margin-bottom: 15px;">Images:</h5>
+                        <h5 style="color: var(--text-secondary); margin-bottom: 15px;">
+                            <i class="fas fa-print" style="margin-right: 8px; color: var(--primary);"></i>
+                            Print-Ready Image (High Quality):
+                        </h5>
                         <div class="image-grid">
                             ${bestImage ? `
-                                <div class="image-card">
-                                    <img src="${bestImage}" 
-                                         alt="Order Image" 
-                                         onerror="console.error('Failed to load image:', this.src); console.error('Image error for item ${index + 1}'); this.style.display='none'; this.nextElementSibling.style.display='block';"
-                                         onload="console.log('Image loaded successfully for item ${index + 1}:', this.src.substring(0, 50) + '...')">
-                                    <div style="display: none; padding: 20px; color: var(--text-muted); font-style: italic;">
-                                        Image failed to load<br>
-                                        <small>URL: ${bestImage.substring(0, 100)}...</small>
+                                <div class="image-card" style="border: 2px solid ${cloudinaryUrl ? 'var(--success)' : 'var(--warning)'};">
+                                    <div style="position: absolute; top: 10px; right: 10px; z-index: 10;">
+                                        <span class="badge ${cloudinaryUrl ? 'badge-success' : 'badge-warning'}" style="font-size: 0.7em;">
+                                            ${cloudinaryUrl ? '✓ HQ Cloud' : '⚠ Local'}
+                                        </span>
                                     </div>
-                                    <p style="margin: 8px 0; font-size: 0.85em; color: var(--text-muted); font-weight: 500;">
-                                        ${cloudinaryUrl ? '🌐 Cloudinary Image' : '📷 Base64 Image'}
-                                    </p>
-                                    <button data-image-data="${encodeURIComponent(bestImage)}" 
-                                            data-filename="${order.orderNumber}_item${index + 1}_print.jpg"
-                                            onclick="downloadImage(this.dataset.imageData, this.dataset.filename)"
-                                            class="download-btn">
-                                        <i class="fas fa-download"></i> Download
-                                    </button>
+                                    <img src="${bestImage}" 
+                                         alt="Print Ready Image" 
+                                         style="width: 100%; height: 250px; object-fit: contain; background: #f8f9fa; border-radius: 4px;"
+                                         onerror="console.error('Failed to load image:', this.src); this.style.display='none'; this.nextElementSibling.style.display='block';"
+                                         onload="console.log('✅ High-quality print image loaded for item ${index + 1}')">
+                                    <div style="display: none; padding: 40px; color: var(--text-muted); font-style: italic; text-align: center; background: #f8f9fa; border-radius: 4px;">
+                                        <i class="fas fa-exclamation-triangle" style="font-size: 2em; color: var(--warning); display: block; margin-bottom: 10px;"></i>
+                                        Image failed to load<br>
+                                        <small style="word-break: break-all;">URL: ${bestImage.substring(0, 80)}...</small>
+                                    </div>
+                                    <div style="margin-top: 12px; padding: 10px; background: var(--bg-tertiary); border-radius: 4px;">
+                                        <p style="margin: 0 0 8px 0; font-size: 0.85em; color: var(--text-secondary);">
+                                            <strong>${cloudinaryUrl ? '🌐 Cloudinary (Full Resolution)' : '📷 Base64 Image'}</strong>
+                                            ${cloudinaryUrl ? '<br><span style="color: var(--success);">Ready for professional printing</span>' : '<br><span style="color: var(--warning);">Backup image - check quality</span>'}
+                                        </p>
+                                        <button data-image-data="${encodeURIComponent(bestImage)}" 
+                                                data-filename="${order.orderNumber}_item${index + 1}_PRINT.jpg"
+                                                onclick="downloadImage(this.dataset.imageData, this.dataset.filename)"
+                                                class="download-btn" style="width: 100%; justify-content: center;">
+                                            <i class="fas fa-download"></i> Download for Print
+                                        </button>
+                                    </div>
                                 </div>
                             ` : `
-                                <div class="image-card empty">
-                                    <div style="padding: 20px; color: var(--text-muted); font-style: italic;">
-                                        No image available<br>
-                                        <small>Checked: Cloudinary URLs, Base64 data, originalImagePath</small>
+                                <div class="image-card empty" style="border: 2px dashed var(--danger);">
+                                    <div style="padding: 40px; color: var(--text-muted); font-style: italic; text-align: center;">
+                                        <i class="fas fa-image" style="font-size: 3em; color: var(--danger); display: block; margin-bottom: 15px;"></i>
+                                        <strong style="color: var(--danger);">No image available</strong><br>
+                                        <small>The print image could not be retrieved for this order.</small><br>
+                                        <small>Please contact customer for the original image.</small>
                                     </div>
                                 </div>
                             `}
@@ -1819,6 +2787,8 @@
                     </div>
                 </div>
             `}).join('');
+            
+            const orderQuantity = order.items ? order.items.length : (order.quantity || 1);
             
             content.innerHTML = `
                 <div class="order-header">
@@ -1838,6 +2808,10 @@
                         <div class="detail-row">
                             <span class="detail-label">Phone:</span>
                             <span class="detail-value">${order.customer.phone || 'N/A'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Quantity:</span>
+                            <span class="detail-value"><span class="badge badge-info" style="font-size: 1em;">${orderQuantity} item${orderQuantity > 1 ? 's' : ''}</span></span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Date:</span>
@@ -1873,7 +2847,17 @@
                 </div>
                 
                 <div class="items-section">
-                    <h3 style="color: var(--text-primary); margin-bottom: 20px;">Order Items (${order.items.length})</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="color: var(--text-primary); margin: 0;">
+                            <i class="fas fa-box" style="margin-right: 8px; color: var(--primary);"></i>
+                            Order Items (${order.items.length})
+                        </h3>
+                        ${order.items.length > 1 ? `
+                            <button class="btn btn-primary btn-sm" onclick="downloadAllOrderImages('${order.orderNumber}')" style="padding: 8px 16px;">
+                                <i class="fas fa-download"></i> Download All Images
+                            </button>
+                        ` : ''}
+                    </div>
                     ${itemsHTML}
                 </div>
             `;
@@ -2004,6 +2988,119 @@
             }, 2000);
         }
 
+        // Download all images for an order
+        async function downloadAllOrderImages(orderNumber) {
+            console.log('🔽 Downloading all images for order:', orderNumber);
+            
+            const order = orders.find(o => o.orderNumber === orderNumber);
+            if (!order || !order.items || order.items.length === 0) {
+                alert('No items found for this order');
+                return;
+            }
+            
+            // Show progress notification
+            showNotification(`Downloading ${order.items.length} image(s)...`, 'info');
+            
+            let successCount = 0;
+            let failCount = 0;
+            
+            for (let i = 0; i < order.items.length; i++) {
+                const item = order.items[i];
+                
+                // Find the best image for this item (same logic as showOrderModal)
+                let bestImage = null;
+                
+                // Check Cloudinary URLs first
+                if (order.images && order.images[i]) {
+                    const orderImage = order.images[i];
+                    bestImage = orderImage.print || orderImage.original || orderImage.display;
+                    if (!bestImage && orderImage.originalImage) {
+                        bestImage = orderImage.originalImage.startsWith('https://') ? orderImage.originalImage : null;
+                    }
+                    if (!bestImage && orderImage.printImage) {
+                        bestImage = orderImage.printImage.startsWith('https://') ? orderImage.printImage : null;
+                    }
+                }
+                
+                // Fallback to item properties
+                if (!bestImage) {
+                    bestImage = item.cloudinaryUrl || item.printImage || item.originalImage || item.displayImage;
+                }
+                
+                // Check for fallback base64 images
+                if (!bestImage && order.images && order.images[i]) {
+                    const orderImage = order.images[i];
+                    bestImage = orderImage.fallbackImage || orderImage.originalImage || orderImage.printImage;
+                }
+                
+                if (bestImage) {
+                    const filename = `${orderNumber}_item${i + 1}_PRINT.jpg`;
+                    try {
+                        await downloadImageAsync(bestImage, filename);
+                        successCount++;
+                        // Small delay between downloads to prevent browser throttling
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    } catch (error) {
+                        console.error(`Failed to download image ${i + 1}:`, error);
+                        failCount++;
+                    }
+                } else {
+                    console.warn(`No image found for item ${i + 1}`);
+                    failCount++;
+                }
+            }
+            
+            // Show completion notification
+            if (failCount === 0) {
+                showNotification(`Successfully downloaded ${successCount} image(s)!`, 'success');
+            } else {
+                showNotification(`Downloaded ${successCount}/${order.items.length} images. ${failCount} failed.`, failCount === order.items.length ? 'error' : 'warning');
+            }
+        }
+        
+        // Async version of downloadImage for batch downloads
+        function downloadImageAsync(imageData, filename) {
+            return new Promise((resolve, reject) => {
+                try {
+                    const decodedData = decodeURIComponent(imageData);
+                    
+                    if (decodedData.startsWith('http')) {
+                        fetch(decodedData)
+                            .then(response => {
+                                if (!response.ok) throw new Error('Network response was not ok');
+                                return response.blob();
+                            })
+                            .then(blob => {
+                                const url = window.URL.createObjectURL(blob);
+                                const link = document.createElement('a');
+                                link.href = url;
+                                link.download = filename;
+                                document.body.appendChild(link);
+                                link.click();
+                                window.URL.revokeObjectURL(url);
+                                document.body.removeChild(link);
+                                resolve();
+                            })
+                            .catch(reject);
+                    } else {
+                        let dataUrl = decodedData;
+                        if (!dataUrl.startsWith('data:')) {
+                            dataUrl = 'data:image/jpeg;base64,' + decodedData;
+                        }
+                        const link = document.createElement('a');
+                        link.href = dataUrl;
+                        link.download = filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        resolve();
+                    }
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        }
+
         // Helper function to download image from button data attributes
         function downloadImageFromData(button) {
             const base64Data = decodeURIComponent(button.getAttribute('data-image-data'));
@@ -2110,27 +3207,1103 @@
             downloadImage(base64Data, filename);
         }
 
-        function editOrder(orderNumber) {
-            alert(`Edit order #${orderNumber} - Feature coming soon!`);
+        // ============ DELETE ORDER FUNCTIONALITY ============
+        
+        // Store pending delete info
+        let pendingDeleteInfo = null;
+        
+        function deleteOrder(orderId, orderNumber) {
+            // Show confirmation modal for single order delete
+            pendingDeleteInfo = {
+                type: 'single',
+                orderId: orderId,
+                orderNumber: orderNumber
+            };
+            
+            document.getElementById('confirm-modal-title').textContent = 'Delete Order?';
+            document.getElementById('confirm-modal-message').textContent = 
+                `Are you sure you want to delete order #${orderNumber}? This action cannot be undone.`;
+            document.getElementById('confirm-delete-modal').classList.add('show');
         }
-
-        function deleteOrder(orderNumber) {
-            if (confirm(`Are you sure you want to delete order #${orderNumber}?`)) {
-                alert(`Delete order #${orderNumber} - Feature coming soon!`);
+        
+        function closeConfirmModal() {
+            document.getElementById('confirm-delete-modal').classList.remove('show');
+            pendingDeleteInfo = null;
+        }
+        
+        async function confirmDelete() {
+            if (!pendingDeleteInfo) return;
+            
+            const deleteBtn = document.getElementById('confirm-delete-btn');
+            const originalText = deleteBtn.textContent;
+            deleteBtn.textContent = 'Deleting...';
+            deleteBtn.disabled = true;
+            
+            try {
+                if (pendingDeleteInfo.type === 'single') {
+                    await executeSingleDelete(pendingDeleteInfo.orderId, pendingDeleteInfo.orderNumber);
+                } else if (pendingDeleteInfo.type === 'bulk') {
+                    await executeBulkDelete(pendingDeleteInfo.orderIds, pendingDeleteInfo.source);
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                alert('Failed to delete: ' + error.message);
+            } finally {
+                deleteBtn.textContent = originalText;
+                deleteBtn.disabled = false;
+                closeConfirmModal();
             }
         }
-
-        function loadCustomers() {
-            console.log('Loading customers...');
+        
+        async function executeSingleDelete(orderId, orderNumber) {
+            console.log('🗑️ Deleting order:', orderId, orderNumber);
+            console.log('🔍 Order ID to delete:', orderId);
+            
+            if (!window.jbAPI || typeof window.jbAPI.deleteOrder !== 'function') {
+                throw new Error('Firebase API not available');
+            }
+            
+            const result = await window.jbAPI.deleteOrder(orderId);
+            
+            if (result.success) {
+                console.log('✅ Order deleted successfully from Firebase');
+                
+                // Remove from local arrays using both id and orderId
+                const beforeCount = orders.length;
+                orders = orders.filter(o => {
+                    const orderDocId = o.id || o.orderId;
+                    return orderDocId !== orderId;
+                });
+                console.log(`📊 Orders array: ${beforeCount} -> ${orders.length}`);
+                
+                filteredOrders = filteredOrders.filter(o => {
+                    const orderDocId = o.id || o.orderId;
+                    return orderDocId !== orderId;
+                });
+                
+                tabFilteredOrders = tabFilteredOrders.filter(o => {
+                    const orderDocId = o.id || o.orderId;
+                    return orderDocId !== orderId;
+                });
+                
+                // Update tables and stats
+                updateDashboardStats();
+                updateRecentOrdersTable();
+                updateTabCounts();
+                applyTabFilter();
+                
+                // Show success message
+                showNotification(`Order #${orderNumber} deleted successfully`, 'success');
+            } else {
+                throw new Error(result.error || 'Failed to delete order');
+            }
+        }
+        
+        async function executeBulkDelete(orderIds, source) {
+            console.log('🗑️ Bulk deleting orders:', orderIds.length);
+            console.log('🔍 Order IDs to delete:', orderIds);
+            
+            if (!window.jbAPI || typeof window.jbAPI.deleteMultipleOrders !== 'function') {
+                throw new Error('Firebase API not available');
+            }
+            
+            const result = await window.jbAPI.deleteMultipleOrders(orderIds);
+            
+            if (result.success) {
+                console.log('✅ Orders deleted successfully from Firebase:', result.deletedCount);
+                
+                // Remove from local arrays
+                orders = orders.filter(o => {
+                    const orderDocId = o.id || o.orderId;
+                    return !orderIds.includes(orderDocId);
+                });
+                
+                filteredOrders = filteredOrders.filter(o => {
+                    const orderDocId = o.id || o.orderId;
+                    return !orderIds.includes(orderDocId);
+                });
+                
+                tabFilteredOrders = tabFilteredOrders.filter(o => {
+                    const orderDocId = o.id || o.orderId;
+                    return !orderIds.includes(orderDocId);
+                });
+                
+                // Clear selections
+                if (source === 'recent') {
+                    selectedRecentOrders.clear();
+                    updateRecentBulkActionsBar();
+                } else {
+                    selectedAllOrders.clear();
+                    updateAllBulkActionsBar();
+                }
+                
+                // Update tables and stats
+                updateDashboardStats();
+                updateRecentOrdersTable();
+                updateTabCounts();
+                applyTabFilter();
+                
+                // Show success message
+                showNotification(`${result.deletedCount} orders deleted successfully`, 'success');
+            } else {
+                throw new Error(result.error || 'Failed to delete orders');
+            }
+        }
+        
+        // ============ SELECTION FUNCTIONALITY FOR ALL ORDERS ============
+        
+        function toggleAllOrderSelection(checkbox) {
+            const orderId = checkbox.dataset.orderId;
+            if (checkbox.checked) {
+                selectedAllOrders.add(orderId);
+            } else {
+                selectedAllOrders.delete(orderId);
+            }
+            updateAllBulkActionsBar();
+            updateAllSelectAllCheckbox();
+        }
+        
+        function toggleSelectAllOrders(checkbox) {
+            const checkboxes = document.querySelectorAll('.all-order-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = checkbox.checked;
+                const orderId = cb.dataset.orderId;
+                if (checkbox.checked) {
+                    selectedAllOrders.add(orderId);
+                } else {
+                    selectedAllOrders.delete(orderId);
+                }
+            });
+            updateAllBulkActionsBar();
+        }
+        
+        function updateAllSelectAllCheckbox() {
+            const selectAllCheckbox = document.getElementById('all-select-all');
+            const checkboxes = document.querySelectorAll('.all-order-checkbox');
+            if (!selectAllCheckbox || checkboxes.length === 0) return;
+            
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            const someChecked = Array.from(checkboxes).some(cb => cb.checked);
+            
+            selectAllCheckbox.checked = allChecked;
+            selectAllCheckbox.indeterminate = someChecked && !allChecked;
+        }
+        
+        function updateAllBulkActionsBar() {
+            const bar = document.getElementById('all-orders-bulk-actions');
+            const countSpan = document.getElementById('all-selected-count');
+            if (!bar || !countSpan) return;
+            
+            const count = selectedAllOrders.size;
+            countSpan.textContent = count;
+            
+            if (count > 0) {
+                bar.classList.add('show');
+            } else {
+                bar.classList.remove('show');
+            }
+        }
+        
+        function clearAllOrdersSelection() {
+            selectedAllOrders.clear();
+            const checkboxes = document.querySelectorAll('.all-order-checkbox');
+            checkboxes.forEach(cb => cb.checked = false);
+            const selectAllCheckbox = document.getElementById('all-select-all');
+            if (selectAllCheckbox) selectAllCheckbox.checked = false;
+            updateAllBulkActionsBar();
+        }
+        
+        function deleteSelectedAllOrders() {
+            const count = selectedAllOrders.size;
+            if (count === 0) return;
+            
+            pendingDeleteInfo = {
+                type: 'bulk',
+                orderIds: Array.from(selectedAllOrders),
+                source: 'all'
+            };
+            
+            document.getElementById('confirm-modal-title').textContent = 'Delete Selected Orders?';
+            document.getElementById('confirm-modal-message').textContent = 
+                `Are you sure you want to delete ${count} order${count > 1 ? 's' : ''}? This action cannot be undone.`;
+            document.getElementById('confirm-delete-modal').classList.add('show');
+        }
+        
+        // ============ NOTIFICATION HELPER ============
+        
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                color: white;
+                font-weight: 500;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                z-index: 2000;
+                animation: slideIn 0.3s ease-out;
+            `;
+            notification.textContent = message;
+            
+            // Add animation styles
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
         }
 
+        // ============ CUSTOMER ANALYTICS FUNCTIONS ============
+        
+        let customerData = [];
+        let showingAllCustomers = false;
+        let frameTypesChart = null;
+        let customerDistributionChart = null;
+
+        function loadCustomers() {
+            console.log('Loading customers analytics...');
+            
+            // Process orders to extract customer data
+            const customerMap = new Map();
+            const frameTypeMap = new Map();
+            
+            orders.forEach(order => {
+                const email = order.customer?.email?.toLowerCase() || 'unknown';
+                
+                if (!customerMap.has(email)) {
+                    customerMap.set(email, {
+                        email: email,
+                        name: order.customer?.name || 'Unknown',
+                        phone: order.customer?.phone || 'N/A',
+                        orders: [],
+                        totalSpent: 0,
+                        orderCount: 0
+                    });
+                }
+                
+                const customer = customerMap.get(email);
+                customer.orders.push(order);
+                customer.orderCount++;
+                customer.totalSpent += parseFloat(order.totals?.total || 0);
+                
+                // Update name/phone if available and current is unknown
+                if (order.customer?.name && customer.name === 'Unknown') {
+                    customer.name = order.customer.name;
+                }
+                if (order.customer?.phone && customer.phone === 'N/A') {
+                    customer.phone = order.customer.phone;
+                }
+                
+                // Track frame types
+                if (order.items && order.items.length > 0) {
+                    order.items.forEach(item => {
+                        const frameSize = item.frameSize?.size || 'Unknown';
+                        const frameColor = item.frameColor || 'Unknown';
+                        const frameKey = `${frameSize} - ${frameColor}`;
+                        frameTypeMap.set(frameKey, (frameTypeMap.get(frameKey) || 0) + 1);
+                    });
+                }
+            });
+            
+            // Convert to array and sort by order count (descending)
+            customerData = Array.from(customerMap.values()).sort((a, b) => b.orderCount - a.orderCount);
+            
+            // Calculate statistics
+            const totalCustomers = customerData.length;
+            const repeatCustomers = customerData.filter(c => c.orderCount >= 2);
+            const repeatCustomerCount = repeatCustomers.length;
+            const ordersFromRepeatCustomers = repeatCustomers.reduce((sum, c) => sum + c.orderCount, 0);
+            const repeatPercentage = totalCustomers > 0 ? ((repeatCustomerCount / totalCustomers) * 100).toFixed(1) : 0;
+            const repeatOrdersPercentage = orders.length > 0 ? ((ordersFromRepeatCustomers / orders.length) * 100).toFixed(1) : 0;
+            const avgOrdersPerCustomer = totalCustomers > 0 ? (orders.length / totalCustomers).toFixed(2) : 0;
+            const totalRevenue = customerData.reduce((sum, c) => sum + c.totalSpent, 0);
+            const avgOrderValue = orders.length > 0 ? (totalRevenue / orders.length).toFixed(2) : 0;
+            
+            // Update stats display
+            document.getElementById('total-customers-stat').textContent = totalCustomers;
+            document.getElementById('repeat-customers-stat').textContent = repeatCustomerCount;
+            document.getElementById('repeat-percentage-stat').textContent = `${repeatPercentage}% of customers`;
+            document.getElementById('repeat-orders-percentage-stat').textContent = `${repeatOrdersPercentage}% of orders`;
+            document.getElementById('customer-total-orders-stat').textContent = orders.length;
+            document.getElementById('orders-from-repeat-stat').textContent = `${ordersFromRepeatCustomers} from repeat customers`;
+            document.getElementById('avg-orders-stat').textContent = avgOrdersPerCustomer;
+            document.getElementById('avg-order-value-stat').textContent = `₹${parseFloat(avgOrderValue).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+            
+            // Update top 5 customers table
+            updateTopCustomersTable(customerData.slice(0, 5));
+            
+            // Update all customers table
+            updateAllCustomersTable(customerData);
+            
+            // Render charts
+            renderFrameTypesChart(frameTypeMap);
+            renderCustomerDistributionChart(customerData);
+            
+            // Set up search and sort for customers
+            setupCustomerSearchAndSort();
+        }
+        
+        function updateTopCustomersTable(customers) {
+            const tableBody = document.getElementById('top-customers-table-body');
+            if (!tableBody) return;
+            
+            if (customers.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No customers found</td></tr>';
+                return;
+            }
+            
+            tableBody.innerHTML = customers.map((customer, index) => {
+                const isRepeat = customer.orderCount >= 2;
+                const rankIcon = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
+                
+                return `
+                <tr>
+                    <td><strong style="font-size: 1.2em;">${rankIcon}</strong></td>
+                    <td><strong>${customer.email}</strong></td>
+                    <td>${customer.name}</td>
+                    <td>${customer.phone}</td>
+                    <td><span class="badge ${isRepeat ? 'badge-success' : 'badge-info'}">${customer.orderCount} order${customer.orderCount > 1 ? 's' : ''}</span></td>
+                    <td><strong style="color: var(--success);">₹${customer.totalSpent.toFixed(2)}</strong></td>
+                    <td>${isRepeat ? '<span class="badge badge-success">Repeat Customer</span>' : '<span class="badge badge-info">New Customer</span>'}</td>
+                </tr>
+            `}).join('');
+        }
+        
+        function updateAllCustomersTable(customers) {
+            const tableBody = document.getElementById('all-customers-table-body');
+            if (!tableBody) return;
+            
+            if (customers.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No customers found</td></tr>';
+                return;
+            }
+            
+            tableBody.innerHTML = customers.map((customer, index) => {
+                const isRepeat = customer.orderCount >= 2;
+                
+                return `
+                <tr>
+                    <td><strong>#${index + 1}</strong></td>
+                    <td><strong>${customer.email}</strong></td>
+                    <td>${customer.name}</td>
+                    <td>${customer.phone}</td>
+                    <td><span class="badge ${isRepeat ? 'badge-success' : 'badge-info'}">${customer.orderCount} order${customer.orderCount > 1 ? 's' : ''}</span></td>
+                    <td><strong style="color: var(--success);">₹${customer.totalSpent.toFixed(2)}</strong></td>
+                    <td>${isRepeat ? '<span class="badge badge-success">Repeat Customer</span>' : '<span class="badge badge-info">New Customer</span>'}</td>
+                </tr>
+            `}).join('');
+        }
+        
+        function toggleAllCustomers() {
+            showingAllCustomers = !showingAllCustomers;
+            const allCustomersCard = document.getElementById('all-customers-card');
+            const btnText = document.getElementById('view-all-btn-text');
+            
+            if (showingAllCustomers) {
+                allCustomersCard.style.display = 'block';
+                btnText.textContent = 'Hide All';
+                // Scroll to all customers
+                allCustomersCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                allCustomersCard.style.display = 'none';
+                btnText.textContent = 'View All';
+            }
+        }
+        
+        function setupCustomerSearchAndSort() {
+            const searchInput = document.getElementById('customer-search');
+            const sortSelect = document.getElementById('customer-sort');
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', filterAndSortCustomers);
+            }
+            
+            if (sortSelect) {
+                sortSelect.addEventListener('change', filterAndSortCustomers);
+            }
+        }
+        
+        function filterAndSortCustomers() {
+            const searchTerm = document.getElementById('customer-search')?.value.toLowerCase() || '';
+            const sortOption = document.getElementById('customer-sort')?.value || 'orders-desc';
+            
+            let filteredCustomers = customerData.filter(customer => {
+                return !searchTerm || 
+                    customer.email.toLowerCase().includes(searchTerm) ||
+                    customer.name.toLowerCase().includes(searchTerm) ||
+                    customer.phone.toLowerCase().includes(searchTerm);
+            });
+            
+            // Sort customers
+            filteredCustomers.sort((a, b) => {
+                switch(sortOption) {
+                    case 'orders-asc':
+                        return a.orderCount - b.orderCount;
+                    case 'email-asc':
+                        return a.email.localeCompare(b.email);
+                    case 'email-desc':
+                        return b.email.localeCompare(a.email);
+                    case 'spent-desc':
+                        return b.totalSpent - a.totalSpent;
+                    case 'spent-asc':
+                        return a.totalSpent - b.totalSpent;
+                    default: // 'orders-desc'
+                        return b.orderCount - a.orderCount;
+                }
+            });
+            
+            updateAllCustomersTable(filteredCustomers);
+        }
+        
+        function renderFrameTypesChart(frameTypeMap) {
+            const ctx = document.getElementById('frame-types-chart');
+            if (!ctx) return;
+            
+            // Destroy existing chart if it exists
+            if (frameTypesChart) {
+                frameTypesChart.destroy();
+            }
+            
+            // Get top 6 frame types
+            const sortedFrameTypes = Array.from(frameTypeMap.entries())
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 6);
+            
+            const labels = sortedFrameTypes.map(([type]) => type);
+            const data = sortedFrameTypes.map(([, count]) => count);
+            
+            const colors = [
+                '#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6'
+            ];
+            
+            frameTypesChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 15,
+                                font: { size: 12 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.raw / total) * 100).toFixed(1);
+                                    return `${context.label}: ${context.raw} orders (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderCustomerDistributionChart(customers) {
+            const ctx = document.getElementById('customer-distribution-chart');
+            if (!ctx) return;
+            
+            // Destroy existing chart if it exists
+            if (customerDistributionChart) {
+                customerDistributionChart.destroy();
+            }
+            
+            // Categorize customers by order count
+            const oneOrder = customers.filter(c => c.orderCount === 1).length;
+            const twoOrders = customers.filter(c => c.orderCount === 2).length;
+            const threeOrders = customers.filter(c => c.orderCount === 3).length;
+            const fourPlusOrders = customers.filter(c => c.orderCount >= 4).length;
+            
+            customerDistributionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['1 Order', '2 Orders', '3 Orders', '4+ Orders'],
+                    datasets: [{
+                        label: 'Number of Customers',
+                        data: [oneOrder, twoOrders, threeOrders, fourPlusOrders],
+                        backgroundColor: ['#94a3b8', '#10b981', '#f59e0b', '#6366f1'],
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.raw} customer${context.raw !== 1 ? 's' : ''}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============ COMPREHENSIVE ANALYTICS FUNCTIONS ============
+        
+        let revenueOverTimeChart = null;
+        let ordersByStatusChart = null;
+        let analyticsFrameSizesChart = null;
+        let analyticsFrameColorsChart = null;
+        let ordersByDayChart = null;
+
         function loadAnalytics() {
-            console.log('Loading analytics...');
+            console.log('📊 Loading comprehensive analytics...');
+            
+            if (!orders || orders.length === 0) {
+                console.log('No orders to analyze');
+                return;
+            }
+            
+            // Calculate all analytics
+            const analytics = calculateAnalytics();
+            
+            // Update stat cards
+            updateAnalyticsStats(analytics);
+            
+            // Render charts
+            renderRevenueOverTimeChart(analytics.revenueByDate);
+            renderOrdersByStatusChart(analytics.ordersByStatus);
+            renderAnalyticsFrameSizesChart(analytics.frameSizes);
+            renderAnalyticsFrameColorsChart(analytics.frameColors);
+            renderOrdersByDayChart(analytics.ordersByDay);
+            
+            // Update tables
+            updateTopProductsTable(analytics.topProducts);
+            updateLocationAnalyticsTable(analytics.locationData);
+        }
+        
+        function calculateAnalytics() {
+            const now = new Date();
+            const today = now.toDateString();
+            const thisMonth = now.getMonth();
+            const thisYear = now.getFullYear();
+            
+            let totalRevenue = 0;
+            let totalItems = 0;
+            let monthRevenue = 0;
+            let monthOrders = 0;
+            let todayRevenue = 0;
+            let todayOrders = 0;
+            let completedOrders = 0;
+            
+            const revenueByDate = {};
+            const ordersByStatus = { pending: 0, processing: 0, shipped: 0, completed: 0, delivered: 0, cancelled: 0 };
+            const frameSizes = {};
+            const frameColors = {};
+            const productConfigs = {};
+            const ordersByDay = { 'Sun': 0, 'Mon': 0, 'Tue': 0, 'Wed': 0, 'Thu': 0, 'Fri': 0, 'Sat': 0 };
+            const locationData = {};
+            
+            orders.forEach(order => {
+                const orderTotal = parseFloat(order.totals?.total || 0);
+                const orderDate = getOrderDate(order.orderDate);
+                const dateKey = orderDate.toISOString().split('T')[0];
+                const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][orderDate.getDay()];
+                const itemCount = order.items ? order.items.length : (order.quantity || 1);
+                
+                // Total revenue
+                totalRevenue += orderTotal;
+                totalItems += itemCount;
+                
+                // Revenue by date
+                revenueByDate[dateKey] = (revenueByDate[dateKey] || 0) + orderTotal;
+                
+                // Orders by day of week
+                ordersByDay[dayName]++;
+                
+                // This month
+                if (orderDate.getMonth() === thisMonth && orderDate.getFullYear() === thisYear) {
+                    monthRevenue += orderTotal;
+                    monthOrders++;
+                }
+                
+                // Today
+                if (orderDate.toDateString() === today) {
+                    todayRevenue += orderTotal;
+                    todayOrders++;
+                }
+                
+                // Orders by status
+                const status = order.status || 'pending';
+                ordersByStatus[status] = (ordersByStatus[status] || 0) + 1;
+                
+                // Completed orders
+                if (status === 'completed' || status === 'delivered') {
+                    completedOrders++;
+                }
+                
+                // Frame sizes and colors
+                if (order.items && order.items.length > 0) {
+                    order.items.forEach(item => {
+                        const size = item.frameSize?.size || 'Standard';
+                        const color = item.frameColor || 'Wood';
+                        const texture = item.frameTexture || 'Standard';
+                        const price = parseFloat(item.price || 349);
+                        
+                        // Frame sizes
+                        if (!frameSizes[size]) frameSizes[size] = { count: 0, revenue: 0 };
+                        frameSizes[size].count++;
+                        frameSizes[size].revenue += price;
+                        
+                        // Frame colors
+                        if (!frameColors[color]) frameColors[color] = { count: 0, revenue: 0 };
+                        frameColors[color].count++;
+                        frameColors[color].revenue += price;
+                        
+                        // Product configurations
+                        const configKey = `${size} - ${color}`;
+                        if (!productConfigs[configKey]) productConfigs[configKey] = { count: 0, revenue: 0 };
+                        productConfigs[configKey].count++;
+                        productConfigs[configKey].revenue += price;
+                    });
+                }
+                
+                // Location data
+                const address = order.customer?.address || '';
+                const addressParts = address.split(',').map(p => p.trim());
+                let city = 'Unknown';
+                let state = 'Unknown';
+                
+                // Try to extract city and state from address
+                if (addressParts.length >= 2) {
+                    // Usually format: Street, City, State, Pincode
+                    if (addressParts.length >= 3) {
+                        city = addressParts[addressParts.length - 3] || addressParts[1] || 'Unknown';
+                        state = addressParts[addressParts.length - 2] || 'Unknown';
+                    } else {
+                        city = addressParts[0] || 'Unknown';
+                        state = addressParts[1] || 'Unknown';
+                    }
+                }
+                
+                // Clean up city and state
+                city = city.replace(/\d+/g, '').trim() || 'Unknown';
+                state = state.replace(/\d+/g, '').trim() || 'Unknown';
+                
+                const locationKey = `${city}|${state}`;
+                if (!locationData[locationKey]) {
+                    locationData[locationKey] = { city, state, orders: 0, revenue: 0 };
+                }
+                locationData[locationKey].orders++;
+                locationData[locationKey].revenue += orderTotal;
+            });
+            
+            // Sort and get top products
+            const topProducts = Object.entries(productConfigs)
+                .map(([name, data]) => ({ name, ...data }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 5);
+            
+            // Calculate averages
+            const avgOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
+            const conversionRate = orders.length > 0 ? (completedOrders / orders.length * 100) : 0;
+            
+            return {
+                totalRevenue,
+                totalItems,
+                avgOrderValue,
+                conversionRate,
+                monthRevenue,
+                monthOrders,
+                todayRevenue,
+                todayOrders,
+                revenueByDate,
+                ordersByStatus,
+                frameSizes,
+                frameColors,
+                topProducts,
+                ordersByDay,
+                locationData: Object.values(locationData).sort((a, b) => b.orders - a.orders).slice(0, 10)
+            };
+        }
+        
+        function updateAnalyticsStats(analytics) {
+            document.getElementById('analytics-total-revenue').textContent = 
+                '₹' + analytics.totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            document.getElementById('analytics-total-items').textContent = analytics.totalItems.toLocaleString();
+            document.getElementById('analytics-avg-order').textContent = 
+                '₹' + analytics.avgOrderValue.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            document.getElementById('analytics-conversion-rate').textContent = 
+                analytics.conversionRate.toFixed(1) + '%';
+            document.getElementById('analytics-month-revenue').textContent = 
+                '₹' + analytics.monthRevenue.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            document.getElementById('analytics-month-orders').innerHTML = 
+                `<i class="fas fa-shopping-cart"></i><span>${analytics.monthOrders} orders this month</span>`;
+            document.getElementById('analytics-today-orders').textContent = analytics.todayOrders;
+            document.getElementById('analytics-today-revenue').innerHTML = 
+                `<i class="fas fa-rupee-sign"></i><span>₹${analytics.todayRevenue.toLocaleString('en-IN')} revenue today</span>`;
+        }
+        
+        function renderRevenueOverTimeChart(revenueByDate) {
+            const ctx = document.getElementById('revenue-over-time-chart');
+            if (!ctx) return;
+            
+            if (revenueOverTimeChart) revenueOverTimeChart.destroy();
+            
+            const days = parseInt(document.getElementById('revenue-chart-period')?.value || 30);
+            const dates = [];
+            const revenues = [];
+            
+            // Generate last N days
+            for (let i = days - 1; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateKey = date.toISOString().split('T')[0];
+                dates.push(date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }));
+                revenues.push(revenueByDate[dateKey] || 0);
+            }
+            
+            revenueOverTimeChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Revenue (₹)',
+                        data: revenues,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#6366f1',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `₹${context.raw.toLocaleString('en-IN')}`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (value) => '₹' + value.toLocaleString('en-IN')
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateRevenueChart() {
+            const analytics = calculateAnalytics();
+            renderRevenueOverTimeChart(analytics.revenueByDate);
+        }
+        
+        function renderOrdersByStatusChart(ordersByStatus) {
+            const ctx = document.getElementById('orders-by-status-chart');
+            if (!ctx) return;
+            
+            if (ordersByStatusChart) ordersByStatusChart.destroy();
+            
+            const labels = Object.keys(ordersByStatus).filter(k => ordersByStatus[k] > 0);
+            const data = labels.map(k => ordersByStatus[k]);
+            const colors = {
+                pending: '#f59e0b',
+                processing: '#3b82f6',
+                shipped: '#8b5cf6',
+                completed: '#10b981',
+                delivered: '#059669',
+                cancelled: '#ef4444'
+            };
+            
+            ordersByStatusChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
+                    datasets: [{
+                        data: data,
+                        backgroundColor: labels.map(l => colors[l] || '#6b7280'),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { padding: 15, font: { size: 12 } }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderAnalyticsFrameSizesChart(frameSizes) {
+            const ctx = document.getElementById('analytics-frame-sizes-chart');
+            if (!ctx) return;
+            
+            if (analyticsFrameSizesChart) analyticsFrameSizesChart.destroy();
+            
+            const sorted = Object.entries(frameSizes)
+                .map(([name, data]) => ({ name, ...data }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 6);
+            
+            const colors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6'];
+            
+            analyticsFrameSizesChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: sorted.map(s => s.name),
+                    datasets: [{
+                        data: sorted.map(s => s.count),
+                        backgroundColor: colors.slice(0, sorted.length),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { padding: 15, font: { size: 12 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const item = sorted[context.dataIndex];
+                                    return `${item.name}: ${item.count} (₹${item.revenue.toLocaleString('en-IN')})`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderAnalyticsFrameColorsChart(frameColors) {
+            const ctx = document.getElementById('analytics-frame-colors-chart');
+            if (!ctx) return;
+            
+            if (analyticsFrameColorsChart) analyticsFrameColorsChart.destroy();
+            
+            const sorted = Object.entries(frameColors)
+                .map(([name, data]) => ({ name, ...data }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 6);
+            
+            // Map common color names to actual colors
+            const colorMap = {
+                'Wood': '#8B4513',
+                'Black': '#1f2937',
+                'White': '#f3f4f6',
+                'Gold': '#d4af37',
+                'Silver': '#c0c0c0',
+                'Brown': '#964B00',
+                'Walnut': '#5C4033',
+                'Oak': '#c4a35a'
+            };
+            
+            const chartColors = sorted.map(s => colorMap[s.name] || '#6b7280');
+            
+            analyticsFrameColorsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sorted.map(s => s.name),
+                    datasets: [{
+                        label: 'Units Sold',
+                        data: sorted.map(s => s.count),
+                        backgroundColor: chartColors,
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const item = sorted[context.dataIndex];
+                                    return `${item.count} units (₹${item.revenue.toLocaleString('en-IN')})`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    }
+                }
+            });
+        }
+        
+        function renderOrdersByDayChart(ordersByDay) {
+            const ctx = document.getElementById('orders-by-day-chart');
+            if (!ctx) return;
+            
+            if (ordersByDayChart) ordersByDayChart.destroy();
+            
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const data = days.map(d => ordersByDay[d] || 0);
+            
+            // Highlight the busiest day
+            const maxOrders = Math.max(...data);
+            const colors = data.map(d => d === maxOrders && d > 0 ? '#10b981' : '#6366f1');
+            
+            ordersByDayChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                    datasets: [{
+                        label: 'Orders',
+                        data: data,
+                        backgroundColor: colors,
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    }
+                }
+            });
+        }
+        
+        function updateTopProductsTable(topProducts) {
+            const tableBody = document.getElementById('top-products-table-body');
+            if (!tableBody) return;
+            
+            if (topProducts.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No data available</td></tr>';
+                return;
+            }
+            
+            const rankIcons = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+            tableBody.innerHTML = topProducts.map((product, index) => `
+                <tr>
+                    <td><strong style="font-size: 1.2em;">${rankIcons[index] || index + 1}</strong></td>
+                    <td><strong>${product.name}</strong></td>
+                    <td><span class="badge badge-info">${product.count}</span></td>
+                    <td><strong style="color: var(--success);">₹${product.revenue.toLocaleString('en-IN')}</strong></td>
+                </tr>
+            `).join('');
+        }
+        
+        function updateLocationAnalyticsTable(locationData) {
+            const tableBody = document.getElementById('location-analytics-table-body');
+            if (!tableBody) return;
+            
+            if (locationData.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No location data available</td></tr>';
+                return;
+            }
+            
+            const rankIcons = ['🥇', '🥈', '🥉'];
+            tableBody.innerHTML = locationData.map((loc, index) => `
+                <tr>
+                    <td><strong style="font-size: 1.1em;">${rankIcons[index] || '#' + (index + 1)}</strong></td>
+                    <td><strong>${loc.city}</strong></td>
+                    <td>${loc.state}</td>
+                    <td><span class="badge badge-info">${loc.orders}</span></td>
+                    <td><strong style="color: var(--success);">₹${loc.revenue.toLocaleString('en-IN')}</strong></td>
+                    <td>₹${(loc.revenue / loc.orders).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+                </tr>
+            `).join('');
         }
 
         // Export functions
         function exportData() {
-            exportOrdersCSV();
+            // Check which view is active and export accordingly
+            const customersView = document.getElementById('customers-view');
+            if (customersView && customersView.style.display !== 'none') {
+                exportCustomersCSV();
+            } else {
+                exportOrdersCSV();
+            }
+        }
+
+        function exportCustomersCSV() {
+            if (!customerData || customerData.length === 0) {
+                alert('No customer data to export');
+                return;
+            }
+            
+            // customerData is already sorted by orderCount descending
+            const csvContent = [
+                ['Rank', 'Email', 'Phone', 'Customer Name', 'Total Orders', 'Total Spent (₹)', 'Customer Type'].join(','),
+                ...customerData.map((customer, index) => [
+                    index + 1,
+                    `"${customer.email || ''}"`,
+                    `"${customer.phone || ''}"`,
+                    `"${customer.name || ''}"`,
+                    customer.orderCount,
+                    customer.totalSpent.toFixed(2),
+                    customer.orderCount >= 2 ? 'Repeat Customer' : 'New Customer'
+                ].join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `customers-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
         }
 
         function exportOrdersCSV() {
@@ -2143,10 +4316,10 @@
                 ['Order Number', 'Customer Name', 'Email', 'Phone', 'Address', 'Date', 'Status', 'Amount', 'Frame Size', 'Frame Type'].join(','),
                 ...orders.map(order => [
                     order.orderNumber,
-                    order.customerName || '',
-                    order.email || '',
-                    order.phone || '',
-                    order.address || '',
+                    `"${order.customerName || ''}"`,
+                    `"${order.email || ''}"`,
+                    `"${order.phone || ''}"`,
+                    `"${order.address || ''}"`,
                     order.orderDate || '',
                     order.status || '',
                     order.totalAmount || '',
@@ -2170,8 +4343,31 @@
             if (e.target === modal) {
                 closeOrderModal();
             }
+            
+            // Close confirmation modal when clicking outside
+            const confirmModal = document.getElementById('confirm-delete-modal');
+            if (e.target === confirmModal) {
+                closeConfirmModal();
+            }
         });
     </script>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="confirm-modal-overlay" id="confirm-delete-modal">
+        <div class="confirm-modal">
+            <div class="confirm-modal-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="confirm-modal-title" id="confirm-modal-title">Delete Order?</h3>
+            <p class="confirm-modal-message" id="confirm-modal-message">
+                Are you sure you want to delete this order? This action cannot be undone.
+            </p>
+            <div class="confirm-modal-buttons">
+                <button class="btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+                <button class="btn-confirm-delete" id="confirm-delete-btn" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Firebase Integration - Use same approach as other pages -->
     <!-- Firebase v9 SDK - Compatibility Mode -->

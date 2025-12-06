@@ -272,6 +272,39 @@ class JBCreationsAPI {
             return { success: false, error: error.message };
         }
     }
+
+    // Delete order by order ID (document ID)
+    async deleteOrder(orderId) {
+        try {
+            console.log('🗑️ Deleting order:', orderId);
+            await this.db.collection('orders').doc(orderId).delete();
+            console.log('✅ Order deleted successfully:', orderId);
+            return { success: true };
+        } catch (error) {
+            console.error('❌ Error deleting order:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Delete multiple orders by order IDs (document IDs)
+    async deleteMultipleOrders(orderIds) {
+        try {
+            console.log('🗑️ Deleting multiple orders:', orderIds.length);
+            const batch = this.db.batch();
+            
+            orderIds.forEach(orderId => {
+                const orderRef = this.db.collection('orders').doc(orderId);
+                batch.delete(orderRef);
+            });
+            
+            await batch.commit();
+            console.log('✅ Multiple orders deleted successfully:', orderIds.length);
+            return { success: true, deletedCount: orderIds.length };
+        } catch (error) {
+            console.error('❌ Error deleting multiple orders:', error);
+            return { success: false, error: error.message };
+        }
+    }
 }
 
 // Global API instance

@@ -1,8 +1,169 @@
 /*
- * Checkout Page JavaScript - V4 (Cloudinary Integration Added)
+ * Checkout Page JavaScript - V9 (Diagnostic Version)
  * Handles order processing and submission with Firebase and Cloudinary integration
  * Users can place orders without login requirement
  */
+
+// VERSION CHECK - Update this to force cache refresh
+const CHECKOUT_VERSION = '9.2-INDEXEDDB';
+
+console.log('');
+console.log('%c╔═══════════════════════════════════════════════════════════════════════════╗', 'color: #00ff00; font-size: 16px; font-weight: bold;');
+console.log('%c║    🛒 CHECKOUT.JS VERSION ' + CHECKOUT_VERSION.padEnd(20) + '                        ║', 'color: #00ff00; font-size: 16px; font-weight: bold;');
+console.log('%c║    📅 ' + new Date().toISOString() + '                        ║', 'color: #00ff00; font-size: 16px; font-weight: bold;');
+console.log('%c╚═══════════════════════════════════════════════════════════════════════════╝', 'color: #00ff00; font-size: 16px; font-weight: bold;');
+console.log('');
+
+// ═══════════════════════════════════════════════════════════════
+// IndexedDB Storage for Large Images (sessionStorage has 5MB limit)
+// ═══════════════════════════════════════════════════════════════
+const ImageDB = {
+    dbName: 'JBCreationsImages',
+    storeName: 'cartImages',
+    version: 1,
+    
+    // Open/create the database
+    async open() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(this.dbName, this.version);
+            
+            request.onerror = () => {
+                console.error('❌ IndexedDB error:', request.error);
+                reject(request.error);
+            };
+            
+            request.onsuccess = () => {
+                resolve(request.result);
+            };
+            
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(this.storeName)) {
+                    db.createObjectStore(this.storeName, { keyPath: 'id' });
+                    console.log('📦 IndexedDB store created for cart images');
+                }
+            };
+        });
+    },
+    
+    // Retrieve high-quality image data
+    async getImage(itemId) {
+        try {
+            const db = await this.open();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([this.storeName], 'readonly');
+                const store = transaction.objectStore(this.storeName);
+                const request = store.get(String(itemId));
+                
+                request.onsuccess = () => {
+                    if (request.result) {
+                        console.log(`✅ IndexedDB: Retrieved images for item ${itemId}`);
+                        resolve(request.result);
+                    } else {
+                        console.log(`⚠️ IndexedDB: No images found for item ${itemId}`);
+                        resolve(null);
+                    }
+                };
+                
+                request.onerror = () => {
+                    console.error('❌ IndexedDB get error:', request.error);
+                    reject(request.error);
+                };
+                
+                transaction.oncomplete = () => db.close();
+            });
+        } catch (error) {
+            console.error('❌ Failed to get from IndexedDB:', error);
+            return null;
+        }
+    },
+    
+    // Delete image data for an item
+    async deleteImage(itemId) {
+        try {
+            const db = await this.open();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([this.storeName], 'readwrite');
+                const store = transaction.objectStore(this.storeName);
+                const request = store.delete(String(itemId));
+                
+                request.onsuccess = () => {
+                    console.log(`🗑️ IndexedDB: Deleted images for item ${itemId}`);
+                    resolve(true);
+                };
+                
+                request.onerror = () => reject(request.error);
+                transaction.oncomplete = () => db.close();
+            });
+        } catch (error) {
+            console.error('❌ Failed to delete from IndexedDB:', error);
+            return false;
+        }
+    },
+    
+    // Clear all stored images
+    async clearAll() {
+        try {
+            const db = await this.open();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([this.storeName], 'readwrite');
+                const store = transaction.objectStore(this.storeName);
+                const request = store.clear();
+                
+                request.onsuccess = () => {
+                    console.log('🧹 IndexedDB: Cleared all cart images');
+                    resolve(true);
+                };
+                
+                request.onerror = () => reject(request.error);
+                transaction.oncomplete = () => db.close();
+            });
+        } catch (error) {
+            console.error('❌ Failed to clear IndexedDB:', error);
+            return false;
+        }
+    }
+};
+
+// Make ImageDB globally available
+window.ImageDB = ImageDB;
+// ═══════════════════════════════════════════════════════════════
+
+// Clean up old cart images that aren't in current cart to prevent quota issues
+function cleanupOldCartImages() {
+    console.log('🧹 Cleaning up old cart images from sessionStorage...');
+    const currentCart = JSON.parse(sessionStorage.getItem('photoFramingCart') || '[]');
+    const currentItemIds = new Set(currentCart.map(item => String(item.id)));
+    
+    const keysToRemove = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key && key.startsWith('cartImage_')) {
+            // Extract item ID from key
+            const match = key.match(/cartImage_(?:full_|hq_)?(\d+)/);
+            if (match) {
+                const itemId = match[1];
+                if (!currentItemIds.has(itemId)) {
+                    keysToRemove.push(key);
+                }
+            }
+        }
+    }
+    
+    keysToRemove.forEach(key => {
+        sessionStorage.removeItem(key);
+        console.log(`  🗑️ Removed orphaned: ${key}`);
+    });
+    
+    if (keysToRemove.length > 0) {
+        console.log(`✅ Cleaned up ${keysToRemove.length} orphaned cart image entries`);
+    } else {
+        console.log('✅ No orphaned cart images found');
+    }
+}
+
+// Run cleanup on page load
+cleanupOldCartImages();
 
 // Initialize Firebase API instance (will be loaded from window events)
 let jbApi = null;
@@ -17,6 +178,75 @@ window.addEventListener('firebaseReady', (event) => {
 
 // Load Cloudinary client library
 document.addEventListener('DOMContentLoaded', function() {
+    // ═══════════════════════════════════════════════════════════════
+    // DIAGNOSTIC: Dump ALL sessionStorage and localStorage keys
+    // ═══════════════════════════════════════════════════════════════
+    console.log('');
+    console.log('╔═══════════════════════════════════════════════════════════════╗');
+    console.log('║        SESSION STORAGE DIAGNOSTIC DUMP                        ║');
+    console.log('╚═══════════════════════════════════════════════════════════════╝');
+    
+    console.log('\n📦 ALL sessionStorage keys:');
+    for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        const value = sessionStorage.getItem(key);
+        const sizeKB = Math.round(value.length / 1024);
+        
+        if (key.includes('cartImage') || key.includes('Image')) {
+            console.log(`  🖼️ ${key}: ${sizeKB} KB`);
+            // Show first 80 chars of the data
+            console.log(`      Preview: ${value.substring(0, 80)}...`);
+        } else if (key === 'photoFramingCart') {
+            try {
+                const cart = JSON.parse(value);
+                console.log(`  🛒 photoFramingCart: ${cart.length} items`);
+                cart.forEach((item, idx) => {
+                    console.log(`      Item ${idx + 1} (ID: ${item.id}):`);
+                    console.log(`        - hasImage: ${!!item.image}`);
+                    console.log(`        - hasThumbnailImage: ${!!item.thumbnailImage}`);
+                    console.log(`        - hasHighQualityPrintImage: ${!!item.highQualityPrintImage}`);
+                    console.log(`        - hasAdminCroppedImage: ${!!item.adminCroppedImage}`);
+                    if (item.thumbnailImage) {
+                        console.log(`        - thumbnailImageSize: ${Math.round(item.thumbnailImage.length / 1024)} KB`);
+                    }
+                    if (item.highQualityPrintImage) {
+                        console.log(`        - highQualityPrintImageSize: ${Math.round(item.highQualityPrintImage.length / 1024)} KB`);
+                    }
+                    if (item.adminCroppedImage) {
+                        console.log(`        - adminCroppedImageSize: ${Math.round(item.adminCroppedImage.length / 1024)} KB`);
+                    }
+                });
+            } catch(e) {
+                console.log(`  🛒 photoFramingCart: [parse error] ${sizeKB} KB`);
+            }
+        } else {
+            console.log(`  📄 ${key}: ${sizeKB} KB`);
+        }
+    }
+    
+    console.log('\n📁 Looking for specific cart image keys:');
+    const cart = JSON.parse(sessionStorage.getItem('photoFramingCart') || '[]');
+    cart.forEach((item, idx) => {
+        const fullKey = `cartImage_full_${item.id}`;
+        const compressedKey = `cartImage_${item.id}`;
+        const hqKey = `cartImage_hq_${item.id}`;
+        
+        const fullData = sessionStorage.getItem(fullKey);
+        const compressedData = sessionStorage.getItem(compressedKey);
+        const hqData = sessionStorage.getItem(hqKey);
+        
+        console.log(`  Item ${idx + 1} (${item.id}):`);
+        console.log(`    - ${fullKey}: ${fullData ? Math.round(fullData.length/1024) + ' KB' : '❌ NOT FOUND'}`);
+        console.log(`    - ${compressedKey}: ${compressedData ? Math.round(compressedData.length/1024) + ' KB' : '❌ NOT FOUND'}`);
+        console.log(`    - ${hqKey}: ${hqData ? Math.round(hqData.length/1024) + ' KB' : '❌ NOT FOUND'}`);
+    });
+    
+    console.log('');
+    console.log('╔═══════════════════════════════════════════════════════════════╗');
+    console.log('║        END OF SESSION STORAGE DIAGNOSTIC                      ║');
+    console.log('╚═══════════════════════════════════════════════════════════════╝');
+    console.log('');
+    
     // Add Cloudinary script if not already added
     if (!window.cloudinary) {
         const script = document.createElement('script');
@@ -52,7 +282,40 @@ setTimeout(() => {
 
 // Enhanced Cloudinary Upload with Direct Upload Support
 async function uploadOrderImagesToCloudinaryEnhanced(orderData) {
-    console.log('🔄 Starting enhanced Cloudinary upload process...');
+    console.log('═══════════════════════════════════════════════════════════════');
+    console.log('🔄 CLOUDINARY UPLOAD - STARTING');
+    console.log('═══════════════════════════════════════════════════════════════');
+    console.log('📦 Order data:', {
+        orderNumber: orderData.orderNumber,
+        itemCount: orderData.items ? orderData.items.length : 0
+    });
+    
+    // Log each item's available images
+    if (orderData.items) {
+        orderData.items.forEach((item, index) => {
+            console.log(`📸 Item ${index + 1} (ID: ${item.id}):`, {
+                hasHighQualityPrintImage: !!item.highQualityPrintImage,
+                hasAdminCroppedImage: !!item.adminCroppedImage,
+                hasPrintImage: !!item.printImage,
+                hasOriginalImage: !!item.originalImage,
+                highQualitySize: item.highQualityPrintImage ? `${Math.round(item.highQualityPrintImage.length / 1024)} KB` : 'N/A',
+                adminCroppedSize: item.adminCroppedImage ? `${Math.round(item.adminCroppedImage.length / 1024)} KB` : 'N/A'
+            });
+            
+            // Check sessionStorage for this item
+            const fullKey = `cartImage_full_${item.id}`;
+            const compressedKey = `cartImage_${item.id}`;
+            const fullData = sessionStorage.getItem(fullKey);
+            const compressedData = sessionStorage.getItem(compressedKey);
+            console.log(`📁 SessionStorage for item ${item.id}:`, {
+                fullKeyExists: !!fullData,
+                compressedKeyExists: !!compressedData,
+                fullDataSize: fullData ? `${Math.round(fullData.length / 1024)} KB` : 'N/A',
+                compressedDataSize: compressedData ? `${Math.round(compressedData.length / 1024)} KB` : 'N/A'
+            });
+        });
+    }
+    console.log('═══════════════════════════════════════════════════════════════');
     
     // Try direct upload first (production-ready, no server needed)
     if (window.CloudinaryDirect) {
@@ -99,30 +362,82 @@ async function uploadOrderImagesToCloudinaryEnhanced(orderData) {
             // Try to get compressed image for admin viewing
             let fallbackImageData = null;
             try {
-                // First try compressed images - prioritize adminCroppedImage for best quality
-                const sessionImageData = sessionStorage.getItem(`cartImage_${item.id}`);
-                if (sessionImageData) {
-                    const imageData = JSON.parse(sessionImageData);
-                    // Use adminCroppedImage first (high quality cropped), then fallback to others
-                    fallbackImageData = imageData.adminCroppedImage || imageData.previewImage || imageData.displayImage || imageData.originalImage;
-                    console.log(`🖼️ Found compressed fallback image for item ${item.id}:`, 
-                        fallbackImageData ? fallbackImageData.substring(0, 50) + '...' : 'none');
-                    if (imageData.adminCroppedImage) {
-                        console.log('✅ Using high-quality cropped image for admin panel');
+                console.log(`🔍 Looking for fallback image for item ${item.id}...`);
+                
+                // PRIORITY 0: Check IndexedDB first (high-quality images stored here)
+                const indexedDBData = await ImageDB.getImage(item.id);
+                if (indexedDBData) {
+                    console.log(`💾 Found image in IndexedDB for item ${item.id}:`, {
+                        hasHighQualityPrintImage: !!indexedDBData.highQualityPrintImage,
+                        hasAdminCroppedImage: !!indexedDBData.adminCroppedImage,
+                        hasPrintImage: !!indexedDBData.printImage,
+                        hasOriginalImage: !!indexedDBData.originalImage,
+                        highQualityPrintImageSize: indexedDBData.highQualityPrintImage ? Math.round(indexedDBData.highQualityPrintImage.length / 1024) + ' KB' : 'N/A',
+                        adminCroppedImageSize: indexedDBData.adminCroppedImage ? Math.round(indexedDBData.adminCroppedImage.length / 1024) + ' KB' : 'N/A'
+                    });
+                    fallbackImageData = indexedDBData.highQualityPrintImage || indexedDBData.adminCroppedImage || indexedDBData.printImage || indexedDBData.originalImage;
+                    if (fallbackImageData) {
+                        console.log(`✅ Using IndexedDB high-quality image for item ${item.id}, Size: ${Math.round(fallbackImageData.length / 1024)} KB`);
                     }
                 }
                 
-                // If no compressed image, try full quality - prioritize adminCroppedImage
+                // PRIORITY 1: Check window.cartImageStorage (fallback for when IndexedDB fails)
+                if (!fallbackImageData && window.cartImageStorage && window.cartImageStorage[item.id]) {
+                    const windowImageData = window.cartImageStorage[item.id];
+                    console.log(`🪟 Found image in window.cartImageStorage for item ${item.id}:`, {
+                        hasHighQualityPrintImage: !!windowImageData.highQualityPrintImage,
+                        hasAdminCroppedImage: !!windowImageData.adminCroppedImage,
+                        hasPrintImage: !!windowImageData.printImage,
+                        hasOriginalImage: !!windowImageData.originalImage,
+                        highQualityPrintImageSize: windowImageData.highQualityPrintImage ? Math.round(windowImageData.highQualityPrintImage.length / 1024) + ' KB' : 'N/A',
+                        adminCroppedImageSize: windowImageData.adminCroppedImage ? Math.round(windowImageData.adminCroppedImage.length / 1024) + ' KB' : 'N/A'
+                    });
+                    fallbackImageData = windowImageData.highQualityPrintImage || windowImageData.adminCroppedImage || windowImageData.printImage || windowImageData.originalImage;
+                    if (fallbackImageData) {
+                        console.log(`✅ Using window.cartImageStorage image for item ${item.id}, Size: ${Math.round(fallbackImageData.length / 1024)} KB`);
+                    }
+                }
+                
+                // PRIORITY 1: Try FULL quality images from sessionStorage (best for printing)
                 if (!fallbackImageData) {
                     const sessionFullImageData = sessionStorage.getItem(`cartImage_full_${item.id}`);
                     if (sessionFullImageData) {
                         const fullImageData = JSON.parse(sessionFullImageData);
-                        // Use adminCroppedImage first (best for admin viewing), then fallback
-                        fallbackImageData = fullImageData.adminCroppedImage || fullImageData.previewImage || fullImageData.displayImage || fullImageData.originalImage;
-                        console.log(`🖼️ Found full-quality fallback image for item ${item.id}:`, 
-                            fallbackImageData ? fallbackImageData.substring(0, 50) + '...' : 'none');
-                        if (fullImageData.adminCroppedImage) {
-                            console.log('✅ Using full-quality cropped image for admin panel');
+                        console.log(`📦 Full storage contents for item ${item.id}:`, {
+                            hasHighQualityPrintImage: !!fullImageData.highQualityPrintImage,
+                            hasAdminCroppedImage: !!fullImageData.adminCroppedImage,
+                            hasPrintImage: !!fullImageData.printImage,
+                            hasOriginalImage: !!fullImageData.originalImage,
+                            highQualityPrintImageSize: fullImageData.highQualityPrintImage ? fullImageData.highQualityPrintImage.length : 0,
+                            adminCroppedImageSize: fullImageData.adminCroppedImage ? fullImageData.adminCroppedImage.length : 0
+                        });
+                        // PRIORITY: highQualityPrintImage > adminCroppedImage > printImage > originalImage
+                        fallbackImageData = fullImageData.highQualityPrintImage || fullImageData.adminCroppedImage || fullImageData.printImage || fullImageData.originalImage;
+                        if (fallbackImageData) {
+                            console.log(`✅ Using FULL quality image for item ${item.id}:`, 
+                                fullImageData.highQualityPrintImage ? 'highQualityPrintImage' :
+                                (fullImageData.adminCroppedImage ? 'adminCroppedImage' : 
+                                (fullImageData.printImage ? 'printImage' : 'originalImage')),
+                                `Size: ${Math.round(fallbackImageData.length / 1024)} KB`);
+                        }
+                    }
+                }
+                
+                // PRIORITY 2: Try compressed images if full quality not available
+                if (!fallbackImageData) {
+                    const sessionImageData = sessionStorage.getItem(`cartImage_${item.id}`);
+                    if (sessionImageData) {
+                        const imageData = JSON.parse(sessionImageData);
+                        console.log(`📦 Compressed storage contents for item ${item.id}:`, {
+                            hasHighQualityPrintImage: !!imageData.highQualityPrintImage,
+                            hasAdminCroppedImage: !!imageData.adminCroppedImage,
+                            hasPrintImage: !!imageData.printImage,
+                            hasOriginalImage: !!imageData.originalImage
+                        });
+                        // PRIORITY: highQualityPrintImage > adminCroppedImage > printImage > originalImage > previewImage
+                        fallbackImageData = imageData.highQualityPrintImage || imageData.adminCroppedImage || imageData.printImage || imageData.originalImage || imageData.previewImage || imageData.displayImage;
+                        if (fallbackImageData) {
+                            console.log(`⚠️ Using COMPRESSED image for item ${item.id}, Size: ${Math.round(fallbackImageData.length / 1024)} KB`);
                         }
                     }
                 }

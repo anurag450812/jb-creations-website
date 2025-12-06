@@ -8,7 +8,16 @@
  * - Drag and zoom functionality
  */
 
+// VERSION CHECK - Update this to force cache refresh
+const SCRIPT_VERSION = '5.5-INDEXEDDB';
+
 // State management
+console.log('');
+console.log('%c╔═══════════════════════════════════════════════════════════════════════════╗', 'color: #00ff00; font-size: 16px; font-weight: bold;');
+console.log('%c║    🚀 SCRIPT.JS VERSION ' + SCRIPT_VERSION.padEnd(20) + '                          ║', 'color: #00ff00; font-size: 16px; font-weight: bold;');
+console.log('%c║    📅 ' + new Date().toISOString() + '                        ║', 'color: #00ff00; font-size: 16px; font-weight: bold;');
+console.log('%c╚═══════════════════════════════════════════════════════════════════════════╝', 'color: #00ff00; font-size: 16px; font-weight: bold;');
+console.log('');
 console.log('🔄 script.js is loading...');
 const state = {
     image: null,
@@ -37,6 +46,163 @@ const state = {
 
 // DOM Elements - will be initialized in DOMContentLoaded
 let elements = {};
+
+// ═══════════════════════════════════════════════════════════════
+// IndexedDB Storage for Large Images (sessionStorage has 5MB limit)
+// ═══════════════════════════════════════════════════════════════
+const ImageDB = {
+    dbName: 'JBCreationsImages',
+    storeName: 'cartImages',
+    version: 1,
+    
+    // Open/create the database
+    async open() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(this.dbName, this.version);
+            
+            request.onerror = () => {
+                console.error('❌ IndexedDB error:', request.error);
+                reject(request.error);
+            };
+            
+            request.onsuccess = () => {
+                resolve(request.result);
+            };
+            
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(this.storeName)) {
+                    db.createObjectStore(this.storeName, { keyPath: 'id' });
+                    console.log('📦 IndexedDB store created for cart images');
+                }
+            };
+        });
+    },
+    
+    // Store high-quality image data
+    async storeImage(itemId, imageData) {
+        try {
+            const db = await this.open();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([this.storeName], 'readwrite');
+                const store = transaction.objectStore(this.storeName);
+                
+                const data = {
+                    id: String(itemId),
+                    timestamp: Date.now(),
+                    highQualityPrintImage: imageData.highQualityPrintImage || null,
+                    adminCroppedImage: imageData.adminCroppedImage || null,
+                    printImage: imageData.printImage || null,
+                    originalImage: imageData.originalImage || null
+                };
+                
+                const request = store.put(data);
+                
+                request.onsuccess = () => {
+                    console.log(`✅ IndexedDB: Stored high-quality images for item ${itemId}`);
+                    const sizes = {
+                        highQualityPrintImage: data.highQualityPrintImage ? `${Math.round(data.highQualityPrintImage.length / 1024)} KB` : 'N/A',
+                        adminCroppedImage: data.adminCroppedImage ? `${Math.round(data.adminCroppedImage.length / 1024)} KB` : 'N/A'
+                    };
+                    console.log(`📊 IndexedDB stored sizes:`, sizes);
+                    resolve(true);
+                };
+                
+                request.onerror = () => {
+                    console.error('❌ IndexedDB store error:', request.error);
+                    reject(request.error);
+                };
+                
+                transaction.oncomplete = () => db.close();
+            });
+        } catch (error) {
+            console.error('❌ Failed to store in IndexedDB:', error);
+            return false;
+        }
+    },
+    
+    // Retrieve high-quality image data
+    async getImage(itemId) {
+        try {
+            const db = await this.open();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([this.storeName], 'readonly');
+                const store = transaction.objectStore(this.storeName);
+                const request = store.get(String(itemId));
+                
+                request.onsuccess = () => {
+                    if (request.result) {
+                        console.log(`✅ IndexedDB: Retrieved images for item ${itemId}`);
+                        resolve(request.result);
+                    } else {
+                        console.log(`⚠️ IndexedDB: No images found for item ${itemId}`);
+                        resolve(null);
+                    }
+                };
+                
+                request.onerror = () => {
+                    console.error('❌ IndexedDB get error:', request.error);
+                    reject(request.error);
+                };
+                
+                transaction.oncomplete = () => db.close();
+            });
+        } catch (error) {
+            console.error('❌ Failed to get from IndexedDB:', error);
+            return null;
+        }
+    },
+    
+    // Delete image data for an item
+    async deleteImage(itemId) {
+        try {
+            const db = await this.open();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([this.storeName], 'readwrite');
+                const store = transaction.objectStore(this.storeName);
+                const request = store.delete(String(itemId));
+                
+                request.onsuccess = () => {
+                    console.log(`🗑️ IndexedDB: Deleted images for item ${itemId}`);
+                    resolve(true);
+                };
+                
+                request.onerror = () => reject(request.error);
+                transaction.oncomplete = () => db.close();
+            });
+        } catch (error) {
+            console.error('❌ Failed to delete from IndexedDB:', error);
+            return false;
+        }
+    },
+    
+    // Clear all stored images
+    async clearAll() {
+        try {
+            const db = await this.open();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([this.storeName], 'readwrite');
+                const store = transaction.objectStore(this.storeName);
+                const request = store.clear();
+                
+                request.onsuccess = () => {
+                    console.log('🧹 IndexedDB: Cleared all cart images');
+                    resolve(true);
+                };
+                
+                request.onerror = () => reject(request.error);
+                transaction.oncomplete = () => db.close();
+            });
+        } catch (error) {
+            console.error('❌ Failed to clear IndexedDB:', error);
+            return false;
+        }
+    }
+};
+
+// Make ImageDB globally available
+window.ImageDB = ImageDB;
+// ═══════════════════════════════════════════════════════════════
 
 // Mobile helpers and lock for live preview position
 function isMobileViewport() {
@@ -612,7 +778,11 @@ function initializeEventListeners() {
                 });
                 
                 try {
-                    const [printImageData, previewImageData, adminCroppedImage] = await Promise.all([
+                    console.log('');
+                    console.log('%c═══ STARTING IMAGE CAPTURE PROMISE.ALL ═══', 'color: #ff00ff; font-size: 16px; font-weight: bold;');
+                    console.log('Calling 4 capture functions in parallel...');
+                    
+                    const [printImageData, previewImageData, adminCroppedImage, highQualityPrintImage] = await Promise.all([
                         getCanvasImageData().catch(err => {
                             console.warn('Print image capture failed:', err);
                             return null;
@@ -624,16 +794,24 @@ function initializeEventListeners() {
                         captureFramedImage().catch(err => {
                             console.warn('Admin cropped image capture failed:', err);
                             return null;
+                        }),
+                        captureHighQualityPrintImage().catch(err => {
+                            console.error('❌❌❌ High-quality print image capture FAILED:', err);
+                            console.error('❌❌❌ Error stack:', err.stack);
+                            return null;
                         })
                     ]);
                     
+                    console.log('%c═══ IMAGE CAPTURE PROMISE.ALL COMPLETE ═══', 'color: #ff00ff; font-size: 16px; font-weight: bold;');
                     console.log('Image capture results:', {
                         printImageCaptured: !!printImageData,
                         previewImageCaptured: !!previewImageData,
                         adminCroppedImageCaptured: !!adminCroppedImage,
+                        highQualityPrintImageCaptured: !!highQualityPrintImage,
                         printImageSize: printImageData ? printImageData.length : 0,
                         previewImageSize: previewImageData ? previewImageData.length : 0,
-                        adminCroppedImageSize: adminCroppedImage ? adminCroppedImage.length : 0
+                        adminCroppedImageSize: adminCroppedImage ? adminCroppedImage.length : 0,
+                        highQualityPrintImageSize: highQualityPrintImage ? highQualityPrintImage.length : 0
                     });
                     
                     // Add captured images if available
@@ -655,12 +833,24 @@ function initializeEventListeners() {
                         cartItem.displayImage = state.originalImage || state.image;
                     }
 
-                    // Add high-quality cropped image for admin panel
-                    if (adminCroppedImage) {
+                    // Add high-quality cropped image for admin panel (prefer the new high-quality version)
+                    if (highQualityPrintImage) {
+                        const sizeKB = Math.round(highQualityPrintImage.length / 1024);
+                        cartItem.highQualityPrintImage = highQualityPrintImage;
+                        cartItem.adminCroppedImage = highQualityPrintImage; // Use high-quality as admin cropped image
+                        console.log('✅ HIGH-QUALITY print image captured from original!');
+                        console.log('📊 High-quality image size:', sizeKB, 'KB');
+                        
+                        // WARN if image seems too small (should be at least 50KB for a 4000px image)
+                        if (sizeKB < 50) {
+                            console.error('❌ WARNING: High-quality image is suspiciously small! Expected >50KB, got', sizeKB, 'KB');
+                            console.error('❌ This indicates the capture function may have failed or used wrong source');
+                        }
+                    } else if (adminCroppedImage) {
                         cartItem.adminCroppedImage = adminCroppedImage;
-                        console.log('✅ High-quality cropped image captured for admin panel');
+                        console.log('✅ Standard cropped image captured for admin panel');
                     } else {
-                        console.warn('⚠️ Admin cropped image not captured, will use fallback');
+                        console.warn('⚠️ No cropped image captured, will use fallback');
                     }
                     
                 } catch (imageError) {
@@ -988,9 +1178,20 @@ function handleImageUpload(file) {
                 mobileSection.style.display = 'block';
             }
 
+            // Store the TRUE original image (full resolution, uncompressed) for print quality
+            state.trueOriginalImage = e.target.result;
+            console.log('📸 True original image stored for print quality');
+
             // Create a temporary image to get dimensions and compress if needed
             const tempImg = new Image();
             tempImg.onload = () => {
+                // Store original image dimensions for crop calculation
+                state.originalImageDimensions = {
+                    width: tempImg.width,
+                    height: tempImg.height
+                };
+                console.log('📐 Original image dimensions:', state.originalImageDimensions);
+                
                 // Compress high-res images for better performance
                 compressImageForPreview(tempImg).then(compressedDataURL => {
                     processCompressedImage(compressedDataURL);
@@ -1670,6 +1871,199 @@ function initializeDragAndZoom() {
     });
 }
 
+/**
+ * Capture high-quality print-ready image from the TRUE original image
+ * This function crops the original full-resolution image based on the user's
+ * frame positioning (zoom and position) and applies color adjustments.
+ * The result is suitable for professional printing.
+ */
+function captureHighQualityPrintImage() {
+    console.log('%c🔴🔴🔴 captureHighQualityPrintImage FUNCTION CALLED 🔴🔴🔴', 'color: red; font-size: 20px; font-weight: bold;');
+    return new Promise((resolve, reject) => {
+        console.log('═══════════════════════════════════════════════════════════════');
+        console.log('🖼️ HIGH-QUALITY PRINT IMAGE CAPTURE - STARTING');
+        console.log('═══════════════════════════════════════════════════════════════');
+        
+        const previewImage = document.getElementById('previewImage');
+        const frameContainer = document.querySelector('.frame-preview');
+        
+        if (!previewImage || !previewImage.src || !state.frameSize || !frameContainer) {
+            console.warn('⚠️ Missing required elements for high-quality capture');
+            resolve(state.originalImage || state.image);
+            return;
+        }
+        
+        // Log current state
+        console.log('📦 State check:', {
+            hasTrueOriginal: !!state.trueOriginalImage,
+            hasOriginalImage: !!state.originalImage,
+            hasImage: !!state.image,
+            trueOriginalSize: state.trueOriginalImage ? Math.round(state.trueOriginalImage.length / 1024) + ' KB' : 'N/A',
+            originalImageSize: state.originalImage ? Math.round(state.originalImage.length / 1024) + ' KB' : 'N/A',
+            frameSize: state.frameSize,
+            zoom: state.zoom,
+            position: state.position
+        });
+        
+        try {
+            // Get the frame container dimensions (this is the visible area)
+            const frameRect = frameContainer.getBoundingClientRect();
+            const frameInnerPadding = 20; // Frame border thickness
+            
+            // Calculate the actual visible area inside the frame borders
+            const visibleWidth = frameRect.width - (frameInnerPadding * 2);
+            const visibleHeight = frameRect.height - (frameInnerPadding * 2);
+            
+            console.log('📐 Visible frame area:', { visibleWidth, visibleHeight });
+            
+            // Use the highest quality image available
+            const sourceImage = state.trueOriginalImage || state.originalImage || state.image;
+            const sourceType = state.trueOriginalImage ? 'TRUE ORIGINAL' : (state.originalImage ? 'originalImage' : 'state.image');
+            console.log('📸 Using source image:', sourceType, '- Size:', Math.round(sourceImage.length / 1024), 'KB');
+            
+            // Create the output canvas at high resolution (4000px on longest side)
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d', { alpha: false });
+            
+            // Calculate output dimensions maintaining frame aspect ratio
+            const frameAspect = visibleWidth / visibleHeight;
+            const maxDimension = 4000;
+            
+            if (frameAspect > 1) {
+                // Landscape frame
+                canvas.width = maxDimension;
+                canvas.height = Math.round(maxDimension / frameAspect);
+            } else {
+                // Portrait frame
+                canvas.height = maxDimension;
+                canvas.width = Math.round(maxDimension * frameAspect);
+            }
+            
+            console.log('🎨 Output canvas dimensions:', { width: canvas.width, height: canvas.height });
+            
+            // Load the TRUE original image
+            const trueOriginalImg = new Image();
+            trueOriginalImg.crossOrigin = 'anonymous';
+            
+            trueOriginalImg.onload = () => {
+                try {
+                    // Get preview image's current position relative to frame
+                    const previewRect = previewImage.getBoundingClientRect();
+                    const frameContainerRect = frameContainer.getBoundingClientRect();
+                    
+                    // Calculate the image's position relative to the frame container
+                    const imgLeft = previewRect.left - frameContainerRect.left - frameInnerPadding;
+                    const imgTop = previewRect.top - frameContainerRect.top - frameInnerPadding;
+                    const imgWidth = previewRect.width;
+                    const imgHeight = previewRect.height;
+                    
+                    console.log('📍 Preview image position:', { imgLeft, imgTop, imgWidth, imgHeight });
+                    
+                    // Calculate the scale from the preview image to the TRUE original
+                    // Preview uses state.originalImage (compressed), TRUE original is full res
+                    const previewNaturalWidth = previewImage.naturalWidth;
+                    const previewNaturalHeight = previewImage.naturalHeight;
+                    const trueOrigWidth = trueOriginalImg.width;
+                    const trueOrigHeight = trueOriginalImg.height;
+                    
+                    // Scale ratio from compressed to true original
+                    const origToTrueScaleX = trueOrigWidth / previewNaturalWidth;
+                    const origToTrueScaleY = trueOrigHeight / previewNaturalHeight;
+                    
+                    console.log('📊 Scale ratios:', {
+                        previewNatural: { w: previewNaturalWidth, h: previewNaturalHeight },
+                        trueOriginal: { w: trueOrigWidth, h: trueOrigHeight },
+                        scaleX: origToTrueScaleX,
+                        scaleY: origToTrueScaleY
+                    });
+                    
+                    // Calculate scale from visible frame to output canvas
+                    const canvasScaleX = canvas.width / visibleWidth;
+                    const canvasScaleY = canvas.height / visibleHeight;
+                    
+                    // Clear canvas with white background
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Enable high-quality image smoothing
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    
+                    // Apply color adjustments/filters
+                    if (state.adjustments) {
+                        const { brightness, contrast, highlights, shadows, vibrance } = state.adjustments;
+                        const combinedBrightness = Math.max(0.1, Math.min(3, 
+                            (brightness / 100) * 
+                            (1 + (highlights - 100) / 200) * 
+                            (1 + (shadows - 100) / 200)
+                        ));
+                        
+                        ctx.filter = `
+                            brightness(${combinedBrightness})
+                            contrast(${contrast}%)
+                            saturate(${vibrance}%)
+                        `.replace(/\s+/g, ' ').trim();
+                        
+                        console.log('🎨 Applied filters:', ctx.filter);
+                    }
+                    
+                    // Calculate the drawing position scaled up to output canvas
+                    // But we need to account for the scale difference between preview and true original
+                    
+                    // The displayed size in preview
+                    const displayedImgWidth = imgWidth;
+                    const displayedImgHeight = imgHeight;
+                    
+                    // Scale up the positioning to canvas coordinates
+                    const canvasX = imgLeft * canvasScaleX;
+                    const canvasY = imgTop * canvasScaleY;
+                    const canvasW = displayedImgWidth * canvasScaleX;
+                    const canvasH = displayedImgHeight * canvasScaleY;
+                    
+                    console.log('🎯 Drawing TRUE original at:', { canvasX, canvasY, canvasW, canvasH });
+                    
+                    // Draw the TRUE original image at the calculated position
+                    ctx.drawImage(trueOriginalImg, canvasX, canvasY, canvasW, canvasH);
+                    
+                    // Reset filter
+                    ctx.filter = 'none';
+                    
+                    // Convert to high-quality JPEG
+                    const dataURL = canvas.toDataURL('image/jpeg', 0.95);
+                    
+                    console.log('═══════════════════════════════════════════════════════════════');
+                    console.log('✅ HIGH-QUALITY PRINT IMAGE CAPTURE - COMPLETE');
+                    console.log('═══════════════════════════════════════════════════════════════');
+                    console.log('📊 Output details:', {
+                        outputWidth: canvas.width,
+                        outputHeight: canvas.height,
+                        sizeKB: Math.round(dataURL.length / 1024),
+                        sizeMB: (dataURL.length / (1024 * 1024)).toFixed(2),
+                        format: 'JPEG 95%'
+                    });
+                    
+                    resolve(dataURL);
+                    
+                } catch (error) {
+                    console.error('❌ Error during high-quality capture:', error);
+                    resolve(state.originalImage || state.image);
+                }
+            };
+            
+            trueOriginalImg.onerror = (error) => {
+                console.error('❌ Failed to load TRUE original image:', error);
+                resolve(state.originalImage || state.image);
+            };
+            
+            trueOriginalImg.src = sourceImage;
+            
+        } catch (error) {
+            console.error('❌ Error in captureHighQualityPrintImage:', error);
+            resolve(state.originalImage || state.image);
+        }
+    });
+}
+
 // Function to capture just the cropped image inside the frame with all adjustments
 function captureFramedImage() {
     return new Promise((resolve) => {
@@ -2167,6 +2561,27 @@ async function addToCart(item) {
             throw new Error('Missing frame size information');
         }
 
+        // Clean up old cart images to prevent quota issues
+        console.log('🧹 Cleaning up old cart images before adding new item...');
+        const keysToRemove = [];
+        for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            if (key && key.startsWith('cartImage_')) {
+                keysToRemove.push(key);
+            }
+        }
+        // Get current cart item IDs that should be preserved
+        const currentCart = JSON.parse(sessionStorage.getItem('photoFramingCart') || '[]');
+        const preserveIds = new Set(currentCart.map(c => String(c.id)));
+        
+        keysToRemove.forEach(key => {
+            const match = key.match(/cartImage_(?:full_|hq_)?(\d+)/);
+            if (match && !preserveIds.has(match[1])) {
+                sessionStorage.removeItem(key);
+                console.log(`  🗑️ Removed orphaned: ${key}`);
+            }
+        });
+
         // Get existing cart
         let cart;
         try {
@@ -2247,7 +2662,8 @@ async function addToCart(item) {
             printImage: await compressImage(item.printImage, 0.8, 1200),
             displayImage: await compressImage(item.displayImage, 0.6, 800),
             previewImage: await compressImage(item.previewImage, 0.6, 800),
-            adminCroppedImage: item.adminCroppedImage ? await compressImage(item.adminCroppedImage, 0.9, 1600) : null // High quality for admin
+            adminCroppedImage: item.adminCroppedImage ? await compressImage(item.adminCroppedImage, 0.9, 1600) : null, // High quality for admin
+            highQualityPrintImage: item.highQualityPrintImage ? await compressImage(item.highQualityPrintImage, 0.9, 2000) : null // Highest quality for printing
         };
 
         // Store original full-quality images separately for upload
@@ -2256,24 +2672,69 @@ async function addToCart(item) {
             printImage: item.printImage,
             displayImage: item.displayImage,
             previewImage: item.previewImage,
-            adminCroppedImage: item.adminCroppedImage // Keep full quality for admin panel
+            adminCroppedImage: item.adminCroppedImage, // Keep full quality for admin panel
+            highQualityPrintImage: item.highQualityPrintImage // HIGHEST quality - cropped from TRUE original with adjustments
         };
+        
+        console.log('═══════════════════════════════════════════════════════════════');
+        console.log('📦 CART IMAGE STORAGE - PREPARING TO SAVE');
+        console.log('═══════════════════════════════════════════════════════════════');
+        
+        // Calculate total size to check if it might exceed storage limits
+        const totalFullSize = (item.highQualityPrintImage?.length || 0) + 
+                              (item.adminCroppedImage?.length || 0) + 
+                              (item.printImage?.length || 0) + 
+                              (item.originalImage?.length || 0);
+        const totalFullSizeMB = (totalFullSize / (1024 * 1024)).toFixed(2);
+        
+        console.log('📊 Full quality image sizes (THESE WILL BE UPLOADED):', {
+            highQualityPrintImage: item.highQualityPrintImage ? `${Math.round(item.highQualityPrintImage.length / 1024)} KB` : 'NOT AVAILABLE',
+            adminCroppedImage: item.adminCroppedImage ? `${Math.round(item.adminCroppedImage.length / 1024)} KB` : 'NOT AVAILABLE',
+            printImage: item.printImage ? `${Math.round(item.printImage.length / 1024)} KB` : 'NOT AVAILABLE',
+            originalImage: item.originalImage ? `${Math.round(item.originalImage.length / 1024)} KB` : 'NOT AVAILABLE',
+            TOTAL_SIZE_MB: totalFullSizeMB + ' MB'
+        });
+        
+        if (parseFloat(totalFullSizeMB) > 4) {
+            console.warn(`⚠️ WARNING: Total image size (${totalFullSizeMB} MB) may exceed sessionStorage limits!`);
+        }
+        
+        console.log('📊 Compressed image sizes (for display only):', {
+            highQualityPrintImage: compressedImages.highQualityPrintImage ? `${Math.round(compressedImages.highQualityPrintImage.length / 1024)} KB` : 'NOT AVAILABLE',
+            adminCroppedImage: compressedImages.adminCroppedImage ? `${Math.round(compressedImages.adminCroppedImage.length / 1024)} KB` : 'NOT AVAILABLE'
+        });
+        console.log('═══════════════════════════════════════════════════════════════');
         
         try {
             // Store compressed images in sessionStorage for display
             sessionStorage.setItem(`cartImage_${item.id}`, JSON.stringify(compressedImages));
             
-            // Store full-quality images for upload (fallback to window if sessionStorage fails)
-            try {
-                sessionStorage.setItem(`cartImage_full_${item.id}`, JSON.stringify(fullImageData));
-                console.log(`🗂️ Stored compressed and full images in sessionStorage for item ${item.id}`);
-            } catch (fullStorageError) {
-                // Fallback to window storage for full images
-                if (typeof window.cartImageStorage === 'undefined') {
-                    window.cartImageStorage = {};
+            // Store full-quality images in IndexedDB (no size limits like sessionStorage)
+            console.log('💾 Storing full-quality images in IndexedDB...');
+            const indexedDBResult = await ImageDB.storeImage(item.id, fullImageData);
+            
+            if (indexedDBResult) {
+                console.log(`✅ Successfully stored high-quality images in IndexedDB for item ${item.id}`);
+                
+                // Verify storage
+                const verification = await ImageDB.getImage(item.id);
+                if (verification && verification.highQualityPrintImage) {
+                    console.log(`✅ VERIFICATION - IndexedDB storage confirmed:`, {
+                        highQualityPrintImage: `${Math.round(verification.highQualityPrintImage.length / 1024)} KB`,
+                        adminCroppedImage: verification.adminCroppedImage ? `${Math.round(verification.adminCroppedImage.length / 1024)} KB` : 'N/A'
+                    });
+                } else {
+                    console.warn(`⚠️ IndexedDB verification: high-quality image may not have stored correctly`);
                 }
-                window.cartImageStorage[item.id] = fullImageData;
-                console.log(`🗂️ Stored compressed images in sessionStorage, full images in window storage for item ${item.id}`);
+            } else {
+                console.error('❌ Failed to store images in IndexedDB!');
+                // Fallback: try sessionStorage anyway
+                try {
+                    sessionStorage.setItem(`cartImage_full_${item.id}`, JSON.stringify(fullImageData));
+                    console.log('📁 Fallback: Stored in sessionStorage');
+                } catch (sessionError) {
+                    console.warn('⚠️ SessionStorage fallback also failed:', sessionError.message);
+                }
             }
             
             console.log(`🗂️ Image storage summary for item ${item.id}:`, {
@@ -2282,12 +2743,15 @@ async function addToCart(item) {
                 displayImage: !!item.displayImage,
                 previewImage: !!item.previewImage,
                 adminCroppedImage: !!item.adminCroppedImage,
+                highQualityPrintImage: !!item.highQualityPrintImage,
                 originalImageSize: item.originalImage ? item.originalImage.length : 0,
                 printImageSize: item.printImage ? item.printImage.length : 0,
                 adminCroppedImageSize: item.adminCroppedImage ? item.adminCroppedImage.length : 0,
+                highQualityPrintImageSize: item.highQualityPrintImage ? item.highQualityPrintImage.length : 0,
                 compressedOriginalSize: compressedImages.originalImage ? compressedImages.originalImage.length : 0,
                 compressedPrintSize: compressedImages.printImage ? compressedImages.printImage.length : 0,
-                compressedAdminCroppedSize: compressedImages.adminCroppedImage ? compressedImages.adminCroppedImage.length : 0
+                compressedAdminCroppedSize: compressedImages.adminCroppedImage ? compressedImages.adminCroppedImage.length : 0,
+                compressedHighQualityPrintSize: compressedImages.highQualityPrintImage ? compressedImages.highQualityPrintImage.length : 0
             });
         } catch (storageError) {
             console.warn('⚠️ Failed to store images in sessionStorage, falling back to window storage:', storageError);
@@ -4677,21 +5141,25 @@ function initMobileRoomPreview() {
                 console.log('Capturing images for cart before switching view (parallel)...');
                 const captureStartTime = performance.now();
                 
-                const [previewResult, printResult, adminResult] = await Promise.all([
+                const [previewResult, printResult, adminResult, highQualityResult] = await Promise.all([
                     captureFramePreview().catch(e => { console.warn('Preview capture failed', e); return null; }),
                     getCanvasImageData().catch(e => { console.warn('Print capture failed', e); return null; }),
-                    captureFramedImage().catch(e => { console.warn('Admin capture failed', e); return null; })
+                    captureFramedImage().catch(e => { console.warn('Admin capture failed', e); return null; }),
+                    captureHighQualityPrintImage().catch(e => { console.warn('High-quality capture failed', e); return null; })
                 ]);
                 
                 state.cachedCartImages = {
                     preview: previewResult,
                     print: printResult,
-                    admin: adminResult
+                    admin: adminResult,
+                    highQuality: highQualityResult
                 };
                 
                 console.log('Images captured in', (performance.now() - captureStartTime).toFixed(0), 'ms:', {
                     preview: !!state.cachedCartImages.preview,
-                    print: !!state.cachedCartImages.print
+                    print: !!state.cachedCartImages.print,
+                    highQuality: !!state.cachedCartImages.highQuality,
+                    highQualitySizeKB: state.cachedCartImages.highQuality ? Math.round(state.cachedCartImages.highQuality.length / 1024) : 0
                 });
 
                 // Update room previews - this is now optimized with parallel processing
@@ -4766,13 +5234,28 @@ function initMobileRoomPreview() {
                     return null;
                 });
                 
+                // Get high-quality print image from cache or capture fresh
+                const highQualityPrintImage = cached.highQuality || await captureHighQualityPrintImage().catch(err => {
+                    console.warn('High-quality print image capture failed:', err);
+                    return null;
+                });
+                
+                console.log('📸 Mobile Room Add to Cart - Image capture results:', {
+                    hasHighQuality: !!highQualityPrintImage,
+                    highQualitySizeKB: highQualityPrintImage ? Math.round(highQualityPrintImage.length / 1024) : 0,
+                    hasAdmin: !!adminCroppedImage,
+                    hasPrint: !!printImageData,
+                    hasPreview: !!previewImageData
+                });
+                
                 // Create cart item
                 const cartItem = {
                     id: Date.now(),
                     printImage: printImageData || state.originalImage || state.image,
                     previewImage: previewImageData || state.originalImage || state.image,
                     displayImage: previewImageData || state.originalImage || state.image,
-                    adminCroppedImage: adminCroppedImage || state.originalImage || state.image,
+                    adminCroppedImage: highQualityPrintImage || adminCroppedImage || state.originalImage || state.image,
+                    highQualityPrintImage: highQualityPrintImage, // Add the high-quality image
                     frameSize: state.frameSize,
                     frameColor: state.frameColor || 'black',
                     frameTexture: state.frameTexture || 'smooth',
