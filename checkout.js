@@ -225,12 +225,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Mobile drawer toggle logic
+// Mobile drawer toggle logic with swipe support
 function initMobileDrawer() {
     const toggleBtn = document.getElementById('mobileItemsToggle');
     const drawer = document.getElementById('mobileOrderDrawer');
     const closeBtn = document.getElementById('mobileDrawerClose');
     const backdrop = document.getElementById('mobileDrawerBackdrop');
+    const totalBox = document.getElementById('mobileTotalBox');
+    const swipeHandle = document.getElementById('mobileDrawerSwipeHandle');
+    
     if (!toggleBtn || !drawer || !closeBtn || !backdrop) return;
 
     const openDrawer = () => {
@@ -239,19 +242,42 @@ function initMobileDrawer() {
         drawer.setAttribute('aria-hidden', 'false');
         backdrop.setAttribute('aria-hidden', 'false');
         toggleBtn.setAttribute('aria-expanded', 'true');
+        if (totalBox) totalBox.classList.add('drawer-open');
     };
+    
     const closeDrawer = () => {
         drawer.classList.remove('open');
+        drawer.classList.remove('dragging');
         backdrop.classList.remove('open');
         drawer.setAttribute('aria-hidden', 'true');
         backdrop.setAttribute('aria-hidden', 'true');
         toggleBtn.setAttribute('aria-expanded', 'false');
+        drawer.style.transform = '';
+        if (totalBox) totalBox.classList.remove('drawer-open');
     };
 
     toggleBtn.addEventListener('click', () => {
         const isOpen = drawer.classList.contains('open');
         if (isOpen) closeDrawer(); else openDrawer();
     });
+    
+    // Click on Total Payable to show/hide items
+    if (totalBox) {
+        totalBox.addEventListener('click', () => {
+            const isOpen = drawer.classList.contains('open');
+            if (isOpen) closeDrawer(); else openDrawer();
+        });
+        
+        // Also handle keyboard activation
+        totalBox.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                const isOpen = drawer.classList.contains('open');
+                if (isOpen) closeDrawer(); else openDrawer();
+            }
+        });
+    }
+    
     closeBtn.addEventListener('click', closeDrawer);
     backdrop.addEventListener('click', closeDrawer);
 
@@ -259,6 +285,63 @@ function initMobileDrawer() {
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeDrawer();
     });
+    
+    // Swipe to close functionality
+    let startY = 0;
+    let currentY = 0;
+    let isDragging = false;
+    const SWIPE_THRESHOLD = 80; // Minimum distance to trigger close
+    
+    const handleTouchStart = (e) => {
+        if (!drawer.classList.contains('open')) return;
+        startY = e.touches[0].clientY;
+        currentY = startY;
+        isDragging = true;
+        drawer.classList.add('dragging');
+    };
+    
+    const handleTouchMove = (e) => {
+        if (!isDragging || !drawer.classList.contains('open')) return;
+        currentY = e.touches[0].clientY;
+        const deltaY = currentY - startY;
+        
+        // Only allow dragging down (positive deltaY)
+        if (deltaY > 0) {
+            e.preventDefault();
+            drawer.style.transform = `translateY(${deltaY}px)`;
+        }
+    };
+    
+    const handleTouchEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        drawer.classList.remove('dragging');
+        
+        const deltaY = currentY - startY;
+        
+        if (deltaY > SWIPE_THRESHOLD) {
+            // Swipe down far enough - close the drawer
+            closeDrawer();
+        } else {
+            // Not far enough - snap back to open position
+            drawer.style.transform = '';
+        }
+    };
+    
+    // Add touch listeners to swipe handle and drawer header
+    if (swipeHandle) {
+        swipeHandle.addEventListener('touchstart', handleTouchStart, { passive: true });
+        swipeHandle.addEventListener('touchmove', handleTouchMove, { passive: false });
+        swipeHandle.addEventListener('touchend', handleTouchEnd, { passive: true });
+    }
+    
+    // Also allow swiping from the drawer header area
+    const drawerHeader = drawer.querySelector('.mobile-drawer-header');
+    if (drawerHeader) {
+        drawerHeader.addEventListener('touchstart', handleTouchStart, { passive: true });
+        drawerHeader.addEventListener('touchmove', handleTouchMove, { passive: false });
+        drawerHeader.addEventListener('touchend', handleTouchEnd, { passive: true });
+    }
 }
 
 // Pincode lookup functionality

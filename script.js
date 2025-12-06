@@ -299,6 +299,84 @@ function initMobileBottomBar() {
             e.stopPropagation();
             toggleDropup();
         });
+
+        // Swipe/slide gesture support for dropup header
+        let touchStartY = 0;
+        let touchStartX = 0;
+        let touchStartTime = 0;
+        let isDragging = false;
+        let startTransform = 0;
+        const SWIPE_THRESHOLD = 50; // Minimum distance for swipe
+        const SWIPE_VELOCITY_THRESHOLD = 0.3; // Minimum velocity (px/ms)
+        const DRAG_THRESHOLD = 10; // Minimum distance before dragging starts
+
+        dropupHeader.addEventListener('touchstart', function(e) {
+            if (!dropup.classList.contains('open')) return;
+            const touch = e.touches[0];
+            touchStartY = touch.clientY;
+            touchStartX = touch.clientX;
+            touchStartTime = Date.now();
+            isDragging = false;
+            startTransform = 0;
+            
+            // Remove transition during drag for smoother feel
+            dropup.style.transition = 'none';
+        }, { passive: true });
+
+        dropupHeader.addEventListener('touchmove', function(e) {
+            if (!dropup.classList.contains('open')) return;
+            const touch = e.touches[0];
+            const deltaY = touch.clientY - touchStartY;
+            const deltaX = touch.clientX - touchStartX;
+            
+            // Only start dragging if moving more vertically than horizontally
+            // and moving downward
+            if (!isDragging && Math.abs(deltaY) > DRAG_THRESHOLD && Math.abs(deltaY) > Math.abs(deltaX)) {
+                isDragging = true;
+            }
+            
+            if (isDragging && deltaY > 0) {
+                // Sliding down - apply transform to show sliding effect
+                const translateY = Math.min(deltaY, dropup.offsetHeight);
+                dropup.style.transform = `translateY(${translateY}px)`;
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        dropupHeader.addEventListener('touchend', function(e) {
+            if (!dropup.classList.contains('open')) return;
+            
+            // Restore transition
+            dropup.style.transition = '';
+            dropup.style.transform = '';
+            
+            if (!isDragging) return;
+            
+            const touch = e.changedTouches[0];
+            const deltaY = touch.clientY - touchStartY;
+            const deltaX = touch.clientX - touchStartX;
+            const deltaTime = Date.now() - touchStartTime;
+            const velocity = Math.abs(deltaY) / deltaTime;
+            
+            // Check if it's a valid downward swipe (more vertical than horizontal, moving down)
+            const isSwipeDown = deltaY > 0 && Math.abs(deltaY) > Math.abs(deltaX);
+            const hasEnoughDistance = deltaY > SWIPE_THRESHOLD;
+            const hasEnoughVelocity = velocity > SWIPE_VELOCITY_THRESHOLD;
+            
+            if (isSwipeDown && (hasEnoughDistance || hasEnoughVelocity)) {
+                // Close the dropup
+                toggleDropup();
+            }
+            
+            isDragging = false;
+        }, { passive: true });
+
+        dropupHeader.addEventListener('touchcancel', function() {
+            // Reset state on cancel
+            dropup.style.transition = '';
+            dropup.style.transform = '';
+            isDragging = false;
+        }, { passive: true });
     }
 
     // Ensure a default drawer is prepared (but don't auto-open)

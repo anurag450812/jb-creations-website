@@ -146,10 +146,6 @@ class CartManager {
                             ${item.frameSize ? (item.frameSize.orientation || 'Landscape') : 'N/A'}
                         </div>
                     </div>
-                    <div class="cart-item-spec">
-                        <i class="fas fa-calendar-plus"></i>
-                        Added ${this.formatDate(item.timestamp)}
-                    </div>
                 </div>
                 <div class="cart-item-actions">
                     <div class="cart-item-price">₹${item.price}</div>
@@ -244,13 +240,11 @@ class CartManager {
         const itemCount = this.cart.reduce((total, item) => total + (item.quantity || 1), 0);
         const subtotal = this.cart.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
         
-        // Calculate tax (18% GST)
-        const taxRate = 0.18;
-        const tax = Math.round(subtotal * taxRate);
+        // Shipping is always free
+        const shippingCost = 0;
         
-        // Calculate shipping (free for orders above ₹1000)
-        const shippingThreshold = 1000;
-        const shippingCost = subtotal >= shippingThreshold ? 0 : 100;
+        // Platform fee is free
+        const platformFee = 0;
         
         // Apply discount if promo code is applied
         let discount = 0;
@@ -262,13 +256,13 @@ class CartManager {
             }
         }
         
-        const total = subtotal + tax + shippingCost - discount;
+        const total = subtotal - discount;
 
         // Update DOM elements
         document.getElementById('itemCount').textContent = itemCount;
         document.getElementById('subtotalAmount').textContent = subtotal;
-        document.getElementById('taxAmount').textContent = tax;
-        document.getElementById('shippingAmount').textContent = shippingCost === 0 ? 'Free' : `₹${shippingCost}`;
+        document.getElementById('shippingAmount').textContent = 'Free';
+        document.getElementById('platformFee').textContent = 'Free';
         document.getElementById('totalAmount').textContent = total;
 
         // Show/hide discount row

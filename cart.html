@@ -943,6 +943,14 @@
             .cart-page {
                 padding-top: 0;
             }
+            
+            .cart-container {
+                padding-top: 15px;
+            }
+            
+            .cart-header {
+                display: none;
+            }
         }
     </style>
     <!-- Global Header Component -->
@@ -1010,23 +1018,22 @@
                 </div>
                 
                 <div class="summary-row">
-                    <span class="summary-label">Tax (18% GST)</span>
-                    <span class="summary-value">₹<span id="taxAmount">0</span></span>
-                </div>
-                
-                <div class="summary-row">
                     <span class="summary-label">Shipping</span>
-                    <span class="summary-value" id="shippingAmount">₹0</span>
+                    <span class="summary-value" style="color: #27ae60;" id="shippingAmount">Free</span>
                 </div>
                 
                 <div class="summary-row">
                     <span class="summary-label">Platform Fee</span>
-                    <span class="summary-value">₹<span id="platformFee">20</span></span>
+                    <span class="summary-value" style="color: #27ae60;" id="platformFee">Free</span>
                 </div>
                 
                 <div class="summary-row summary-total">
                     <span class="summary-label">Total Amount</span>
                     <span class="summary-value">₹<span id="totalAmount">0</span></span>
+                </div>
+                
+                <div class="gst-inclusive-text" style="text-align: center; font-size: 0.85rem; color: #666; margin-top: 8px;">
+                    (Inclusive of GST)
                 </div>
 
                 <div class="cart-actions">

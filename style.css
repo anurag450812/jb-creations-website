@@ -2723,21 +2723,28 @@ button i {
         -webkit-tap-highlight-color: transparent;
         transition: background-color 0.15s ease;
         position: relative;
+        /* Improve touch handling for swipe gesture */
+        touch-action: pan-x;
     }
     .customize-page .dropup-header:active {
         background-color: rgba(22, 105, 122, 0.08);
     }
-    /* Add a subtle drag handle indicator that header is tappable */
+    /* Add a subtle drag handle indicator that header is swipeable/tappable */
     .customize-page .dropup-header::before {
         content: '';
         position: absolute;
         top: 6px;
         left: 50%;
         transform: translateX(-50%);
-        width: 36px;
-        height: 4px;
-        background: rgba(0,0,0,0.15);
-        border-radius: 2px;
+        width: 40px;
+        height: 5px;
+        background: rgba(0,0,0,0.2);
+        border-radius: 3px;
+        transition: background-color 0.2s ease, width 0.2s ease;
+    }
+    .customize-page .dropup-header:active::before {
+        background: rgba(22, 105, 122, 0.4);
+        width: 48px;
     }
     .customize-page .dropup-header .dropup-close {
         display: inline-flex;
