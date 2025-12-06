@@ -5203,6 +5203,44 @@ function initMobileRoomPreview() {
         });
     }
     
+    // Change Frame Size button click - takes user back to live preview with preserved state
+    const changeFrameSizeBtn = document.getElementById('changeFrameSizeBtn');
+    if (changeFrameSizeBtn) {
+        changeFrameSizeBtn.addEventListener('click', function() {
+            // Hide mobile room preview page and show main container
+            mobileRoomPreviewPage.style.display = 'none';
+            document.body.classList.remove('room-preview-active');
+            if (container) container.style.display = '';
+            
+            // Show bottom customization bar again if it exists and we have an upload
+            const bottomBar = document.getElementById('mobileBottomBar') || document.querySelector('.mobile-bottom-bar');
+            if (bottomBar && document.body.classList.contains('has-upload')) {
+                bottomBar.style.display = ''; // Reset to CSS default (flex)
+            }
+
+            // Show adjustments container if it exists
+            const adjustmentsContainer = document.querySelector('.mobile-adjustments-container');
+            if (adjustmentsContainer) {
+                adjustmentsContainer.style.display = ''; // Reset to CSS default
+            }
+
+            // Scroll to top of the live preview section
+            window.scrollTo(0, 0);
+            
+            // The live preview state is already preserved in the global state object
+            // (image, frameSize, frameColor, frameTexture, adjustments, position, zoom)
+            // so the user will see exactly where they left off
+            console.log('Change Frame Size clicked - Returning to live preview with preserved state:', {
+                hasImage: !!state.image,
+                frameSize: state.frameSize,
+                frameColor: state.frameColor,
+                frameTexture: state.frameTexture,
+                zoom: state.zoom,
+                position: state.position
+            });
+        });
+    }
+    
     // Mobile Room Add to Cart button
     if (mobileRoomAddToCartBtn) {
         mobileRoomAddToCartBtn.addEventListener('click', async function() {
