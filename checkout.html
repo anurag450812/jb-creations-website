@@ -619,10 +619,27 @@
         }
 
         .processing-spinner {
-            font-size: 50px;
+            font-size: 60px;
             color: var(--primary-color);
             margin-bottom: 25px;
+        }
+
+        .processing-spinner i {
+            display: inline-block;
             animation: spin 1s linear infinite;
+        }
+
+        /* Loading dots animation */
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
         }
 
         .processing-content h3 {
@@ -637,8 +654,79 @@
         }
 
         @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Success Checkmark Animation */
+        .success-state {
+            text-align: center;
+        }
+
+        .success-checkmark {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 25px;
+        }
+
+        .checkmark {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 2;
+            stroke: #28a745;
+            stroke-miterlimit: 10;
+            animation: fill 0.4s ease-in-out 0.4s forwards, scale 0.3s ease-in-out 0.9s both;
+        }
+
+        .checkmark-circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 2;
+            stroke-miterlimit: 10;
+            stroke: #28a745;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .checkmark-check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes scale {
+            0%, 100% {
+                transform: none;
+            }
+            50% {
+                transform: scale3d(1.1, 1.1, 1);
+            }
+        }
+
+        @keyframes fill {
+            100% {
+                box-shadow: inset 0px 0px 0px 50px rgba(40, 167, 69, 0.1);
+            }
+        }
+
+        .success-state h3 {
+            color: #28a745;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .success-state p {
+            color: rgba(22, 105, 122, 0.7);
+            font-size: 16px;
         }
 
         /* Guest Checkout Styles */
@@ -1857,11 +1945,25 @@
     <!-- Processing Overlay -->
     <div class="processing-overlay" id="processingOverlay">
         <div class="processing-content">
-            <div class="processing-spinner">
-                <i class="fas fa-spinner"></i>
+            <!-- Processing State -->
+            <div class="processing-state" id="processingState">
+                <div class="processing-spinner">
+                    <i class="fas fa-spinner"></i>
+                </div>
+                <h3>Processing Your Order<span class="loading-dots"></span></h3>
+                <p>Please wait while we prepare your order details.</p>
             </div>
-            <h3>Processing Your Order...</h3>
-            <p>Please wait while we prepare your order details.</p>
+            <!-- Success State -->
+            <div class="success-state" id="successState" style="display: none;">
+                <div class="success-checkmark">
+                    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                        <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                        <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                    </svg>
+                </div>
+                <h3>Order Confirmed!</h3>
+                <p>Redirecting you to order details...</p>
+            </div>
         </div>
     </div>
 

@@ -483,10 +483,18 @@ let orderData = {
 document.addEventListener('DOMContentLoaded', function() {
     // Wait for auth utilities to load
     function initializeCheckout() {
+        console.log('🔵 Checkout: Initializing...');
+        console.log('🔵 Checkout: jb_current_user in localStorage:', localStorage.getItem('jb_current_user'));
+        
         // Check if user is authenticated
         const user = getCurrentUser();
+        console.log('🔵 Checkout: getCurrentUser returned:', user);
         
         if (user) {
+            console.log('🔵 Checkout: User found, pre-filling form...');
+            console.log('🔵 Checkout: User phone:', user.phone);
+            console.log('🔵 Checkout: User name:', user.name);
+            
             // Pre-fill customer information for logged-in users
             const userName = user.name || user.displayName || user.fullName || '';
             const userEmail = user.email || '';
@@ -496,14 +504,33 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Handle phone number - extract digits only for new format
             const userPhone = user.phone || '';
-            if (userPhone) {
+            console.log('🔵 Checkout: Extracted phone:', userPhone);
+            const phoneInput = document.getElementById('customerPhone');
+            if (userPhone && phoneInput) {
                 // Extract only the 10-digit number (remove +91 prefix if present)
                 let phoneDigits = userPhone.replace(/[^\d]/g, '');
+                console.log('🔵 Checkout: Phone digits after cleanup:', phoneDigits);
                 if (phoneDigits.startsWith('91') && phoneDigits.length > 10) {
                     phoneDigits = phoneDigits.substring(2); // Remove 91 prefix
                 }
                 if (phoneDigits.length >= 10) {
-                    document.getElementById('customerPhone').value = phoneDigits.substring(0, 10);
+                    phoneInput.value = phoneDigits.substring(0, 10);
+                    console.log('🔵 Checkout: Phone field set to:', phoneInput.value);
+                    // Make phone field read-only for logged-in users
+                    // The phone number is their primary ID and should not be changed here
+                    phoneInput.readOnly = true;
+                    phoneInput.style.backgroundColor = '#f5f5f5';
+                    phoneInput.style.cursor = 'not-allowed';
+                    phoneInput.title = 'Phone number cannot be changed. It is linked to your account.';
+                    
+                    // Add a small note under the phone field
+                    const phoneContainer = phoneInput.closest('.form-group');
+                    if (phoneContainer) {
+                        const helpText = phoneContainer.querySelector('.form-help-text');
+                        if (helpText) {
+                            helpText.innerHTML = '<i class="fas fa-lock" style="margin-right: 4px;"></i> Linked to your account. Orders will be tracked using this number.';
+                        }
+                    }
                 }
             }
             
@@ -1846,6 +1873,7 @@ ITEM ${index + 1}:
 - Frame Size: ${item.frameSize.size} ${item.frameSize.orientation}
 - Frame Color: ${item.frameColor}
 - Frame Texture: ${item.frameTexture}
+- White Border: ${item.whiteBorder ? 'Yes' : 'No'}
 - Price: ₹${item.price}
 - Image Adjustments:
   * Brightness: ${item.adjustments.brightness}%
@@ -1919,20 +1947,50 @@ async function submitOrder(orderData) {
                             address: orderData.customer?.address || 'No address provided'
                         },
                         // Clean items data - exclude large base64 images, keep only essential data
-                        items: orderData.items.map((item, index) => ({
-                            id: item.id,
-                            frameSize: item.frameSize,
-                            frameColor: item.frameColor,
-                            frameTexture: item.frameTexture,
-                            price: item.price,
-                            // Only include small metadata, no base64 images
-                            hasImage: !!(item.originalImage || item.printImage || item.displayImage),
-                            imageIndex: index,
-                            // If Cloudinary upload succeeded, reference it
-                            cloudinaryUrl: cloudinaryImages && cloudinaryImages[index] && cloudinaryImages[index].urls 
-                                ? cloudinaryImages[index].urls.original 
-                                : null
-                        })),
+                        items: orderData.items.map((item, index) => {
+                            // Get the cart thumbnail (the image user saw in cart)
+                            // This is prioritized over Cloudinary URLs so it persists even after Cloudinary cleanup
+                            let cartThumbnail = null;
+                            
+                            // First try the thumbnail from cart (already compressed, what user saw)
+                            if (item.thumbnailImage) {
+                                // Only include if it's reasonably small (under 100KB)
+                                if (item.thumbnailImage.length < 100000) {
+                                    cartThumbnail = item.thumbnailImage;
+                                    console.log(`📸 Item ${index}: Using cart thumbnail (${Math.round(item.thumbnailImage.length / 1024)}KB)`);
+                                } else {
+                                    console.log(`📸 Item ${index}: Cart thumbnail too large (${Math.round(item.thumbnailImage.length / 1024)}KB), skipping`);
+                                }
+                            }
+                            
+                            // If no cart thumbnail, try to get from sessionStorage
+                            if (!cartThumbnail) {
+                                const storedImage = sessionStorage.getItem(`cartImage_${item.id}`);
+                                if (storedImage && storedImage.length < 100000) {
+                                    cartThumbnail = storedImage;
+                                    console.log(`📸 Item ${index}: Using sessionStorage thumbnail (${Math.round(storedImage.length / 1024)}KB)`);
+                                }
+                            }
+                            
+                            return {
+                                id: item.id,
+                                frameSize: item.frameSize,
+                                frameColor: item.frameColor,
+                                frameTexture: item.frameTexture,
+                                whiteBorder: item.whiteBorder || false,
+                                price: item.price,
+                                quantity: item.quantity || 1,
+                                // Only include small metadata, no base64 images
+                                hasImage: !!(item.originalImage || item.printImage || item.displayImage),
+                                imageIndex: index,
+                                // Cloudinary URL for admin/printing (may be deleted after delivery)
+                                cloudinaryUrl: cloudinaryImages && cloudinaryImages[index] && cloudinaryImages[index].urls 
+                                    ? cloudinaryImages[index].urls.original 
+                                    : null,
+                                // Cart thumbnail for order history display (permanent, stored in Firebase)
+                                cartThumbnail: cartThumbnail
+                            };
+                        }),
                         // Include Cloudinary upload results for processing
                         cloudinaryImages: cloudinaryImages,
                         // Legacy images array for backward compatibility - only URLs, no base64
@@ -2212,6 +2270,33 @@ async function submitOrder(orderData) {
     }
 }
 
+// Show success animation in processing overlay
+function showOrderSuccessAnimation() {
+    const processingState = document.getElementById('processingState');
+    const successState = document.getElementById('successState');
+    
+    if (processingState && successState) {
+        // Hide processing state, show success state
+        processingState.style.display = 'none';
+        successState.style.display = 'block';
+        
+        console.log('✅ Showing order success animation');
+    }
+}
+
+// Reset processing overlay to initial state
+function resetProcessingOverlay() {
+    const processingState = document.getElementById('processingState');
+    const successState = document.getElementById('successState');
+    
+    if (processingState && successState) {
+        processingState.style.display = 'block';
+        successState.style.display = 'none';
+    }
+    
+    document.getElementById('processingOverlay').style.display = 'none';
+}
+
 // Main order placement function
 async function placeOrder() {
     // Validate form
@@ -2243,7 +2328,7 @@ async function placeOrder() {
         const totalAmount = orderData.totals.total;
         
         // Hide processing overlay before showing Razorpay
-    document.getElementById('processingOverlay').style.display = 'none';
+    resetProcessingOverlay();
     document.getElementById('placeOrderBtn').disabled = false;
     if (mobileBtn) mobileBtn.disabled = false;
 
@@ -2299,20 +2384,26 @@ async function placeOrder() {
                     sessionStorage.setItem('lastCustomerEmail', orderData.customer?.email || '');
                     sessionStorage.setItem('lastOrderAmount', orderData.totals?.total || '299');
                     
-                    // Redirect to success page ONLY for Firebase success
-                    if (user) {
-                        // For logged-in users
-                        window.location.href = `order-success.html?order=${orderData.orderNumber}&name=${encodeURIComponent(orderData.customer?.name || 'Customer')}&email=${encodeURIComponent(orderData.customer?.email || '')}&amount=${orderData.totals?.total || 299}&guest=false`;
-                    } else {
-                        // For guest users
-                        window.location.href = `order-success.html?order=${orderData.orderNumber}&name=${encodeURIComponent(orderData.customer?.name || 'Guest Customer')}&email=${encodeURIComponent(orderData.customer?.email || '')}&amount=${orderData.totals?.total || 299}&guest=true`;
-                    }
+                    // Show success animation before redirecting
+                    showOrderSuccessAnimation();
+                    
+                    // Delay redirect to show success animation
+                    setTimeout(() => {
+                        // Redirect to success page ONLY for Firebase success
+                        if (user) {
+                            // For logged-in users
+                            window.location.href = `order-success.html?order=${orderData.orderNumber}&name=${encodeURIComponent(orderData.customer?.name || 'Customer')}&email=${encodeURIComponent(orderData.customer?.email || '')}&amount=${orderData.totals?.total || 299}&guest=false`;
+                        } else {
+                            // For guest users
+                            window.location.href = `order-success.html?order=${orderData.orderNumber}&name=${encodeURIComponent(orderData.customer?.name || 'Guest Customer')}&email=${encodeURIComponent(orderData.customer?.email || '')}&amount=${orderData.totals?.total || 299}&guest=true`;
+                        }
+                    }, 2000); // 2 second delay to show success animation
                 } else {
                     // For localStorage fallback, show error instead of success
                     console.error('❌ Order not saved to Firebase - showing error message instead of success');
                     
                     // Hide processing overlay
-                    document.getElementById('processingOverlay').style.display = 'none';
+                    resetProcessingOverlay();
                     document.getElementById('placeOrderBtn').disabled = false;
                     if (mobileBtn) mobileBtn.disabled = false;
                     
@@ -2331,7 +2422,7 @@ async function placeOrder() {
                 
                 // Don't redirect on error - let user contact support
                 // Hide processing overlay
-                document.getElementById('processingOverlay').style.display = 'none';
+                resetProcessingOverlay();
                 document.getElementById('placeOrderBtn').disabled = false;
                 if (mobileBtn) mobileBtn.disabled = false;
                 return;
@@ -2351,7 +2442,7 @@ async function placeOrder() {
         }
         
         // Hide processing overlay
-        document.getElementById('processingOverlay').style.display = 'none';
+        resetProcessingOverlay();
         document.getElementById('placeOrderBtn').disabled = false;
         if (mobileBtn) mobileBtn.disabled = false;
     }
@@ -2380,10 +2471,36 @@ window.downloadOrderData = downloadOrderData;
 
 // Authentication helper functions
 function getCurrentUser() {
-    // First check OTP authentication system (newer)
-    if (window.otpAuthUtils) {
+    // First check OTP authentication system (newer) - jb_current_user is the primary storage
+    const currentUserData = localStorage.getItem('jb_current_user');
+    if (currentUserData) {
+        try {
+            const userData = JSON.parse(currentUserData);
+            // Handle both direct user object and session wrapper
+            const user = userData.user || userData;
+            if (user && user.phone) {
+                console.log('📱 Checkout: Found user from jb_current_user:', user.name, user.phone);
+                return user;
+            }
+        } catch (error) {
+            console.error('Error parsing jb_current_user:', error);
+        }
+    }
+    
+    // Check window.otpAuthUtils
+    if (window.otpAuthUtils && typeof window.otpAuthUtils.getCurrentUser === 'function') {
         const otpUser = window.otpAuthUtils.getCurrentUser();
         if (otpUser) {
+            console.log('📱 Checkout: Found user from otpAuthUtils:', otpUser.name);
+            return otpUser;
+        }
+    }
+    
+    // Check window.otpAuth
+    if (window.otpAuth && typeof window.otpAuth.getCurrentUser === 'function') {
+        const otpUser = window.otpAuth.getCurrentUser();
+        if (otpUser) {
+            console.log('📱 Checkout: Found user from otpAuth:', otpUser.name);
             return otpUser;
         }
     }
@@ -2399,6 +2516,7 @@ function getCurrentUser() {
         }
     }
     
+    console.log('📱 Checkout: No user found');
     return null;
 }
 

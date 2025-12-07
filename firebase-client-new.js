@@ -193,20 +193,100 @@ class JBCreationsAPI {
         try {
             console.log('📋 Fetching orders for phone:', phoneNumber);
             
-            const ordersSnapshot = await this.db.collection('orders')
-                .where('customer.phone', '==', phoneNumber)
-                .orderBy('createdAt', 'desc')
-                .get();
+            // Normalize phone number for matching (handle with/without +91 prefix)
+            const normalizedPhone = phoneNumber.replace(/^\+91/, '').replace(/^\+/, '');
+            const phoneVariants = [
+                phoneNumber,                    // Original: +918269909774
+                normalizedPhone,                // Without prefix: 8269909774
+                '+91' + normalizedPhone,        // With +91: +918269909774
+                '91' + normalizedPhone,         // With 91: 918269909774
+            ];
             
-            const orders = [];
-            ordersSnapshot.forEach(doc => {
-                orders.push({
-                    orderId: doc.id,
-                    ...doc.data()
+            console.log('📋 Searching with phone variants:', phoneVariants);
+            
+            let orders = [];
+            
+            // Try the indexed query first (requires composite index)
+            try {
+                const ordersSnapshot = await this.db.collection('orders')
+                    .where('customer.phone', '==', phoneNumber)
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
+                ordersSnapshot.forEach(doc => {
+                    orders.push({
+                        orderId: doc.id,
+                        ...doc.data()
+                    });
                 });
-            });
+            } catch (indexError) {
+                // If composite index doesn't exist, try without orderBy and sort client-side
+                console.log('⚠️ Composite index not available, using fallback query...');
+                
+                // Try each phone variant
+                for (const phone of phoneVariants) {
+                    try {
+                        const ordersSnapshot = await this.db.collection('orders')
+                            .where('customer.phone', '==', phone)
+                            .get();
+                        
+                        ordersSnapshot.forEach(doc => {
+                            // Avoid duplicates
+                            if (!orders.find(o => o.orderId === doc.id)) {
+                                orders.push({
+                                    orderId: doc.id,
+                                    ...doc.data()
+                                });
+                            }
+                        });
+                    } catch (e) {
+                        console.log(`Query failed for phone ${phone}:`, e.message);
+                    }
+                }
+                
+                // Sort client-side by createdAt (newest first)
+                orders.sort((a, b) => {
+                    const dateA = a.createdAt?.toDate?.() || a.createdAt?.seconds ? new Date(a.createdAt.seconds * 1000) : new Date(a.createdAt || 0);
+                    const dateB = b.createdAt?.toDate?.() || b.createdAt?.seconds ? new Date(b.createdAt.seconds * 1000) : new Date(b.createdAt || 0);
+                    return dateB - dateA;
+                });
+            }
             
             console.log(`📋 Found ${orders.length} orders for phone:`, phoneNumber);
+            
+            // If still no orders found, try fetching all and filtering (last resort)
+            if (orders.length === 0) {
+                console.log('⚠️ No orders found with direct query, trying full scan...');
+                try {
+                    const allOrdersSnapshot = await this.db.collection('orders').get();
+                    const normalizedInput = phoneNumber.replace(/[^0-9]/g, '').slice(-10);
+                    
+                    allOrdersSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        const orderPhone = data.customer?.phone || '';
+                        const normalizedOrderPhone = orderPhone.replace(/[^0-9]/g, '').slice(-10);
+                        
+                        if (normalizedOrderPhone === normalizedInput) {
+                            orders.push({
+                                orderId: doc.id,
+                                ...data
+                            });
+                        }
+                    });
+                    
+                    // Sort by createdAt
+                    orders.sort((a, b) => {
+                        const dateA = a.createdAt?.toDate?.() || (a.createdAt?.seconds ? new Date(a.createdAt.seconds * 1000) : new Date(a.createdAt || 0));
+                        const dateB = b.createdAt?.toDate?.() || (b.createdAt?.seconds ? new Date(b.createdAt.seconds * 1000) : new Date(b.createdAt || 0));
+                        return dateB - dateA;
+                    });
+                    
+                    console.log(`📋 Found ${orders.length} orders via full scan`);
+                } catch (scanError) {
+                    console.error('❌ Full scan failed:', scanError);
+                }
+            }
+            
             return orders;
         } catch (error) {
             console.error('❌ Error fetching orders:', error);
@@ -304,6 +384,219 @@ class JBCreationsAPI {
             console.error('❌ Error deleting multiple orders:', error);
             return { success: false, error: error.message };
         }
+    }
+
+    // ==================== SUPPORT CHAT METHODS ====================
+
+    // Create or get support chat for user
+    async getOrCreateSupportChat(userPhone, userName, userEmail) {
+        try {
+            console.log('💬 Getting or creating support chat for:', userPhone);
+            
+            // Normalize phone number
+            const normalizedPhone = userPhone.replace(/^\+91/, '');
+            
+            // Check for existing open chat
+            const existingChat = await this.db.collection('supportChats')
+                .where('userPhone', '==', normalizedPhone)
+                .where('status', 'in', ['open', 'pending'])
+                .limit(1)
+                .get();
+            
+            if (!existingChat.empty) {
+                const chatDoc = existingChat.docs[0];
+                console.log('💬 Found existing chat:', chatDoc.id);
+                return { success: true, chatId: chatDoc.id, chat: { id: chatDoc.id, ...chatDoc.data() } };
+            }
+            
+            // Create new chat
+            const chatRef = await this.db.collection('supportChats').add({
+                userPhone: normalizedPhone,
+                userName: userName || 'Customer',
+                userEmail: userEmail || '',
+                status: 'open',
+                unreadByAdmin: 0,
+                unreadByUser: 0,
+                lastMessage: null,
+                lastMessageTime: firebase.firestore.FieldValue.serverTimestamp(),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            console.log('✅ New support chat created:', chatRef.id);
+            return { success: true, chatId: chatRef.id, chat: { id: chatRef.id }, isNew: true };
+        } catch (error) {
+            console.error('❌ Error getting/creating support chat:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Send a message in support chat
+    async sendChatMessage(chatId, message, senderType = 'user', senderName = 'Customer') {
+        try {
+            console.log('📤 Sending chat message:', { chatId, senderType });
+            
+            // Add message to subcollection
+            const messageRef = await this.db.collection('supportChats').doc(chatId)
+                .collection('messages').add({
+                    text: message,
+                    senderType: senderType, // 'user' or 'admin'
+                    senderName: senderName,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    read: false
+                });
+            
+            // Update chat metadata
+            const updateData = {
+                lastMessage: message.substring(0, 100),
+                lastMessageTime: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            if (senderType === 'user') {
+                updateData.unreadByAdmin = firebase.firestore.FieldValue.increment(1);
+                updateData.unreadByUser = 0;
+            } else {
+                updateData.unreadByUser = firebase.firestore.FieldValue.increment(1);
+                updateData.unreadByAdmin = 0;
+            }
+            
+            await this.db.collection('supportChats').doc(chatId).update(updateData);
+            
+            console.log('✅ Message sent:', messageRef.id);
+            return { success: true, messageId: messageRef.id };
+        } catch (error) {
+            console.error('❌ Error sending message:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Get chat messages (with optional real-time listener)
+    async getChatMessages(chatId, callback = null) {
+        try {
+            const messagesRef = this.db.collection('supportChats').doc(chatId)
+                .collection('messages')
+                .orderBy('createdAt', 'asc');
+            
+            if (callback) {
+                // Real-time listener
+                return messagesRef.onSnapshot(snapshot => {
+                    const messages = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data(),
+                        createdAt: doc.data().createdAt?.toDate()
+                    }));
+                    callback(messages);
+                });
+            } else {
+                // One-time fetch
+                const snapshot = await messagesRef.get();
+                return {
+                    success: true,
+                    messages: snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data(),
+                        createdAt: doc.data().createdAt?.toDate()
+                    }))
+                };
+            }
+        } catch (error) {
+            console.error('❌ Error getting chat messages:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Get all support chats (for admin)
+    async getAllSupportChats(status = null) {
+        try {
+            console.log('💬 Fetching all support chats');
+            
+            let query = this.db.collection('supportChats').orderBy('lastMessageTime', 'desc');
+            
+            if (status) {
+                query = query.where('status', '==', status);
+            }
+            
+            const snapshot = await query.get();
+            
+            const chats = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                createdAt: doc.data().createdAt?.toDate(),
+                lastMessageTime: doc.data().lastMessageTime?.toDate()
+            }));
+            
+            console.log('✅ Found', chats.length, 'support chats');
+            return { success: true, chats };
+        } catch (error) {
+            console.error('❌ Error getting support chats:', error);
+            return { success: false, error: error.message, chats: [] };
+        }
+    }
+
+    // Mark chat messages as read
+    async markChatAsRead(chatId, readerType = 'user') {
+        try {
+            // Update unread counter
+            const updateData = readerType === 'user' 
+                ? { unreadByUser: 0 }
+                : { unreadByAdmin: 0 };
+            
+            await this.db.collection('supportChats').doc(chatId).update(updateData);
+            
+            // Mark individual messages as read
+            const messagesRef = this.db.collection('supportChats').doc(chatId)
+                .collection('messages');
+            
+            const unreadMessages = await messagesRef
+                .where('senderType', '!=', readerType)
+                .where('read', '==', false)
+                .get();
+            
+            const batch = this.db.batch();
+            unreadMessages.docs.forEach(doc => {
+                batch.update(doc.ref, { read: true });
+            });
+            await batch.commit();
+            
+            return { success: true };
+        } catch (error) {
+            console.error('❌ Error marking chat as read:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Close support chat
+    async closeSupportChat(chatId) {
+        try {
+            await this.db.collection('supportChats').doc(chatId).update({
+                status: 'closed',
+                closedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            console.log('✅ Support chat closed:', chatId);
+            return { success: true };
+        } catch (error) {
+            console.error('❌ Error closing chat:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Listen for new chats (for admin notification)
+    listenForNewChats(callback) {
+        return this.db.collection('supportChats')
+            .where('status', 'in', ['open', 'pending'])
+            .orderBy('lastMessageTime', 'desc')
+            .onSnapshot(snapshot => {
+                const chats = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data(),
+                    createdAt: doc.data().createdAt?.toDate(),
+                    lastMessageTime: doc.data().lastMessageTime?.toDate()
+                }));
+                callback(chats);
+            });
     }
 }
 

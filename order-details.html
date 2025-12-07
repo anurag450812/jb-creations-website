@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details - JB Creations</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .order-details-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-bottom: 100px;
+            background-color: var(--background-color);
+            min-height: 100vh;
+        }
+
+        .order-header-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 15px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .order-header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .order-title {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .order-title h1 {
+            font-size: 1.25rem;
+            margin: 0;
+            color: #333;
+            word-break: break-word;
+        }
+
+        .order-title .order-date {
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .order-status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .status-pending { background: rgba(255, 166, 43, 0.15); color: #e67e00; }
+        .status-confirmed { background: rgba(72, 159, 181, 0.15); color: #489FB5; }
+        .status-processing { background: rgba(108, 117, 125, 0.15); color: #6c757d; }
+        .status-shipped { background: rgba(130, 192, 204, 0.2); color: #2d8fa3; }
+        .status-out-for-delivery { background: rgba(40, 167, 69, 0.15); color: #28a745; }
+        .status-delivered { background: rgba(22, 105, 122, 0.15); color: #16697A; }
+        .status-cancelled { background: rgba(220, 53, 69, 0.15); color: #dc3545; }
+
+        /* Section Cards */
+        .detail-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-header i {
+            color: #16697A;
+            font-size: 16px;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .section-content {
+            padding: 20px;
+        }
+
+        /* Order Timeline */
+        .timeline-horizontal {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            padding: 0 10px;
+        }
+
+        .timeline-horizontal::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 30px;
+            right: 30px;
+            height: 3px;
+            background: #e9ecef;
+            z-index: 1;
+        }
+
+        .timeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            z-index: 2;
+            flex: 1;
+        }
+
+        .step-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        .step-icon.active { background: #16697A; }
+        .step-icon.completed { background: #28a745; }
+
+        .step-label {
+            font-size: 10px;
+            color: #6c757d;
+            text-align: center;
+            max-width: 55px;
+        }
+
+        .step-label.active {
+            color: #16697A;
+            font-weight: 600;
+        }
+
+        /* Order Items */
+        .order-item-card {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .order-item-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .item-image {
+            width: auto;
+            min-width: 75px;
+            max-width: 100px;
+            height: 95px;
+            flex-shrink: 0;
+            background: #f1f3f4;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .item-image .item-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* Legacy: Frame Preview Styles - keeping for backward compatibility */
+        .frame-preview-item {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.2);
+        }
+
+        .frame-border-item {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 2px;
+        }
+
+        .image-container-item {
+            position: relative;
+            width: calc(100% - 12px);
+            height: calc(100% - 12px);
+            overflow: hidden;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-container-item.with-white-border::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 3px solid white;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .image-container-item img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* Frame color classes - keeping for legacy support */
+        .frame-brown { background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #8B4513 100%); }
+        .frame-black { background: linear-gradient(135deg, #1a1a1a 0%, #333 50%, #1a1a1a 100%); }
+        .frame-white { background: linear-gradient(135deg, #f8f8f8 0%, #fff 50%, #f8f8f8 100%); border: 1px solid #e0e0e0; }
+        .frame-gold { background: linear-gradient(135deg, #B8860B 0%, #DAA520 50%, #B8860B 100%); }
+        .frame-silver { background: linear-gradient(135deg, #A9A9A9 0%, #C0C0C0 50%, #A9A9A9 100%); }
+        .frame-walnut { background: linear-gradient(135deg, #5D432C 0%, #6B4423 50%, #5D432C 100%); }
+        .frame-oak { background: linear-gradient(135deg, #C19A6B 0%, #D4A574 50%, #C19A6B 100%); }
+        .frame-mahogany { background: linear-gradient(135deg, #4A0404 0%, #5C0707 50%, #4A0404 100%); }
+        .frame-cherry { background: linear-gradient(135deg, #7B3F00 0%, #8B4513 50%, #7B3F00 100%); }
+        .frame-default { background: linear-gradient(135deg, #6B4423 0%, #7a5430 50%, #6B4423 100%); }
+
+        .item-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #adb5bd;
+            font-size: 28px;
+            background: #f1f3f4;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+        }
+
+        .item-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .item-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .item-specs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .spec-badge {
+            font-size: 11px;
+            padding: 3px 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            color: #495057;
+        }
+
+        .item-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #16697A;
+            margin-top: auto;
+        }
+
+        /* Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .info-item {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .info-item.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .info-label {
+            font-size: 11px;
+            color: #6c757d;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* Tracking Section */
+        .tracking-card {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+        }
+
+        .tracking-number {
+            font-family: monospace;
+            font-size: 16px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block;
+            margin: 10px 0;
+            border: 2px dashed #16697A;
+            color: #16697A;
+            font-weight: 600;
+        }
+
+        .track-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: #16697A;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .track-btn:hover {
+            background: #489FB5;
+        }
+
+        .tracking-pending {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: #16697A;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #489FB5;
+        }
+
+        .btn-outline {
+            background: white;
+            color: #16697A;
+            border: 2px solid #16697A;
+        }
+
+        .btn-outline:hover {
+            background: #16697A;
+            color: white;
+        }
+
+        /* Order Summary */
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+            padding-top: 15px;
+            font-weight: 700;
+            font-size: 18px;
+            color: #16697A;
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 50vh;
+            color: #6c757d;
+        }
+
+        .loading-container i {
+            font-size: 48px;
+            color: #16697A;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+            }
+
+            .timeline-horizontal {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .timeline-horizontal::before {
+                display: none;
+            }
+        }
+    </style>
+    <script src="global-header.js"></script>
+</head>
+<body>
+    <div id="global-header-container"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            GlobalWebsiteHeader.init();
+        });
+    </script>
+
+    <div class="order-details-container">
+        <div id="orderContent">
+            <div class="loading-container">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading order details...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-client-new.js?v=3.1"></script>
+    <script src="fast2sms-client.js?v=3.0"></script>
+    <script src="otp-auth-realsms.js?v=3.0"></script>
+    <script src="auth.js?v=3.0"></script>
+    <script src="support-chat.js?v=1.0"></script>
+
+    <script>
+        let currentUser = null;
+        let orderData = null;
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Get order ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('id');
+            const orderIndex = urlParams.get('index');
+
+            if (!orderId && orderIndex === null) {
+                showError('No order specified');
+                return;
+            }
+
+            // Wait for Firebase and load order
+            setTimeout(async () => {
+                await loadOrderDetails(orderId, orderIndex);
+            }, 500);
+
+            // Handle back button
+            window.addEventListener('popstate', function() {
+                window.location.href = 'my-orders.html';
+            });
+        });
+
+        async function loadOrderDetails(orderId, orderIndex) {
+            try {
+                // Check auth
+                const sessionData = localStorage.getItem('jb_current_user');
+                if (!sessionData) {
+                    window.location.href = 'otp-login.html?redirect=my-orders.html';
+                    return;
+                }
+
+                const session = JSON.parse(sessionData);
+                currentUser = session.user || session;
+
+                // Load orders and find the specific one
+                if (!window.jbAPI) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+
+                const orders = await window.jbAPI.getOrdersByPhone(currentUser.phone);
+                const userOrders = Array.isArray(orders) ? orders : (orders.orders || []);
+
+                // Sort by date
+                userOrders.sort((a, b) => {
+                    const dateA = getOrderDate(a);
+                    const dateB = getOrderDate(b);
+                    return dateB - dateA;
+                });
+
+                // Find order by ID or index
+                if (orderId) {
+                    orderData = userOrders.find(o => o.orderId === orderId || o.orderNumber === orderId);
+                } else if (orderIndex !== null) {
+                    orderData = userOrders[parseInt(orderIndex)];
+                }
+
+                if (!orderData) {
+                    showError('Order not found');
+                    return;
+                }
+
+                renderOrderDetails();
+
+            } catch (error) {
+                console.error('Error loading order:', error);
+                showError('Failed to load order details');
+            }
+        }
+
+        function getOrderDate(order) {
+            if (order.createdAt) {
+                if (order.createdAt.toDate) return order.createdAt.toDate();
+                if (order.createdAt.seconds) return new Date(order.createdAt.seconds * 1000);
+                return new Date(order.createdAt);
+            }
+            if (order.orderDate) return new Date(order.orderDate);
+            return new Date(0);
+        }
+
+        function formatDate(date) {
+            return date.toLocaleDateString('en-IN', { 
+                day: 'numeric', 
+                month: 'short', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function getStatusClass(status) {
+            const statusMap = {
+                'pending': 'pending',
+                'confirmed': 'confirmed',
+                'processing': 'processing',
+                'shipped': 'shipped',
+                'out for delivery': 'out-for-delivery',
+                'out-for-delivery': 'out-for-delivery',
+                'delivered': 'delivered',
+                'cancelled': 'cancelled'
+            };
+            return statusMap[(status || 'pending').toLowerCase()] || 'pending';
+        }
+
+        // Get order thumbnail - prioritize cart thumbnail stored in Firebase
+        function getOrderThumbnail(order, itemIndex = 0) {
+            // First priority: cartThumbnail from Firebase (the exact image user saw in cart)
+            if (order.items && order.items[itemIndex]) {
+                const item = order.items[itemIndex];
+                // Cart thumbnail is the primary source - persists forever in Firebase
+                if (item.cartThumbnail) {
+                    return item.cartThumbnail;
+                }
+                // Legacy: previewThumbnail (old orders)
+                if (item.previewThumbnail) {
+                    return item.previewThumbnail;
+                }
+            }
+            
+            // Fallback: Cloudinary URLs (may be deleted after delivery)
+            if (order.cloudinaryImages && order.cloudinaryImages[itemIndex]) {
+                const cloudImg = order.cloudinaryImages[itemIndex];
+                if (cloudImg.urls) {
+                    return cloudImg.urls.display || cloudImg.urls.original || null;
+                }
+            }
+            
+            // Legacy: images array
+            if (order.images && order.images[itemIndex]) {
+                const img = order.images[itemIndex];
+                if (img.display || img.original) {
+                    return img.display || img.original;
+                }
+            }
+            
+            // Legacy: cloudinaryUrl on item
+            if (order.items && order.items[itemIndex] && order.items[itemIndex].cloudinaryUrl) {
+                return order.items[itemIndex].cloudinaryUrl;
+            }
+            
+            return null;
+        }
+
+        function renderOrderDetails() {
+            const container = document.getElementById('orderContent');
+            const orderNumber = orderData.orderNumber || orderData.orderId || 'N/A';
+            const status = orderData.status || 'pending';
+            const orderDate = getOrderDate(orderData);
+            const items = orderData.items || [];
+            const total = orderData.totalAmount || orderData.total || 0;
+
+            container.innerHTML = `
+                <!-- Order Header -->
+                <div class="order-header-section">
+                    <div class="order-header-top">
+                        <div class="order-title">
+                            <h1>Order #${orderNumber}</h1>
+                            <div class="order-date">${formatDate(orderDate)}</div>
+                        </div>
+                        <span class="order-status-badge status-${getStatusClass(status)}">
+                            ${status.charAt(0).toUpperCase() + status.slice(1)}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Order Status Timeline -->
+                <div class="detail-section">
+                    <div class="section-header">
+                        <i class="fas fa-route"></i>
+                        <h2>Order Status</h2>
+                    </div>
+                    <div class="section-content">
+                        ${renderTimeline(status)}
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="detail-section">
+                    <div class="section-header">
+                        <i class="fas fa-box"></i>
+                        <h2>Order Items (${items.length})</h2>
+                    </div>
+                    <div class="section-content">
+                        ${renderItems(items)}
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="detail-section">
+                    <div class="section-header">
+                        <i class="fas fa-receipt"></i>
+                        <h2>Order Summary</h2>
+                    </div>
+                    <div class="section-content">
+                        <div class="summary-row">
+                            <span>Subtotal (${items.length} items)</span>
+                            <span>₹${total}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Delivery</span>
+                            <span>${orderData.deliveryMethod === 'express' ? '₹99' : 'Free'}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Total</span>
+                            <span>₹${total}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer & Delivery Info -->
+                <div class="detail-section">
+                    <div class="section-header">
+                        <i class="fas fa-user"></i>
+                        <h2>Delivery Details</h2>
+                    </div>
+                    <div class="section-content">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Name</div>
+                                <div class="info-value">${orderData.customer?.name || currentUser?.name || 'N/A'}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Phone</div>
+                                <div class="info-value">${orderData.customer?.phone || currentUser?.phone || 'N/A'}</div>
+                            </div>
+                            <div class="info-item full-width">
+                                <div class="info-label">Delivery Address</div>
+                                <div class="info-value">${orderData.customer?.address || 'Address not provided'}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tracking -->
+                <div class="detail-section">
+                    <div class="section-header">
+                        <i class="fas fa-truck"></i>
+                        <h2>Shipment Tracking</h2>
+                    </div>
+                    <div class="section-content">
+                        ${renderTracking(orderData)}
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="detail-section">
+                    <div class="section-content">
+                        <div class="action-buttons">
+                            <button class="action-btn btn-outline" onclick="contactSupport('${orderNumber}')">
+                                <i class="fas fa-headset"></i>
+                                Need Help?
+                            </button>
+                            <button class="action-btn btn-primary" onclick="goBack()">
+                                <i class="fas fa-arrow-left"></i>
+                                Back to Orders
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTimeline(status) {
+            const steps = [
+                { key: 'pending', label: 'Placed', icon: 'fa-shopping-cart' },
+                { key: 'confirmed', label: 'Confirmed', icon: 'fa-check' },
+                { key: 'processing', label: 'Processing', icon: 'fa-cog' },
+                { key: 'shipped', label: 'Shipped', icon: 'fa-truck' },
+                { key: 'delivered', label: 'Delivered', icon: 'fa-home' }
+            ];
+            
+            const statusOrder = ['pending', 'confirmed', 'processing', 'shipped', 'out-for-delivery', 'delivered'];
+            const currentStatus = status.toLowerCase().replace(' ', '-');
+            const currentIndex = statusOrder.indexOf(currentStatus);
+            
+            return `
+                <div class="timeline-horizontal">
+                    ${steps.map((step, index) => {
+                        let stepClass = '';
+                        if (statusOrder.indexOf(step.key) < currentIndex) {
+                            stepClass = 'completed';
+                        } else if (statusOrder.indexOf(step.key) === currentIndex || 
+                                  (step.key === 'shipped' && currentStatus === 'out-for-delivery')) {
+                            stepClass = 'active';
+                        }
+                        
+                        return `
+                            <div class="timeline-step">
+                                <div class="step-icon ${stepClass}">
+                                    <i class="fas ${stepClass === 'completed' ? 'fa-check' : step.icon}"></i>
+                                </div>
+                                <span class="step-label ${stepClass}">${step.label}</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderItems(items) {
+            if (!items || items.length === 0) {
+                return '<p style="color: #6c757d; text-align: center;">No item details available</p>';
+            }
+
+            return items.map((item, index) => {
+                // Use cart thumbnail from Firebase (same image user saw in cart)
+                const thumbnailUrl = getOrderThumbnail(orderData, index);
+                const specs = [];
+                
+                if (item.frameSize) {
+                    const size = typeof item.frameSize === 'object' ? item.frameSize.size : item.frameSize;
+                    const orientation = typeof item.frameSize === 'object' ? item.frameSize.orientation : '';
+                    specs.push(`${size}${orientation ? ' ' + orientation : ''}`);
+                }
+                if (item.frameColor) specs.push(item.frameColor);
+                if (item.frameTexture) specs.push(item.frameTexture);
+                if (item.whiteBorder) specs.push('White Border');
+
+                return `
+                    <div class="order-item-card">
+                        <div class="item-image">
+                            ${thumbnailUrl 
+                                ? `<img src="${thumbnailUrl}" alt="Frame ${index + 1}" class="item-thumbnail" 
+                                        onerror="this.parentElement.innerHTML='<div class=\\'item-image-placeholder\\'><i class=\\'fas fa-image\\'></i></div>'">`
+                                : `<div class="item-image-placeholder"><i class="fas fa-image"></i></div>`
+                            }
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">Custom Photo Frame ${index + 1}</div>
+                            <div class="item-specs">
+                                ${specs.map(s => `<span class="spec-badge">${s}</span>`).join('')}
+                            </div>
+                            <div class="item-price">₹${item.price || 0}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Get frame color class
+        function getFrameColorClass(frameColor) {
+            if (!frameColor) return 'frame-default';
+            const color = frameColor.toLowerCase().replace(/\s+/g, '-');
+            const colorMap = {
+                'brown': 'frame-brown',
+                'black': 'frame-black',
+                'white': 'frame-white',
+                'gold': 'frame-gold',
+                'silver': 'frame-silver',
+                'walnut': 'frame-walnut',
+                'oak': 'frame-oak',
+                'mahogany': 'frame-mahogany',
+                'cherry': 'frame-cherry'
+            };
+            return colorMap[color] || 'frame-default';
+        }
+
+        function renderTracking(order) {
+            const trackingNumber = order.trackingNumber || order.shipmentId;
+            const status = (order.status || 'pending').toLowerCase();
+            
+            if (!['shipped', 'out-for-delivery', 'delivered'].includes(status.replace(' ', '-'))) {
+                return `
+                    <div class="tracking-card">
+                        <p class="tracking-pending">
+                            <i class="fas fa-info-circle"></i>
+                            Tracking information will be available once your order is shipped.
+                        </p>
+                    </div>
+                `;
+            }
+            
+            if (trackingNumber) {
+                return `
+                    <div class="tracking-card">
+                        <p>Your tracking number:</p>
+                        <div class="tracking-number">${trackingNumber}</div>
+                        <a href="https://www.shiprocket.in/shipment-tracking/" target="_blank" class="track-btn">
+                            <i class="fas fa-external-link-alt"></i>
+                            Track on Shiprocket
+                        </a>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="tracking-card">
+                    <p class="tracking-pending">
+                        <i class="fas fa-truck"></i>
+                        Your order has been shipped. Tracking details will be updated soon.
+                    </p>
+                </div>
+            `;
+        }
+
+        function goBack() {
+            window.location.href = 'my-orders.html';
+        }
+
+        function contactSupport(orderNumber) {
+            // Open support chat with order context
+            if (typeof openSupportChat === 'function') {
+                openSupportChat(orderNumber);
+            } else {
+                // Fallback to email if chat not available
+                const subject = encodeURIComponent(`Help with Order #${orderNumber}`);
+                const body = encodeURIComponent(`Hi JB Creations Team,\n\nI need help with my order #${orderNumber}.\n\n[Please describe your issue here]\n\nThank you!`);
+                window.location.href = `mailto:jbcreationssss@gmail.com?subject=${subject}&body=${body}`;
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('orderContent').innerHTML = `
+                <div class="loading-container">
+                    <i class="fas fa-exclamation-triangle" style="color: #dc3545;"></i>
+                    <p>${message}</p>
+                    <button class="action-btn btn-primary" onclick="goBack()" style="margin-top: 20px;">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Orders
+                    </button>
+                </div>
+            `;
+        }
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <a href="index.html" class="footer-logo">JB Creations</a>
+                <div class="footer-tagline">Custom Photo Frames & Memories</div>
+            </div>
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="customize.html">Our Services</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-bottom-content">
+                <div class="copyright">© 2024 JB Creations. All rights reserved.</div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

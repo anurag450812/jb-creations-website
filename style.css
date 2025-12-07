@@ -291,6 +291,26 @@ body {
     max-height: none !important;
 }
 
+/* White Border Effect Inside Frame - appears when data-white-border="yes" */
+.preview-section .frame .image-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 0 solid #ffffff;
+    pointer-events: none;
+    z-index: 10;
+    transition: border-width 0.3s ease;
+    box-sizing: border-box;
+}
+
+.preview-section .frame[data-white-border="yes"] .image-container::before {
+    /* Border width matches frame border width (dynamic) */
+    border-width: var(--dynamic-border-width, 15px);
+}
+
 /* Frame Textures */
 .frame::after {
     content: '';
@@ -1531,6 +1551,61 @@ input[type="range"]::-webkit-slider-thumb:hover {
     font-size: 0.95rem;
 }
 
+/* Border Grid */
+.desktop-border-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+}
+
+.desktop-border-btn {
+    background: #ffffff;
+    border: 2px solid #e9ecef;
+    border-radius: 15px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+    min-height: 90px;
+}
+
+.desktop-border-btn:hover {
+    border-color: var(--accent-color);
+    background: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.desktop-border-btn.selected {
+    border-color: var(--highlight-color);
+    background: #fff5f5;
+    box-shadow: 0 4px 15px rgba(255, 166, 43, 0.15);
+}
+
+.desktop-border-btn i {
+    font-size: 1.3rem;
+    color: var(--highlight-color);
+    flex-shrink: 0;
+}
+
+.desktop-border-btn span {
+    font-weight: 700;
+    color: var(--text-color);
+    font-size: 0.95rem;
+}
+
+.border-description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 1rem;
+    text-align: center;
+    font-style: italic;
+}
+
 /* Adjustments Container */
 .desktop-adjustments-container {
     display: flex;
@@ -2632,8 +2707,8 @@ button i {
 
     .customize-page .bar-tabs {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
     }
 
     .customize-page .bar-tab {
@@ -2641,13 +2716,13 @@ button i {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 4px;
+        gap: 3px;
         background: rgba(130, 192, 204, 0.12);
         border: 1px solid rgba(130, 192, 204, 0.35);
         color: #16697A;
-        border-radius: 12px;
-        padding: 8px 6px;
-        font-size: 11px;
+        border-radius: 10px;
+        padding: 6px 4px;
+        font-size: 10px;
         font-weight: 700;
     }
 
@@ -2658,7 +2733,7 @@ button i {
     }
 
     .customize-page .bar-tab i {
-        font-size: 16px;
+        font-size: 14px;
     }
 
     .customize-page .bar-dots {
@@ -3712,6 +3787,44 @@ button i {
     }
 
     .mobile-texture-btn span {
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+
+    /* Border Card Specific Styles */
+    .mobile-border-grid {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .mobile-border-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 8px 12px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 50px;
+    }
+
+    .mobile-border-btn:hover,
+    .mobile-border-btn.active {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+        transform: scale(1.05);
+    }
+
+    .mobile-border-btn i {
+        font-size: 1rem;
+        margin-bottom: 4px;
+    }
+
+    .mobile-border-btn span {
         font-size: 0.7rem;
         font-weight: 500;
     }

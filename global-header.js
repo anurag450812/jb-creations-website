@@ -460,10 +460,6 @@ const GlobalWebsiteHeader = {
                             </div>
                             
                             <!-- Common options for all users -->
-                            <a href="track-order.html" class="dropdown-item">
-                                <i class="fas fa-search"></i>
-                                Track Order
-                            </a>
                             <a href="#" class="dropdown-item" onclick="contactUs()">
                                 <i class="fas fa-envelope"></i>
                                 Contact Us
@@ -666,11 +662,18 @@ const GlobalWebsiteHeader = {
             
             // Update cart count
             this.updateCartCount();
+            
+            // Check auth state and update profile dropdown
+            this.checkAndUpdateAuthState();
 
             // Listen for storage events to update cart count
             window.addEventListener('storage', (e) => {
                 if (e.key === 'photoFramingCart') {
                     this.updateCartCount();
+                }
+                // Also check for auth changes
+                if (e.key === 'jb_current_user') {
+                    this.checkAndUpdateAuthState();
                 }
             });
 
@@ -688,6 +691,57 @@ const GlobalWebsiteHeader = {
         }
 
         return this;
+    },
+    
+    /**
+     * Check authentication state and update the header
+     */
+    checkAndUpdateAuthState() {
+        // Check jb_current_user in localStorage (OTP auth)
+        const currentUserData = localStorage.getItem('jb_current_user');
+        if (currentUserData) {
+            try {
+                const userData = JSON.parse(currentUserData);
+                // Handle both direct user object and session wrapper
+                const user = userData.user || userData;
+                if (user && user.phone) {
+                    console.log('GlobalHeader: User is authenticated:', user.name, user.phone);
+                    this.updateAuthState(true, user);
+                    return;
+                }
+            } catch (error) {
+                console.error('GlobalHeader: Error parsing jb_current_user:', error);
+            }
+        }
+        
+        // Check window.otpAuthUtils
+        if (window.otpAuthUtils && typeof window.otpAuthUtils.getCurrentUser === 'function') {
+            const otpUser = window.otpAuthUtils.getCurrentUser();
+            if (otpUser) {
+                console.log('GlobalHeader: User from otpAuthUtils:', otpUser.name);
+                this.updateAuthState(true, otpUser);
+                return;
+            }
+        }
+        
+        // Check jb_user (legacy)
+        const storedUser = localStorage.getItem('jb_user') || sessionStorage.getItem('jb_user');
+        if (storedUser) {
+            try {
+                const user = JSON.parse(storedUser);
+                if (user) {
+                    console.log('GlobalHeader: User from jb_user:', user.name);
+                    this.updateAuthState(true, user);
+                    return;
+                }
+            } catch (error) {
+                console.error('GlobalHeader: Error parsing jb_user:', error);
+            }
+        }
+        
+        // No user found - show guest options
+        console.log('GlobalHeader: No user found, showing guest options');
+        this.updateAuthState(false);
     }
 };
 

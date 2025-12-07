@@ -174,6 +174,16 @@
             text-align: center;
         }
 
+        .nav-badge {
+            background: var(--danger);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.125rem 0.5rem;
+            border-radius: 1rem;
+            margin-left: auto;
+        }
+
         /* Main Content */
         .main-content {
             flex: 1;
@@ -1167,6 +1177,313 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Support Chat Styles */
+        .support-container {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 1.5rem;
+            height: calc(100vh - 200px);
+            min-height: 500px;
+        }
+
+        .chat-list-panel {
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-list-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border-light);
+            background: var(--bg-secondary);
+        }
+
+        .chat-list-header h3 {
+            margin: 0 0 1rem 0;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chat-list-header h3 i {
+            color: var(--primary);
+        }
+
+        .chat-filters select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+        }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .chat-list-item {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .chat-list-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .chat-list-item.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.1));
+            border-left: 3px solid var(--primary);
+        }
+
+        .chat-list-item.unread {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .chat-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .chat-user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-user-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9375rem;
+        }
+
+        .chat-user-phone {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        .chat-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.25rem;
+        }
+
+        .chat-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .chat-unread-badge {
+            background: var(--primary);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.125rem 0.5rem;
+            border-radius: 1rem;
+        }
+
+        .chat-preview {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-status-badge {
+            font-size: 0.6875rem;
+            padding: 0.125rem 0.375rem;
+            border-radius: 0.25rem;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .chat-status-open { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .chat-status-pending { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .chat-status-closed { background: rgba(107, 114, 128, 0.15); color: #6b7280; }
+
+        .chat-conversation-panel {
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .no-chat-selected {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .no-chat-selected i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .no-chat-selected h3 {
+            margin: 0 0 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .conversation-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-light);
+            background: var(--bg-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .conversation-user-info h4 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .conversation-user-info p {
+            margin: 0.25rem 0 0;
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        .conversation-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .conversation-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-lg);
+            font-size: 0.9375rem;
+            line-height: 1.5;
+        }
+
+        .message-bubble.user {
+            background: var(--bg-tertiary);
+            align-self: flex-start;
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        .message-bubble.admin {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .message-bubble .message-time {
+            font-size: 0.6875rem;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+        }
+
+        .conversation-input {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .conversation-input input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-light);
+            border-radius: 2rem;
+            font-size: 0.9375rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .conversation-input input:focus {
+            border-color: var(--primary);
+        }
+
+        .conversation-input button {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .conversation-input button:hover {
+            transform: scale(1.05);
+        }
+
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+
+        .loading-state i {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            opacity: 0.3;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 1024px) {
+            .support-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .chat-list-panel {
+                max-height: 400px;
+            }
+
+            .chat-conversation-panel {
+                min-height: 400px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1202,6 +1519,13 @@
                             <a href="#" class="nav-link" data-view="customers">
                                 <i class="nav-icon fas fa-users"></i>
                                 Customers
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-view="support">
+                                <i class="nav-icon fas fa-comments"></i>
+                                Support Chats
+                                <span class="nav-badge" id="supportChatBadge" style="display: none;">0</span>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -1657,6 +1981,41 @@
                     </div>
                 </div>
 
+                <!-- Support Chats View -->
+                <div id="support-view" class="view" style="display: none;">
+                    <div class="support-container">
+                        <!-- Chat List Panel -->
+                        <div class="chat-list-panel">
+                            <div class="chat-list-header">
+                                <h3><i class="fas fa-comments"></i> Support Conversations</h3>
+                                <div class="chat-filters">
+                                    <select id="chatStatusFilter" onchange="filterSupportChats(this.value)">
+                                        <option value="all">All Chats</option>
+                                        <option value="open">Open</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="closed">Closed</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="chat-list" id="supportChatList">
+                                <div class="loading-state">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <p>Loading chats...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Conversation Panel -->
+                        <div class="chat-conversation-panel" id="chatConversationPanel">
+                            <div class="no-chat-selected">
+                                <i class="fas fa-comments"></i>
+                                <h3>Select a conversation</h3>
+                                <p>Choose a chat from the list to view the conversation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="analytics-view" class="view" style="display: none;">
                     <!-- Analytics Stats Grid -->
                     <div class="stats-grid" style="margin-bottom: 2rem;">
@@ -2014,6 +2373,7 @@
                 'dashboard': 'Dashboard',
                 'orders': 'Orders',
                 'customers': 'Customers',
+                'support': 'Support Chats',
                 'analytics': 'Analytics',
                 'products': 'Products',
                 'inventory': 'Inventory',
@@ -2026,6 +2386,7 @@
                 'dashboard': 'Welcome to your admin dashboard',
                 'orders': 'Manage all customer orders',
                 'customers': 'View and manage customers',
+                'support': 'Chat with customers and provide support',
                 'analytics': 'Business insights and analytics',
                 'products': 'Manage your product catalog',
                 'inventory': 'Track stock and inventory',
@@ -2048,6 +2409,9 @@
                     break;
                 case 'analytics':
                     loadAnalytics();
+                    break;
+                case 'support':
+                    loadSupportChats();
                     break;
                 // Add more cases as needed
             }
@@ -2718,6 +3082,10 @@
                         <div class="detail-row">
                             <span class="detail-label">Frame Texture:</span>
                             <span class="detail-value">${item.frameTexture || 'Standard'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">White Border:</span>
+                            <span class="detail-value">${item.whiteBorder ? 'Yes' : 'No'}</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Price:</span>
@@ -4379,6 +4747,304 @@
     <script src="firebase-client-new.js"></script>
     
     <script>
+        // ==================== SUPPORT CHAT FUNCTIONS ====================
+        let supportChats = [];
+        let activeChatId = null;
+        let chatMessagesUnsubscribe = null;
+        let chatsListUnsubscribe = null;
+
+        async function loadSupportChats(status = null) {
+            const chatList = document.getElementById('supportChatList');
+            if (!chatList) return;
+
+            chatList.innerHTML = `
+                <div class="loading-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading chats...</p>
+                </div>
+            `;
+
+            try {
+                if (!window.jbAPI) {
+                    throw new Error('Firebase API not available');
+                }
+
+                const filterValue = document.getElementById('chatStatusFilter')?.value || 'all';
+                const statusFilter = filterValue === 'all' ? null : filterValue;
+
+                const result = await window.jbAPI.getAllSupportChats(statusFilter);
+                supportChats = result.chats || [];
+
+                if (supportChats.length === 0) {
+                    chatList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <h4>No support chats</h4>
+                            <p>When customers contact support, their chats will appear here.</p>
+                        </div>
+                    `;
+                    updateSupportBadge(0);
+                    return;
+                }
+
+                renderChatList(supportChats);
+
+                // Count unread chats for badge
+                const unreadCount = supportChats.reduce((sum, chat) => sum + (chat.unreadByAdmin || 0), 0);
+                updateSupportBadge(unreadCount);
+
+                // Set up real-time listener for chat updates
+                if (chatsListUnsubscribe) {
+                    chatsListUnsubscribe();
+                }
+                chatsListUnsubscribe = window.jbAPI.listenForNewChats((updatedChats) => {
+                    supportChats = updatedChats;
+                    renderChatList(supportChats);
+                    const newUnreadCount = supportChats.reduce((sum, chat) => sum + (chat.unreadByAdmin || 0), 0);
+                    updateSupportBadge(newUnreadCount);
+                });
+
+            } catch (error) {
+                console.error('Error loading support chats:', error);
+                chatList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h4>Error loading chats</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderChatList(chats) {
+            const chatList = document.getElementById('supportChatList');
+            if (!chatList) return;
+
+            chatList.innerHTML = chats.map(chat => {
+                const isActive = activeChatId === chat.id;
+                const hasUnread = (chat.unreadByAdmin || 0) > 0;
+                const timeStr = chat.lastMessageTime ? formatChatTime(chat.lastMessageTime) : '';
+                
+                return `
+                    <div class="chat-list-item ${isActive ? 'active' : ''} ${hasUnread ? 'unread' : ''}" 
+                         onclick="openChat('${chat.id}')">
+                        <div class="chat-item-header">
+                            <div class="chat-user-info">
+                                <span class="chat-user-name">${chat.userName || 'Customer'}</span>
+                                <span class="chat-user-phone"><i class="fas fa-phone" style="font-size: 10px;"></i> ${chat.userPhone || 'N/A'}</span>
+                            </div>
+                            <div class="chat-meta">
+                                <span class="chat-time">${timeStr}</span>
+                                ${hasUnread ? `<span class="chat-unread-badge">${chat.unreadByAdmin}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="chat-preview">${chat.lastMessage || 'No messages yet'}</div>
+                        <div style="margin-top: 0.5rem;">
+                            <span class="chat-status-badge chat-status-${chat.status || 'open'}">${chat.status || 'open'}</span>
+                            ${chat.userEmail ? `<span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 0.5rem;"><i class="fas fa-envelope"></i> ${chat.userEmail}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterSupportChats(status) {
+            loadSupportChats(status === 'all' ? null : status);
+        }
+
+        async function openChat(chatId) {
+            activeChatId = chatId;
+            const panel = document.getElementById('chatConversationPanel');
+            const chat = supportChats.find(c => c.id === chatId);
+
+            if (!chat || !panel) return;
+
+            // Highlight active chat in list
+            document.querySelectorAll('.chat-list-item').forEach(item => item.classList.remove('active'));
+            event?.target?.closest('.chat-list-item')?.classList.add('active');
+
+            // Show loading state
+            panel.innerHTML = `
+                <div class="conversation-header">
+                    <div class="conversation-user-info">
+                        <h4>${chat.userName || 'Customer'}</h4>
+                        <p><i class="fas fa-phone"></i> ${chat.userPhone || 'N/A'} ${chat.userEmail ? `• <i class="fas fa-envelope"></i> ${chat.userEmail}` : ''}</p>
+                    </div>
+                    <div class="conversation-actions">
+                        ${chat.status !== 'closed' ? `
+                            <button class="btn btn-sm btn-secondary" onclick="closeSupportChat('${chatId}')">
+                                <i class="fas fa-check-circle"></i> Close Chat
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+                <div class="conversation-messages" id="conversationMessages">
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading messages...</p>
+                    </div>
+                </div>
+                ${chat.status !== 'closed' ? `
+                    <div class="conversation-input">
+                        <input type="text" id="adminMessageInput" placeholder="Type your reply..." 
+                               onkeypress="if(event.key==='Enter') sendAdminMessage('${chatId}')">
+                        <button onclick="sendAdminMessage('${chatId}')">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                ` : `
+                    <div class="conversation-input" style="justify-content: center; color: var(--text-muted);">
+                        <i class="fas fa-lock"></i>&nbsp; This conversation is closed
+                    </div>
+                `}
+            `;
+
+            // Unsubscribe from previous chat listener
+            if (chatMessagesUnsubscribe) {
+                chatMessagesUnsubscribe();
+            }
+
+            // Load and listen to messages
+            try {
+                chatMessagesUnsubscribe = await window.jbAPI.getChatMessages(chatId, (messages) => {
+                    renderConversationMessages(messages);
+                });
+
+                // Mark as read
+                await window.jbAPI.markChatAsRead(chatId, 'admin');
+                
+                // Update chat list to reflect read status
+                const chatIndex = supportChats.findIndex(c => c.id === chatId);
+                if (chatIndex !== -1) {
+                    supportChats[chatIndex].unreadByAdmin = 0;
+                }
+                renderChatList(supportChats);
+                
+            } catch (error) {
+                console.error('Error loading chat messages:', error);
+                document.getElementById('conversationMessages').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Error loading messages</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderConversationMessages(messages) {
+            const container = document.getElementById('conversationMessages');
+            if (!container) return;
+
+            if (!messages || messages.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-comments"></i>
+                        <p>No messages yet. The customer will see your reply.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = messages.map(msg => `
+                <div class="message-bubble ${msg.senderType}">
+                    <div class="message-text">${escapeHtml(msg.text)}</div>
+                    <div class="message-time">
+                        ${msg.senderType === 'admin' ? msg.senderName + ' • ' : ''}
+                        ${msg.createdAt ? formatChatTime(msg.createdAt) : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function sendAdminMessage(chatId) {
+            const input = document.getElementById('adminMessageInput');
+            if (!input) return;
+
+            const message = input.value.trim();
+            if (!message) return;
+
+            input.value = '';
+            input.disabled = true;
+
+            try {
+                await window.jbAPI.sendChatMessage(chatId, message, 'admin', 'JB Creations Support');
+            } catch (error) {
+                console.error('Error sending message:', error);
+                input.value = message; // Restore message on error
+                alert('Failed to send message. Please try again.');
+            } finally {
+                input.disabled = false;
+                input.focus();
+            }
+        }
+
+        async function closeSupportChat(chatId) {
+            if (!confirm('Are you sure you want to close this conversation? The customer will need to start a new chat for future support.')) {
+                return;
+            }
+
+            try {
+                await window.jbAPI.closeSupportChat(chatId);
+                
+                // Reload chats
+                loadSupportChats();
+                
+                // Clear conversation panel
+                document.getElementById('chatConversationPanel').innerHTML = `
+                    <div class="no-chat-selected">
+                        <i class="fas fa-comments"></i>
+                        <h3>Chat closed</h3>
+                        <p>Select another conversation from the list</p>
+                    </div>
+                `;
+                activeChatId = null;
+                
+            } catch (error) {
+                console.error('Error closing chat:', error);
+                alert('Failed to close chat. Please try again.');
+            }
+        }
+
+        function updateSupportBadge(count) {
+            const badge = document.getElementById('supportChatBadge');
+            if (badge) {
+                if (count > 0) {
+                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+
+        function formatChatTime(date) {
+            if (!date) return '';
+            const d = date instanceof Date ? date : new Date(date);
+            const now = new Date();
+            const diffMs = now - d;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            
+            return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ==================== END SUPPORT CHAT FUNCTIONS ====================
+
         // Firebase integration - wait for Firebase to be ready then load data
         let firebaseInitialized = false;
 

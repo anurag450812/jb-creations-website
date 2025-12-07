@@ -179,7 +179,7 @@
 
         <div class="sticky-actions">
             <div class="bar">
-                <a href="#" class="btn btn-primary" id="trackOrderBtn"><i class="fas fa-search"></i> Track Order</a>
+                <a href="my-orders.html" class="btn btn-primary"><i class="fas fa-list"></i> My Orders</a>
                 <a href="index.html" class="btn btn-secondary"><i class="fas fa-home"></i> Home</a>
             </div>
         </div>
@@ -243,15 +243,6 @@
             document.getElementById('orderDate').textContent = new Date().toLocaleDateString('en-IN', {
                 year: 'numeric', month: 'long', day: 'numeric'
             });
-
-            // Update track order button
-            const trackBtn = document.getElementById('trackOrderBtn');
-            if (details.isGuest && orderId) {
-                trackBtn.href = `track-order.html?order=${orderId}`;
-            } else {
-                trackBtn.href = 'my-orders.html';
-                trackBtn.innerHTML = '<i class="fas fa-list"></i> My Orders';
-            }
 
             // Copy button wiring
             const copyBtn = document.getElementById('copyOrderIdBtn');

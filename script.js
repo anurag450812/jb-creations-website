@@ -27,6 +27,7 @@ const state = {
     },
     frameColor: 'black',
     frameTexture: 'smooth',
+    whiteBorder: false, // White border option: false = No, true = Yes
     price: 349,
     adjustments: {
         brightness: 100,
@@ -263,6 +264,7 @@ function initMobileBottomBar() {
         color: dropup.querySelector('.drawer[data-drawer="color"]'),
         texture: dropup.querySelector('.drawer[data-drawer="texture"]'),
         adjust: dropup.querySelector('.drawer[data-drawer="adjust"]'),
+        border: dropup.querySelector('.drawer[data-drawer="border"]'),
     };
 
     // Populate drawers by cloning existing mobile controls
@@ -273,6 +275,7 @@ function initMobileBottomBar() {
         const colorGrid = tempContent.querySelector('.mobile-color-grid');
         const textureGrid = tempContent.querySelector('.mobile-texture-grid');
         const adjustments = tempContent.querySelector('.mobile-adjustments-container');
+        const borderGrid = tempContent.querySelector('.mobile-border-grid');
 
         if (sizeGrid && drawers.size && drawers.size.children.length === 0) {
             drawers.size.appendChild(sizeGrid.cloneNode(true));
@@ -295,6 +298,9 @@ function initMobileBottomBar() {
                 if (original) input.value = original.value;
             });
             drawers.adjust.appendChild(adjClone);
+        }
+        if (borderGrid && drawers.border && drawers.border.children.length === 0) {
+            drawers.border.appendChild(borderGrid.cloneNode(true));
         }
     }
 
@@ -331,6 +337,28 @@ function initMobileBottomBar() {
             if (drawers.texture) {
                 drawers.texture.querySelectorAll('.mobile-texture-btn').forEach(btn => btn.classList.remove('active'));
                 textureBtn.classList.add('active');
+            }
+        }
+        const borderBtn = e.target.closest('.mobile-border-btn');
+        if (borderBtn) {
+            // Update state directly since there's no "original" to trigger
+            state.whiteBorder = borderBtn.dataset.border === 'yes';
+            updateWhiteBorder();
+            // Update active states in drawer
+            if (drawers.border) {
+                drawers.border.querySelectorAll('.mobile-border-btn').forEach(btn => btn.classList.remove('active'));
+                borderBtn.classList.add('active');
+            }
+            // Also update desktop buttons if present
+            document.querySelectorAll('.desktop-border-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.dataset.border === borderBtn.dataset.border) {
+                    btn.classList.add('selected');
+                }
+            });
+            // Trigger room preview update button state
+            if (window.updateRoomPreviewButtonState) {
+                setTimeout(() => window.updateRoomPreviewButtonState(), 50);
             }
         }
     });
@@ -391,14 +419,14 @@ function initMobileBottomBar() {
             if (!el) return;
             el.classList.toggle('active', key === name);
         });
-        // dots state
-        const order = ['size','color','texture','adjust'];
+        // dots state - order: border, size, color, texture, adjust
+        const order = ['border','size','color','texture','adjust'];
         order.forEach((key, idx) => {
             if (dots[idx]) dots[idx].classList.toggle('active', key === name);
         });
         // title
         if (titleEl) {
-            const map = { size: 'Size', color: 'Color', texture: 'Texture', adjust: 'Adjust' };
+            const map = { border: 'Border', size: 'Size', color: 'Color', texture: 'Texture', adjust: 'Adjust' };
             titleEl.textContent = map[name] || 'Customize';
         }
         // Hide bottom bar for minimalistic look
@@ -566,6 +594,13 @@ function initializeDefaults() {
         console.log('Default frame size selected:', state.frameSize);
     }
     
+    // Select the "No" border button by default
+    const defaultBorderBtn = document.querySelector('.desktop-border-btn[data-border="no"]');
+    if (defaultBorderBtn) {
+        defaultBorderBtn.classList.add('selected');
+        console.log('Default border selection: No');
+    }
+    
     // Update total price display
     if (elements.totalPrice) {
         elements.totalPrice.textContent = `₹${state.price}`;
@@ -724,6 +759,21 @@ function initializeEventListeners() {
         });
     });
 
+    // Frame White Border Selection
+    document.querySelectorAll('.desktop-border-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            document.querySelectorAll('.desktop-border-btn').forEach(btn => btn.classList.remove('selected'));
+            button.classList.add('selected');
+            state.whiteBorder = button.dataset.border === 'yes';
+            updateWhiteBorder();
+            
+            // No auto-update; let user press Update button for room previews
+            if (window.updateRoomPreviewButtonState) {
+                setTimeout(() => window.updateRoomPreviewButtonState(), 50);
+            }
+        });
+    });
+
     // Add to cart functionality
     console.log('Setting up Add to Cart button:', elements.addToCartBtn);
     if (elements.addToCartBtn) {
@@ -760,6 +810,7 @@ function initializeEventListeners() {
                     frameSize: state.frameSize,
                     frameColor: state.frameColor || '#8B4513',
                     frameTexture: state.frameTexture || 'wood',
+                    whiteBorder: state.whiteBorder || false,
                     adjustments: { ...state.adjustments },
                     zoom: state.zoom || 1,
                     position: { ...state.position },
@@ -2028,6 +2079,26 @@ function captureHighQualityPrintImage() {
                     // Reset filter
                     ctx.filter = 'none';
                     
+                    // Draw white border inside frame if enabled (for high-quality print)
+                    if (state.whiteBorder) {
+                        // Calculate white border width proportional to frame border
+                        // The frame border is frameInnerPadding (20px) in preview
+                        // Scale it to canvas resolution
+                        const whiteBorderWidth = frameInnerPadding * canvasScaleX;
+                        
+                        ctx.fillStyle = '#ffffff';
+                        // Top border
+                        ctx.fillRect(0, 0, canvas.width, whiteBorderWidth);
+                        // Bottom border
+                        ctx.fillRect(0, canvas.height - whiteBorderWidth, canvas.width, whiteBorderWidth);
+                        // Left border
+                        ctx.fillRect(0, 0, whiteBorderWidth, canvas.height);
+                        // Right border
+                        ctx.fillRect(canvas.width - whiteBorderWidth, 0, whiteBorderWidth, canvas.height);
+                        
+                        console.log('🖼️ White border added to high-quality image with width:', whiteBorderWidth);
+                    }
+                    
                     // Convert to high-quality JPEG
                     const dataURL = canvas.toDataURL('image/jpeg', 0.95);
                     
@@ -2173,6 +2244,26 @@ function captureFramedImage() {
                     
                     // Reset filter for any additional operations
                     ctx.filter = 'none';
+                    
+                    // Draw white border inside frame if enabled (for admin panel download)
+                    if (state.whiteBorder) {
+                        // Calculate white border width proportional to frame border
+                        // The frame border is frameInnerPadding (20px) in preview
+                        // Scale it to canvas resolution
+                        const whiteBorderWidth = frameInnerPadding * scaleX;
+                        
+                        ctx.fillStyle = '#ffffff';
+                        // Top border
+                        ctx.fillRect(0, 0, canvas.width, whiteBorderWidth);
+                        // Bottom border
+                        ctx.fillRect(0, canvas.height - whiteBorderWidth, canvas.width, whiteBorderWidth);
+                        // Left border
+                        ctx.fillRect(0, 0, whiteBorderWidth, canvas.height);
+                        // Right border
+                        ctx.fillRect(canvas.width - whiteBorderWidth, 0, whiteBorderWidth, canvas.height);
+                        
+                        console.log('White border added to admin image with width:', whiteBorderWidth);
+                    }
                     
                     // Convert to data URL with optimized quality
                     const dataURL = canvas.toDataURL('image/jpeg', 0.90);
@@ -2332,6 +2423,22 @@ function captureFramePreviewForDisplay() {
                     ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
                     
                     ctx.restore();
+                    
+                    // Draw white border inside frame if enabled
+                    if (state.whiteBorder) {
+                        // Use same border width ratio as the frame border
+                        const whiteBorderWidth = borderWidth;
+                        
+                        ctx.fillStyle = '#ffffff';
+                        // Top border
+                        ctx.fillRect(imageAreaX, imageAreaY, imageAreaWidth, whiteBorderWidth);
+                        // Bottom border
+                        ctx.fillRect(imageAreaX, imageAreaY + imageAreaHeight - whiteBorderWidth, imageAreaWidth, whiteBorderWidth);
+                        // Left border
+                        ctx.fillRect(imageAreaX, imageAreaY, whiteBorderWidth, imageAreaHeight);
+                        // Right border
+                        ctx.fillRect(imageAreaX + imageAreaWidth - whiteBorderWidth, imageAreaY, whiteBorderWidth, imageAreaHeight);
+                    }
                     
                     // Convert to data URL
                     const dataURL = canvas.toDataURL('image/jpeg', 0.9);
@@ -2925,26 +3032,36 @@ function captureFramePreview() {
                 return;
             }
 
-            // Draw frame background
-            const frameColor = state.frameColor || '#8B4513';
-            ctx.fillStyle = frameColor;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Get image container position and size relative to frame preview
-            const containerRect = imageContainer.getBoundingClientRect();
+            // Get the frame's bounding rect for accurate positioning
             const frameRect = framePreview.getBoundingClientRect();
+            const frameElementRect = frame.getBoundingClientRect();
+            const containerRect = imageContainer.getBoundingClientRect();
+            
+            // Calculate positions relative to the canvas (which matches framePreview)
+            const frameX = Math.floor(frameElementRect.left - frameRect.left);
+            const frameY = Math.floor(frameElementRect.top - frameRect.top);
+            const frameVisibleWidth = Math.floor(frameElementRect.width);
+            const frameVisibleHeight = Math.floor(frameElementRect.height);
             
             const containerX = Math.floor(containerRect.left - frameRect.left);
             const containerY = Math.floor(containerRect.top - frameRect.top);
             const containerWidth = Math.floor(containerRect.width);
             const containerHeight = Math.floor(containerRect.height);
+            
+            // The actual frame border width is the distance from frame edge to container edge
+            const frameBorderWidth = Math.floor(containerRect.left - frameElementRect.left);
+            const frameBorderHeight = Math.floor(containerRect.top - frameElementRect.top);
 
-            console.log('Container positioning:', {
-                containerX,
-                containerY, 
-                containerWidth,
-                containerHeight
+            console.log('Frame and container positioning:', {
+                frameX, frameY, frameVisibleWidth, frameVisibleHeight,
+                containerX, containerY, containerWidth, containerHeight,
+                frameBorderWidth, frameBorderHeight
             });
+
+            // Draw frame background (only within the frame element bounds)
+            const frameColor = state.frameColor || '#8B4513';
+            ctx.fillStyle = frameColor;
+            ctx.fillRect(frameX, frameY, frameVisibleWidth, frameVisibleHeight);
 
             // Draw white background for image area
             ctx.fillStyle = '#ffffff';
@@ -2990,6 +3107,35 @@ function captureFramePreview() {
                     ctx.drawImage(img, imgX, imgY, imgWidth, imgHeight);
                     
                     ctx.restore();
+
+                    // Draw white border inside frame if enabled
+                    if (state.whiteBorder) {
+                        // The white border width should match the frame border width
+                        // Use the calculated frameBorderWidth which is the actual visual distance
+                        // from the frame edge to the image container edge
+                        const whiteBorderWidth = Math.min(frameBorderWidth, frameBorderHeight);
+                        
+                        console.log('White border calculation:', {
+                            frameBorderWidth,
+                            frameBorderHeight,
+                            whiteBorderWidth,
+                            containerWidth,
+                            containerHeight
+                        });
+                        
+                        // Draw solid white border rectangles inside the image container
+                        ctx.fillStyle = '#ffffff';
+                        // Top border
+                        ctx.fillRect(containerX, containerY, containerWidth, whiteBorderWidth);
+                        // Bottom border
+                        ctx.fillRect(containerX, containerY + containerHeight - whiteBorderWidth, containerWidth, whiteBorderWidth);
+                        // Left border
+                        ctx.fillRect(containerX, containerY, whiteBorderWidth, containerHeight);
+                        // Right border
+                        ctx.fillRect(containerX + containerWidth - whiteBorderWidth, containerY, whiteBorderWidth, containerHeight);
+                        
+                        console.log('White border drawn with width:', whiteBorderWidth, 'container:', containerWidth, 'x', containerHeight);
+                    }
 
                     // Convert to data URL
                     const dataURL = canvas.toDataURL('image/png', 1.0);
@@ -3960,6 +4106,27 @@ function updateFrameColor() {
     // Update room preview overlays if room slider is active
     // Room preview overlays will only update when "Update Room Previews" button is clicked
     // Removed automatic overlay update for frame color changes to give users control
+}
+
+// Function to update white border inside frame
+function updateWhiteBorder() {
+    const frameElements = document.querySelectorAll('.preview-section .frame');
+    frameElements.forEach(frame => {
+        // Set data attribute for CSS-based white border effect
+        frame.setAttribute('data-white-border', state.whiteBorder ? 'yes' : 'no');
+    });
+    
+    console.log('White border updated:', state.whiteBorder ? 'Yes' : 'No');
+}
+
+// Function to update frame texture (sets data attribute for CSS styling)
+function updateFrameTexture() {
+    const frameElements = document.querySelectorAll('.frame');
+    frameElements.forEach(frame => {
+        frame.setAttribute('data-texture', state.frameTexture || 'smooth');
+    });
+    
+    console.log('Frame texture updated:', state.frameTexture);
 }
 
 // Function to initialize mobile customization features
@@ -5400,6 +5567,7 @@ function updateMobileSpecs() {
     const mobileListingSize = document.getElementById('mobileListingSize');
     const mobileListingColor = document.getElementById('mobileListingColor');
     const mobileListingTexture = document.getElementById('mobileListingTexture');
+    const mobileListingBorder = document.getElementById('mobileListingBorder');
     const mobileListingPrice = document.getElementById('mobileListingPrice');
     const mobileListingCartCount = document.getElementById('mobileListingCartCount');
     const mobileRoomAddToCartBtn = document.getElementById('mobileRoomAddToCart');
@@ -5420,6 +5588,11 @@ function updateMobileSpecs() {
     if (state.frameTexture && mobileListingTexture) {
         const textureText = state.frameTexture.charAt(0).toUpperCase() + state.frameTexture.slice(1);
         mobileListingTexture.textContent = textureText;
+    }
+    
+    // Update white border
+    if (mobileListingBorder) {
+        mobileListingBorder.textContent = state.whiteBorder ? 'Yes' : 'No';
     }
     
     // Update price

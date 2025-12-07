@@ -19,7 +19,78 @@ class CartManager {
 
     loadCart() {
         const cartData = sessionStorage.getItem('photoFramingCart');
-        return cartData ? JSON.parse(cartData) : [];
+        if (!cartData) return [];
+        
+        try {
+            const cart = JSON.parse(cartData);
+            
+            // Validate each cart item has valid image data
+            const validCart = cart.filter(item => {
+                // Check if item has a valid thumbnail or can retrieve image from sessionStorage
+                if (item.thumbnailImage && item.thumbnailImage.length > 100) {
+                    return true;
+                }
+                
+                // Check sessionStorage for image data
+                if (item.id) {
+                    try {
+                        const stored = sessionStorage.getItem(`cartImage_${item.id}`);
+                        if (stored) {
+                            const data = JSON.parse(stored);
+                            if (data.displayImage || data.previewImage || data.printImage || data.originalImage) {
+                                return true;
+                            }
+                        }
+                        // Check in-memory storage
+                        if (window.cartImageStorage && window.cartImageStorage[item.id]) {
+                            const data = window.cartImageStorage[item.id];
+                            if (data.displayImage || data.previewImage || data.printImage || data.originalImage) {
+                                return true;
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Error validating cart item image:', e);
+                    }
+                }
+                
+                console.warn('🗑️ Removing cart item without valid image data:', item.id);
+                return false;
+            });
+            
+            // If we removed any invalid items, update storage
+            if (validCart.length !== cart.length) {
+                console.log(`📦 Cleaned cart: ${cart.length} -> ${validCart.length} items (removed ${cart.length - validCart.length} invalid)`);
+                sessionStorage.setItem('photoFramingCart', JSON.stringify(validCart));
+                
+                // Clean up orphaned image storage
+                this.cleanupOrphanedImages(validCart);
+            }
+            
+            return validCart;
+        } catch (e) {
+            console.error('Error parsing cart data:', e);
+            return [];
+        }
+    }
+
+    cleanupOrphanedImages(validCart) {
+        const validIds = new Set(validCart.map(item => String(item.id)));
+        const keysToRemove = [];
+        
+        for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            if (key && key.startsWith('cartImage_')) {
+                const match = key.match(/cartImage_(?:full_|hq_)?(\d+)/);
+                if (match && !validIds.has(match[1])) {
+                    keysToRemove.push(key);
+                }
+            }
+        }
+        
+        keysToRemove.forEach(key => {
+            sessionStorage.removeItem(key);
+            console.log(`🗑️ Removed orphaned image: ${key}`);
+        });
     }
 
     saveCart() {
@@ -144,6 +215,10 @@ class CartManager {
                         <div class="cart-item-spec">
                             <i class="fas fa-image"></i>
                             ${item.frameSize ? (item.frameSize.orientation || 'Landscape') : 'N/A'}
+                        </div>
+                        <div class="cart-item-spec">
+                            <i class="fas fa-border-style"></i>
+                            Border: ${item.whiteBorder ? 'Yes' : 'No'}
                         </div>
                     </div>
                 </div>
