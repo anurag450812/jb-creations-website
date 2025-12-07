@@ -431,6 +431,16 @@
         .table tbody tr:hover {
             background: var(--bg-secondary);
         }
+        
+        /* Clickable order rows */
+        .clickable-row {
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+        
+        .clickable-row:hover {
+            background: #f5f0eb !important;
+        }
 
         /* Status badges */
         .badge {
@@ -1150,19 +1160,140 @@
             text-align: center;
         }
 
+        /* Mobile Bottom Navigation Bar */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border-light);
+            z-index: 1000;
+            padding: 0.5rem 0.75rem;
+            padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0));
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .mobile-nav-scroll {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding: 0.25rem 0;
+        }
+        
+        .mobile-nav-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .mobile-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 70px;
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            color: var(--text-secondary);
+            font-size: 0.6875rem;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            scroll-snap-align: start;
+            transition: var(--transition);
+            position: relative;
+            flex-shrink: 0;
+        }
+        
+        .mobile-nav-item i {
+            font-size: 1.125rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .mobile-nav-item.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .mobile-nav-item:not(.active):hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .mobile-nav-badge {
+            position: absolute;
+            top: 2px;
+            right: 8px;
+            background: var(--danger);
+            color: white;
+            font-size: 0.5625rem;
+            font-weight: 600;
+            min-width: 14px;
+            height: 14px;
+            padding: 0 4px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Mobile Select All Bar - hidden on desktop */
+        .mobile-select-all-bar {
+            display: none;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
+            /* Prevent horizontal scrolling */
+            html, body {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
             }
-
-            .sidebar.open {
-                transform: translateX(0);
+            
+            /* Show mobile select all bar */
+            .mobile-select-all-bar {
+                display: block;
+                padding: 0.75rem 1rem;
+                background: #f8f4f0;
+                border-bottom: 1px solid #e0d8d0;
+                margin-bottom: 0;
+            }
+            
+            .mobile-select-all-label {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                cursor: pointer;
+                font-size: 0.9rem;
+                font-weight: 500;
+                color: #333;
+            }
+            
+            .mobile-select-all-label input[type="checkbox"] {
+                width: 18px;
+                height: 18px;
+                accent-color: #8B4513;
+            }
+            
+            .sidebar {
+                display: none;
             }
 
             .main-content {
                 margin-left: 0;
+                padding-bottom: 80px; /* Space for bottom nav */
+                overflow-x: hidden !important;
+            }
+            
+            .mobile-bottom-nav {
+                display: block;
+                position: fixed !important;
             }
 
             .header {
@@ -1171,39 +1302,392 @@
 
             .content {
                 padding: 1rem;
+                padding-bottom: 100px; /* Extra space for bottom nav */
             }
 
             .stats-grid {
                 grid-template-columns: 1fr;
             }
+            
+            /* Mobile Meesho-style List */
+            .table-container {
+                overflow: hidden !important;
+                border: none;
+                background: transparent;
+            }
+            
+            .table {
+                display: block;
+                width: 100%;
+            }
+            
+            .table thead {
+                display: none;
+            }
+            
+            .table tbody {
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .table tbody tr {
+                display: block;
+                background: var(--bg-primary);
+                border-bottom: 1px solid var(--border-light);
+                padding: 0.75rem 0;
+            }
+            
+            .table tbody tr:hover {
+                background: var(--bg-secondary);
+            }
+            
+            .table td {
+                display: inline;
+                padding: 0;
+                border: none;
+                font-size: 0.8125rem;
+            }
+            
+            /* Hide data-label completely */
+            .table td::before {
+                display: none !important;
+                content: none !important;
+            }
+            
+            /* Order tabs mobile */
+            .order-tabs {
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                gap: 0.5rem;
+                padding-bottom: 0.5rem;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            
+            .order-tabs::-webkit-scrollbar {
+                display: none;
+            }
+            
+            .order-tab {
+                flex-shrink: 0;
+                font-size: 0.75rem;
+                padding: 0.5rem 0.75rem;
+            }
+            
+            /* Search filter bar mobile */
+            .search-filter-bar {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .search-filter-bar .search-input,
+            .search-filter-bar .filter-select {
+                width: 100%;
+            }
+            
+            /* Bulk actions mobile - horizontal layout */
+            .bulk-actions-bar {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                gap: 0.5rem;
+                padding: 0.5rem 0.75rem;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            .bulk-actions-bar .selected-count {
+                font-size: 0.8rem;
+                white-space: nowrap;
+            }
+            
+            .bulk-actions-bar .btn-delete-selected,
+            .bulk-actions-bar .btn-clear-selection {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.75rem;
+            }
+            
+            /* Pagination mobile - arrows on sides of page numbers */
+            .pagination-container {
+                flex-direction: column;
+                gap: 0.75rem;
+                padding: 0.75rem;
+            }
+            
+            .pagination-controls {
+                display: flex;
+                flex-wrap: nowrap;
+                justify-content: center;
+                align-items: center;
+                gap: 0.5rem;
+                width: 100%;
+            }
+            
+            .pagination-controls .items-per-page {
+                display: none;
+            }
+            
+            .pagination-btn {
+                width: 2rem;
+                height: 2rem;
+                min-width: 2rem;
+            }
+            
+            .pagination-pages {
+                display: flex;
+                gap: 0.25rem;
+            }
+            
+            .page-btn {
+                min-width: 2rem;
+                height: 2rem;
+                font-size: 0.75rem;
+            }
+            
+            /* Compact bulk actions bar for mobile */
+            .bulk-actions-bar.compact {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+                gap: 0.5rem;
+            }
+            
+            .bulk-actions-bar.compact .btn-delete-selected,
+            .bulk-actions-bar.compact .btn-clear-selection {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.75rem;
+            }
+            
+            /* Card header mobile */
+            .card-header {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: flex-start;
+            }
+            
+            /* Force no horizontal scroll */
+            .content, .card, .card-body, #orders-view, #customers-view, #analytics-view {
+                overflow-x: hidden !important;
+                max-width: 100vw;
+            }
+            
+            /* Analytics charts fix */
+            #analytics-view > div[style*="grid-template-columns"] {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 1rem !important;
+            }
+            
+            #analytics-view .card {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            
+            #analytics-view .card canvas {
+                max-width: 100% !important;
+                height: auto !important;
+                max-height: 200px !important;
+            }
+            
+            /* Stat cards more compact on mobile */
+            .stat-card {
+                padding: 1rem;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            
+            /* Mobile Order Table - Card Layout */
+            .order-row {
+                display: flex;
+                flex-wrap: wrap;
+                padding: 0.75rem 1rem;
+                border-bottom: 1px solid #eee;
+                gap: 0.5rem;
+                align-items: center;
+            }
+            
+            /* Hide the full table header on mobile */
+            #all-orders-table thead {
+                display: none;
+            }
+            
+            /* Make table display as block */
+            #all-orders-table,
+            #all-orders-table tbody {
+                display: block;
+                width: 100%;
+            }
+            
+            /* Column styling for mobile - reorder and show as card */
+            .order-row .col-checkbox {
+                order: 1;
+                width: auto;
+                padding: 0;
+            }
+            
+            .order-row .col-order-id {
+                order: 2;
+                font-size: 0.9rem;
+                flex: 1;
+            }
+            
+            .order-row .col-amount {
+                order: 3;
+                text-align: right;
+            }
+            
+            .order-row .col-customer {
+                order: 4;
+                width: 100%;
+                font-size: 0.85rem;
+                color: #333;
+            }
+            
+            .order-row .col-email,
+            .order-row .col-phone {
+                display: none;
+            }
+            
+            .order-row .col-qty {
+                order: 5;
+                font-size: 0.75rem;
+                color: #666;
+            }
+            
+            .order-row .col-qty::before {
+                content: 'Qty: ';
+            }
+            
+            .order-row .col-date {
+                order: 6;
+                font-size: 0.7rem;
+                color: #999;
+            }
+            
+            .order-row .col-status {
+                order: 7;
+                margin-left: auto;
+            }
+            
+            .order-row .col-status .status-badge {
+                font-size: 0.65rem;
+                padding: 0.15rem 0.4rem;
+            }
+            
+            .order-row .col-actions {
+                order: 8;
+                display: flex;
+                gap: 0.5rem;
+            }
+            
+            .order-row .col-actions button {
+                padding: 0.35rem 0.6rem;
+                font-size: 0.7rem;
+            }
+            
+            /* Hide table headers on mobile for compact view */
+            #all-customers-table thead,
+            #top-customers-table thead {
+                display: none;
+            }
+            
+            /* Make customer tables display as block on mobile */
+            #all-customers-table,
+            #all-customers-table tbody,
+            #top-customers-table,
+            #top-customers-table tbody {
+                display: block;
+                width: 100%;
+            }
+            
+            /* Mobile customer row styles */
+            .customer-row {
+                display: flex;
+                flex-wrap: wrap;
+                padding: 0.75rem 1rem;
+                border-bottom: 1px solid #eee;
+                gap: 0.5rem;
+                align-items: center;
+            }
+            
+            .customer-row .col-rank {
+                order: 1;
+                width: auto;
+                font-size: 1.1rem;
+            }
+            
+            .customer-row .col-name {
+                order: 2;
+                flex: 1;
+                font-weight: 600;
+                font-size: 0.9rem;
+            }
+            
+            .customer-row .col-orders {
+                order: 3;
+            }
+            
+            .customer-row .col-email {
+                order: 4;
+                width: 100%;
+                font-size: 0.8rem;
+                color: #666;
+            }
+            
+            .customer-row .col-phone {
+                order: 5;
+                font-size: 0.75rem;
+                color: #999;
+            }
+            
+            .customer-row .col-spent {
+                order: 6;
+                margin-left: auto;
+            }
+            
+            .customer-row .col-type {
+                order: 7;
+            }
+            
+            .customer-row .col-type .badge {
+                font-size: 0.6rem;
+                padding: 0.15rem 0.35rem;
+            }
         }
 
-        /* Support Chat Styles */
-        .support-container {
+        /* Support Chat Styles - WhatsApp-like Interface */
+        .whatsapp-chat-container {
             display: grid;
-            grid-template-columns: 380px 1fr;
-            gap: 1.5rem;
-            height: calc(100vh - 200px);
-            min-height: 500px;
+            grid-template-columns: 350px 1fr;
+            height: calc(100vh - 140px);
+            max-height: 700px;
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
         }
 
         .chat-list-panel {
             background: var(--bg-primary);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-md);
+            border-right: 1px solid var(--border-light);
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
         .chat-list-header {
-            padding: 1.25rem;
+            padding: 1rem 1.25rem;
             border-bottom: 1px solid var(--border-light);
             background: var(--bg-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .chat-list-header h3 {
-            margin: 0 0 1rem 0;
+            margin: 0;
             font-size: 1rem;
             display: flex;
             align-items: center;
@@ -1213,13 +1697,54 @@
         .chat-list-header h3 i {
             color: var(--primary);
         }
-
-        .chat-filters select {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid var(--border-light);
-            border-radius: var(--radius-md);
+        
+        .chat-header-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        /* Chat Category Tabs */
+        .chat-category-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-light);
+            background: var(--bg-secondary);
+        }
+        
+        .chat-tab {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
             font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            border-bottom: 2px solid transparent;
+        }
+        
+        .chat-tab:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .chat-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: var(--bg-primary);
+        }
+        
+        .tab-badge {
+            background: var(--danger);
+            color: white;
+            font-size: 0.6875rem;
+            padding: 0.125rem 0.375rem;
+            border-radius: 1rem;
+            font-weight: 600;
         }
 
         .chat-list {
@@ -1228,10 +1753,13 @@
         }
 
         .chat-list-item {
-            padding: 1rem 1.25rem;
+            padding: 0.875rem 1rem;
             border-bottom: 1px solid var(--border-light);
             cursor: pointer;
             transition: var(--transition);
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
         }
 
         .chat-list-item:hover {
@@ -1246,12 +1774,35 @@
         .chat-list-item.unread {
             background: rgba(99, 102, 241, 0.05);
         }
+        
+        .chat-list-item.unread .chat-user-name {
+            font-weight: 700;
+        }
+        
+        .chat-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .chat-item-content {
+            flex: 1;
+            min-width: 0;
+        }
 
         .chat-item-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
 
         .chat-user-info {
@@ -1266,7 +1817,7 @@
         }
 
         .chat-user-phone {
-            font-size: 0.8125rem;
+            font-size: 0.75rem;
             color: var(--text-muted);
         }
 
@@ -1278,17 +1829,22 @@
         }
 
         .chat-time {
-            font-size: 0.75rem;
+            font-size: 0.6875rem;
             color: var(--text-muted);
         }
 
         .chat-unread-badge {
             background: var(--primary);
             color: white;
-            font-size: 0.75rem;
+            font-size: 0.6875rem;
             font-weight: 600;
-            padding: 0.125rem 0.5rem;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 0.375rem;
             border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .chat-preview {
@@ -1300,7 +1856,7 @@
         }
 
         .chat-status-badge {
-            font-size: 0.6875rem;
+            font-size: 0.625rem;
             padding: 0.125rem 0.375rem;
             border-radius: 0.25rem;
             text-transform: uppercase;
@@ -1312,12 +1868,11 @@
         .chat-status-closed { background: rgba(107, 114, 128, 0.15); color: #6b7280; }
 
         .chat-conversation-panel {
-            background: var(--bg-primary);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-md);
+            background: var(--bg-secondary);
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            position: relative;
         }
 
         .no-chat-selected {
@@ -1327,6 +1882,7 @@
             align-items: center;
             justify-content: center;
             color: var(--text-muted);
+            background: var(--bg-secondary);
         }
 
         .no-chat-selected i {
@@ -1339,11 +1895,17 @@
             margin: 0 0 0.5rem;
             color: var(--text-secondary);
         }
+        
+        .conversation-content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
 
         .conversation-header {
-            padding: 1rem 1.25rem;
+            padding: 0.875rem 1.25rem;
             border-bottom: 1px solid var(--border-light);
-            background: var(--bg-secondary);
+            background: var(--bg-primary);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -1368,51 +1930,56 @@
         .conversation-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 1.25rem;
+            padding: 1rem;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 0.5rem;
+            background: #e5ddd5;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
 
         .message-bubble {
-            max-width: 75%;
-            padding: 0.75rem 1rem;
-            border-radius: var(--radius-lg);
-            font-size: 0.9375rem;
-            line-height: 1.5;
+            max-width: 65%;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            line-height: 1.4;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
         }
 
         .message-bubble.user {
-            background: var(--bg-tertiary);
+            background: white;
             align-self: flex-start;
-            border-bottom-left-radius: 0.25rem;
+            border-bottom-left-radius: 0;
         }
 
         .message-bubble.admin {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
+            background: #dcf8c6;
+            color: #111;
             align-self: flex-end;
-            border-bottom-right-radius: 0.25rem;
+            border-bottom-right-radius: 0;
         }
 
         .message-bubble .message-time {
             font-size: 0.6875rem;
-            opacity: 0.7;
-            margin-top: 0.5rem;
+            opacity: 0.6;
+            margin-top: 0.25rem;
+            text-align: right;
         }
 
         .conversation-input {
-            padding: 1rem 1.25rem;
+            padding: 0.75rem 1rem;
             border-top: 1px solid var(--border-light);
             display: flex;
             gap: 0.75rem;
+            background: var(--bg-primary);
         }
 
         .conversation-input input {
             flex: 1;
-            padding: 0.75rem 1rem;
-            border: 2px solid var(--border-light);
-            border-radius: 2rem;
+            padding: 0.625rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: 1.5rem;
             font-size: 0.9375rem;
             outline: none;
             transition: var(--transition);
@@ -1423,8 +1990,8 @@
         }
 
         .conversation-input button {
-            width: 46px;
-            height: 46px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             border: none;
@@ -1438,6 +2005,98 @@
 
         .conversation-input button:hover {
             transform: scale(1.05);
+        }
+        
+        /* Mobile Chat Header */
+        .mobile-chat-header {
+            padding: 0.75rem 1rem;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .mobile-chat-header .back-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: var(--primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+        }
+        
+        .mobile-user-info {
+            flex: 1;
+        }
+        
+        .mobile-user-name {
+            font-weight: 600;
+            display: block;
+        }
+        
+        .mobile-user-phone {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .whatsapp-chat-container {
+                display: block;
+                height: calc(100vh - 120px);
+                max-height: none;
+            }
+            
+            .chat-list-panel {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 10;
+                border-right: none;
+            }
+            
+            .chat-list-panel.hidden {
+                display: none;
+            }
+            
+            .chat-conversation-panel {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 20;
+                display: none;
+            }
+            
+            .chat-conversation-panel.active {
+                display: flex;
+            }
+            
+            .mobile-chat-header {
+                display: flex !important;
+            }
+            
+            .conversation-header {
+                display: none;
+            }
+            
+            .no-chat-selected {
+                display: none;
+            }
+            
+            #support-view {
+                position: relative;
+                height: calc(100vh - 120px);
+            }
         }
 
         .loading-state {
@@ -1581,6 +2240,45 @@
             </nav>
         </aside>
 
+        <!-- Mobile Bottom Navigation -->
+        <nav class="mobile-bottom-nav" id="mobileBottomNav">
+            <div class="mobile-nav-scroll">
+                <a href="#" class="mobile-nav-item active" data-view="dashboard">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="mobile-nav-item" data-view="orders">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Orders</span>
+                </a>
+                <a href="#" class="mobile-nav-item" data-view="customers">
+                    <i class="fas fa-users"></i>
+                    <span>Customers</span>
+                </a>
+                <a href="#" class="mobile-nav-item" data-view="support">
+                    <i class="fas fa-comments"></i>
+                    <span>Support</span>
+                    <span class="mobile-nav-badge" id="mobileNavSupportBadge" style="display: none;">0</span>
+                </a>
+                <a href="#" class="mobile-nav-item" data-view="analytics">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="#" class="mobile-nav-item" data-view="products">
+                    <i class="fas fa-box"></i>
+                    <span>Products</span>
+                </a>
+                <a href="#" class="mobile-nav-item" data-view="inventory">
+                    <i class="fas fa-warehouse"></i>
+                    <span>Inventory</span>
+                </a>
+                <a href="#" class="mobile-nav-item" data-view="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+        </nav>
+
         <!-- Main Content -->
         <main class="main-content">
             <!-- Header -->
@@ -1692,15 +2390,6 @@
                 <!-- Orders View -->
                 <div id="orders-view" class="view" style="display: none;">
                     <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Orders Management</h3>
-                            <div class="header-right">
-                                <button class="btn btn-secondary btn-sm" onclick="exportOrdersCSV()">
-                                    <i class="fas fa-download"></i>
-                                    Export CSV
-                                </button>
-                            </div>
-                        </div>
                         <div class="card-body">
                             <!-- Order Status Tabs -->
                             <div class="order-tabs">
@@ -1737,12 +2426,20 @@
                             </div>
                             
                             <!-- Bulk Actions Bar for All Orders -->
-                            <div class="bulk-actions-bar" id="all-orders-bulk-actions">
-                                <span class="selected-count"><span id="all-selected-count">0</span> orders selected</span>
+                            <div class="bulk-actions-bar compact" id="all-orders-bulk-actions">
+                                <span class="selected-count"><span id="all-selected-count">0</span> selected</span>
                                 <button class="btn-delete-selected" onclick="deleteSelectedAllOrders()">
-                                    <i class="fas fa-trash"></i> Delete Selected
+                                    <i class="fas fa-trash"></i>
                                 </button>
-                                <button class="btn-clear-selection" onclick="clearAllOrdersSelection()">Clear Selection</button>
+                                <button class="btn-clear-selection" onclick="clearAllOrdersSelection()">✕</button>
+                            </div>
+                            
+                            <!-- Mobile Select All Bar -->
+                            <div class="mobile-select-all-bar" id="mobile-select-all-bar">
+                                <label class="mobile-select-all-label">
+                                    <input type="checkbox" id="mobile-select-all" onchange="toggleSelectAllOrders(this)">
+                                    <span>Select All Orders</span>
+                                </label>
                             </div>
                             
                             <div class="loading" id="all-orders-loading">
@@ -1981,21 +2678,29 @@
                     </div>
                 </div>
 
-                <!-- Support Chats View -->
+                <!-- Support Chats View - WhatsApp-like Interface -->
                 <div id="support-view" class="view" style="display: none;">
-                    <div class="support-container">
-                        <!-- Chat List Panel -->
-                        <div class="chat-list-panel">
+                    <!-- Chat Container - WhatsApp Style -->
+                    <div class="whatsapp-chat-container">
+                        <!-- Chat List Panel (Left Side) -->
+                        <div class="chat-list-panel" id="chatListPanel">
                             <div class="chat-list-header">
-                                <h3><i class="fas fa-comments"></i> Support Conversations</h3>
-                                <div class="chat-filters">
-                                    <select id="chatStatusFilter" onchange="filterSupportChats(this.value)">
-                                        <option value="all">All Chats</option>
-                                        <option value="open">Open</option>
-                                        <option value="pending">Pending</option>
-                                        <option value="closed">Closed</option>
-                                    </select>
+                                <h3><i class="fas fa-comments"></i> Support Chats</h3>
+                                <div class="chat-header-actions">
+                                    <button class="btn btn-sm btn-secondary" onclick="cleanupOldChatsManual()" title="Delete old chats">
+                                        <i class="fas fa-broom"></i>
+                                    </button>
                                 </div>
+                            </div>
+                            <!-- Chat Category Tabs -->
+                            <div class="chat-category-tabs">
+                                <button class="chat-tab active" id="unreadTab" onclick="filterChatsByCategory('unread')">
+                                    <i class="fas fa-envelope"></i> Unread
+                                    <span class="tab-badge" id="unreadTabBadge" style="display: none;">0</span>
+                                </button>
+                                <button class="chat-tab" id="allTab" onclick="filterChatsByCategory('all')">
+                                    <i class="fas fa-inbox"></i> All Chats
+                                </button>
                             </div>
                             <div class="chat-list" id="supportChatList">
                                 <div class="loading-state">
@@ -2005,12 +2710,45 @@
                             </div>
                         </div>
 
-                        <!-- Chat Conversation Panel -->
+                        <!-- Chat Conversation Panel (Right Side) -->
                         <div class="chat-conversation-panel" id="chatConversationPanel">
-                            <div class="no-chat-selected">
+                            <!-- Mobile Back Button (hidden on desktop) -->
+                            <div class="mobile-chat-header" id="mobileChatHeader" style="display: none;">
+                                <button class="back-btn" onclick="goBackToList()">
+                                    <i class="fas fa-arrow-left"></i>
+                                </button>
+                                <div class="mobile-user-info">
+                                    <span class="mobile-user-name" id="mobileUserName">Customer</span>
+                                    <span class="mobile-user-phone" id="mobileUserPhone"></span>
+                                </div>
+                                <div class="mobile-chat-actions" id="mobileChatActions"></div>
+                            </div>
+                            
+                            <div class="no-chat-selected" id="noChatSelected">
                                 <i class="fas fa-comments"></i>
                                 <h3>Select a conversation</h3>
-                                <p>Choose a chat from the list to view the conversation</p>
+                                <p>Choose a chat from the list to start messaging</p>
+                            </div>
+                            
+                            <!-- Conversation Content (hidden until chat selected) -->
+                            <div class="conversation-content" id="conversationContent" style="display: none;">
+                                <div class="conversation-header" id="desktopChatHeader">
+                                    <div class="conversation-user-info">
+                                        <h4 id="chatUserName">Customer</h4>
+                                        <p id="chatUserDetails"></p>
+                                    </div>
+                                    <div class="conversation-actions" id="conversationActions">
+                                    </div>
+                                </div>
+                                <div class="conversation-messages" id="conversationMessages">
+                                </div>
+                                <div class="conversation-input" id="conversationInput">
+                                    <input type="text" id="adminMessageInput" placeholder="Type your reply..." 
+                                           onkeypress="if(event.key==='Enter') sendAdminMessage()">
+                                    <button onclick="sendAdminMessage()">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2201,7 +2939,7 @@
                     <!-- Location Analytics -->
                     <div class="card" style="margin-bottom: 2rem;">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-map-marker-alt" style="margin-right: 0.5rem; color: var(--danger);"></i>Orders by Location (Top Cities)</h3>
+                            <h3 class="card-title"><i class="fas fa-map-marker-alt" style="margin-right: 0.5rem; color: var(--danger);"></i>Orders by Location (Top States)</h3>
                         </div>
                         <div class="card-body">
                             <div class="table-container">
@@ -2209,7 +2947,6 @@
                                     <thead>
                                         <tr>
                                             <th>Rank</th>
-                                            <th>City/Location</th>
                                             <th>State</th>
                                             <th>Orders</th>
                                             <th>Revenue</th>
@@ -2344,9 +3081,57 @@
                     // Get view name
                     const viewName = this.getAttribute('data-view');
                     
+                    // Sync mobile nav active state
+                    syncMobileNavActive(viewName);
+                    
                     // Show corresponding view
                     showView(viewName);
                 });
+            });
+            
+            // Mobile bottom navigation handling
+            const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
+            mobileNavItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all mobile nav items
+                    mobileNavItems.forEach(i => i.classList.remove('active'));
+                    
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // Get view name
+                    const viewName = this.getAttribute('data-view');
+                    
+                    // Sync sidebar nav active state
+                    syncSidebarNavActive(viewName);
+                    
+                    // Show corresponding view
+                    showView(viewName);
+                });
+            });
+        }
+        
+        function syncMobileNavActive(viewName) {
+            const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
+            mobileNavItems.forEach(item => {
+                if (item.getAttribute('data-view') === viewName) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+        
+        function syncSidebarNavActive(viewName) {
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                if (link.getAttribute('data-view') === viewName) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
             });
         }
 
@@ -2754,25 +3539,28 @@
             tableBody.innerHTML = paginatedOrders.map(order => {
                 const orderId = order.id || order.orderId || order.orderNumber;
                 const quantity = order.items ? order.items.length : (order.quantity || 1);
+                const customerName = order.customer.name || 'N/A';
+                const customerEmail = order.customer.email || 'N/A';
+                const customerPhone = order.customer.phone || 'N/A';
+                const amount = parseFloat(order.totals.total || 0).toFixed(2);
+                const date = formatDate(order.orderDate);
+                const statusBadge = getStatusBadge(order.status);
+                
                 return `
-                <tr data-order-id="${orderId}" data-order-number="${order.orderNumber}">
-                    <td><input type="checkbox" class="order-checkbox all-order-checkbox" data-order-id="${orderId}" data-order-number="${order.orderNumber}" onchange="toggleAllOrderSelection(this)"></td>
-                    <td><strong>#${order.orderNumber}</strong></td>
-                    <td>${order.customer.name || 'N/A'}</td>
-                    <td>${order.customer.email || 'N/A'}</td>
-                    <td><span class="badge badge-info">${quantity}</span></td>
-                    <td>${formatDate(order.orderDate)}</td>
-                    <td>₹${parseFloat(order.totals.total || 0).toFixed(2)}</td>
-                    <td>${getStatusBadge(order.status)}</td>
-                    <td>
-                        <div class="action-btns">
-                            <button class="action-btn view" onclick="viewOrder('${order.orderNumber}')" title="View">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="action-btn delete" onclick="deleteOrder('${orderId}', '${order.orderNumber}')" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
+                <tr class="order-row clickable-row" data-order-id="${orderId}" data-order-number="${order.orderNumber}" onclick="handleOrderRowClick(event, '${order.orderNumber}')">
+                    <td class="col-checkbox" onclick="event.stopPropagation()"><input type="checkbox" class="order-checkbox all-order-checkbox" data-order-id="${orderId}" data-order-number="${order.orderNumber}" onchange="toggleAllOrderSelection(this)"></td>
+                    <td class="col-order-id"><strong>#${order.orderNumber}</strong></td>
+                    <td class="col-customer">${customerName}</td>
+                    <td class="col-email">${customerEmail}</td>
+                    <td class="col-phone">${customerPhone}</td>
+                    <td class="col-qty">${quantity}</td>
+                    <td class="col-date">${date}</td>
+                    <td class="col-amount"><strong style="color: var(--success);">₹${amount}</strong></td>
+                    <td class="col-status">${statusBadge}</td>
+                    <td class="col-actions" onclick="event.stopPropagation()">
+                        <button class="action-btn delete" onclick="deleteOrder('${orderId}', '${order.orderNumber}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </td>
                 </tr>
             `;
@@ -2794,32 +3582,24 @@
             if (prevBtn) prevBtn.disabled = currentPage <= 1;
             if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
             
-            // Generate page buttons
+            // Generate page buttons - cleaner format: current, next, ..., last
             let pagesHTML = '';
-            const maxVisiblePages = 5;
-            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
             
-            if (endPage - startPage < maxVisiblePages - 1) {
-                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            // Current page (always shown)
+            pagesHTML += `<button class="page-btn active" onclick="goToPage(${currentPage})">${currentPage}</button>`;
+            
+            // Next page (if exists and not same as last)
+            if (currentPage + 1 < totalPages) {
+                pagesHTML += `<button class="page-btn" onclick="goToPage(${currentPage + 1})">${currentPage + 1}</button>`;
             }
             
-            if (startPage > 1) {
-                pagesHTML += `<button class="page-btn" onclick="goToPage(1)">1</button>`;
-                if (startPage > 2) {
-                    pagesHTML += `<span style="padding: 0 0.5rem; color: var(--text-muted);">...</span>`;
-                }
+            // Ellipsis and last page (if there are more pages)
+            if (currentPage + 2 < totalPages) {
+                pagesHTML += `<span style="padding: 0 0.5rem; color: var(--text-muted);">...</span>`;
             }
             
-            for (let i = startPage; i <= endPage; i++) {
-                const activeClass = i === currentPage ? 'active' : '';
-                pagesHTML += `<button class="page-btn ${activeClass}" onclick="goToPage(${i})">${i}</button>`;
-            }
-            
-            if (endPage < totalPages) {
-                if (endPage < totalPages - 1) {
-                    pagesHTML += `<span style="padding: 0 0.5rem; color: var(--text-muted);">...</span>`;
-                }
+            // Last page (always shown if different from current)
+            if (currentPage < totalPages) {
                 pagesHTML += `<button class="page-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
             }
             
@@ -2886,6 +3666,15 @@
             const className = statusClasses[status] || 'badge-info';
             const displayStatus = status || 'pending';
             return `<span class="badge ${className}">${displayStatus}</span>`;
+        }
+
+        // Handle order row click to view order
+        function handleOrderRowClick(event, orderNumber) {
+            // Don't open if clicking on checkbox or delete button
+            if (event.target.closest('.col-checkbox') || event.target.closest('.col-actions')) {
+                return;
+            }
+            viewOrder(orderNumber);
         }
 
         // Action functions - Firebase version
@@ -3743,18 +4532,31 @@
                 }
             });
             updateAllBulkActionsBar();
+            
+            // Sync both select all checkboxes
+            const desktopCheckbox = document.getElementById('all-select-all');
+            const mobileCheckbox = document.getElementById('mobile-select-all');
+            if (desktopCheckbox) desktopCheckbox.checked = checkbox.checked;
+            if (mobileCheckbox) mobileCheckbox.checked = checkbox.checked;
         }
         
         function updateAllSelectAllCheckbox() {
             const selectAllCheckbox = document.getElementById('all-select-all');
+            const mobileSelectAllCheckbox = document.getElementById('mobile-select-all');
             const checkboxes = document.querySelectorAll('.all-order-checkbox');
-            if (!selectAllCheckbox || checkboxes.length === 0) return;
+            if (checkboxes.length === 0) return;
             
             const allChecked = Array.from(checkboxes).every(cb => cb.checked);
             const someChecked = Array.from(checkboxes).some(cb => cb.checked);
             
-            selectAllCheckbox.checked = allChecked;
-            selectAllCheckbox.indeterminate = someChecked && !allChecked;
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = allChecked;
+                selectAllCheckbox.indeterminate = someChecked && !allChecked;
+            }
+            if (mobileSelectAllCheckbox) {
+                mobileSelectAllCheckbox.checked = allChecked;
+                mobileSelectAllCheckbox.indeterminate = someChecked && !allChecked;
+            }
         }
         
         function updateAllBulkActionsBar() {
@@ -3945,14 +4747,14 @@
                 const rankIcon = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
                 
                 return `
-                <tr>
-                    <td><strong style="font-size: 1.2em;">${rankIcon}</strong></td>
-                    <td><strong>${customer.email}</strong></td>
-                    <td>${customer.name}</td>
-                    <td>${customer.phone}</td>
-                    <td><span class="badge ${isRepeat ? 'badge-success' : 'badge-info'}">${customer.orderCount} order${customer.orderCount > 1 ? 's' : ''}</span></td>
-                    <td><strong style="color: var(--success);">₹${customer.totalSpent.toFixed(2)}</strong></td>
-                    <td>${isRepeat ? '<span class="badge badge-success">Repeat Customer</span>' : '<span class="badge badge-info">New Customer</span>'}</td>
+                <tr class="customer-row">
+                    <td class="col-rank"><strong style="font-size: 1.2em;">${rankIcon}</strong></td>
+                    <td class="col-email"><strong>${customer.email}</strong></td>
+                    <td class="col-name">${customer.name || 'N/A'}</td>
+                    <td class="col-phone">${customer.phone || 'N/A'}</td>
+                    <td class="col-orders"><span class="badge ${isRepeat ? 'badge-success' : 'badge-info'}">${customer.orderCount} order${customer.orderCount > 1 ? 's' : ''}</span></td>
+                    <td class="col-spent"><strong style="color: var(--success);">₹${customer.totalSpent.toFixed(2)}</strong></td>
+                    <td class="col-type">${isRepeat ? '<span class="badge badge-success">Repeat</span>' : '<span class="badge badge-info">New</span>'}</td>
                 </tr>
             `}).join('');
         }
@@ -3970,14 +4772,14 @@
                 const isRepeat = customer.orderCount >= 2;
                 
                 return `
-                <tr>
-                    <td><strong>#${index + 1}</strong></td>
-                    <td><strong>${customer.email}</strong></td>
-                    <td>${customer.name}</td>
-                    <td>${customer.phone}</td>
-                    <td><span class="badge ${isRepeat ? 'badge-success' : 'badge-info'}">${customer.orderCount} order${customer.orderCount > 1 ? 's' : ''}</span></td>
-                    <td><strong style="color: var(--success);">₹${customer.totalSpent.toFixed(2)}</strong></td>
-                    <td>${isRepeat ? '<span class="badge badge-success">Repeat Customer</span>' : '<span class="badge badge-info">New Customer</span>'}</td>
+                <tr class="customer-row">
+                    <td class="col-rank"><strong>#${index + 1}</strong></td>
+                    <td class="col-email"><strong>${customer.email}</strong></td>
+                    <td class="col-name">${customer.name || 'N/A'}</td>
+                    <td class="col-phone">${customer.phone || 'N/A'}</td>
+                    <td class="col-orders"><span class="badge ${isRepeat ? 'badge-success' : 'badge-info'}">${customer.orderCount} order${customer.orderCount > 1 ? 's' : ''}</span></td>
+                    <td class="col-spent"><strong style="color: var(--success);">₹${customer.totalSpent.toFixed(2)}</strong></td>
+                    <td class="col-type">${isRepeat ? '<span class="badge badge-success">Repeat</span>' : '<span class="badge badge-info">New</span>'}</td>
                 </tr>
             `}).join('');
         }
@@ -4270,34 +5072,50 @@
                     });
                 }
                 
-                // Location data
+                // Location data - Extract state from address
                 const address = order.customer?.address || '';
-                const addressParts = address.split(',').map(p => p.trim());
-                let city = 'Unknown';
                 let state = 'Unknown';
                 
-                // Try to extract city and state from address
-                if (addressParts.length >= 2) {
-                    // Usually format: Street, City, State, Pincode
-                    if (addressParts.length >= 3) {
-                        city = addressParts[addressParts.length - 3] || addressParts[1] || 'Unknown';
-                        state = addressParts[addressParts.length - 2] || 'Unknown';
-                    } else {
-                        city = addressParts[0] || 'Unknown';
-                        state = addressParts[1] || 'Unknown';
+                // List of Indian states for matching
+                const indianStates = [
+                    'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+                    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
+                    'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram',
+                    'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu',
+                    'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+                    'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Chandigarh', 'Puducherry',
+                    'Andaman and Nicobar', 'Dadra and Nagar Haveli', 'Daman and Diu', 'Lakshadweep'
+                ];
+                
+                // Try to find state in address
+                const addressLower = address.toLowerCase();
+                for (const s of indianStates) {
+                    if (addressLower.includes(s.toLowerCase())) {
+                        state = s;
+                        break;
                     }
                 }
                 
-                // Clean up city and state
-                city = city.replace(/\d+/g, '').trim() || 'Unknown';
-                state = state.replace(/\d+/g, '').trim() || 'Unknown';
-                
-                const locationKey = `${city}|${state}`;
-                if (!locationData[locationKey]) {
-                    locationData[locationKey] = { city, state, orders: 0, revenue: 0 };
+                // If no state found, try to extract from comma-separated parts
+                if (state === 'Unknown') {
+                    const addressParts = address.split(',').map(p => p.trim());
+                    // Usually format: Street, Locality, City, State, Pincode
+                    // State is typically second-to-last before pincode
+                    if (addressParts.length >= 2) {
+                        // Try second-to-last part (before pincode)
+                        const potentialState = addressParts[addressParts.length - 2]?.replace(/\\d+/g, '').trim();
+                        if (potentialState && potentialState.length > 2) {
+                            state = potentialState;
+                        }
+                    }
                 }
-                locationData[locationKey].orders++;
-                locationData[locationKey].revenue += orderTotal;
+                
+                // Use state as key
+                if (!locationData[state]) {
+                    locationData[state] = { state, orders: 0, revenue: 0 };
+                }
+                locationData[state].orders++;
+                locationData[state].revenue += orderTotal;
             });
             
             // Sort and get top products
@@ -4604,10 +5422,10 @@
             const rankIcons = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
             tableBody.innerHTML = topProducts.map((product, index) => `
                 <tr>
-                    <td><strong style="font-size: 1.2em;">${rankIcons[index] || index + 1}</strong></td>
-                    <td><strong>${product.name}</strong></td>
-                    <td><span class="badge badge-info">${product.count}</span></td>
-                    <td><strong style="color: var(--success);">₹${product.revenue.toLocaleString('en-IN')}</strong></td>
+                    <td data-label="Rank"><strong style="font-size: 1.2em;">${rankIcons[index] || index + 1}</strong></td>
+                    <td data-label="Frame"><strong>${product.name}</strong></td>
+                    <td data-label="Units Sold"><span class="badge badge-info">${product.count}</span></td>
+                    <td data-label="Revenue"><strong style="color: var(--success);">₹${product.revenue.toLocaleString('en-IN')}</strong></td>
                 </tr>
             `).join('');
         }
@@ -4616,20 +5434,32 @@
             const tableBody = document.getElementById('location-analytics-table-body');
             if (!tableBody) return;
             
-            if (locationData.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No location data available</td></tr>';
+            // Group by state instead of city
+            const stateData = {};
+            locationData.forEach(loc => {
+                const state = loc.state || 'Unknown';
+                if (!stateData[state]) {
+                    stateData[state] = { state, orders: 0, revenue: 0 };
+                }
+                stateData[state].orders += loc.orders;
+                stateData[state].revenue += loc.revenue;
+            });
+            
+            const sortedStates = Object.values(stateData).sort((a, b) => b.orders - a.orders).slice(0, 10);
+            
+            if (sortedStates.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No location data available</td></tr>';
                 return;
             }
             
             const rankIcons = ['🥇', '🥈', '🥉'];
-            tableBody.innerHTML = locationData.map((loc, index) => `
+            tableBody.innerHTML = sortedStates.map((loc, index) => `
                 <tr>
-                    <td><strong style="font-size: 1.1em;">${rankIcons[index] || '#' + (index + 1)}</strong></td>
-                    <td><strong>${loc.city}</strong></td>
-                    <td>${loc.state}</td>
-                    <td><span class="badge badge-info">${loc.orders}</span></td>
-                    <td><strong style="color: var(--success);">₹${loc.revenue.toLocaleString('en-IN')}</strong></td>
-                    <td>₹${(loc.revenue / loc.orders).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+                    <td data-label="Rank"><strong style="font-size: 1.1em;">${rankIcons[index] || '#' + (index + 1)}</strong></td>
+                    <td data-label="State"><strong>${loc.state}</strong></td>
+                    <td data-label="Orders"><span class="badge badge-info">${loc.orders}</span></td>
+                    <td data-label="Revenue"><strong style="color: var(--success);">₹${loc.revenue.toLocaleString('en-IN')}</strong></td>
+                    <td data-label="Avg Order">₹${(loc.revenue / loc.orders).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
                 </tr>
             `).join('');
         }
@@ -4749,49 +5579,40 @@
     <script>
         // ==================== SUPPORT CHAT FUNCTIONS ====================
         let supportChats = [];
+        let filteredChats = [];
         let activeChatId = null;
         let chatMessagesUnsubscribe = null;
         let chatsListUnsubscribe = null;
+        let currentChatCategory = 'unread'; // 'unread' or 'all'
 
-        async function loadSupportChats(status = null) {
+        async function loadSupportChats() {
             const chatList = document.getElementById('supportChatList');
-            if (!chatList) return;
-
-            chatList.innerHTML = `
-                <div class="loading-state">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>Loading chats...</p>
-                </div>
-            `;
+            
+            // Show loading state
+            if (chatList) {
+                chatList.innerHTML = `
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading chats...</p>
+                    </div>
+                `;
+            }
 
             try {
                 if (!window.jbAPI) {
                     throw new Error('Firebase API not available');
                 }
 
-                const filterValue = document.getElementById('chatStatusFilter')?.value || 'all';
-                const statusFilter = filterValue === 'all' ? null : filterValue;
-
-                const result = await window.jbAPI.getAllSupportChats(statusFilter);
+                const result = await window.jbAPI.getAllSupportChats(null);
                 supportChats = result.chats || [];
 
-                if (supportChats.length === 0) {
-                    chatList.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-inbox"></i>
-                            <h4>No support chats</h4>
-                            <p>When customers contact support, their chats will appear here.</p>
-                        </div>
-                    `;
-                    updateSupportBadge(0);
-                    return;
-                }
-
-                renderChatList(supportChats);
+                // Apply category filter
+                filterChatsByCategory(currentChatCategory);
 
                 // Count unread chats for badge
                 const unreadCount = supportChats.reduce((sum, chat) => sum + (chat.unreadByAdmin || 0), 0);
                 updateSupportBadge(unreadCount);
+                updateUnreadTabBadge(unreadCount);
 
                 // Set up real-time listener for chat updates
                 if (chatsListUnsubscribe) {
@@ -4799,104 +5620,173 @@
                 }
                 chatsListUnsubscribe = window.jbAPI.listenForNewChats((updatedChats) => {
                     supportChats = updatedChats;
-                    renderChatList(supportChats);
+                    filterChatsByCategory(currentChatCategory);
                     const newUnreadCount = supportChats.reduce((sum, chat) => sum + (chat.unreadByAdmin || 0), 0);
                     updateSupportBadge(newUnreadCount);
+                    updateUnreadTabBadge(newUnreadCount);
                 });
 
             } catch (error) {
                 console.error('Error loading support chats:', error);
-                chatList.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <h4>Error loading chats</h4>
-                        <p>${error.message}</p>
-                    </div>
-                `;
+                if (chatList) {
+                    chatList.innerHTML = `
+                        <div class="empty-state" style="padding: 2rem; text-align: center;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: var(--danger); margin-bottom: 1rem;"></i>
+                            <h4>Error loading chats</h4>
+                            <p>${error.message}</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+        
+        function filterChatsByCategory(category) {
+            currentChatCategory = category;
+            
+            // Update tab active states
+            document.getElementById('unreadTab')?.classList.toggle('active', category === 'unread');
+            document.getElementById('allTab')?.classList.toggle('active', category === 'all');
+            
+            if (category === 'unread') {
+                filteredChats = supportChats.filter(chat => (chat.unreadByAdmin || 0) > 0);
+            } else {
+                filteredChats = [...supportChats];
+            }
+            
+            renderChatList(filteredChats);
+        }
+        
+        function updateUnreadTabBadge(count) {
+            const badge = document.getElementById('unreadTabBadge');
+            if (badge) {
+                if (count > 0) {
+                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
             }
         }
 
         function renderChatList(chats) {
             const chatList = document.getElementById('supportChatList');
             if (!chatList) return;
+            
+            if (!chats || chats.length === 0) {
+                const emptyMessage = currentChatCategory === 'unread' 
+                    ? 'No unread chats. You\'re all caught up!' 
+                    : 'No chats yet. Customer messages will appear here.';
+                chatList.innerHTML = `
+                    <div class="empty-state" style="padding: 2rem; text-align: center;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p style="color: var(--text-muted);">${emptyMessage}</p>
+                    </div>
+                `;
+                return;
+            }
 
             chatList.innerHTML = chats.map(chat => {
                 const isActive = activeChatId === chat.id;
                 const hasUnread = (chat.unreadByAdmin || 0) > 0;
                 const timeStr = chat.lastMessageTime ? formatChatTime(chat.lastMessageTime) : '';
+                const initials = getInitials(chat.userName || 'C');
                 
                 return `
                     <div class="chat-list-item ${isActive ? 'active' : ''} ${hasUnread ? 'unread' : ''}" 
                          onclick="openChat('${chat.id}')">
-                        <div class="chat-item-header">
-                            <div class="chat-user-info">
-                                <span class="chat-user-name">${chat.userName || 'Customer'}</span>
-                                <span class="chat-user-phone"><i class="fas fa-phone" style="font-size: 10px;"></i> ${chat.userPhone || 'N/A'}</span>
+                        <div class="chat-avatar">${initials}</div>
+                        <div class="chat-item-content">
+                            <div class="chat-item-header">
+                                <span class="chat-user-name">${escapeHtml(chat.userName || 'Customer')}</span>
+                                <div class="chat-meta">
+                                    <span class="chat-time">${timeStr}</span>
+                                </div>
                             </div>
-                            <div class="chat-meta">
-                                <span class="chat-time">${timeStr}</span>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="chat-preview">${escapeHtml(chat.lastMessage || 'No messages yet')}</div>
                                 ${hasUnread ? `<span class="chat-unread-badge">${chat.unreadByAdmin}</span>` : ''}
                             </div>
-                        </div>
-                        <div class="chat-preview">${chat.lastMessage || 'No messages yet'}</div>
-                        <div style="margin-top: 0.5rem;">
-                            <span class="chat-status-badge chat-status-${chat.status || 'open'}">${chat.status || 'open'}</span>
-                            ${chat.userEmail ? `<span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 0.5rem;"><i class="fas fa-envelope"></i> ${chat.userEmail}</span>` : ''}
                         </div>
                     </div>
                 `;
             }).join('');
         }
-
-        function filterSupportChats(status) {
-            loadSupportChats(status === 'all' ? null : status);
+        
+        function getInitials(name) {
+            if (!name) return 'C';
+            const parts = name.trim().split(' ');
+            if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+            return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
         }
 
         async function openChat(chatId) {
             activeChatId = chatId;
-            const panel = document.getElementById('chatConversationPanel');
             const chat = supportChats.find(c => c.id === chatId);
-
-            if (!chat || !panel) return;
+            if (!chat) return;
 
             // Highlight active chat in list
             document.querySelectorAll('.chat-list-item').forEach(item => item.classList.remove('active'));
             event?.target?.closest('.chat-list-item')?.classList.add('active');
-
-            // Show loading state
-            panel.innerHTML = `
-                <div class="conversation-header">
-                    <div class="conversation-user-info">
-                        <h4>${chat.userName || 'Customer'}</h4>
-                        <p><i class="fas fa-phone"></i> ${chat.userPhone || 'N/A'} ${chat.userEmail ? `• <i class="fas fa-envelope"></i> ${chat.userEmail}` : ''}</p>
+            
+            // Mobile: Show conversation panel, hide list
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                // Push history state so back button works
+                history.pushState({ chatOpen: true, chatId: chatId }, '', window.location.href);
+                document.getElementById('chatListPanel')?.classList.add('hidden');
+                document.getElementById('chatConversationPanel')?.classList.add('active');
+            }
+            
+            // Update mobile header
+            document.getElementById('mobileUserName').textContent = chat.userName || 'Customer';
+            document.getElementById('mobileUserPhone').textContent = chat.userPhone || '';
+            document.getElementById('mobileChatActions').innerHTML = chat.status !== 'closed' ? `
+                <button class="btn btn-sm btn-secondary" onclick="closeSupportChat('${chatId}')" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                    <i class="fas fa-check"></i>
+                </button>
+            ` : '';
+            
+            // Hide no-chat-selected, show conversation content
+            document.getElementById('noChatSelected').style.display = 'none';
+            const conversationContent = document.getElementById('conversationContent');
+            conversationContent.style.display = 'flex';
+            
+            // Update desktop header
+            document.getElementById('chatUserName').textContent = chat.userName || 'Customer';
+            document.getElementById('chatUserDetails').innerHTML = `
+                <i class="fas fa-phone"></i> ${chat.userPhone || 'N/A'} 
+                ${chat.userEmail ? `• <i class="fas fa-envelope"></i> ${chat.userEmail}` : ''}
+            `;
+            document.getElementById('conversationActions').innerHTML = chat.status !== 'closed' ? `
+                <button class="btn btn-sm btn-secondary" onclick="closeSupportChat('${chatId}')">
+                    <i class="fas fa-check-circle"></i> Close
+                </button>
+            ` : '<span class="chat-status-badge chat-status-closed">Closed</span>';
+            
+            // Update input area
+            const inputArea = document.getElementById('conversationInput');
+            if (chat.status === 'closed') {
+                inputArea.innerHTML = `
+                    <div style="text-align: center; width: 100%; color: var(--text-muted); padding: 0.5rem;">
+                        <i class="fas fa-lock"></i> This conversation is closed
                     </div>
-                    <div class="conversation-actions">
-                        ${chat.status !== 'closed' ? `
-                            <button class="btn btn-sm btn-secondary" onclick="closeSupportChat('${chatId}')">
-                                <i class="fas fa-check-circle"></i> Close Chat
-                            </button>
-                        ` : ''}
-                    </div>
+                `;
+            } else {
+                inputArea.innerHTML = `
+                    <input type="text" id="adminMessageInput" placeholder="Type your reply..." 
+                           onkeypress="if(event.key==='Enter') sendAdminMessage()">
+                    <button onclick="sendAdminMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                `;
+            }
+            
+            // Show loading in messages area
+            document.getElementById('conversationMessages').innerHTML = `
+                <div class="loading-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading messages...</p>
                 </div>
-                <div class="conversation-messages" id="conversationMessages">
-                    <div class="loading-state">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <p>Loading messages...</p>
-                    </div>
-                </div>
-                ${chat.status !== 'closed' ? `
-                    <div class="conversation-input">
-                        <input type="text" id="adminMessageInput" placeholder="Type your reply..." 
-                               onkeypress="if(event.key==='Enter') sendAdminMessage('${chatId}')">
-                        <button onclick="sendAdminMessage('${chatId}')">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
-                ` : `
-                    <div class="conversation-input" style="justify-content: center; color: var(--text-muted);">
-                        <i class="fas fa-lock"></i>&nbsp; This conversation is closed
-                    </div>
-                `}
             `;
 
             // Unsubscribe from previous chat listener
@@ -4918,18 +5808,44 @@
                 if (chatIndex !== -1) {
                     supportChats[chatIndex].unreadByAdmin = 0;
                 }
-                renderChatList(supportChats);
+                filterChatsByCategory(currentChatCategory);
+                
+                // Update badge
+                const unreadCount = supportChats.reduce((sum, chat) => sum + (chat.unreadByAdmin || 0), 0);
+                updateSupportBadge(unreadCount);
+                updateUnreadTabBadge(unreadCount);
                 
             } catch (error) {
                 console.error('Error loading chat messages:', error);
                 document.getElementById('conversationMessages').innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-triangle"></i>
+                    <div class="empty-state" style="padding: 2rem; text-align: center;">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
                         <p>Error loading messages</p>
                     </div>
                 `;
             }
         }
+        
+        function goBackToList() {
+            // Mobile: Show list, hide conversation
+            document.getElementById('chatListPanel')?.classList.remove('hidden');
+            document.getElementById('chatConversationPanel')?.classList.remove('active');
+            activeChatId = null;
+            
+            // Clear active state from chat list
+            document.querySelectorAll('.chat-list-item').forEach(item => item.classList.remove('active'));
+        }
+        
+        // Handle browser back button to close chat and go back to list
+        window.addEventListener('popstate', function(event) {
+            const isMobile = window.innerWidth <= 768;
+            const chatPanel = document.getElementById('chatConversationPanel');
+            
+            if (isMobile && chatPanel?.classList.contains('active')) {
+                // We're in a chat view, go back to list
+                goBackToList();
+            }
+        });
 
         function renderConversationMessages(messages) {
             const container = document.getElementById('conversationMessages');
@@ -4937,9 +5853,9 @@
 
             if (!messages || messages.length === 0) {
                 container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-comments"></i>
-                        <p>No messages yet. The customer will see your reply.</p>
+                    <div class="empty-state" style="padding: 2rem; text-align: center; background: transparent;">
+                        <i class="fas fa-comments" style="font-size: 2rem; opacity: 0.3; margin-bottom: 0.5rem;"></i>
+                        <p style="color: var(--text-muted);">No messages yet</p>
                     </div>
                 `;
                 return;
@@ -4949,7 +5865,6 @@
                 <div class="message-bubble ${msg.senderType}">
                     <div class="message-text">${escapeHtml(msg.text)}</div>
                     <div class="message-time">
-                        ${msg.senderType === 'admin' ? msg.senderName + ' • ' : ''}
                         ${msg.createdAt ? formatChatTime(msg.createdAt) : ''}
                     </div>
                 </div>
@@ -4959,7 +5874,9 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        async function sendAdminMessage(chatId) {
+        async function sendAdminMessage() {
+            if (!activeChatId) return;
+            
             const input = document.getElementById('adminMessageInput');
             if (!input) return;
 
@@ -4970,7 +5887,7 @@
             input.disabled = true;
 
             try {
-                await window.jbAPI.sendChatMessage(chatId, message, 'admin', 'JB Creations Support');
+                await window.jbAPI.sendChatMessage(activeChatId, message, 'admin', 'JB Creations Support');
             } catch (error) {
                 console.error('Error sending message:', error);
                 input.value = message; // Restore message on error
@@ -4982,24 +5899,26 @@
         }
 
         async function closeSupportChat(chatId) {
-            if (!confirm('Are you sure you want to close this conversation? The customer will need to start a new chat for future support.')) {
+            if (!confirm('Close this conversation?')) {
                 return;
             }
 
             try {
                 await window.jbAPI.closeSupportChat(chatId);
                 
+                // On mobile, go back to list
+                if (window.innerWidth <= 768) {
+                    goBackToList();
+                }
+                
                 // Reload chats
                 loadSupportChats();
                 
-                // Clear conversation panel
-                document.getElementById('chatConversationPanel').innerHTML = `
-                    <div class="no-chat-selected">
-                        <i class="fas fa-comments"></i>
-                        <h3>Chat closed</h3>
-                        <p>Select another conversation from the list</p>
-                    </div>
-                `;
+                // Reset conversation panel on desktop
+                if (window.innerWidth > 768) {
+                    document.getElementById('noChatSelected').style.display = 'flex';
+                    document.getElementById('conversationContent').style.display = 'none';
+                }
                 activeChatId = null;
                 
             } catch (error) {
@@ -5009,6 +5928,7 @@
         }
 
         function updateSupportBadge(count) {
+            // Update sidebar badge
             const badge = document.getElementById('supportChatBadge');
             if (badge) {
                 if (count > 0) {
@@ -5016,6 +5936,17 @@
                     badge.style.display = 'inline-block';
                 } else {
                     badge.style.display = 'none';
+                }
+            }
+            
+            // Update mobile nav badge
+            const mobileBadge = document.getElementById('mobileNavSupportBadge');
+            if (mobileBadge) {
+                if (count > 0) {
+                    mobileBadge.textContent = count > 99 ? '99+' : count;
+                    mobileBadge.style.display = 'flex';
+                } else {
+                    mobileBadge.style.display = 'none';
                 }
             }
         }
@@ -5041,6 +5972,36 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+        
+        // Manual cleanup function for old chats
+        async function cleanupOldChatsManual() {
+            if (!confirm('This will permanently delete all chats older than 15 days. Are you sure?')) {
+                return;
+            }
+            
+            try {
+                if (!window.jbAPI) {
+                    alert('Firebase API not available. Please refresh the page.');
+                    return;
+                }
+                
+                const result = await window.jbAPI.cleanupOldChats(15);
+                
+                if (result.success) {
+                    if (result.deletedCount > 0) {
+                        alert(`Successfully deleted ${result.deletedCount} old chat(s).`);
+                        loadSupportChats();
+                    } else {
+                        alert('No chats older than 15 days found.');
+                    }
+                } else {
+                    alert('Error cleaning up chats: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error cleaning up chats:', error);
+                alert('Error cleaning up chats: ' + error.message);
+            }
         }
 
         // ==================== END SUPPORT CHAT FUNCTIONS ====================

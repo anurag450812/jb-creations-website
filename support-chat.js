@@ -8,24 +8,63 @@ class SupportChat {
         this.chatId = null;
         this.messages = [];
         this.unsubscribe = null;
+        this.unsubscribeUnread = null;
         this.isOpen = false;
         this.currentUser = null;
         this.orderContext = options.orderNumber || null;
+        this.isInitializing = false;
+        this.initRetries = 0;
+        this.maxRetries = 10;
         
         this.init();
     }
 
     init() {
-        // Get current user
-        const sessionData = localStorage.getItem('jb_current_user');
-        if (sessionData) {
-            const session = JSON.parse(sessionData);
-            this.currentUser = session.user || session;
-        }
+        // Get current user from multiple possible storage keys
+        this.loadCurrentUser();
 
         // Create chat widget elements
         this.createChatWidget();
         this.attachEventListeners();
+        
+        // Try to initialize Firebase connection
+        this.ensureFirebaseReady();
+        
+        // Start checking for unread messages
+        this.startUnreadCheck();
+    }
+    
+    loadCurrentUser() {
+        // Try multiple storage keys for user data
+        const storageKeys = ['jb_current_user', 'jb_user', 'currentUser'];
+        
+        for (const key of storageKeys) {
+            const sessionData = localStorage.getItem(key);
+            if (sessionData) {
+                try {
+                    const session = JSON.parse(sessionData);
+                    this.currentUser = session.user || session;
+                    if (this.currentUser && (this.currentUser.phone || this.currentUser.id)) {
+                        console.log('💬 Support Chat: User loaded from', key);
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Error parsing user data from', key);
+                }
+            }
+        }
+    }
+    
+    ensureFirebaseReady() {
+        if (window.jbAPI) {
+            console.log('💬 Support Chat: Firebase API already available');
+            return;
+        }
+        
+        // Listen for the firebaseReady event
+        window.addEventListener('firebaseReady', () => {
+            console.log('💬 Support Chat: Firebase ready event received');
+        });
     }
 
     createChatWidget() {
@@ -40,7 +79,7 @@ class SupportChat {
 
                 <!-- Chat Window -->
                 <div id="chat-window" class="chat-window">
-                    <div class="chat-header">
+                    <div class="chat-header" id="chat-header">
                         <div class="chat-header-info">
                             <div class="chat-avatar">
                                 <i class="fas fa-headset"></i>
@@ -50,9 +89,6 @@ class SupportChat {
                                 <span class="chat-status">We typically reply within a few hours</span>
                             </div>
                         </div>
-                        <button class="chat-close-btn" id="chat-close-btn">
-                            <i class="fas fa-times"></i>
-                        </button>
                     </div>
 
                     <div class="chat-body" id="chat-body">
@@ -194,13 +230,14 @@ class SupportChat {
                     padding: 16px 20px;
                     display: flex;
                     align-items: center;
-                    justify-content: space-between;
+                    justify-content: flex-start;
                 }
 
                 .chat-header-info {
                     display: flex;
                     align-items: center;
                     gap: 12px;
+                    flex: 1;
                 }
 
                 .chat-avatar {
@@ -223,24 +260,6 @@ class SupportChat {
                 .chat-status {
                     font-size: 12px;
                     opacity: 0.9;
-                }
-
-                .chat-close-btn {
-                    width: 36px;
-                    height: 36px;
-                    border-radius: 50%;
-                    background: rgba(255,255,255,0.2);
-                    border: none;
-                    color: white;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    transition: background 0.3s;
-                }
-
-                .chat-close-btn:hover {
-                    background: rgba(255,255,255,0.3);
                 }
 
                 .chat-body {
@@ -406,7 +425,7 @@ class SupportChat {
                     transform: none;
                 }
 
-                /* Mobile optimizations */
+                /* Mobile optimizations - Full screen chat */
                 @media (max-width: 480px) {
                     .support-chat-widget {
                         bottom: 15px;
@@ -418,13 +437,33 @@ class SupportChat {
                         height: 55px;
                         font-size: 22px;
                     }
+                    
+                    /* Hide toggle button when chat is open */
+                    .support-chat-widget.chat-open .chat-toggle-btn {
+                        display: none;
+                    }
 
                     .chat-window {
-                        bottom: 75px;
-                        width: calc(100vw - 30px);
-                        height: calc(100vh - 100px);
-                        max-height: none;
-                        border-radius: 12px;
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        width: 100%;
+                        height: 100%;
+                        max-width: 100%;
+                        max-height: 100%;
+                        border-radius: 0;
+                        z-index: 10001;
+                    }
+                    
+                    .chat-header {
+                        padding: 12px 16px;
+                        padding-top: calc(12px + env(safe-area-inset-top, 0));
+                    }
+                    
+                    .chat-footer {
+                        padding-bottom: calc(15px + env(safe-area-inset-bottom, 0));
                     }
                 }
             </style>
@@ -439,9 +478,12 @@ class SupportChat {
             this.toggleChat();
         });
 
-        // Close button
-        document.getElementById('chat-close-btn').addEventListener('click', () => {
-            this.closeChat();
+        // Handle browser back button on mobile - close chat and stay on same page
+        window.addEventListener('popstate', (event) => {
+            if (this.isOpen && window.innerWidth <= 480) {
+                this.closeChat();
+                // Don't navigate away - stay on the current page
+            }
         });
 
         // Form submit
@@ -461,8 +503,15 @@ class SupportChat {
 
     async openChat() {
         this.isOpen = true;
+        const widget = document.getElementById('support-chat-widget');
+        widget.classList.add('chat-open');
         document.getElementById('chat-window').classList.add('active');
         document.getElementById('chat-toggle-btn').classList.add('active');
+        
+        // Push history state for mobile back button
+        if (window.innerWidth <= 480) {
+            history.pushState({ chatOpen: true }, '', window.location.href);
+        }
 
         // Check if user is logged in
         if (!this.currentUser) {
@@ -473,6 +522,14 @@ class SupportChat {
 
         document.getElementById('chat-login-prompt').style.display = 'none';
         document.getElementById('chat-footer').style.display = 'block';
+        
+        // Clear badge when opening chat
+        this.updateBadge(0);
+        
+        // Mark as read when opening
+        if (this.chatId && window.jbAPI) {
+            window.jbAPI.markChatAsRead(this.chatId, 'user');
+        }
 
         // Get or create chat
         await this.initializeChat();
@@ -480,17 +537,63 @@ class SupportChat {
 
     closeChat() {
         this.isOpen = false;
+        const widget = document.getElementById('support-chat-widget');
+        widget.classList.remove('chat-open');
         document.getElementById('chat-window').classList.remove('active');
         document.getElementById('chat-toggle-btn').classList.remove('active');
     }
 
     async initializeChat() {
-        if (!window.jbAPI) {
-            console.error('Firebase API not available');
+        // Prevent multiple simultaneous initializations
+        if (this.isInitializing) {
+            console.log('💬 Chat initialization already in progress...');
             return;
+        }
+        
+        this.isInitializing = true;
+        
+        // Wait for Firebase API to be available
+        if (!window.jbAPI) {
+            console.log('💬 Waiting for Firebase API...');
+            
+            // Show loading state
+            const messagesContainer = document.getElementById('chat-messages');
+            if (messagesContainer) {
+                messagesContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #6c757d;"><i class="fas fa-spinner fa-spin"></i> Connecting...</div>';
+            }
+            
+            // Wait for Firebase with retry
+            let retries = 0;
+            while (!window.jbAPI && retries < this.maxRetries) {
+                await new Promise(resolve => setTimeout(resolve, 300));
+                retries++;
+            }
+            
+            if (!window.jbAPI) {
+                console.error('❌ Firebase API not available after retries');
+                const messagesContainer = document.getElementById('chat-messages');
+                if (messagesContainer) {
+                    messagesContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #dc3545;"><i class="fas fa-exclamation-circle"></i> Unable to connect. Please refresh the page.</div>';
+                }
+                this.isInitializing = false;
+                return;
+            }
         }
 
         try {
+            console.log('💬 Initializing chat for user:', this.currentUser?.phone);
+            
+            // Ensure we have user data
+            if (!this.currentUser?.phone) {
+                this.loadCurrentUser();
+            }
+            
+            if (!this.currentUser?.phone) {
+                console.error('❌ No user phone number available');
+                this.isInitializing = false;
+                return;
+            }
+            
             const result = await window.jbAPI.getOrCreateSupportChat(
                 this.currentUser.phone,
                 this.currentUser.name,
@@ -499,6 +602,7 @@ class SupportChat {
 
             if (result.success) {
                 this.chatId = result.chatId;
+                console.log('✅ Chat initialized with ID:', this.chatId);
                 
                 // If new chat and there's an order context, send initial message
                 if (result.isNew && this.orderContext) {
@@ -507,18 +611,41 @@ class SupportChat {
 
                 // Load and listen for messages
                 this.loadMessages();
+            } else {
+                console.error('❌ Failed to create/get chat:', result.error);
+                const messagesContainer = document.getElementById('chat-messages');
+                if (messagesContainer) {
+                    messagesContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #dc3545;"><i class="fas fa-exclamation-circle"></i> Failed to start chat. Please try again.</div>';
+                }
             }
         } catch (error) {
-            console.error('Error initializing chat:', error);
+            console.error('❌ Error initializing chat:', error);
+            const messagesContainer = document.getElementById('chat-messages');
+            if (messagesContainer) {
+                messagesContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #dc3545;"><i class="fas fa-exclamation-circle"></i> Error: ' + error.message + '</div>';
+            }
+        } finally {
+            this.isInitializing = false;
         }
     }
 
     async loadMessages() {
-        if (!this.chatId) return;
+        if (!this.chatId) {
+            console.log('💬 No chat ID to load messages for');
+            return;
+        }
+        
+        if (!window.jbAPI) {
+            console.error('❌ Firebase API not available for loading messages');
+            return;
+        }
 
         try {
+            console.log('💬 Loading messages for chat:', this.chatId);
+            
             // Set up real-time listener
             this.unsubscribe = await window.jbAPI.getChatMessages(this.chatId, (messages) => {
+                console.log('💬 Received', messages?.length || 0, 'messages');
                 this.messages = messages;
                 this.renderMessages();
             });
@@ -527,7 +654,11 @@ class SupportChat {
             await window.jbAPI.markChatAsRead(this.chatId, 'user');
             this.updateBadge(0);
         } catch (error) {
-            console.error('Error loading messages:', error);
+            console.error('❌ Error loading messages:', error);
+            const container = document.getElementById('chat-messages');
+            if (container) {
+                container.innerHTML = '<div style="text-align: center; padding: 20px; color: #dc3545;"><i class="fas fa-exclamation-circle"></i> Failed to load messages</div>';
+            }
         }
     }
 
@@ -561,35 +692,154 @@ class SupportChat {
         const input = document.getElementById('chat-input');
         const message = text || input.value.trim();
         
-        if (!message || !this.chatId) return;
+        if (!message) {
+            console.log('💬 No message to send');
+            return;
+        }
+        
+        // Check if this is the first message (no existing messages)
+        const isFirstMessage = !this.messages || this.messages.length === 0;
+        
+        // Ensure we have a chat ID
+        if (!this.chatId) {
+            console.log('💬 No chat ID, initializing chat first...');
+            await this.initializeChat();
+            
+            if (!this.chatId) {
+                console.error('❌ Could not initialize chat');
+                alert('Unable to send message. Please refresh the page and try again.');
+                return;
+            }
+        }
+        
+        // Ensure Firebase API is available
+        if (!window.jbAPI) {
+            console.error('❌ Firebase API not available');
+            alert('Unable to send message. Please refresh the page and try again.');
+            return;
+        }
 
         const sendBtn = document.getElementById('chat-send-btn');
         sendBtn.disabled = true;
-        input.value = '';
+        if (input) input.value = '';
 
         try {
-            await window.jbAPI.sendChatMessage(
+            console.log('📤 Sending message:', message.substring(0, 50) + '...');
+            
+            const result = await window.jbAPI.sendChatMessage(
                 this.chatId,
                 message,
                 'user',
-                this.currentUser.name || 'Customer'
+                this.currentUser?.name || 'Customer'
             );
+            
+            if (result.success) {
+                console.log('✅ Message sent successfully');
+                
+                // If this is the first message, send an auto-greeting from admin
+                if (isFirstMessage) {
+                    await this.sendAutoGreeting();
+                }
+            } else {
+                console.error('❌ Failed to send message:', result.error);
+                if (input) input.value = message; // Restore message on error
+                alert('Failed to send message: ' + (result.error || 'Unknown error'));
+            }
         } catch (error) {
-            console.error('Error sending message:', error);
-            input.value = message; // Restore message on error
+            console.error('❌ Error sending message:', error);
+            if (input) input.value = message; // Restore message on error
+            alert('Error sending message. Please try again.');
         } finally {
             sendBtn.disabled = false;
-            input.focus();
+            if (input) input.focus();
+        }
+    }
+    
+    async sendAutoGreeting() {
+        try {
+            // Wait a moment before sending greeting
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const greetingMessage = `Hi ${this.currentUser?.name || 'there'}! 👋 Thank you for reaching out to JB Creations Support. Our team typically responds within a few hours. Please hold on while we connect you with our support team. We appreciate your patience!`;
+            
+            await window.jbAPI.sendChatMessage(
+                this.chatId,
+                greetingMessage,
+                'admin',
+                'JB Creations Support'
+            );
+            
+            console.log('✅ Auto-greeting sent');
+        } catch (error) {
+            console.error('❌ Error sending auto-greeting:', error);
+            // Don't show error to user - greeting is not critical
         }
     }
 
     updateBadge(count) {
         const badge = document.getElementById('chat-badge');
-        if (count > 0) {
-            badge.textContent = count > 9 ? '9+' : count;
-            badge.style.display = 'flex';
-        } else {
-            badge.style.display = 'none';
+        if (badge) {
+            if (count > 0) {
+                badge.textContent = count > 9 ? '9+' : count;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    }
+    
+    async startUnreadCheck() {
+        // Wait for Firebase to be ready
+        if (!window.jbAPI) {
+            window.addEventListener('firebaseReady', () => {
+                this.checkUnreadMessages();
+            });
+            return;
+        }
+        
+        this.checkUnreadMessages();
+    }
+    
+    async checkUnreadMessages() {
+        if (!this.currentUser?.phone) {
+            this.loadCurrentUser();
+        }
+        
+        if (!this.currentUser?.phone || !window.jbAPI) {
+            return;
+        }
+        
+        try {
+            // Get user's chat and listen for unread count changes
+            const result = await window.jbAPI.getOrCreateSupportChat(
+                this.currentUser.phone,
+                this.currentUser.name,
+                this.currentUser.email
+            );
+            
+            if (result.success && result.chatId) {
+                this.chatId = result.chatId;
+                
+                // Set up real-time listener for unread count
+                if (this.unsubscribeUnread) {
+                    this.unsubscribeUnread();
+                }
+                
+                this.unsubscribeUnread = window.jbAPI.db.collection('supportChats')
+                    .doc(result.chatId)
+                    .onSnapshot(doc => {
+                        if (doc.exists) {
+                            const unreadByUser = doc.data().unreadByUser || 0;
+                            
+                            // Only show badge if chat is not open
+                            if (!this.isOpen) {
+                                this.updateBadge(unreadByUser);
+                            }
+                        }
+                    });
+            }
+        } catch (error) {
+            console.error('❌ Error checking unread messages:', error);
         }
     }
 
@@ -608,6 +858,9 @@ class SupportChat {
     destroy() {
         if (this.unsubscribe) {
             this.unsubscribe();
+        }
+        if (this.unsubscribeUnread) {
+            this.unsubscribeUnread();
         }
         const widget = document.getElementById('support-chat-widget');
         if (widget) {

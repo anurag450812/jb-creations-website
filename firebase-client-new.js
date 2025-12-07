@@ -393,23 +393,61 @@ class JBCreationsAPI {
         try {
             console.log('💬 Getting or creating support chat for:', userPhone);
             
-            // Normalize phone number
-            const normalizedPhone = userPhone.replace(/^\+91/, '');
+            // Normalize phone number - remove all non-digits and country code variations
+            let normalizedPhone = userPhone.replace(/\D/g, ''); // Remove all non-digits
+            if (normalizedPhone.startsWith('91') && normalizedPhone.length > 10) {
+                normalizedPhone = normalizedPhone.substring(2); // Remove 91 country code
+            }
+            // Keep only last 10 digits
+            if (normalizedPhone.length > 10) {
+                normalizedPhone = normalizedPhone.slice(-10);
+            }
             
-            // Check for existing open chat
-            const existingChat = await this.db.collection('supportChats')
+            console.log('💬 Normalized phone:', normalizedPhone);
+            
+            // Check for existing chat with any status except closed
+            // First try with normalized phone
+            let existingChat = await this.db.collection('supportChats')
                 .where('userPhone', '==', normalizedPhone)
                 .where('status', 'in', ['open', 'pending'])
                 .limit(1)
                 .get();
             
+            // If not found, try with original phone format
+            if (existingChat.empty && userPhone !== normalizedPhone) {
+                existingChat = await this.db.collection('supportChats')
+                    .where('userPhone', '==', userPhone)
+                    .where('status', 'in', ['open', 'pending'])
+                    .limit(1)
+                    .get();
+            }
+            
+            // Also try with +91 prefix
+            if (existingChat.empty) {
+                existingChat = await this.db.collection('supportChats')
+                    .where('userPhone', '==', '+91' + normalizedPhone)
+                    .where('status', 'in', ['open', 'pending'])
+                    .limit(1)
+                    .get();
+            }
+            
             if (!existingChat.empty) {
                 const chatDoc = existingChat.docs[0];
                 console.log('💬 Found existing chat:', chatDoc.id);
+                
+                // Update user info if changed
+                if (userName || userEmail) {
+                    await this.db.collection('supportChats').doc(chatDoc.id).update({
+                        userName: userName || chatDoc.data().userName || 'Customer',
+                        userEmail: userEmail || chatDoc.data().userEmail || '',
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                
                 return { success: true, chatId: chatDoc.id, chat: { id: chatDoc.id, ...chatDoc.data() } };
             }
             
-            // Create new chat
+            // Create new chat with normalized phone
             const chatRef = await this.db.collection('supportChats').add({
                 userPhone: normalizedPhone,
                 userName: userName || 'Customer',
@@ -598,6 +636,199 @@ class JBCreationsAPI {
                 callback(chats);
             });
     }
+    
+    // ==================== CHAT CLEANUP METHODS ====================
+    
+    /**
+     * Delete chats older than the specified number of days
+     * @param {number} daysOld - Number of days after which chats should be deleted (default: 15)
+     * @returns {Promise<{success: boolean, deletedCount: number}>}
+     */
+    async cleanupOldChats(daysOld = 15) {
+        try {
+            console.log(`🧹 Cleaning up chats older than ${daysOld} days...`);
+            
+            // Calculate the cutoff date
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - daysOld);
+            
+            // Find old chats
+            const oldChatsQuery = await this.db.collection('supportChats')
+                .where('createdAt', '<', cutoffDate)
+                .get();
+            
+            if (oldChatsQuery.empty) {
+                console.log('✅ No old chats to clean up');
+                return { success: true, deletedCount: 0 };
+            }
+            
+            let deletedCount = 0;
+            const batch = this.db.batch();
+            
+            // Process each old chat
+            for (const chatDoc of oldChatsQuery.docs) {
+                // First, delete all messages in the chat
+                const messagesQuery = await this.db.collection('supportChats')
+                    .doc(chatDoc.id)
+                    .collection('messages')
+                    .get();
+                
+                // Delete messages in batches
+                for (const messageDoc of messagesQuery.docs) {
+                    await messageDoc.ref.delete();
+                }
+                
+                // Delete the chat document
+                batch.delete(chatDoc.ref);
+                deletedCount++;
+            }
+            
+            await batch.commit();
+            
+            console.log(`✅ Cleaned up ${deletedCount} old chats`);
+            return { success: true, deletedCount };
+        } catch (error) {
+            console.error('❌ Error cleaning up old chats:', error);
+            return { success: false, error: error.message, deletedCount: 0 };
+        }
+    }
+    
+    /**
+     * Schedule automatic cleanup of old chats
+     * This runs once when the API is initialized and then daily
+     */
+    scheduleAutoCleanup() {
+        // Run cleanup immediately on initialization
+        this.cleanupOldChats(15).then(result => {
+            if (result.success && result.deletedCount > 0) {
+                console.log(`🧹 Auto-cleanup: Deleted ${result.deletedCount} old chats`);
+            }
+        });
+        
+        // Also merge duplicates on initialization
+        this.mergeDuplicateChats().then(result => {
+            if (result.success && result.mergedCount > 0) {
+                console.log(`🔄 Auto-merge: Merged ${result.mergedCount} duplicate chats`);
+            }
+        });
+        
+        // Schedule daily cleanup (runs every 24 hours)
+        // Note: This will only run while the page is open
+        setInterval(() => {
+            this.cleanupOldChats(15).then(result => {
+                if (result.success && result.deletedCount > 0) {
+                    console.log(`🧹 Scheduled cleanup: Deleted ${result.deletedCount} old chats`);
+                }
+            });
+        }, 24 * 60 * 60 * 1000); // 24 hours in milliseconds
+    }
+    
+    /**
+     * Merge duplicate chats for the same phone number
+     * Keeps the oldest chat and moves all messages from newer chats into it
+     */
+    async mergeDuplicateChats() {
+        try {
+            console.log('🔄 Checking for duplicate chats to merge...');
+            
+            // Get all open/pending chats
+            const chatsSnapshot = await this.db.collection('supportChats')
+                .where('status', 'in', ['open', 'pending'])
+                .get();
+            
+            if (chatsSnapshot.empty) {
+                return { success: true, mergedCount: 0 };
+            }
+            
+            // Group chats by normalized phone number
+            const chatsByPhone = {};
+            
+            for (const doc of chatsSnapshot.docs) {
+                const data = doc.data();
+                const phone = data.userPhone || '';
+                
+                // Normalize phone - keep only last 10 digits
+                const normalizedPhone = phone.replace(/\D/g, '').slice(-10);
+                
+                if (!normalizedPhone || normalizedPhone.length < 10) continue;
+                
+                if (!chatsByPhone[normalizedPhone]) {
+                    chatsByPhone[normalizedPhone] = [];
+                }
+                chatsByPhone[normalizedPhone].push({
+                    id: doc.id,
+                    ...data,
+                    createdAt: data.createdAt?.toDate() || new Date()
+                });
+            }
+            
+            let mergedCount = 0;
+            
+            // For each phone with duplicates, merge them
+            for (const phone of Object.keys(chatsByPhone)) {
+                const chats = chatsByPhone[phone];
+                
+                if (chats.length <= 1) continue; // No duplicates
+                
+                console.log(`🔄 Found ${chats.length} duplicate chats for phone ${phone}`);
+                
+                // Sort by createdAt - oldest first
+                chats.sort((a, b) => a.createdAt - b.createdAt);
+                
+                // Keep the oldest chat as the main one
+                const mainChat = chats[0];
+                const duplicateChats = chats.slice(1);
+                
+                // Move messages from duplicate chats to main chat
+                for (const duplicateChat of duplicateChats) {
+                    // Get all messages from duplicate chat
+                    const messagesSnapshot = await this.db.collection('supportChats')
+                        .doc(duplicateChat.id)
+                        .collection('messages')
+                        .orderBy('createdAt', 'asc')
+                        .get();
+                    
+                    // Copy messages to main chat
+                    for (const msgDoc of messagesSnapshot.docs) {
+                        await this.db.collection('supportChats')
+                            .doc(mainChat.id)
+                            .collection('messages')
+                            .add(msgDoc.data());
+                        
+                        // Delete original message
+                        await msgDoc.ref.delete();
+                    }
+                    
+                    // Update main chat with latest info from duplicate
+                    if (duplicateChat.lastMessageTime > mainChat.lastMessageTime) {
+                        await this.db.collection('supportChats').doc(mainChat.id).update({
+                            lastMessage: duplicateChat.lastMessage,
+                            lastMessageTime: duplicateChat.lastMessageTime,
+                            unreadByAdmin: firebase.firestore.FieldValue.increment(duplicateChat.unreadByAdmin || 0)
+                        });
+                    }
+                    
+                    // Delete the duplicate chat
+                    await this.db.collection('supportChats').doc(duplicateChat.id).delete();
+                    
+                    mergedCount++;
+                    console.log(`✅ Merged chat ${duplicateChat.id} into ${mainChat.id}`);
+                }
+                
+                // Update the main chat's phone to normalized format
+                await this.db.collection('supportChats').doc(mainChat.id).update({
+                    userPhone: phone,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+            
+            console.log(`✅ Merged ${mergedCount} duplicate chats`);
+            return { success: true, mergedCount };
+        } catch (error) {
+            console.error('❌ Error merging duplicate chats:', error);
+            return { success: false, error: error.message, mergedCount: 0 };
+        }
+    }
 }
 
 // Global API instance
@@ -627,6 +858,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Set global reference
                 window.jbAPI = jbAPI;
+                
+                // Schedule automatic cleanup of old chats (15 days)
+                jbAPI.scheduleAutoCleanup();
                 
                 // Dispatch ready event
                 window.dispatchEvent(new Event('firebaseReady'));
