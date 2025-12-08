@@ -250,36 +250,36 @@
                             </div>
                             <div class="desktop-card-content">
                                 <div class="desktop-size-grid">
-                                    <button class="desktop-size-btn" data-size="13x19" data-orientation="portrait" data-price="349">
+                                    <button class="desktop-size-btn" data-size="13x19" data-orientation="portrait" data-price="499">
                                         <i class="fas fa-portrait"></i>
                                         <div class="size-info">
                                             <span class="size-text">13×19"</span>
                                             <span class="orientation">Portrait</span>
-                                            <span class="price">₹349</span>
+                                            <span class="price">₹499</span>
                                         </div>
                                     </button>
-                                    <button class="desktop-size-btn" data-size="13x19" data-orientation="landscape" data-price="349">
+                                    <button class="desktop-size-btn" data-size="13x19" data-orientation="landscape" data-price="499">
                                         <i class="fas fa-image"></i>
                                         <div class="size-info">
                                             <span class="size-text">13×19"</span>
                                             <span class="orientation">Landscape</span>
-                                            <span class="price">₹349</span>
+                                            <span class="price">₹499</span>
                                         </div>
                                     </button>
-                                    <button class="desktop-size-btn" data-size="13x10" data-orientation="portrait" data-price="249">
+                                    <button class="desktop-size-btn" data-size="13x10" data-orientation="portrait" data-price="349">
                                         <i class="fas fa-portrait"></i>
                                         <div class="size-info">
                                             <span class="size-text">13×10"</span>
                                             <span class="orientation">Portrait</span>
-                                            <span class="price">₹249</span>
+                                            <span class="price">₹349</span>
                                         </div>
                                     </button>
-                                    <button class="desktop-size-btn" data-size="13x10" data-orientation="landscape" data-price="249">
+                                    <button class="desktop-size-btn" data-size="13x10" data-orientation="landscape" data-price="349">
                                         <i class="fas fa-image"></i>
                                         <div class="size-info">
                                             <span class="size-text">13×10"</span>
                                             <span class="orientation">Landscape</span>
-                                            <span class="price">₹249</span>
+                                            <span class="price">₹349</span>
                                         </div>
                                     </button>
                                 </div>
@@ -508,8 +508,8 @@
                     <!-- Price Section -->
                     <div class="product-price-section">
                         <div class="price-container">
-                            <span class="current-price" id="mobileListingPrice">₹349</span>
-                            <span class="original-price">₹699</span>
+                            <span class="current-price" id="mobileListingPrice">₹499</span>
+                            <span class="original-price">₹999</span>
                             <span class="discount-badge">50% off</span>
                         </div>
                     </div>
@@ -595,36 +595,36 @@
                 </button>
             </div>
             <div class="mobile-size-grid">
-                <button class="mobile-size-btn" data-size="13x19" data-orientation="portrait" data-price="349">
+                <button class="mobile-size-btn" data-size="13x19" data-orientation="portrait" data-price="499">
                     <i class="fas fa-portrait"></i>
                     <div class="size-info">
                         <span class="size-text">13×19"</span>
                         <span class="orientation">Portrait</span>
-                        <span class="price">₹349</span>
+                        <span class="price">₹499</span>
                     </div>
                 </button>
-                <button class="mobile-size-btn" data-size="13x19" data-orientation="landscape" data-price="349">
+                <button class="mobile-size-btn" data-size="13x19" data-orientation="landscape" data-price="499">
                     <i class="fas fa-image"></i>
                     <div class="size-info">
                         <span class="size-text">13×19"</span>
                         <span class="orientation">Landscape</span>
-                        <span class="price">₹349</span>
+                        <span class="price">₹499</span>
                     </div>
                 </button>
-                <button class="mobile-size-btn" data-size="13x10" data-orientation="portrait" data-price="249">
+                <button class="mobile-size-btn" data-size="13x10" data-orientation="portrait" data-price="349">
                     <i class="fas fa-portrait"></i>
                     <div class="size-info">
                         <span class="size-text">13×10"</span>
                         <span class="orientation">Portrait</span>
-                        <span class="price">₹249</span>
+                        <span class="price">₹349</span>
                     </div>
                 </button>
-                <button class="mobile-size-btn" data-size="13x10" data-orientation="landscape" data-price="249">
+                <button class="mobile-size-btn" data-size="13x10" data-orientation="landscape" data-price="349">
                     <i class="fas fa-image"></i>
                     <div class="size-info">
                         <span class="size-text">13×10"</span>
                         <span class="orientation">Landscape</span>
-                        <span class="price">₹249</span>
+                        <span class="price">₹349</span>
                     </div>
                 </button>
             </div>
@@ -680,24 +680,24 @@
     <!-- Fast2SMS OTP System (Primary) -->
     <script src="fast2sms-client.js?v=4.0"></script>
     
+    <!-- Initialize Fast2SMS OTP Client BEFORE loading otp-auth-realsms.js -->
+    <script>
+        try {
+            console.log('🔧 Initializing Fast2SMS OTP Client for customize page...');
+            window.otpClient = new Fast2SMSOTPClient();
+            console.log('✅ Fast2SMS OTP Client initialized successfully');
+            console.log('📡 API Endpoint:', window.otpClient.apiBaseURL);
+        } catch (error) {
+            console.error('❌ Failed to initialize Fast2SMS client:', error);
+        }
+    </script>
+    
     <!-- Main Scripts -->
     <script type="module" src="firebase-client-new.js?v=4.0"></script>
     <script src="otp-auth-realsms.js?v=4.0"></script>
     <script src="auth.js?v=4.0"></script>
     <script src="script.js?v=5.5-indexeddb"></script>
     <script>
-        // Initialize Fast2SMS OTP Client
-        document.addEventListener('DOMContentLoaded', function() {
-            try {
-                window.otpClient = new Fast2SMSOTPClient('http://localhost:3001');
-                if (window.otpAuth) {
-                    window.otpAuth.otpClient = window.otpClient;
-                }
-            } catch (error) {
-                console.error('❌ Failed to initialize Fast2SMS client:', error);
-            }
-        });
-        
         function setProfileDropdownState(isOpen) {
             const dropdownContainer = document.getElementById('profileDropdown');
             const dropdownMenu = document.getElementById('profileDropdownMenu');

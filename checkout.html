@@ -1750,9 +1750,6 @@
 
     <!-- Customer Information Section -->
     <div class="checkout-section" id="customerSection">
-            <!-- User Status Container -->
-            <div id="userStatusContainer" style="display: none; margin-bottom: 20px;"></div>
-            
             <h2 class="section-title">
                 <i class="fas fa-user"></i>
                 Customer Information
@@ -1761,13 +1758,6 @@
             <!-- Required Fields Note -->
             <div class="required-note">
                 Fields marked with an asterisk are required
-            </div>
-
-            <!-- Guest Checkout Indicator -->
-            <div id="guestIndicator" style="display: none;" class="guest-checkout-notice">
-                <i class="fas fa-user"></i>
-                <span>Checking out as guest</span>
-                <small>You will receive order confirmation via email</small>
             </div>
 
             <form id="checkoutForm">
@@ -1791,6 +1781,21 @@
                         <div class="phone-input-container">
                             <span class="phone-prefix">+91</span>
                             <input type="tel" id="customerPhone" name="customerPhone" required placeholder="XXXXXXXXXX" pattern="^[0-9]{10}$" maxlength="10" oninput="formatPhoneNumberNew(this)" onfocus="handlePhoneFocusNew(this)" onblur="handlePhoneBlurNew(this)" autocomplete="tel" inputmode="numeric" aria-required="true">
+                        </div>
+                        <div id="phoneVerifySection" style="display: none; margin-top: 10px;">
+                            <button type="button" id="verifyPhoneBtn" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--primary-color); color: white; border: none; cursor: pointer; font-weight: 600; font-size: 14px;">
+                                <i class="fas fa-shield-alt" style="margin-right: 8px;"></i>Verify Phone Number
+                            </button>
+                        </div>
+                        <div id="otpContainer" style="display: none; margin-top: 10px;">
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="otpInput" placeholder="Enter 6-digit OTP" maxlength="6" inputmode="numeric" style="flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; text-align: center; letter-spacing: 3px;">
+                                <button type="button" id="confirmOtpBtn" style="padding: 12px 20px; border-radius: 8px; background: #28a745; color: white; border: none; cursor: pointer; font-weight: 600;">Confirm</button>
+                            </div>
+                            <div id="otpMessage" style="font-size: 12px; margin-top: 8px;"></div>
+                        </div>
+                        <div id="phoneVerifiedIndicator" style="display: none; margin-top: 8px; padding: 8px 12px; background: #d4edda; border-radius: 8px; color: #155724;">
+                            <i class="fas fa-check-circle" style="margin-right: 8px;"></i>Phone number verified
                         </div>
                         <div class="form-help-text">Enter 10-digit mobile number (Indian format)</div>
                     </div>
@@ -2016,9 +2021,24 @@
     <!-- Firebase Backend Integration -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-    <script src="fast2sms-client.js?v=3.0"></script>
-    <script src="otp-auth-realsms.js?v=3.0"></script>
-    <script type="module" src="firebase-client-new.js?v=3.0"></script>
+    <script src="fast2sms-client.js?v=5.0.1208"></script>
+    
+    <!-- Initialize Fast2SMS OTP Client BEFORE loading otp-auth-realsms.js -->
+    <script>
+        // Initialize Fast2SMS OTP Client immediately (not waiting for DOMContentLoaded)
+        try {
+            console.log('🔧 Initializing Fast2SMS OTP Client for checkout...');
+            // No URL parameter - uses production Netlify functions by default
+            window.otpClient = new Fast2SMSOTPClient();
+            console.log('✅ Fast2SMS OTP Client initialized successfully');
+            console.log('📡 API Endpoint:', window.otpClient.apiBaseURL);
+        } catch (error) {
+            console.error('❌ Failed to initialize Fast2SMS client:', error);
+        }
+    </script>
+    
+    <script src="otp-auth-realsms.js?v=5.0.1208"></script>
+    <script type="module" src="firebase-client-new.js?v=5.0.1208"></script>
     
     <!-- Authentication Check Script -->
     <script>
@@ -2282,10 +2302,11 @@
     </script>
 
     <!-- Firebase SDK - already loaded above, removing duplicates -->
-    <!-- Authentication utilities -->
-    <script src="auth.js"></script>
+    <!-- Authentication utilities - Demo OTP (fallback) -->
+    <script src="otp-auth.js?v=5.0.1208"></script>
+    <script src="auth.js?v=5.0.1208"></script>
     
     <!-- Cache-busted checkout script to ensure latest version loads -->
-    <script src="checkout.js?v=9.2-indexeddb"></script>
+    <script src="checkout.js?v=9.4-otp-fix"></script>
 </body>
 </html>

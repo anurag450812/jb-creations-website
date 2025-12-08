@@ -537,8 +537,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Hide the status container completely for logged-in users
             hideUserStatusContainer();
         } else {
-            // Show guest checkout options
-            showGuestCheckoutOptions();
+            // Don't show guest/login options - just let user fill the form
+            // OTP verification will happen when they enter phone number
+            hideUserStatusContainer();
         }
 
         loadCartItems();
@@ -1233,38 +1234,11 @@ function showUserStatus(user) {
     }
 }
 
-// Show guest checkout options
+// Show guest checkout options - disabled, we use OTP verification instead
 function showGuestCheckoutOptions() {
-    const statusContainer = document.getElementById('userStatusContainer');
-    if (statusContainer) {
-        statusContainer.innerHTML = `
-            <div class="user-status guest">
-                <div class="checkout-options">
-                    <div class="option-header">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span>Choose Your Checkout Method</span>
-                    </div>
-                    <div class="checkout-method-buttons">
-                        <button type="button" class="checkout-method-btn guest-btn active" onclick="selectCheckoutMethod('guest')">
-                            <i class="fas fa-user"></i>
-                            <div>
-                                <strong>Continue as Guest</strong>
-                                <small>Quick checkout without creating an account</small>
-                            </div>
-                        </button>
-                        <button type="button" class="checkout-method-btn login-btn" onclick="redirectToLogin()">
-                            <i class="fas fa-sign-in-alt"></i>
-                            <div>
-                                <strong>Sign In</strong>
-                                <small>Access your account and order history</small>
-                            </div>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        statusContainer.style.display = 'block';
-    }
+    // No longer showing guest/login options
+    // Users will verify via OTP when entering phone number
+    hideUserStatusContainer();
 }
 
 // Select checkout method
@@ -2850,3 +2824,274 @@ function processSimplePayment(amount, orderData, user) {
         }
     });
 }
+
+// OTP Verification Logic
+function initializeOTPVerification() {
+    const phoneInput = document.getElementById('customerPhone');
+    const phoneVerifySection = document.getElementById('phoneVerifySection');
+    const verifyBtn = document.getElementById('verifyPhoneBtn');
+    const otpContainer = document.getElementById('otpContainer');
+    const otpInput = document.getElementById('otpInput');
+    const confirmBtn = document.getElementById('confirmOtpBtn');
+    const otpMessage = document.getElementById('otpMessage');
+    const phoneVerifiedIndicator = document.getElementById('phoneVerifiedIndicator');
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    const mobilePlaceOrderBtn = document.getElementById('mobilePlaceOrderBtn');
+
+    if (!phoneInput || !verifyBtn) {
+        console.log('⚠️ Phone verification elements not found');
+        return;
+    }
+
+    // Check if user is already signed in
+    const currentUser = localStorage.getItem('jb_current_user');
+    const isSignedIn = !!currentUser;
+    
+    // Track phone verification status
+    window.phoneVerified = isSignedIn;
+    
+    // If user is signed in, enable place order button and skip verification
+    if (isSignedIn) {
+        console.log('✅ User is signed in, skipping phone verification');
+        enablePlaceOrderButton();
+        if (phoneVerifySection) phoneVerifySection.style.display = 'none';
+        if (phoneVerifiedIndicator) phoneVerifiedIndicator.style.display = 'block';
+        return;
+    }
+    
+    // User is NOT signed in - disable place order button initially
+    disablePlaceOrderButton();
+
+    // Initialize OTP Auth - use real SMS if available, otherwise demo
+    let otpAuth;
+    if (typeof OTPAuthRealSMS !== 'undefined') {
+        otpAuth = new OTPAuthRealSMS();
+        console.log('✅ Using Real SMS OTP authentication');
+    } else if (typeof OTPAuth !== 'undefined') {
+        otpAuth = new OTPAuth();
+        console.log('ℹ️ Using Demo OTP authentication');
+    } else {
+        console.error('❌ No OTP auth system available');
+        return;
+    }
+
+    phoneInput.addEventListener('input', function() {
+        const phone = this.value.replace(/\D/g, '');
+        
+        if (phone.length === 10) {
+            // Show verify button section
+            if (phoneVerifySection) phoneVerifySection.style.display = 'block';
+        } else {
+            if (phoneVerifySection) phoneVerifySection.style.display = 'none';
+            if (otpContainer) otpContainer.style.display = 'none';
+        }
+    });
+
+    verifyBtn.addEventListener('click', async function() {
+        const phone = phoneInput.value.replace(/\D/g, '');
+        
+        if (phone.length !== 10) {
+            alert('Please enter a valid 10-digit phone number');
+            return;
+        }
+        
+        verifyBtn.disabled = true;
+        verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i>Sending OTP...';
+        
+        try {
+            const result = await otpAuth.sendOTP(phone);
+            if (result.success) {
+                if (otpContainer) otpContainer.style.display = 'block';
+                if (phoneVerifySection) phoneVerifySection.style.display = 'none';
+                if (otpMessage) {
+                    otpMessage.textContent = 'OTP sent to +91 ' + phone + '. Please check your phone.';
+                    otpMessage.style.color = '#28a745';
+                }
+            } else {
+                if (otpMessage) {
+                    otpMessage.textContent = 'Failed to send OTP: ' + (result.error || 'Unknown error');
+                    otpMessage.style.color = '#dc3545';
+                }
+                verifyBtn.disabled = false;
+                verifyBtn.innerHTML = '<i class="fas fa-shield-alt" style="margin-right: 8px;"></i>Verify Phone Number';
+            }
+        } catch (error) {
+            console.error('OTP send error:', error);
+            if (otpMessage) {
+                otpMessage.textContent = 'Error sending OTP. Please try again.';
+                otpMessage.style.color = '#dc3545';
+            }
+            verifyBtn.disabled = false;
+            verifyBtn.innerHTML = '<i class="fas fa-shield-alt" style="margin-right: 8px;"></i>Verify Phone Number';
+        }
+    });
+
+    confirmBtn.addEventListener('click', async function() {
+        const phone = phoneInput.value.replace(/\D/g, '');
+        const otp = otpInput.value.trim();
+        
+        if (!otp || otp.length < 4) {
+            if (otpMessage) {
+                otpMessage.textContent = 'Please enter a valid OTP';
+                otpMessage.style.color = '#dc3545';
+            }
+            return;
+        }
+        
+        // Get name and email from form fields
+        const nameInput = document.getElementById('customerName');
+        const emailInput = document.getElementById('customerEmail');
+        const fullName = nameInput ? nameInput.value.trim() : '';
+        const email = emailInput ? emailInput.value.trim() : '';
+        
+        if (!fullName) {
+            if (otpMessage) {
+                otpMessage.textContent = 'Please enter your full name first';
+                otpMessage.style.color = '#dc3545';
+            }
+            if (nameInput) nameInput.focus();
+            return;
+        }
+        
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Verifying...';
+        
+        try {
+            const result = await otpAuth.verifyOTP(phone, otp);
+            if (result.success) {
+                // Hide OTP container
+                if (otpContainer) otpContainer.style.display = 'none';
+                
+                // Show verified indicator
+                if (phoneVerifiedIndicator) phoneVerifiedIndicator.style.display = 'block';
+                
+                // Create user object with form data
+                const normalizedPhone = '+91' + phone;
+                const userData = {
+                    id: result.user?.id || 'user_' + Date.now(),
+                    phone: normalizedPhone,
+                    name: fullName,
+                    email: email,
+                    registrationDate: new Date().toISOString(),
+                    lastLogin: new Date().toISOString(),
+                    loginCount: 1,
+                    isVerified: true
+                };
+                
+                // Save to Firebase
+                if (window.jbAPI && window.jbAPI.createUser) {
+                    try {
+                        await window.jbAPI.createUser(userData);
+                        console.log('✅ User saved to Firebase:', userData);
+                    } catch (firebaseError) {
+                        console.warn('⚠️ Could not save user to Firebase:', firebaseError);
+                    }
+                }
+                
+                // Sign in user locally
+                localStorage.setItem('jb_current_user', JSON.stringify(userData));
+                window.phoneVerified = true;
+                
+                // Update UI
+                if (window.updateAuthUI) {
+                    window.updateAuthUI(userData);
+                }
+                
+                // Enable place order button
+                enablePlaceOrderButton();
+                
+            } else {
+                if (otpMessage) {
+                    otpMessage.textContent = 'Invalid OTP. Please try again.';
+                    otpMessage.style.color = '#dc3545';
+                }
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = 'Confirm';
+            }
+        } catch (error) {
+            console.error('OTP verify error:', error);
+            if (otpMessage) {
+                otpMessage.textContent = 'Error verifying OTP. Please try again.';
+                otpMessage.style.color = '#dc3545';
+            }
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Confirm';
+        }
+    });
+    
+    // Helper functions to enable/disable place order button
+    function disablePlaceOrderButton() {
+        const placeOrderBtn = document.getElementById('placeOrderBtn');
+        const mobilePlaceOrderBtn = document.getElementById('mobilePlaceOrderBtn');
+        
+        if (placeOrderBtn) {
+            placeOrderBtn.disabled = true;
+            placeOrderBtn.style.opacity = '0.5';
+            placeOrderBtn.style.cursor = 'not-allowed';
+            placeOrderBtn.title = 'Please verify your phone number first';
+        }
+        if (mobilePlaceOrderBtn) {
+            mobilePlaceOrderBtn.disabled = true;
+            mobilePlaceOrderBtn.style.opacity = '0.5';
+            mobilePlaceOrderBtn.style.cursor = 'not-allowed';
+        }
+    }
+    
+    function enablePlaceOrderButton() {
+        const placeOrderBtn = document.getElementById('placeOrderBtn');
+        const mobilePlaceOrderBtn = document.getElementById('mobilePlaceOrderBtn');
+        
+        if (placeOrderBtn) {
+            placeOrderBtn.disabled = false;
+            placeOrderBtn.style.opacity = '1';
+            placeOrderBtn.style.cursor = 'pointer';
+            placeOrderBtn.title = '';
+        }
+        if (mobilePlaceOrderBtn) {
+            mobilePlaceOrderBtn.disabled = false;
+            mobilePlaceOrderBtn.style.opacity = '1';
+            mobilePlaceOrderBtn.style.cursor = 'pointer';
+        }
+    }
+}
+
+// Make enable/disable functions globally available
+function enablePlaceOrderButton() {
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    const mobilePlaceOrderBtn = document.getElementById('mobilePlaceOrderBtn');
+    
+    if (placeOrderBtn) {
+        placeOrderBtn.disabled = false;
+        placeOrderBtn.style.opacity = '1';
+        placeOrderBtn.style.cursor = 'pointer';
+        placeOrderBtn.title = '';
+    }
+    if (mobilePlaceOrderBtn) {
+        mobilePlaceOrderBtn.disabled = false;
+        mobilePlaceOrderBtn.style.opacity = '1';
+        mobilePlaceOrderBtn.style.cursor = 'pointer';
+    }
+}
+
+function disablePlaceOrderButton() {
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    const mobilePlaceOrderBtn = document.getElementById('mobilePlaceOrderBtn');
+    
+    if (placeOrderBtn) {
+        placeOrderBtn.disabled = true;
+        placeOrderBtn.style.opacity = '0.5';
+        placeOrderBtn.style.cursor = 'not-allowed';
+        placeOrderBtn.title = 'Please verify your phone number first';
+    }
+    if (mobilePlaceOrderBtn) {
+        mobilePlaceOrderBtn.disabled = true;
+        mobilePlaceOrderBtn.style.opacity = '0.5';
+        mobilePlaceOrderBtn.style.cursor = 'not-allowed';
+    }
+}
+
+// Initialize OTP verification when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    initializeOTPVerification();
+});
+

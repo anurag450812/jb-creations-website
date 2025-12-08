@@ -7,6 +7,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Admin Panel Protection
+        (function() {
+            const isAuthenticated = sessionStorage.getItem('adminAuthenticated');
+            if (isAuthenticated !== 'true') {
+                const password = prompt("Please enter the admin password:");
+                if (password === '200274') {
+                    sessionStorage.setItem('adminAuthenticated', 'true');
+                } else {
+                    alert("Incorrect password. Access denied.");
+                    window.location.href = 'index.html'; // Redirect to home or login page
+                }
+            }
+        })();
+    </script>
     <style>
         * {
             margin: 0;

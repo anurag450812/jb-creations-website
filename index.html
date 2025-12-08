@@ -2978,6 +2978,18 @@
     <!-- Fast2SMS OTP System (Primary) -->
     <script src="fast2sms-client.js?v=4.0"></script>
     
+    <!-- Initialize Fast2SMS OTP Client BEFORE loading otp-auth-realsms.js -->
+    <script>
+        try {
+            console.log('🔧 Initializing Fast2SMS OTP Client for homepage...');
+            window.otpClient = new Fast2SMSOTPClient();
+            console.log('✅ Fast2SMS OTP Client initialized successfully');
+            console.log('📡 API Endpoint:', window.otpClient.apiBaseURL);
+        } catch (error) {
+            console.error('❌ Failed to initialize Fast2SMS client:', error);
+        }
+    </script>
+    
     <!-- JB Creations Backend Scripts -->
     <script src="firebase-client-new.js?v=4.0"></script>
     <script src="api-client.js?v=4.0"></script>
@@ -3019,23 +3031,6 @@
                 onDomReady();
             }
         })();
-
-        // Initialize Fast2SMS OTP Client for homepage
-        document.addEventListener('DOMContentLoaded', function() {
-            try {
-                console.log('🔧 Initializing Fast2SMS OTP Client for homepage...');
-                window.otpClient = new Fast2SMSOTPClient('http://localhost:3001');
-                console.log('✅ Fast2SMS OTP Client initialized successfully');
-                
-                // Update OTP Auth with the client
-                if (window.otpAuth) {
-                    window.otpAuth.otpClient = window.otpClient;
-                    console.log('✅ OTP Auth updated with Fast2SMS client');
-                }
-            } catch (error) {
-                console.error('❌ Failed to initialize Fast2SMS client:', error);
-            }
-        });
         
         function setProfileDropdownState(isOpen) {
             const dropdownContainer = document.getElementById('profileDropdown');

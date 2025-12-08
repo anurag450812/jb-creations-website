@@ -3,10 +3,16 @@
  * Handles both traditional auth and new OTP authentication system with Fast2SMS
  */
 
-// Initialize Fast2SMS OTP Client
+// Initialize Fast2SMS OTP Client (only if not already initialized)
 let otpClient;
-if (typeof Fast2SMSOTPClient !== 'undefined') {
-    otpClient = new Fast2SMSOTPClient('http://localhost:3001');
+if (window.otpClient) {
+    // Use existing otpClient (already initialized with correct URL)
+    otpClient = window.otpClient;
+    console.log('🔐 Using existing Fast2SMS OTP Client');
+} else if (typeof Fast2SMSOTPClient !== 'undefined') {
+    // Create new client with production URL (no localhost!)
+    otpClient = new Fast2SMSOTPClient();
+    window.otpClient = otpClient;
     console.log('🔐 Fast2SMS OTP Client initialized');
 } else {
     console.warn('⚠️ Fast2SMS OTP Client not available, check if fast2sms-client.js is loaded');

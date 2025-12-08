@@ -4,10 +4,21 @@
  */
 
 class Fast2SMSOTPClient {
-    constructor(apiBaseURL = 'http://localhost:3001') {
-        this.apiBaseURL = apiBaseURL;
+    constructor(apiBaseURL = null) {
+        // Use production URL by default, fallback to localhost only if explicitly needed
+        // Production URL from Netlify functions or Railway deployment
+        const productionURL = 'https://jb-creations-website.netlify.app/.netlify/functions';
+        const localURL = 'http://localhost:3001';
+        
+        // Determine if we're running locally
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        
+        // Always use production URL for SMS (even in local development)
+        this.apiBaseURL = apiBaseURL || productionURL;
         this.currentPhone = null;
         this.otpExpiresAt = null;
+        
+        console.log('📱 Fast2SMS Client initialized with URL:', this.apiBaseURL);
     }
 
     /**
@@ -60,13 +71,13 @@ class Fast2SMSOTPClient {
 
             console.log('📱 Sending OTP to:', phoneNumber, 'Type:', type);
 
-            const response = await fetch(`${this.apiBaseURL}/api/auth/send-otp`, {
+            const response = await fetch(`${this.apiBaseURL}/send-otp`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    phone: phoneNumber,
+                    phoneNumber: phoneNumber,
                     type: type
                 })
             });
@@ -120,13 +131,13 @@ class Fast2SMSOTPClient {
 
             console.log('🔍 Verifying OTP for:', phoneNumber);
 
-            const response = await fetch(`${this.apiBaseURL}/api/auth/verify-otp`, {
+            const response = await fetch(`${this.apiBaseURL}/verify-otp`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    phone: phoneNumber,
+                    phoneNumber: phoneNumber,
                     otp: otp
                 })
             });
@@ -160,13 +171,14 @@ class Fast2SMSOTPClient {
         try {
             console.log('🔄 Resending OTP to:', phoneNumber);
 
-            const response = await fetch(`${this.apiBaseURL}/api/auth/resend-otp`, {
+            // Use the send-otp endpoint for resending
+            const response = await fetch(`${this.apiBaseURL}/send-otp`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    phone: phoneNumber
+                    phoneNumber: phoneNumber
                 })
             });
 
@@ -218,16 +230,18 @@ class Fast2SMSOTPClient {
 
             console.log('📝 Registering user:', phone);
 
-            const response = await fetch(`${this.apiBaseURL}/api/auth/register`, {
+            // Use verify-otp endpoint which also creates/updates user
+            const response = await fetch(`${this.apiBaseURL}/verify-otp`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    name,
-                    phone,
-                    email,
-                    otp
+                    phoneNumber: phone,
+                    otp: otp,
+                    name: name,
+                    email: email,
+                    action: 'register'
                 })
             });
 
@@ -272,14 +286,16 @@ class Fast2SMSOTPClient {
 
             console.log('🔐 Logging in user:', phone);
 
-            const response = await fetch(`${this.apiBaseURL}/api/auth/login`, {
+            // Use verify-otp endpoint which handles login
+            const response = await fetch(`${this.apiBaseURL}/verify-otp`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    phone,
-                    otp
+                    phoneNumber: phone,
+                    otp: otp,
+                    action: 'login'
                 })
             });
 

@@ -15,3 +15,11 @@
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
+
+# CORS headers for all Netlify functions
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"

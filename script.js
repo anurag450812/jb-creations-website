@@ -703,10 +703,26 @@ function initializeEventListeners() {
             const price = parseInt(button.dataset.price) || 349;
             state.price = price;
             
-            // Update price display
+            // Update price display with MRP and Discount
             const totalPriceElement = document.getElementById('totalPrice');
             if (totalPriceElement) {
-                totalPriceElement.textContent = '₹' + price;
+                let mrp = 0;
+                if (state.frameSize.size === '13x19') {
+                    mrp = 999;
+                } else if (state.frameSize.size === '13x10' || state.frameSize.size === '10x13') {
+                    mrp = 799;
+                }
+                
+                if (mrp > 0) {
+                    const discount = Math.round(((mrp - price) / mrp) * 100);
+                    totalPriceElement.innerHTML = `
+                        <span style="text-decoration: line-through; color: #999; font-size: 0.8em; margin-right: 5px;">₹${mrp}</span>
+                        ₹${price}
+                        <span style="color: #28a745; font-size: 0.8em; margin-left: 5px;">(${discount}% OFF)</span>
+                    `;
+                } else {
+                    totalPriceElement.textContent = '₹' + price;
+                }
             }
             // Also update mobile total price if present
             if (typeof updateMobileTotalPrice === 'function') {
@@ -3849,10 +3865,26 @@ document.addEventListener('DOMContentLoaded', function() {
         // Set the default price
         state.price = parseInt(defaultSizeButton.dataset.price) || 349;
         
-        // Update price display
+        // Update price display with MRP and Discount
         const totalPriceElement = document.getElementById('totalPrice');
         if (totalPriceElement) {
-            totalPriceElement.textContent = '₹' + state.price;
+            let mrp = 0;
+            if (state.frameSize.size === '13x19') {
+                mrp = 999;
+            } else if (state.frameSize.size === '13x10' || state.frameSize.size === '10x13') {
+                mrp = 799;
+            }
+            
+            if (mrp > 0) {
+                const discount = Math.round(((mrp - state.price) / mrp) * 100);
+                totalPriceElement.innerHTML = `
+                    <span style="text-decoration: line-through; color: #999; font-size: 0.8em; margin-right: 5px;">₹${mrp}</span>
+                    ₹${state.price}
+                    <span style="color: #28a745; font-size: 0.8em; margin-left: 5px;">(${discount}% OFF)</span>
+                `;
+            } else {
+                totalPriceElement.textContent = '₹' + state.price;
+            }
         }
         
         // Initialize room slider with default frame size
