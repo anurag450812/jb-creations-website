@@ -5,16 +5,18 @@
 
 class Fast2SMSOTPClient {
     constructor(apiBaseURL = null) {
-        // Use production URL by default, fallback to localhost only if explicitly needed
-        // Production URL from Netlify functions or Railway deployment
-        const productionURL = 'https://jb-creations-website.netlify.app/.netlify/functions';
-        const localURL = 'http://localhost:3001';
-        
-        // Determine if we're running locally
+        // Dynamically determine the API base URL based on current site
         const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         
-        // Always use production URL for SMS (even in local development)
-        this.apiBaseURL = apiBaseURL || productionURL;
+        // Use the current origin's Netlify functions (works for any Netlify site)
+        // This ensures the API calls go to the same site that's hosting the page
+        const currentSiteURL = `${window.location.origin}/.netlify/functions`;
+        
+        // For local development, use the production site
+        const productionURL = 'https://jbcreationss.netlify.app/.netlify/functions';
+        
+        // Use provided URL, or current site URL, or production URL for localhost
+        this.apiBaseURL = apiBaseURL || (isLocalhost ? productionURL : currentSiteURL);
         this.currentPhone = null;
         this.otpExpiresAt = null;
         
