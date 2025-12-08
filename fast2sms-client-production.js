@@ -10,10 +10,8 @@
 
 class Fast2SMSOTPClient {
     constructor() {
-        // Automatically detect if running on localhost or production
-        this.apiBaseURL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? 'http://localhost:8888/.netlify/functions'  // Netlify Dev
-            : '/.netlify/functions';  // Production
+        // Always use production Netlify URL for OTP functions
+        this.apiBaseURL = 'https://jbcreations.netlify.app/.netlify/functions';
         
         this.currentPhone = null;
         this.otpExpiresAt = null;
