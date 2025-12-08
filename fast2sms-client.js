@@ -90,27 +90,30 @@ class Fast2SMSOTPClient {
                 throw new Error(data.message || 'Failed to send OTP');
             }
 
-            // Store current phone and expiry
+            // Store current phone, expiry, and OTP token for verification
             this.currentPhone = data.phone || phoneNumber;
             this.otpExpiresAt = data.expiresAt;
+            this.otpToken = data.otpToken; // Store the JWT token for verification
 
             console.log('✅ OTP sent successfully:', data);
 
             // In development mode, show OTP if provided
-            if (data.otp) {
-                console.log('🔐 Development OTP:', data.otp);
+            if (data.otp || data.demo_otp) {
+                const devOtp = data.otp || data.demo_otp;
+                console.log('🔐 Development OTP:', devOtp);
                 // Show alert with OTP for testing
                 setTimeout(() => {
-                    alert(`🔐 Development Mode OTP: ${data.otp}\n\nThis OTP is only shown in development mode.`);
+                    alert(`🔐 Development Mode OTP: ${devOtp}\n\nThis OTP is only shown in development mode.`);
                 }, 500);
             }
 
             return {
                 success: true,
                 message: data.message,
-                phone: data.phone,
+                phone: data.phone || phoneNumber,
                 expiresAt: data.expiresAt,
-                otp: data.otp // Only in development
+                otpToken: data.otpToken, // Return token for storage
+                otp: data.otp || data.demo_otp // Only in development
             };
 
         } catch (error) {
@@ -123,12 +126,20 @@ class Fast2SMSOTPClient {
      * Verify OTP
      * @param {string} phoneNumber - Phone number
      * @param {string} otp - OTP to verify
+     * @param {string} otpToken - Optional OTP token (uses stored token if not provided)
      * @returns {Promise<Object>} - Verification result
      */
-    async verifyOTP(phoneNumber, otp) {
+    async verifyOTP(phoneNumber, otp, otpToken = null) {
         try {
             if (!otp || otp.length !== 6) {
                 throw new Error('Please enter a valid 6-digit OTP');
+            }
+
+            // Use provided token or the stored token from sendOTP
+            const tokenToUse = otpToken || this.otpToken;
+            
+            if (!tokenToUse) {
+                throw new Error('OTP session expired. Please request a new OTP.');
             }
 
             console.log('🔍 Verifying OTP for:', phoneNumber);
@@ -140,7 +151,8 @@ class Fast2SMSOTPClient {
                 },
                 body: JSON.stringify({
                     phoneNumber: phoneNumber,
-                    otp: otp
+                    otp: otp,
+                    otpToken: tokenToUse
                 })
             });
 
@@ -151,11 +163,16 @@ class Fast2SMSOTPClient {
             }
 
             console.log('✅ OTP verified successfully');
+            
+            // Clear the stored token after successful verification
+            this.otpToken = null;
 
             return {
                 success: true,
                 message: data.message,
-                phone: data.phone
+                phone: data.phone,
+                user: data.user,
+                token: data.token
             };
 
         } catch (error) {
