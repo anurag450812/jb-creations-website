@@ -10,11 +10,21 @@
 
 class Fast2SMSOTPClient {
     constructor() {
-        // Always use production Netlify URL for OTP functions
-        this.apiBaseURL = 'https://jbcreations.netlify.app/.netlify/functions';
+        // Dynamically determine the API base URL based on current site
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        
+        // Use the current origin's Netlify functions (works for any Netlify site)
+        const currentSiteURL = `${window.location.origin}/.netlify/functions`;
+        
+        // For local development, use the production site
+        const productionURL = 'https://jbcreationss.netlify.app/.netlify/functions';
+        
+        // Use current site URL on production, or production URL for localhost
+        this.apiBaseURL = isLocalhost ? productionURL : currentSiteURL;
         
         this.currentPhone = null;
         this.otpExpiresAt = null;
+        this.otpToken = null; // Store JWT token for verification
         
         console.log('🚀 Fast2SMS Client initialized with API:', this.apiBaseURL);
     }

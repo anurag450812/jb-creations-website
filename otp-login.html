@@ -861,31 +861,24 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     
     <!-- Fast2SMS OTP System (Production - Netlify Functions) -->
-    <script src="fast2sms-client-production.js?v=4.0"></script>
+    <script src="fast2sms-client-production.js?v=5.0.1208"></script>
+    
+    <!-- Initialize Fast2SMS OTP Client IMMEDIATELY after loading -->
+    <script>
+        try {
+            console.log('🔧 Initializing Fast2SMS OTP Client (Production - Serverless)...');
+            window.otpClient = new Fast2SMSOTPClient();
+            console.log('✅ Fast2SMS OTP Client initialized successfully');
+            console.log('📡 API Endpoint:', window.otpClient.apiBaseURL);
+        } catch (error) {
+            console.error('❌ Failed to initialize Fast2SMS client:', error);
+        }
+    </script>
     
     <!-- Scripts (OTP Auth with Fast2SMS Integration) -->
-    <script src="firebase-client-new.js?v=3.0"></script>
-    <script src="otp-auth-realsms.js?v=3.0"></script>
+    <script src="firebase-client-new.js?v=5.0.1208"></script>
+    <script src="otp-auth-realsms.js?v=5.0.1208"></script>
     <script>
-        // Wait for DOM to be ready, then initialize Fast2SMS OTP Client (Production)
-        document.addEventListener('DOMContentLoaded', function() {
-            try {
-                console.log('🔧 Initializing Fast2SMS OTP Client (Production - Serverless)...');
-                // No need to pass URL - auto-detects local vs production
-                window.otpClient = new Fast2SMSOTPClient();
-                console.log('✅ Fast2SMS OTP Client initialized successfully');
-                console.log('📡 API Endpoint:', window.otpClient.apiBaseURL);
-                
-                // Reinitialize OTP Auth with the client
-                if (window.otpAuth) {
-                    window.otpAuth.otpClient = window.otpClient;
-                    console.log('✅ OTP Auth updated with Fast2SMS client');
-                }
-            } catch (error) {
-                console.error('❌ Failed to initialize Fast2SMS client:', error);
-            }
-        });
-        
         // Enhanced OTP Authentication with Tabbed Interface
         class TabbedOTPAuth {
             constructor() {
