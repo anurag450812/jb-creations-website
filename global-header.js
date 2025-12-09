@@ -29,6 +29,69 @@ const GlobalWebsiteHeader = {
    These styles override any page-specific CSS conflicts
    ===================================================== */
 
+/* Global Header Container - Matches Homepage Header */
+#globalSiteHeader {
+    padding: 0 !important;
+    top: 0 !important;
+    position: fixed !important;
+    width: 100% !important;
+    z-index: 2000 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+#globalSiteHeader .header-content {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 0 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    height: 56px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+#globalSiteHeader .brand-name {
+    font-size: 2rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 2px !important;
+    color: #16697A !important;
+    text-decoration: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: relative !important;
+    display: inline-block !important;
+}
+
+#globalSiteHeader .brand-name::after {
+    content: '' !important;
+    display: block !important;
+    width: 50% !important;
+    height: 3px !important;
+    background: #16697A !important;
+    margin: 4px auto 0 !important;
+    border-radius: 2px !important;
+}
+
+#globalSiteHeader .header-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#globalSiteHeader .header-left {
+    display: flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 /* Profile Dropdown Container - Strictly scoped */
 #globalSiteHeader .profile-dropdown {
     position: relative !important;
@@ -46,26 +109,26 @@ const GlobalWebsiteHeader = {
     padding: 8px 12px !important;
     border-radius: 8px !important;
     cursor: pointer !important;
-    font-size: 22px !important;
-    transition: all 0.3s ease !important;
+    font-size: 1.1rem !important;
+    transition: background 0.2s ease !important;
     position: relative !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
     gap: 4px !important;
-    min-width: 50px !important;
+    min-width: auto !important;
     text-align: center !important;
 }
 
 #globalSiteHeader .profile-icon-btn:hover {
-    background: rgba(22, 105, 122, 0.25) !important;
-    border: 1px solid rgba(22, 105, 122, 0.4) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
-    color: white !important;
+    background: rgba(22, 105, 122, 0.08) !important;
+    color: #16697A !important;
+    border: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    transform: none !important;
+    box-shadow: none !important;
 }
 
 #globalSiteHeader .profile-icon-btn i {
@@ -75,7 +138,7 @@ const GlobalWebsiteHeader = {
     width: 100% !important;
     margin: 0 !important;
     line-height: 1 !important;
-    font-size: 20px !important;
+    font-size: 1.1rem !important;
 }
 
 #globalSiteHeader .profile-icon-btn .button-label {
@@ -234,7 +297,7 @@ const GlobalWebsiteHeader = {
     color: #16697A !important;
     padding: 8px 12px !important;
     cursor: pointer !important;
-    transition: all 0.3s ease !important;
+    transition: background 0.2s ease !important;
     position: relative !important;
     display: flex !important;
     flex-direction: column !important;
@@ -243,16 +306,17 @@ const GlobalWebsiteHeader = {
     gap: 4px !important;
     box-shadow: none !important;
     font-weight: 600 !important;
-    min-width: 50px !important;
+    min-width: auto !important;
     text-align: center !important;
-    font-size: 20px !important;
+    font-size: 1.1rem !important;
 }
 
 #globalSiteHeader .cart-icon-btn:hover {
-    background: rgba(22, 105, 122, 0.25) !important;
-    border: 1px solid rgba(22, 105, 122, 0.4) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
+    background: rgba(22, 105, 122, 0.08) !important;
+    color: #16697A !important;
+    border: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     transform: translateY(-2px) !important;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
     color: white !important;
@@ -283,19 +347,21 @@ const GlobalWebsiteHeader = {
 #globalSiteHeader .cart-count {
     background: #FFA62B !important;
     color: white !important;
-    border-radius: 12px !important;
-    padding: 3px 7px !important;
-    font-size: 11px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    font-size: 10px !important;
     font-weight: 700 !important;
-    min-width: 20px !important;
-    height: 20px !important;
+    min-width: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     position: absolute !important;
-    top: -5px !important;
-    right: 5px !important;
+    top: -8px !important;
+    right: -4px !important;
     z-index: 10 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
 }
 
 #globalSiteHeader .cart-count:empty {
@@ -304,30 +370,41 @@ const GlobalWebsiteHeader = {
 
 /* Mobile Responsive Styles - Strictly scoped */
 @media (max-width: 768px) {
+    #globalSiteHeader {
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    #globalSiteHeader .header-content {
+        height: 52px !important;
+        padding: 0 12px !important;
+        gap: 10px !important;
+    }
+
+    #globalSiteHeader .brand-name {
+        font-size: 1.3rem !important;
+    }
+
     #globalSiteHeader .profile-icon-btn,
     #globalSiteHeader .cart-icon-btn {
         background: transparent !important;
         border: none !important;
-        border-radius: 0 !important;
-        padding: 6px !important;
+        border-radius: 8px !important;
+        padding: 6px 10px !important;
         box-shadow: none !important;
         color: #16697A !important;
+        font-size: 1rem !important;
     }
 
-    #globalSiteHeader .profile-icon-btn {
-        font-size: 20px !important;
-        min-width: 40px !important;
-        gap: 2px !important;
-    }
-
-    #globalSiteHeader .profile-icon-btn i {
-        font-size: 16px !important;
+    #globalSiteHeader .profile-icon-btn i,
+    #globalSiteHeader .cart-icon-btn i {
+        font-size: 1rem !important;
     }
 
     #globalSiteHeader .profile-icon-btn:hover,
     #globalSiteHeader .cart-icon-btn:hover {
-        background: transparent !important;
-        color: #0f4f5d !important;
+        background: rgba(22, 105, 122, 0.08) !important;
+        color: #16697A !important;
         border: none !important;
         box-shadow: none !important;
         transform: none !important;
@@ -335,8 +412,9 @@ const GlobalWebsiteHeader = {
 
     #globalSiteHeader .profile-icon-btn .button-label,
     #globalSiteHeader .cart-icon-btn .button-label {
-        font-size: 0.62rem !important;
-        letter-spacing: 0.4px !important;
+        font-size: 0.7rem !important;
+        font-weight: 600 !important;
+        display: none !important;
     }
     
     /* CRITICAL: Fixed width for mobile dropdown */
