@@ -1,5 +1,5 @@
 /**
- * Enhanced Order Processing Backend for JB Creations
+ * Enhanced Order Processing Backend for Xidlz
  * Supports the new admin panel features
  */
 
@@ -117,7 +117,7 @@ async function saveOrderImages(orderNumber, items) {
 app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'OK', 
-        message: 'JB Creations Enhanced Admin API is running',
+        message: 'Xidlz Enhanced Admin API is running',
         timestamp: new Date().toISOString()
     });
 });
@@ -658,7 +658,7 @@ async function startServer() {
     await ensureDirectories();
     
     app.listen(PORT, () => {
-        console.log(`🚀 JB Creations Enhanced Admin API running on port ${PORT}`);
+        console.log(`🚀 Xidlz Enhanced Admin API running on port ${PORT}`);
         console.log(`📊 Enhanced Admin Panel: http://localhost:${PORT}/admin`);
         console.log(`📋 Legacy Admin Panel: http://localhost:${PORT}/admin-legacy`);
         console.log(`🔧 API Health Check: http://localhost:${PORT}/api/health`);

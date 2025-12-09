@@ -93,7 +93,7 @@ function authenticateToken(req, res, next) {
 app.get('/health', (req, res) => {
     res.json({ 
         success: true, 
-        message: 'JB Creations Auth Server is running',
+        message: 'Xidlz Auth Server is running',
         timestamp: new Date().toISOString()
     });
 });
@@ -620,7 +620,7 @@ app.use((req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`🚀 JB Creations Auth Server running on http://localhost:${PORT}`);
+    console.log(`🚀 Xidlz Auth Server running on http://localhost:${PORT}`);
     console.log(`📊 Health check: http://localhost:${PORT}/health`);
     console.log(`👥 Admin users: http://localhost:${PORT}/api/admin/users`);
 });

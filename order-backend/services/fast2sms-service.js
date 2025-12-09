@@ -1,5 +1,5 @@
 /**
- * Fast2SMS DLT OTP Service for JB Creations
+ * Fast2SMS DLT OTP Service for Xidlz
  * Handles OTP generation, sending, and verification using Fast2SMS API
  */
 

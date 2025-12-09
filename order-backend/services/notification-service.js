@@ -1,5 +1,5 @@
 /**
- * Notification Service for JB Creations
+ * Notification Service for Xidlz
  * Handles email and SMS notifications for order updates
  */
 
@@ -83,7 +83,7 @@ class NotificationService {
             }
 
             const mailOptions = {
-                from: process.env.EMAIL_FROM || 'JB Creations <noreply@jbcreations.com>',
+                from: process.env.EMAIL_FROM || 'Xidlz <noreply@xidlz.com>',
                 to: to,
                 subject: subject,
                 html: htmlContent,
@@ -123,12 +123,12 @@ class NotificationService {
             <head>
                 <meta charset="utf-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Order Confirmation - JB Creations</title>
+                <title>Order Confirmation - Xidlz</title>
             </head>
             <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
                 <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 20px;">
                     <div style="text-align: center; margin-bottom: 30px;">
-                        <h1 style="color: #16697A; margin: 0;">JB Creations</h1>
+                        <h1 style="color: #16697A; margin: 0;">Xidlz</h1>
                         <p style="color: #666; margin: 5px 0;">Custom Photo Framing</p>
                     </div>
                     
@@ -182,8 +182,8 @@ class NotificationService {
                     </div>
                     
                     <div style="text-align: center; margin-top: 30px; color: #666; font-size: 14px;">
-                        <p>Questions? Contact us at support@jbcreations.com or call us at +91-XXXXXXXXXX</p>
-                        <p>&copy; 2024 JB Creations. All rights reserved.</p>
+                        <p>Questions? Contact us at support@xidlz.com or call us at +91-XXXXXXXXXX</p>
+                        <p>&copy; 2024 Xidlz. All rights reserved.</p>
                     </div>
                 </div>
             </body>
@@ -201,7 +201,7 @@ class NotificationService {
             'processing': 'Your order is currently being processed by our team.',
             'ready': 'Great news! Your order is ready for delivery.',
             'shipped': 'Your order has been shipped and is on its way to you.',
-            'delivered': 'Your order has been delivered. Thank you for choosing JB Creations!',
+            'delivered': 'Your order has been delivered. Thank you for choosing Xidlz!',
             'cancelled': 'Your order has been cancelled. If you have any questions, please contact us.'
         };
 
@@ -223,12 +223,12 @@ class NotificationService {
             <head>
                 <meta charset="utf-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Order Update - JB Creations</title>
+                <title>Order Update - Xidlz</title>
             </head>
             <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
                 <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 20px;">
                     <div style="text-align: center; margin-bottom: 30px;">
-                        <h1 style="color: #16697A; margin: 0;">JB Creations</h1>
+                        <h1 style="color: #16697A; margin: 0;">Xidlz</h1>
                         <p style="color: #666; margin: 5px 0;">Custom Photo Framing</p>
                     </div>
                     
@@ -249,8 +249,8 @@ class NotificationService {
                     </div>
                     
                     <div style="text-align: center; margin-top: 30px; color: #666; font-size: 14px;">
-                        <p>Questions? Contact us at support@jbcreations.com or call us at +91-XXXXXXXXXX</p>
-                        <p>&copy; 2024 JB Creations. All rights reserved.</p>
+                        <p>Questions? Contact us at support@xidlz.com or call us at +91-XXXXXXXXXX</p>
+                        <p>&copy; 2024 Xidlz. All rights reserved.</p>
                     </div>
                 </div>
             </body>
@@ -268,12 +268,12 @@ class NotificationService {
             const emailHtml = this.generateOrderConfirmationEmail(orderData, customerInfo);
             const emailResult = await this.sendEmail(
                 email,
-                `Order Confirmation - ${orderId} - JB Creations`,
+                `Order Confirmation - ${orderId} - Xidlz`,
                 emailHtml
             );
 
             // Send SMS confirmation
-            const smsMessage = `Dear ${name}, your order ${orderId} has been confirmed! Track at: https://your-website.com/track-order.html. -JB Creations`;
+            const smsMessage = `Dear ${name}, your order ${orderId} has been confirmed! Track at: https://your-website.com/track-order.html. -Xidlz`;
             const smsResult = await this.sendSMS(phone, smsMessage);
 
             logger.info(`Order confirmation sent for ${orderId}`);
@@ -300,12 +300,12 @@ class NotificationService {
             const emailHtml = this.generateOrderUpdateEmail(orderData, customerInfo, newStatus, notes);
             const emailResult = await this.sendEmail(
                 email,
-                `Order Update - ${orderId} - ${newStatus.toUpperCase()} - JB Creations`,
+                `Order Update - ${orderId} - ${newStatus.toUpperCase()} - Xidlz`,
                 emailHtml
             );
 
             // Send SMS update
-            const smsMessage = `Dear ${name}, your order ${orderId} is now ${newStatus.toUpperCase()}. Track: https://your-website.com/track-order.html -JB Creations`;
+            const smsMessage = `Dear ${name}, your order ${orderId} is now ${newStatus.toUpperCase()}. Track: https://your-website.com/track-order.html -Xidlz`;
             const smsResult = await this.sendSMS(phone, smsMessage);
 
             logger.info(`Order update sent for ${orderId} - Status: ${newStatus}`);

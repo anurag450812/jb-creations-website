@@ -94,8 +94,8 @@ const GlobalWebsiteHeader = {
 #globalSiteHeader .profile-dropdown-menu {
     position: absolute !important;
     top: 100% !important;
-    right: 0 !important;
-    left: auto !important;
+    left: 0 !important;
+    right: auto !important;
     background: rgba(255, 255, 255, 0.95) !important;
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
@@ -344,7 +344,8 @@ const GlobalWebsiteHeader = {
         width: 260px !important;
         min-width: 260px !important;
         max-width: 260px !important;
-        right: -10px !important;
+        left: 0 !important;
+        right: auto !important;
     }
 }
 
@@ -403,11 +404,7 @@ const GlobalWebsiteHeader = {
     <!-- Header -->
     <header class="site-header" id="globalSiteHeader">
         <div class="header-content">
-            <div class="header-left"></div>
-            <div class="header-brand">
-                <a href="index.html" style="text-decoration: none; color: inherit;"><h1 class="brand-name">JB Creations</h1></a>
-            </div>
-            <div class="header-right">
+            <div class="header-left">
                 <div class="auth-section" id="authSection">
                     <!-- Profile dropdown button (always visible) -->
                     <div class="profile-dropdown" id="profileDropdown">
@@ -471,7 +468,11 @@ const GlobalWebsiteHeader = {
                         </div>
                     </div>
                 </div>
-                
+            </div>
+            <div class="header-brand">
+                <a href="index.html" style="text-decoration: none; color: inherit;"><h1 class="brand-name">XIDLZ</h1></a>
+            </div>
+            <div class="header-right">
                 <div class="header-cart">
                     <button class="cart-icon-btn" id="headerCartBtn" onclick="window.location.href='cart.html'">
                         <i class="fas fa-shopping-cart"></i>
@@ -764,7 +765,7 @@ if (typeof contactUs === 'undefined') {
 if (typeof aboutUs === 'undefined') {
     window.aboutUs = function() {
         // Open about modal or redirect to about page
-        alert('JB Creations - Beautiful Memories Deserve a Frame\n\nWe specialize in custom photo framing with high-quality materials and perfect craftsmanship.');
+        alert('Xidlz - Beautiful Memories Deserve a Frame\n\nWe specialize in custom photo framing with high-quality materials and perfect craftsmanship.');
     };
 }
 

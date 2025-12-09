@@ -1,5 +1,5 @@
 /**
- * Fast2SMS OTP Client for JB Creations Frontend - PRODUCTION VERSION
+ * Fast2SMS OTP Client for Xidlz Frontend - PRODUCTION VERSION
  * Handles OTP authentication with Netlify Functions (serverless)
  * 
  * USAGE:

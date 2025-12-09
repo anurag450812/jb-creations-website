@@ -189,7 +189,7 @@ class OTPAuthRealSMS {
                     
                     return {
                         success: true,
-                        message: 'Account created successfully! Welcome to JB Creations!',
+                        message: 'Account created successfully! Welcome to Xidlz!',
                         user: {
                             phone: normalizedPhone,
                             name: userName,

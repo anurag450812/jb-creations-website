@@ -1,5 +1,5 @@
 /**
- * Support Chat Widget for JB Creations
+ * Support Chat Widget for Xidlz
  * Floating chat button that connects users to admin support
  */
 
@@ -85,7 +85,7 @@ class SupportChat {
                                 <i class="fas fa-headset"></i>
                             </div>
                             <div class="chat-title">
-                                <h4>JB Creations Support</h4>
+                                <h4>Xidlz Support</h4>
                                 <span class="chat-status">We typically reply within a few hours</span>
                             </div>
                         </div>
@@ -760,13 +760,13 @@ class SupportChat {
             // Wait a moment before sending greeting
             await new Promise(resolve => setTimeout(resolve, 1000));
             
-            const greetingMessage = `Hi ${this.currentUser?.name || 'there'}! 👋 Thank you for reaching out to JB Creations Support. Our team typically responds within a few hours. Please hold on while we connect you with our support team. We appreciate your patience!`;
+            const greetingMessage = `Hi ${this.currentUser?.name || 'there'}! 👋 Thank you for reaching out to Xidlz Support. Our team typically responds within a few hours. Please hold on while we connect you with our support team. We appreciate your patience!`;
             
             await window.jbAPI.sendChatMessage(
                 this.chatId,
                 greetingMessage,
                 'admin',
-                'JB Creations Support'
+                'Xidlz Support'
             );
             
             console.log('✅ Auto-greeting sent');

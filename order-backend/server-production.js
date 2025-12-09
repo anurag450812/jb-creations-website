@@ -643,7 +643,7 @@ process.on('SIGTERM', () => {
 });
 
 const server = app.listen(PORT, '0.0.0.0', () => {
-    logger.info(`JB Creations Production Server running on port ${PORT}`);
+    logger.info(`Xidlz Production Server running on port ${PORT}`);
     logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
     logger.info(`Admin panel available at: http://localhost:${PORT}/admin`);
 });

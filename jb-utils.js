@@ -1,5 +1,5 @@
 /**
- * Utility functions for JB Creations website
+ * Utility functions for Xidlz website
  * Common functions used across multiple files
  */
 

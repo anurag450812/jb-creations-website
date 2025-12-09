@@ -1,5 +1,5 @@
 /**
- * Database Backup Script for JB Creations
+ * Database Backup Script for Xidlz
  * Creates timestamped backups of the user database
  */
 
@@ -134,7 +134,7 @@ switch (command) {
         
     case 'help':
     case '--help':
-        console.log('🗄️ JB Creations Database Backup Tool');
+        console.log('🗄️ Xidlz Database Backup Tool');
         console.log('');
         console.log('Usage:');
         console.log('  node backup-database.js create   - Create a new backup');

@@ -1,5 +1,5 @@
 /**
- * Fast2SMS DLT OTP Configuration for JB Creations Website
+ * Fast2SMS DLT OTP Configuration for Xidlz Website
  * 
  * Setup Instructions:
  * 1. Get your API key from https://www.fast2sms.com/dashboard
@@ -9,7 +9,7 @@
  * 5. Replace YOUR_DLT_TEMPLATE_ID with your registered DLT template ID
  * 
  * DLT Template Format Example:
- * "Your OTP for JB Creations is {#var#}. Valid for 5 minutes. Do not share with anyone."
+ * "Your OTP for Xidlz is {#var#}. Valid for 5 minutes. Do not share with anyone."
  */
 
 const fast2smsConfig = {

@@ -1,4 +1,4 @@
-// MSG91 SMS Configuration for JB Creations Website
+// MSG91 SMS Configuration for Xidlz Website
 // Replace these values with your actual MSG91 credentials
 
 const msg91Config = {
@@ -50,7 +50,7 @@ async function sendOTPViaMSG91(phoneNumber) {
                 mobile: cleanPhone,
                 authkey: msg91Config.authKey,
                 extra_param: {
-                    brand_name: "JB Creations"
+                    brand_name: "Xidlz"
                 }
             };
             

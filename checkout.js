@@ -2776,7 +2776,7 @@ function processSimplePayment(amount, orderData, user) {
             "key": "rzp_test_1DP5mmOlF5G5ag", // Working test key
             "amount": (amount * 100).toString(), // Convert to paise
             "currency": "INR",
-            "name": "JB Creations",
+            "name": "Xidlz",
             "description": `Photo Frame Order - ${orderData.items.length} item(s)`,
             "handler": function (response) {
                 console.log('✅ Simple payment success:', response.razorpay_payment_id);

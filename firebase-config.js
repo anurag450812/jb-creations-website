@@ -1,5 +1,5 @@
-// Firebase Configuration for JB Creations Website
-// Configuration for "JB Creations Auth" project
+// Firebase Configuration for Xidlz Website
+// Configuration for "Xidlz Auth" project
 
 // Your Firebase configuration object
 const firebaseConfig = {

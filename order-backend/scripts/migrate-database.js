@@ -1,5 +1,5 @@
 /**
- * Database Migration Script for JB Creations
+ * Database Migration Script for Xidlz
  * Handles database schema updates and data migrations
  */
 

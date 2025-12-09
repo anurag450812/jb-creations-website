@@ -411,7 +411,7 @@ async function verifySignupOtp(event) {
             localStorage.setItem('jb_user', JSON.stringify(user));
             
             showLoading(false);
-            showSuccess('Account created successfully! Welcome to JB Creations!');
+            showSuccess('Account created successfully! Welcome to Xidlz!');
             
             // Redirect after short delay
             setTimeout(() => {

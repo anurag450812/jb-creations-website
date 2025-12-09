@@ -1,5 +1,5 @@
 /**
- * Demo OTP Authentication System for JB Creations
+ * Demo OTP Authentication System for Xidlz
  * Handles phone number verification, user registration, and login
  */
 
@@ -285,7 +285,7 @@ class OTPAuth {
         let welcomeMessage;
 
         if (loginCount === 1) {
-            welcomeMessage = `Welcome to JB Creations, ${user.name}! 🎉`;
+            welcomeMessage = `Welcome to Xidlz, ${user.name}! 🎉`;
         } else if (loginCount < 5) {
             welcomeMessage = `Welcome back, ${user.name}! 😊`;
         } else {

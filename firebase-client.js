@@ -1,5 +1,5 @@
 /**
- * Firebase Configuration for JB Creations
+ * Firebase Configuration for Xidlz
  * Complete backend solution - Database, Storage, Authentication
  */
 
@@ -33,7 +33,7 @@ function initializeFirebase() {
     return true;
 }
 
-//JB Creations API Client powered by Firebase
+//Xidlz API Client powered by Firebase
 class JBCreationsAPI {
     constructor() {
         if (!db) {
@@ -42,7 +42,7 @@ class JBCreationsAPI {
             }
         }
         this.db = db;
-        console.log('🚀 JB Creations API powered by Firebase initialized');
+        console.log('🚀 Xidlz API powered by Firebase initialized');
     }
 
     // Create customer record
@@ -599,7 +599,7 @@ class JBCreationsAPI {
             return {
                 success: true,
                 status: 'healthy',
-                message: 'JB Creations API powered by Firebase',
+                message: 'Xidlz API powered by Firebase',
                 timestamp: new Date().toISOString(),
                 backend: 'Firebase Firestore + Storage'
             };
@@ -621,7 +621,7 @@ export const jbAPI = new JBCreationsAPI();
 window.JBCreationsAPI = JBCreationsAPI;
 window.jbAPI = jbAPI;
 
-console.log('🔥 JB Creations Firebase integration loaded successfully!');
+console.log('🔥 Xidlz Firebase integration loaded successfully!');
 
 // Dispatch event to notify other scripts that Firebase client is ready
 window.dispatchEvent(new Event('firebaseReady'));

@@ -486,7 +486,7 @@ function contactUs() {
 }
 
 function aboutUs() {
-    alert('About JB Creations\n\nWe are passionate about turning your precious memories into beautiful wall art. With years of experience in custom photo framing, we use premium materials and professional craftsmanship to create frames that last a lifetime.\n\nOur mission is to help you showcase your most cherished moments in style.');
+    alert('About Xidlz\n\nWe are passionate about turning your precious memories into beautiful wall art. With years of experience in custom photo framing, we use premium materials and professional craftsmanship to create frames that last a lifetime.\n\nOur mission is to help you showcase your most cherished moments in style.');
 }
 
 // Initialize cart manager when page loads

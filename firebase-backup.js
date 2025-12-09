@@ -1,5 +1,5 @@
 /**
- * Firebase Alternative Setup for JB Creations
+ * Firebase Alternative Setup for Xidlz
  * Complete backend solution if Supabase has issues
  */
 
@@ -23,10 +23,10 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// JB Creations Firebase API Client
+// Xidlz Firebase API Client
 export class JBCreationsFirebaseAPI {
     constructor() {
-        console.log('🔥 JB Creations API powered by Firebase initialized')
+        console.log('🔥 Xidlz API powered by Firebase initialized')
     }
 
     // Create customer and order
@@ -98,7 +98,7 @@ export class JBCreationsFirebaseAPI {
         return {
             success: true,
             status: 'healthy',
-            message: 'JB Creations API powered by Firebase',
+            message: 'Xidlz API powered by Firebase',
             timestamp: new Date().toISOString()
         };
     }

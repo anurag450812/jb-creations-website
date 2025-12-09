@@ -1,5 +1,5 @@
 /**
- * Production-Ready Authentication Server for JB Creations
+ * Production-Ready Authentication Server for Xidlz
  * Enhanced with security, monitoring, and real SMS integration
  */
 
@@ -277,7 +277,7 @@ function checkAccountLock(req, res, next) {
 app.get('/health', (req, res) => {
     const health = {
         success: true,
-        message: 'JB Creations Auth Server is running',
+        message: 'Xidlz Auth Server is running',
         timestamp: new Date().toISOString(),
         uptime: Math.floor(process.uptime()),
         environment: process.env.NODE_ENV || 'development',
@@ -333,7 +333,7 @@ app.post('/api/auth/send-otp', checkAccountLock, async (req, res) => {
                        [otp, expiresAt.toISOString(), phone]);
 
                 // Send SMS
-                const message = `Your JB Creations login code is ${otp}. Valid for ${process.env.OTP_EXPIRY_MINUTES || 10} minutes.`;
+                const message = `Your Xidlz login code is ${otp}. Valid for ${process.env.OTP_EXPIRY_MINUTES || 10} minutes.`;
                 await sendSMS(phone, message);
 
                 res.json({
@@ -361,7 +361,7 @@ app.post('/api/auth/send-otp', checkAccountLock, async (req, res) => {
                 }
 
                 // Send SMS for registration
-                const message = `Your JB Creations verification code is ${otp}. Valid for ${process.env.OTP_EXPIRY_MINUTES || 10} minutes.`;
+                const message = `Your Xidlz verification code is ${otp}. Valid for ${process.env.OTP_EXPIRY_MINUTES || 10} minutes.`;
                 await sendSMS(phone, message);
 
                 res.json({
@@ -724,7 +724,7 @@ app.use((req, res) => {
 
 // Start server
 const server = app.listen(PORT, () => {
-    logger.info(`🚀 JB Creations Auth Server running on http://localhost:${PORT}`);
+    logger.info(`🚀 Xidlz Auth Server running on http://localhost:${PORT}`);
     logger.info(`📊 Health check: http://localhost:${PORT}/health`);
     logger.info(`👥 Admin users: http://localhost:${PORT}/api/admin/users`);
     logger.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);

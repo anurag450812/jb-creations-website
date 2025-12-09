@@ -1,5 +1,5 @@
 /*
- * Enhanced Authentication JavaScript for JB Creations
+ * Enhanced Authentication JavaScript for Xidlz
  * Handles both traditional auth and new OTP authentication system with Fast2SMS
  */
 
@@ -202,7 +202,7 @@ function updateUIForAuthenticatedUser() {
             </div>
             <h2>Welcome back, ${user.name}!</h2>
             <p class="user-phone">${user.phone}</p>
-            <p class="auth-success-message">You are successfully signed in to JB Creations</p>
+            <p class="auth-success-message">You are successfully signed in to Xidlz</p>
         </div>
         
         <div class="user-actions">
@@ -698,7 +698,7 @@ async function verifySignupOtp(event) {
             authState.isAuthenticated = true;
             
             showLoading(false);
-            showSuccess('Account created successfully! Welcome to JB Creations!');
+            showSuccess('Account created successfully! Welcome to Xidlz!');
             
             // Check if there's a specific redirect URL
             const redirectUrl = sessionStorage.getItem('auth_redirect');

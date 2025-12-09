@@ -1,5 +1,5 @@
 /**
- * JB Creations Auth API Client
+ * Xidlz Auth API Client
  * Replaces localStorage-based user management with server-side authentication
  */
 
@@ -208,5 +208,5 @@ class AuthAPI {
 // Create global instance
 window.authAPI = new AuthAPI();
 
-console.log('🔐 JB Creations Auth API Client loaded');
+console.log('🔐 Xidlz Auth API Client loaded');
 console.log('💡 Use window.authAPI to interact with the server');

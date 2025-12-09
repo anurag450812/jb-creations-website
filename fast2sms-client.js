@@ -1,5 +1,5 @@
 /**
- * Fast2SMS OTP Client for JB Creations Frontend
+ * Fast2SMS OTP Client for Xidlz Frontend
  * Handles OTP authentication with backend Fast2SMS integration
  */
 

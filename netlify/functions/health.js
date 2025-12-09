@@ -23,7 +23,7 @@ exports.handler = async (event, context) => {
             headers,
             body: JSON.stringify({
                 status: 'healthy',
-                message: 'JB Creations Backend is running on Netlify Functions!',
+                message: 'Xidlz Backend is running on Netlify Functions!',
                 timestamp: new Date().toISOString(),
                 version: '1.0.0'
             })

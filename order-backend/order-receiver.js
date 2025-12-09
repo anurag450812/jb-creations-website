@@ -286,7 +286,7 @@ async function sendOrderNotification(orderData, imagePaths) {
                     </div>
 
                     <div style="text-align: center; margin-top: 30px;">
-                        <p style="color: #666;">This is an automated notification from JB Creations Order System</p>
+                        <p style="color: #666;">This is an automated notification from Xidlz Order System</p>
                     </div>
                 </div>
             </body>
@@ -724,7 +724,7 @@ app.get('/health', (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`JB Creations Order Server running on port ${PORT}`);
+    console.log(`Xidlz Order Server running on port ${PORT}`);
     console.log(`Orders will be saved to: ${ordersDir}`);
     console.log(`Images will be saved to: ${imagesDir}`);
     console.log(`Health check: http://localhost:${PORT}/health`);

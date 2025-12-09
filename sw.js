@@ -1,11 +1,11 @@
 /**
- * Service Worker for JB Creations
+ * Service Worker for Xidlz
  * Provides offline caching and performance optimization
  * Version: 1.0.0
  */
 
-const CACHE_NAME = 'jb-creations-v1.1';
-const RUNTIME_CACHE = 'jb-creations-runtime-v1.1';
+const CACHE_NAME = 'xidlz-v1.1';
+const RUNTIME_CACHE = 'xidlz-runtime-v1.1';
 
 // Critical assets to cache immediately
 const CRITICAL_ASSETS = [

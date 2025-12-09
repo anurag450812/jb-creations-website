@@ -1,5 +1,5 @@
 /**
- * Razorpay Configuration for JB Creations
+ * Razorpay Configuration for Xidlz
  * Complete payment system integration
  */
 
@@ -13,7 +13,7 @@ const razorpayConfig = {
     currency: 'INR',
     
     // Business details
-    businessName: 'JB Creations',
+    businessName: 'Xidlz',
     businessLogo: './logo.png', // Update with your actual logo path
     businessDescription: 'Custom Photo Frames & Digital Art',
     contactEmail: 'info@jbcreations.com',
@@ -35,7 +35,7 @@ const razorpayConfig = {
 
 /**
  * Razorpay Payment System Class
- * Handles all payment operations for JB Creations
+ * Handles all payment operations for Xidlz
  */
 class RazorpayPaymentSystem {
     constructor() {
@@ -121,7 +121,7 @@ class RazorpayPaymentSystem {
                     key: this.config.keyId, // rzp_test_1DP5mmOlF5G5ag
                     amount: amount * 100, // Convert rupees to paise
                     currency: 'INR',
-                    name: 'JB Creations',
+                    name: 'Xidlz',
                     description: 'Photo Frame Order',
                     
                     // Success handler

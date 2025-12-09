@@ -42,7 +42,7 @@ app.use(express.static('../')); // Serve the parent directory
 app.get('/', (req, res) => {
     console.log('GET / requested');
     res.json({
-        message: 'JB Creations Backend - MINIMAL TEST',
+        message: 'Xidlz Backend - MINIMAL TEST',
         status: 'running',
         timestamp: new Date().toISOString(),
         port: PORT,

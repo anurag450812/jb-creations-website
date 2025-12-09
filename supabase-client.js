@@ -1,5 +1,5 @@
 /**
- * Supabase Configuration for JB Creations
+ * Supabase Configuration for Xidlz
  * Complete backend solution - Database, Storage, Authentication
  */
 
@@ -15,10 +15,10 @@ const SUPABASE_CONFIG = {
 // Initialize Supabase client
 export const supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey)
 
-// JB Creations API Client powered by Supabase
+// Xidlz API Client powered by Supabase
 export class JBCreationsAPI {
     constructor() {
-        console.log('🚀 JB Creations API powered by Supabase initialized')
+        console.log('🚀 Xidlz API powered by Supabase initialized')
     }
 
     // Customer Management
@@ -220,7 +220,7 @@ export class JBCreationsAPI {
             return {
                 success: true,
                 status: 'healthy',
-                message: 'JB Creations API powered by Supabase',
+                message: 'Xidlz API powered by Supabase',
                 timestamp: new Date().toISOString(),
                 customerCount: data?.length || 0
             }
@@ -241,4 +241,4 @@ export const jbAPI = new JBCreationsAPI()
 window.APIClient = JBCreationsAPI
 window.jbAPI = jbAPI
 
-console.log('🎯 JB Creations Supabase integration loaded successfully!')
+console.log('🎯 Xidlz Supabase integration loaded successfully!')

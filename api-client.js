@@ -1,5 +1,5 @@
 /**
- * API Configuration and Utilities for JB Creations
+ * API Configuration and Utilities for Xidlz
  * Handles all API calls to the backend server
  */
 
