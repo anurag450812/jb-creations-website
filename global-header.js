@@ -36,7 +36,7 @@ const GlobalWebsiteHeader = {
     position: fixed !important;
     width: 100% !important;
     z-index: 2000 !important;
-    background: transparent !important;
+    background: #EDE7E3 !important;
     box-shadow: none !important;
     border: none !important;
 }
@@ -50,7 +50,7 @@ const GlobalWebsiteHeader = {
     justify-content: space-between !important;
     gap: 12px !important;
     height: 56px !important;
-    background: transparent !important;
+    background: #EDE7E3 !important;
     border: none !important;
     box-shadow: none !important;
 }
@@ -371,7 +371,7 @@ const GlobalWebsiteHeader = {
 /* Mobile Responsive Styles - Strictly scoped */
 @media (max-width: 768px) {
     #globalSiteHeader {
-        background: transparent !important;
+        background: #EDE7E3 !important;
         box-shadow: none !important;
     }
 

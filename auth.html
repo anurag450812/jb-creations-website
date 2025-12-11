@@ -40,6 +40,24 @@
             padding: 100px 20px 20px 20px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        
+        /* Fix mobile header */
+        @media (max-width: 768px) {
+            .site-header,
+            #globalSiteHeader {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                z-index: 2500 !important;
+                background: #EDE7E3 !important;
+                box-shadow: none !important;
+            }
+            
+            .auth-container {
+                padding-top: 70px !important;
+            }
+        }
 
         .auth-box {
             background: var(--card-background);
@@ -59,10 +77,10 @@
         }
 
         .brand-logo {
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 100px;
             background: var(--primary-color);
-            border-radius: 20px;
+            border-radius: 24px;
             margin: 0 auto 20px auto;
             display: flex;
             align-items: center;
@@ -71,24 +89,21 @@
         }
 
         .brand-logo i {
-            font-size: 36px;
+            font-size: 48px;
             color: white;
         }
 
         .brand-title {
-            font-size: 32px;
-            font-weight: 700;
+            font-size: 52px;
+            font-weight: 800;
             /* XIDLZ brand styling - theme color */
             color: var(--primary-color);
-            margin-bottom: 8px;
-            letter-spacing: 3px;
+            margin-bottom: 0;
+            letter-spacing: 5px;
         }
 
         .brand-subtitle {
-            font-size: 16px;
-            color: var(--accent-color);
-            font-weight: 500;
-            margin-bottom: 0;
+            display: none !important;
         }
 
         .auth-tabs {
@@ -947,7 +962,6 @@
                     <i class="fas fa-image"></i>
                 </div>
                 <h1 class="brand-title">XIDLZ</h1>
-                <p class="brand-subtitle">Beautiful Memories Deserve a Frame</p>
             </div>
 
             <!-- Tab Navigation -->

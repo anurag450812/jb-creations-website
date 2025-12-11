@@ -32,6 +32,30 @@
             padding: 20px;
             padding-top: 100px; /* Space for fixed header */
         }
+        
+        /* Fix mobile header positioning */
+        @media (max-width: 768px) {
+            .site-header,
+            #globalSiteHeader {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                z-index: 2500 !important;
+                background: #EDE7E3 !important;
+                box-shadow: none !important;
+            }
+            
+            .profile-container {
+                padding-top: 80px !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .profile-container {
+                padding-top: 70px !important;
+            }
+        }
 
         .page-header {
             background: linear-gradient(135deg, #82C0CC 0%, #489FB5 100%);
@@ -525,49 +549,5 @@
         });
     </script>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-column footer-brand">
-                <a href="index.html" class="footer-logo">XIDLZ</a>
-                <div class="footer-tagline">Custom Photo Frames & Memories</div>
-                <p class="footer-description">Premium custom frames crafted with care and delivered to your doorstep.</p>
-            </div>
-            <div class="footer-column footer-quick-links">
-                <h3>Quick Links</h3>
-                <ul class="footer-links">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="customize.html">Our Services</a></li>
-                    <li><a href="#gallery">Gallery</a></li>
-                    <li><a href="customize.html">Custom Orders</a></li>
-                    <li><a href="#" onclick="aboutUs(); return false;">About Us</a></li>
-                    <li><a href="#" onclick="contactUs(); return false;">Contact</a></li>
-                </ul>
-            </div>
-            <div class="footer-column footer-contact">
-                <h3>Get In Touch</h3>
-                <div class="contact-item">
-                    <i class="fas fa-phone contact-icon"></i>
-                    <div class="contact-text"><strong>Call Us</strong> 9424772998</div>
-                </div>
-                <div class="contact-item">
-                    <i class="fas fa-envelope contact-icon"></i>
-                    <div class="contact-text"><strong>Email Us</strong> jbcreationssss@gmail.com</div>
-                </div>
-                <!-- Visit Us removed as requested -->
-                <!-- Social Media Links removed as requested -->
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <div class="footer-bottom-content">
-                <div class="copyright">© 2024 XIDLZ. All rights reserved.</div>
-                <div class="footer-bottom-links">
-                    <a href="#privacy-policy">Privacy Policy</a>
-                    <a href="#terms-conditions">Terms & Conditions</a>
-                    <div class="designed-by">Designed with <span class="heart">❤️</span> by XIDLZ</div>
-                </div>
-            </div>
-        </div>
-    </footer>
 </body>
 </html>

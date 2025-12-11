@@ -40,6 +40,34 @@
             position: relative;
             overflow-x: hidden;
         }
+        
+        /* Fix mobile header positioning and overlap */
+        @media (max-width: 768px) {
+            .site-header,
+            #globalSiteHeader {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                z-index: 2500 !important;
+                background: #EDE7E3 !important;
+                box-shadow: none !important;
+            }
+            
+            .cart-page {
+                padding-top: 70px !important;
+            }
+            
+            .cart-container {
+                padding: 20px 15px !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .cart-page {
+                padding-top: 65px !important;
+            }
+        }
 
         .cart-container {
             max-width: 1400px;

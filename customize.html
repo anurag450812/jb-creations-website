@@ -16,7 +16,7 @@
                 left: 0 !important;
                 right: 0 !important;
                 z-index: 2500 !important;
-                background: transparent !important;
+                background: #EDE7E3 !important;
                 box-shadow: none !important;
             }
             
@@ -37,6 +37,7 @@
                 left: 0 !important;
                 right: 0 !important;
                 z-index: 2500 !important;
+                background: #EDE7E3 !important;
             }
             
             body.customize-page {
@@ -78,6 +79,14 @@
         }
         body.room-preview-active .mobile-dropup,
         body.room-preview-active #mobileDropup {
+            display: none !important;
+        }
+        
+        /* Hide texture option completely on mobile */
+        .desktop-card[data-type="texture"],
+        .mobile-texture-grid,
+        .bar-tab[data-target="texture"],
+        .drawer[data-drawer="texture"] {
             display: none !important;
         }
 
@@ -268,16 +277,43 @@
 
         @media (max-width: 768px) {
             .upload-hero-wrapper {
-                padding: 12px;
+                padding: 8px;
             }
 
             .upload-hero-section {
-                padding: 32px 20px;
-                border-radius: 20px;
+                padding: 20px 16px;
+                border-radius: 16px;
+            }
+            
+            .upload-hero-section h1 {
+                font-size: 1.3rem;
+                margin-bottom: 8px;
+            }
+            
+            .upload-hero-section > p {
+                display: none;
+            }
+            
+            .upload-hero-badge {
+                padding: 6px 12px;
+                font-size: 0.75rem;
+                margin-bottom: 12px;
             }
 
             .upload-box-wrapper {
-                padding: 20px;
+                padding: 16px;
+            }
+            
+            .upload-box-wrapper .upload-header h2 {
+                font-size: 1rem;
+            }
+            
+            .upload-box-wrapper .frame {
+                min-height: 180px !important;
+            }
+            
+            .upload-box-wrapper .image-container {
+                min-height: 180px !important;
             }
 
             .instructions-steps {
@@ -297,6 +333,19 @@
 
             .step-arrow {
                 font-size: 1rem;
+            }
+            
+            .upload-instructions {
+                padding: 16px;
+                border-radius: 16px;
+            }
+            
+            .instructions-header {
+                margin-bottom: 12px;
+            }
+            
+            .instructions-header h2 {
+                font-size: 1.1rem;
             }
         }
     </style>
@@ -732,7 +781,6 @@
                         <div class="card-dot" data-card="1"></div>
                         <div class="card-dot" data-card="2"></div>
                         <div class="card-dot" data-card="3"></div>
-                        <div class="card-dot" data-card="4"></div>
                     </div>
                     
                     <button class="card-nav-btn next-card-btn" id="nextCardBtn">

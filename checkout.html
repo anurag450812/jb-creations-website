@@ -40,13 +40,14 @@
 
         /* Fix mobile header positioning - override style.css relative positioning */
         @media (max-width: 600px) {
-            .site-header {
+            .site-header,
+            #globalSiteHeader {
                 position: fixed !important;
                 top: 0 !important;
                 left: 0 !important;
                 right: 0 !important;
                 z-index: 2500 !important;
-                background: transparent !important;
+                background: #EDE7E3 !important;
                 box-shadow: none !important;
             }
             
@@ -56,12 +57,14 @@
         }
         
         @media (max-width: 400px) {
-            .site-header {
+            .site-header,
+            #globalSiteHeader {
                 position: fixed !important;
                 top: 0 !important;
                 left: 0 !important;
                 right: 0 !important;
                 z-index: 2500 !important;
+                background: #EDE7E3 !important;
             }
             
             body {
@@ -171,12 +174,12 @@
             font-style: italic;
         }
 
-        /* Enhanced input validation states */
-        .form-group input:valid:not(:placeholder-shown) {
+        /* Enhanced input validation states - only show after user interaction */
+        .form-group input.touched:valid:not(:placeholder-shown) {
             border-color: var(--success-color);
         }
 
-        .form-group input:invalid:not(:placeholder-shown) {
+        .form-group input.touched:invalid:not(:placeholder-shown) {
             border-color: var(--error-color);
         }
 
