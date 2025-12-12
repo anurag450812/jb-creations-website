@@ -15,6 +15,15 @@ class SupportChat {
         this.isInitializing = false;
         this.initRetries = 0;
         this.maxRetries = 10;
+        this.forceInit = options.forceInit || false; // Allow forced initialization for contact link
+        this.hideFloatingButton = options.hideFloatingButton || false; // Hide the floating button
+        
+        // Only show floating button on my-orders page, unless forceInit is true
+        const currentPage = window.location.pathname.toLowerCase();
+        if (!currentPage.includes('my-orders') && !this.forceInit) {
+            console.log('💬 Support Chat: Floating button disabled on this page (only visible on my-orders page)');
+            return;
+        }
         
         this.init();
     }
@@ -25,6 +34,15 @@ class SupportChat {
 
         // Create chat widget elements
         this.createChatWidget();
+        
+        // Hide floating button if specified
+        if (this.hideFloatingButton) {
+            const toggleBtn = document.getElementById('chat-toggle-btn');
+            if (toggleBtn) {
+                toggleBtn.style.display = 'none';
+            }
+        }
+        
         this.attachEventListeners();
         
         // Try to initialize Firebase connection

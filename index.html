@@ -877,7 +877,7 @@
             <div class="hero-badge">
                 ✨ Premium Quality Frames
             </div>
-            <h1>Transform Your Memories Into Art 🖼️</h1>
+            <h1>Transform Your Memories Into Art</h1>
             <p>Custom photo frames crafted with love. Upload, customize, and get stunning wall art delivered to your doorstep.</p>
             <a href="customize.html" class="hero-cta">
                 <i class="fas fa-palette"></i>
@@ -890,7 +890,7 @@
         <section class="trust-bar">
             <div class="trust-item animate-in animate-delay-1">
                 <span class="trust-emoji">😊</span>
-                <span class="trust-value">5000+</span>
+                <span class="trust-value">100000+</span>
                 <span class="trust-label">Happy Customers</span>
             </div>
             <div class="trust-item animate-in animate-delay-2">
@@ -925,8 +925,8 @@
                 <span class="feature-pill-text">Secure Payment</span>
             </div>
             <div class="feature-pill">
-                <span class="feature-pill-icon">🎁</span>
-                <span class="feature-pill-text">Gift Wrapping Available</span>
+                <span class="feature-pill-icon">📦</span>
+                <span class="feature-pill-text">Secure Packaging</span>
             </div>
         </section>
 
@@ -1190,26 +1190,21 @@
         <div class="footer-content">
             <div class="footer-column footer-brand">
                 <a href="index.html" class="footer-logo" style="color: #FFA62B !important;">XIDLZ</a>
-                <div class="footer-tagline">Custom Photo Frames</div>
             </div>
 
             <div class="footer-column footer-quick-links">
                 <h3><i class="fas fa-link"></i> Quick Links</h3>
                 <ul class="footer-links footer-links-icons">
-                    <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
-                    <li><a href="customize.html"><i class="fas fa-paint-brush"></i> Customize</a></li>
-                    <li><a href="#" onclick="contactUs(); return false;"><i class="fas fa-envelope"></i> Contact</a></li>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="customize.html">Customize</a></li>
+                    <li><a href="#" onclick="openContactChat(); return false;">Contact Us</a></li>
+                    <li><a href="about-us.html">About Us</a></li>
+                    <li><a href="terms-and-conditions.html">Terms & Conditions</a></li>
+                    <li><a href="cart.html">Cart</a></li>
+                    <li><a href="faq.html">FAQ</a></li>
+                    <li><a href="my-profile.html">My Profile</a></li>
+                    <li><a href="my-orders.html">My Orders</a></li>
                 </ul>
-            </div>
-
-            <div class="footer-column footer-contact">
-                <h3><i class="fas fa-phone-alt"></i> Contact</h3>
-                <div class="contact-item-compact">
-                    <a href="tel:9424772998"><i class="fas fa-phone"></i> 9424772998</a>
-                </div>
-                <div class="contact-item-compact">
-                    <a href="mailto:jbcreationssss@gmail.com"><i class="fas fa-envelope"></i> Email Us</a>
-                </div>
             </div>
         </div>
 
@@ -1224,6 +1219,31 @@
             </div>
         </div>
     </footer>
+
+    <!-- Support Chat Widget -->
+    <script src="support-chat.js?v=1.1"></script>
+    <script>
+        // Initialize support chat on homepage (floating button is hidden, but can be opened via Contact Us)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Chat will auto-initialize on my-orders page
+            // On other pages, it initializes on demand via openContactChat
+        });
+        
+        // Function to open contact chat from footer link
+        function openContactChat() {
+            if (window.supportChat && window.supportChat.openChat) {
+                window.supportChat.openChat();
+            } else {
+                // Initialize chat with forceInit and hideFloatingButton options
+                window.supportChat = new SupportChat({ forceInit: true, hideFloatingButton: true });
+                setTimeout(() => {
+                    if (window.supportChat && window.supportChat.openChat) {
+                        window.supportChat.openChat();
+                    }
+                }, 300);
+            }
+        }
+    </script>
 
     <!-- Service Worker Registration -->
     <script>

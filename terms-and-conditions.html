@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms and Conditions - Xidlz</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Terms and Conditions Page Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #16697A;
+            --primary-light: #489FB5;
+            --primary-lighter: #82C0CC;
+            --accent: #FFA62B;
+            --white: #FFFFFF;
+            --off-white: #EDE7E3;
+            --text-dark: #1a3a42;
+            --text-muted: #5a7a82;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--off-white);
+            color: var(--text-dark);
+            line-height: 1.7;
+            padding-top: 56px;
+        }
+
+        /* Header */
+        .terms-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: var(--off-white);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 10px rgba(22, 105, 122, 0.1);
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(22, 105, 122, 0.1);
+        }
+
+        .header-title {
+            flex: 1;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-right: 60px;
+        }
+
+        /* Main Container */
+        .terms-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px 20px 60px;
+        }
+
+        /* Hero Section */
+        .terms-hero {
+            background: linear-gradient(145deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 24px;
+            padding: 50px 40px;
+            text-align: center;
+            color: var(--white);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .terms-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -30%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .terms-hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .terms-hero p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Disclaimer */
+        .disclaimer {
+            background: rgba(255, 166, 43, 0.1);
+            border-left: 4px solid var(--accent);
+            padding: 16px 20px;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Table of Contents */
+        .toc-section {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 6px 25px rgba(22, 105, 122, 0.08);
+        }
+
+        .toc-section h3 {
+            font-size: 1.25rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toc-section h3 i {
+            color: var(--accent);
+        }
+
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .toc-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: rgba(22, 105, 122, 0.04);
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .toc-link:hover {
+            background: rgba(22, 105, 122, 0.08);
+            transform: translateX(4px);
+        }
+
+        .toc-link i {
+            color: var(--primary);
+            font-size: 0.85rem;
+        }
+
+        /* Content Sections */
+        .content-section {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 24px;
+            box-shadow: 0 6px 25px rgba(22, 105, 122, 0.08);
+        }
+
+        .content-section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(22, 105, 122, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .content-section h2 i {
+            color: var(--accent);
+            font-size: 1.25rem;
+        }
+
+        .content-section h3 {
+            font-size: 1.15rem;
+            color: var(--primary);
+            margin: 24px 0 12px;
+        }
+
+        .content-section p {
+            font-size: 1rem;
+            margin-bottom: 14px;
+            color: var(--text-dark);
+        }
+
+        .content-section ul {
+            margin: 14px 0;
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .content-section ul li {
+            padding: 10px 16px 10px 40px;
+            margin-bottom: 8px;
+            background: rgba(22, 105, 122, 0.03);
+            border-radius: 10px;
+            position: relative;
+            font-size: 0.95rem;
+        }
+
+        .content-section ul li::before {
+            content: '\f058';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 14px;
+            color: var(--accent);
+        }
+
+        /* Contact Box */
+        .contact-methods {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .contact-card {
+            background: linear-gradient(135deg, rgba(22, 105, 122, 0.06) 0%, rgba(72, 159, 181, 0.06) 100%);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(22, 105, 122, 0.1);
+        }
+
+        .contact-card i {
+            font-size: 1.75rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .contact-card h4 {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .contact-card a {
+            font-size: 1.1rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Highlight Box */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 166, 43, 0.08) 0%, rgba(255, 166, 43, 0.04) 100%);
+            border: 1px solid rgba(255, 166, 43, 0.2);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin: 20px 0;
+        }
+
+        .highlight-box p {
+            margin: 0;
+            color: var(--text-dark);
+        }
+
+        .highlight-box strong {
+            color: var(--primary);
+        }
+
+        /* Note Box */
+        .note-box {
+            background: rgba(22, 105, 122, 0.06);
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            border-radius: 0 12px 12px 0;
+            margin: 16px 0;
+        }
+
+        .note-box p {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        /* Warning Box */
+        .warning-box {
+            background: rgba(220, 53, 69, 0.08);
+            border-left: 4px solid #dc3545;
+            padding: 16px 20px;
+            border-radius: 0 12px 12px 0;
+            margin: 16px 0;
+        }
+
+        .warning-box p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #721c24;
+        }
+
+        /* Last Updated */
+        .last-updated {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 52px;
+            }
+
+            .terms-header {
+                height: 52px;
+            }
+
+            .header-title {
+                font-size: 1.1rem;
+                margin-right: 40px;
+            }
+
+            .terms-hero {
+                padding: 35px 24px;
+                border-radius: 20px;
+            }
+
+            .terms-hero h1 {
+                font-size: 1.75rem;
+            }
+
+            .terms-hero p {
+                font-size: 1rem;
+            }
+
+            .toc-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .content-section {
+                padding: 25px 18px;
+                border-radius: 16px;
+            }
+
+            .content-section h2 {
+                font-size: 1.3rem;
+            }
+
+            .contact-methods {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .terms-container {
+                padding: 20px 14px 40px;
+            }
+
+            .terms-hero {
+                padding: 28px 18px;
+            }
+
+            .terms-hero h1 {
+                font-size: 1.5rem;
+            }
+
+            .back-btn span {
+                display: none;
+            }
+
+            .header-title {
+                margin-right: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="terms-header">
+        <a href="index.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back</span>
+        </a>
+        <div class="header-title">Terms & Conditions</div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="terms-container">
+        <!-- Hero Section -->
+        <section class="terms-hero">
+            <h1>Terms and Conditions</h1>
+            <p>Please read these terms carefully before using our services. By accessing our website, you agree to comply with these terms.</p>
+        </section>
+
+        <!-- Disclaimer -->
+        <div class="disclaimer">
+            <strong>Disclaimer:</strong> In the event of any discrepancy or variation, the English version will take precedence over the translated version.
+        </div>
+
+        <!-- Table of Contents -->
+        <section class="toc-section">
+            <h3><i class="fas fa-list"></i> Quick Navigation</h3>
+            <div class="toc-grid">
+                <a href="#introduction" class="toc-link"><i class="fas fa-chevron-right"></i> Introduction</a>
+                <a href="#website-use" class="toc-link"><i class="fas fa-chevron-right"></i> Website Use</a>
+                <a href="#intellectual-property" class="toc-link"><i class="fas fa-chevron-right"></i> Intellectual Property</a>
+                <a href="#account" class="toc-link"><i class="fas fa-chevron-right"></i> Account Registration</a>
+                <a href="#products" class="toc-link"><i class="fas fa-chevron-right"></i> Products & Pricing</a>
+                <a href="#payment" class="toc-link"><i class="fas fa-chevron-right"></i> Payment Policy</a>
+                <a href="#shipping" class="toc-link"><i class="fas fa-chevron-right"></i> Shipping & Delivery</a>
+                <a href="#cancellation" class="toc-link"><i class="fas fa-chevron-right"></i> Cancellation Policy</a>
+                <a href="#returns" class="toc-link"><i class="fas fa-chevron-right"></i> Returns & Refunds</a>
+                <a href="#privacy" class="toc-link"><i class="fas fa-chevron-right"></i> Privacy Policy</a>
+                <a href="#cookies" class="toc-link"><i class="fas fa-chevron-right"></i> Cookies Policy</a>
+                <a href="#offers" class="toc-link"><i class="fas fa-chevron-right"></i> Offers & Discounts</a>
+            </div>
+        </section>
+
+        <!-- Introduction -->
+        <section class="content-section" id="introduction">
+            <h2><i class="fas fa-handshake"></i> Introduction</h2>
+            <p>
+                Welcome to Xidlz ("we," "our," or "us"). By accessing, browsing, or making purchases from our website, 
+                you ("customer," "user," "you") agree to comply fully with these terms and conditions. 
+                We encourage you to review these carefully before utilizing our services.
+            </p>
+        </section>
+
+        <!-- Use of Website -->
+        <section class="content-section" id="website-use">
+            <h2><i class="fas fa-globe"></i> Use of the Website</h2>
+            <p>
+                You must use our website strictly for lawful purposes and in adherence to all applicable laws and 
+                regulations in India. You agree not to misuse the website, interfere with its operations, or attempt 
+                unauthorized access to our servers or user accounts.
+            </p>
+            <p>
+                In no event shall Xidlz be liable for any indirect, consequential, incidental, special, or punitive 
+                damages arising from or related to your use of our website, products, or services.
+            </p>
+        </section>
+
+        <!-- Intellectual Property -->
+        <section class="content-section" id="intellectual-property">
+            <h2><i class="fas fa-copyright"></i> Intellectual Property Rights</h2>
+            <p>
+                All content available on our website, including text, graphics, images, logos, designs, and digital downloads, 
+                is the property of Xidlz or its licensors. Any unauthorized use, reproduction, or distribution is 
+                strictly prohibited and may result in legal action.
+            </p>
+        </section>
+
+        <!-- Account Registration -->
+        <section class="content-section" id="account">
+            <h2><i class="fas fa-user-shield"></i> Account Registration & Security</h2>
+            <p>
+                To place orders, you may register an account on our website. You agree to provide accurate, complete, 
+                and current information. You are responsible for safeguarding your account credentials and agree to 
+                notify us immediately of any unauthorized access or security breaches.
+            </p>
+        </section>
+
+        <!-- Products & Pricing -->
+        <section class="content-section" id="products">
+            <h2><i class="fas fa-box-open"></i> Product Information & Availability</h2>
+            <p>
+                We strive for accuracy in our product listings, including descriptions, images, pricing, and stock availability. 
+                However, we do not guarantee that all content is error-free or current. We reserve the right to correct 
+                errors or inaccuracies at any time without prior notice.
+            </p>
+
+            <h3>Pricing & Taxes</h3>
+            <p>
+                All product prices displayed are inclusive of applicable GST unless otherwise specified. 
+                Additional charges like shipping and handling, if applicable, will be clearly outlined during checkout.
+            </p>
+        </section>
+
+        <!-- Payment Policy -->
+        <section class="content-section" id="payment">
+            <h2><i class="fas fa-credit-card"></i> Payment Policy</h2>
+            <p>
+                Payments must be made in full at checkout using approved methods such as credit/debit cards, net banking, 
+                UPI, and other digital wallets. All orders placed are subject to acceptance and product availability. 
+                We reserve the right to cancel or refuse any order at our discretion.
+            </p>
+            <p>
+                Payments are securely processed through reputable payment gateways. We do not store sensitive payment 
+                information on our servers. If your payment is declined, the order will not be processed, and we hold 
+                no liability for any loss arising from declined transactions.
+            </p>
+            <div class="note-box">
+                <p>
+                    <strong>Legal Note:</strong> In the event where Xidlz must commence legal action to enforce any terms 
+                    of this agreement, the buyer must agree to pay reasonable legal fees and costs.
+                </p>
+            </div>
+        </section>
+
+        <!-- Shipping & Delivery -->
+        <section class="content-section" id="shipping">
+            <h2><i class="fas fa-truck"></i> Shipping & Delivery Policy</h2>
+            <p>
+                We deliver products across India via reputed third-party courier services. Shipping usually takes 
+                <strong>5–7 business days</strong> for metro and major cities, and up to <strong>14 business days</strong> 
+                for rural areas. Estimated delivery times provided are indicative and not guaranteed.
+            </p>
+            <p>
+                We are not responsible for delays caused by courier partners, weather conditions, public holidays, 
+                or other unforeseen circumstances.
+            </p>
+            <div class="highlight-box">
+                <p>
+                    <strong>Damage During Transit:</strong> We will provide a replacement if your product is damaged 
+                    during transit due to improper handling by the courier service. The replacement process will take 
+                    an additional 5-7 business days from the date it is issued.
+                </p>
+            </div>
+            <div class="warning-box">
+                <p>
+                    <strong>Warning:</strong> Strict legal action will be taken against any unlawful attempts to misuse 
+                    the replacement service.
+                </p>
+            </div>
+        </section>
+
+        <!-- Cancellation Policy -->
+        <section class="content-section" id="cancellation">
+            <h2><i class="fas fa-times-circle"></i> Cancellation Policy</h2>
+            <p>
+                Order cancellations must be requested within <strong>24 hours</strong> of placing the order by contacting 
+                us through any of the following methods:
+            </p>
+
+            <div class="contact-methods">
+                <div class="contact-card">
+                    <i class="fas fa-phone"></i>
+                    <h4>Contact Via Call</h4>
+                    <a href="tel:9424772998">9424772998</a>
+                </div>
+                <div class="contact-card">
+                    <i class="fab fa-whatsapp"></i>
+                    <h4>Contact Via WhatsApp</h4>
+                    <a href="https://wa.me/919424772998">9424772998</a>
+                </div>
+            </div>
+
+            <p>Our dedicated customer support team is available from <strong>9 AM to 9 PM, 7 days a week</strong>, to assist you.</p>
+
+            <div class="note-box">
+                <p>
+                    <strong>Please Note:</strong> Cancellation requests received after 24 hours of placing the order or 
+                    after the order has been sent to production will always be reviewed on a case-by-case basis, 
+                    but a refund is not always guaranteed.
+                </p>
+            </div>
+        </section>
+
+        <!-- Return & Refund Policy -->
+        <section class="content-section" id="returns">
+            <h2><i class="fas fa-undo-alt"></i> Return & Refund Policy</h2>
+            <p>
+                Xidlz offers a hassle-free <strong>7-day return policy</strong>. We're committed to providing you with 
+                a seamless shopping experience. However, customized products cannot be returned or exchanged unless 
+                they are damaged, defective, or incorrectly printed due to our error.
+            </p>
+            <p>
+                We strive to deliver a product that closely matches your order. To ensure accuracy, we provide a 
+                detailed preview option before you finalize your purchase. It is the buyer's responsibility to review 
+                and verify all details, including spelling, alignment, and the placement of pictures or text, before 
+                confirming the order.
+            </p>
+
+            <h3>Return Conditions</h3>
+            <ul>
+                <li>All return requests must be submitted within 24 hours of receiving the product, along with order ID, photographic evidence, and reason for return.</li>
+                <li>Refunds, where applicable, will be processed within 7-10 business days from the date of approval.</li>
+                <li>Products must be returned in substantially the same condition as purchased, with tags intact and in original packaging.</li>
+                <li>Refunds will only be provided if the product received is completely different from what was ordered, damaged, defective, or has printing issues.</li>
+                <li>The returned product must reach us within 7 days of initiating the return request.</li>
+                <li>The buyer is responsible for covering the postal charges for returning the product.</li>
+                <li>Refund or replacement is subject to inspection and verification by us.</li>
+                <li>Damages caused by the buyer's negligence or improper use will not be covered.</li>
+                <li>Products purchased with discount coupons or under promotional schemes may be exempt from our 7-day returns policy.</li>
+                <li>The refund mode will always be the same as the original payment source.</li>
+            </ul>
+
+            <div class="warning-box">
+                <p>
+                    Print products are susceptible to manipulation. A refund will only be processed if the product, 
+                    along with its original packaging, is returned in its entirety and shows no signs of unlawful tampering.
+                </p>
+            </div>
+        </section>
+
+        <!-- Privacy Policy -->
+        <section class="content-section" id="privacy">
+            <h2><i class="fas fa-lock"></i> Privacy Policy</h2>
+            <p>
+                Xidlz values and respects its customer's privacy in keeping their information secure. We collect 
+                customer information to provide a better shopping experience and to communicate about our new products, 
+                promotions, and services.
+            </p>
+            <p>
+                We are committed to protecting your privacy and confidentiality with respect to the information we 
+                collect during your order. Your personal information is not shared with third parties unless required 
+                for order fulfillment.
+            </p>
+
+            <h3>Information We Collect</h3>
+            <ul>
+                <li>Full name, email address, and mailing address</li>
+                <li>Phone number and credit/debit card details for order processing</li>
+                <li>Order history and product preferences to enhance your experience</li>
+            </ul>
+
+            <h3>How We Use Your Information</h3>
+            <p>
+                Your information is used securely to enhance your experience in future transactions. We use your 
+                details to process orders, send email updates about order status, or contact you via phone. 
+                During registration, you will be automatically subscribed to receive email updates unless you opt out.
+            </p>
+
+            <h3>Third-Party Limitations</h3>
+            <p>
+                We communicate with third parties to assist us in managing and maintaining customer information for 
+                order fulfillment. However, we do not authorize those third parties to use your information for any 
+                other purpose.
+            </p>
+        </section>
+
+        <!-- Upload Content Policy -->
+        <section class="content-section" id="upload-policy">
+            <h2><i class="fas fa-upload"></i> Uploaded Content Copyright Policy</h2>
+            <p>Before uploading content to place an order, buyers must follow these guidelines:</p>
+            <ul>
+                <li>Only use or upload images, icons, logos, pictures, text, or any file that are either owned by you or free to use including for commercial purposes (copyright free).</li>
+                <li>Do not upload content that infringes copyright, including any copyrighted material regardless of file format.</li>
+                <li>Do not upload content of an explicit nature, including vulgarity, nudity, or any inappropriate material.</li>
+            </ul>
+
+            <div class="note-box">
+                <p>
+                    Once an order is completed, any pictures or uploaded content related to that order will be removed 
+                    from the Xidlz server after 14 days. If you wish to reorder the same product with the same picture, 
+                    you will need to re-upload it.
+                </p>
+            </div>
+
+            <div class="warning-box">
+                <p>
+                    Xidlz is not liable if any individual uploads or uses content that results in copyright infringement. 
+                    Any violation of our Content Copyright Compliance Policy will hold the individual accountable under 
+                    the Copyright Law of India.
+                </p>
+            </div>
+        </section>
+
+        <!-- Cookies Policy -->
+        <section class="content-section" id="cookies">
+            <h2><i class="fas fa-cookie-bite"></i> Cookies Policy</h2>
+            <p>
+                A cookie is a small data file that websites often store on your computer's hard drive when you visit them. 
+                Xidlz uses cookies; however, we do not store personally identifiable information in them.
+            </p>
+            <p>
+                We use cookies to enhance your shopping experience. When you visit Xidlz, your cookie helps us track 
+                the items you have shopped with us. If you have saved your details with us, your cookie allows us to 
+                recognize you when you return and provides easy access to your shopping account information.
+            </p>
+            <p>
+                You can refuse cookies by disabling them in your browser settings. However, if you disable cookies, 
+                we will not be able to track your order or enable you to make a purchase on our website.
+            </p>
+        </section>
+
+        <!-- Children's Privacy -->
+        <section class="content-section" id="children">
+            <h2><i class="fas fa-child"></i> Children's Privacy Policy</h2>
+            <p>
+                Xidlz is committed to the safety of children on the internet. In accordance with the Children's Online 
+                Privacy Protection Act of 1998, Xidlz will never knowingly request personally identifiable information 
+                from anyone under the age of 13 without prior verifiable parental consent.
+            </p>
+            <p>
+                If we become aware that a customer is under the age of 13 and has signed up without prior verifiable 
+                parental consent, we will promptly remove their personally identifiable information from our database.
+            </p>
+        </section>
+
+        <!-- Offers & Discounts -->
+        <section class="content-section" id="offers">
+            <h2><i class="fas fa-tags"></i> Offers & Discounts</h2>
+            
+            <h3>Cashback Offer</h3>
+            <ul>
+                <li>The cashback offer amount will not be credited to your bank. Instead, it will be added to your Xidlz wallet for future purchases.</li>
+                <li>The cashback amount will be credited within 24 hours of order delivery.</li>
+                <li>The cashback amount must be used within one year from the date of accrual, otherwise it will expire.</li>
+                <li>Xidlz reserves the right to modify or cancel any offer without prior notice.</li>
+            </ul>
+
+            <h3>Referral Program</h3>
+            <ul>
+                <li>Invite friends and family using your unique 'Send Invite' link.</li>
+                <li>New users receive a flat ₹75 discount on their registration and first order.</li>
+                <li>Once their order is completed, you'll receive ₹100 in your Xidlz wallet.</li>
+                <li>All invited users must be completely new to Xidlz and should not have used the platform before.</li>
+            </ul>
+
+            <div class="warning-box">
+                <p>
+                    <strong>Important:</strong> All offers and discounts provided by Xidlz will be listed on our official 
+                    website (xidlz.com) or official social media platforms. Do not rely on offers found on third-party 
+                    websites or applications.
+                </p>
+            </div>
+        </section>
+
+        <!-- Termination -->
+        <section class="content-section" id="termination">
+            <h2><i class="fas fa-ban"></i> Termination & Indemnification</h2>
+            
+            <h3>Termination of Access</h3>
+            <p>
+                We reserve the right to terminate or suspend your access without notice for misuse or violations of these terms.
+            </p>
+
+            <h3>Indemnification</h3>
+            <p>
+                You agree to indemnify Xidlz from any claims, damages, or expenses arising from your misuse of the 
+                website or breach of these terms.
+            </p>
+
+            <h3>Force Majeure</h3>
+            <p>
+                We are not liable for delays or failures due to circumstances beyond our control, such as natural 
+                disasters, pandemics, or strikes.
+            </p>
+        </section>
+
+        <!-- Last Updated -->
+        <div class="last-updated">
+            <p>Last updated: December 2024</p>
+            <p>If you have any questions about these terms, please contact us via our support chat.</p>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="global-header.js"></script>
+</body>
+</html>

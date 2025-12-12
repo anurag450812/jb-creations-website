@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - Xidlz</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #16697A;
+            --primary-light: #489FB5;
+            --primary-lighter: #82C0CC;
+            --accent: #FFA62B;
+            --white: #FFFFFF;
+            --off-white: #EDE7E3;
+            --text-dark: #1a3a42;
+            --text-muted: #5a7a82;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--off-white);
+            color: var(--text-dark);
+            line-height: 1.7;
+            padding-top: 56px;
+        }
+
+        /* Header */
+        .faq-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: var(--off-white);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 10px rgba(22, 105, 122, 0.1);
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(22, 105, 122, 0.1);
+        }
+
+        .header-title {
+            flex: 1;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-right: 60px;
+        }
+
+        /* Main Container */
+        .faq-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px 20px 60px;
+        }
+
+        /* Category Header */
+        .category-header {
+            text-align: center;
+            padding: 30px 20px 40px;
+        }
+
+        .category-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .category-header .question-count {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        /* Search in Category */
+        .category-search {
+            display: flex;
+            max-width: 600px;
+            margin: 0 auto 40px;
+            background: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 15px rgba(22, 105, 122, 0.1);
+        }
+
+        .category-search input {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            font-size: 1rem;
+            color: var(--text-dark);
+            background: var(--white);
+        }
+
+        .category-search input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .category-search input:focus {
+            outline: none;
+        }
+
+        .category-search button {
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 14px 24px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .category-search button:hover {
+            background: var(--primary-light);
+        }
+
+        /* FAQ Accordion */
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .faq-item {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(22, 105, 122, 0.05);
+            transition: box-shadow 0.3s;
+        }
+
+        .faq-item:hover {
+            box-shadow: 0 4px 20px rgba(22, 105, 122, 0.1);
+        }
+
+        .faq-question {
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            gap: 16px;
+        }
+
+        .faq-question h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            flex: 1;
+        }
+
+        .faq-toggle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--off-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+
+        .faq-toggle i {
+            color: var(--primary);
+            font-size: 0.9rem;
+            transition: transform 0.3s;
+        }
+
+        .faq-item.active .faq-toggle {
+            background: var(--primary);
+        }
+
+        .faq-item.active .faq-toggle i {
+            color: var(--white);
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .faq-answer-content {
+            padding: 0 24px 24px;
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .faq-answer-content p {
+            margin-bottom: 12px;
+        }
+
+        .faq-answer-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .faq-answer-content ul {
+            padding-left: 20px;
+            margin: 12px 0;
+        }
+
+        .faq-answer-content li {
+            margin-bottom: 8px;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 1000px;
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .no-results i {
+            font-size: 3rem;
+            color: var(--primary-lighter);
+            margin-bottom: 16px;
+        }
+
+        .no-results p {
+            font-size: 1.1rem;
+        }
+
+        /* Back to FAQ Button */
+        .back-to-faq {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 40px;
+            padding: 14px 28px;
+            background: var(--primary);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .back-to-faq:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .category-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .category-search {
+                flex-direction: column;
+            }
+
+            .faq-question {
+                padding: 16px 20px;
+            }
+
+            .faq-question h3 {
+                font-size: 0.95rem;
+            }
+
+            .faq-answer-content {
+                padding: 0 20px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="faq-header">
+        <a href="faq.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back to FAQ</span>
+        </a>
+        <div class="header-title" id="headerTitle">FAQ</div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="faq-container">
+        <!-- Category Header -->
+        <div class="category-header">
+            <h1 id="categoryTitle">Loading...</h1>
+            <p class="question-count" id="questionCount"></p>
+        </div>
+
+        <!-- Search in Category -->
+        <div class="category-search">
+            <input type="text" id="searchInput" placeholder="Search in this category..." onkeyup="filterQuestions()">
+            <button onclick="filterQuestions()"><i class="fas fa-search"></i></button>
+        </div>
+
+        <!-- FAQ List -->
+        <div class="faq-list" id="faqList">
+            <!-- FAQ items will be loaded here -->
+        </div>
+
+        <!-- No Results Message -->
+        <div class="no-results" id="noResults" style="display: none;">
+            <i class="fas fa-search"></i>
+            <p>No questions found matching your search.</p>
+        </div>
+
+        <!-- Back to FAQ -->
+        <div style="text-align: center;">
+            <a href="faq.html" class="back-to-faq">
+                <i class="fas fa-arrow-left"></i>
+                View All Categories
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // FAQ Data by Category
+        const faqData = {
+            customization: {
+                title: "Product Customization",
+                questions: [
+                    {
+                        q: "What Happens If Low Quality Files Are Uploaded?",
+                        a: "If you upload a low-resolution image, our system will display a warning. For best results, we recommend uploading images with at least 300 DPI resolution. Low quality images may appear pixelated or blurry when printed on larger frame sizes."
+                    },
+                    {
+                        q: "What is Product Customization?",
+                        a: "Product customization allows you to personalize your photo frame by uploading your own images, choosing frame sizes, colors, textures, and adding text. You can preview exactly how your final product will look before ordering."
+                    },
+                    {
+                        q: "About Our Customization Tool",
+                        a: "Our easy-to-use customization tool lets you upload photos, adjust positioning, choose from various frame styles and sizes, and see a real-time preview. The tool is designed to be intuitive so you can create your perfect frame in minutes."
+                    },
+                    {
+                        q: "Guidelines For Customizing Products",
+                        a: "<p>For the best customization experience:</p><ul><li>Use high-resolution images (300 DPI or higher)</li><li>Supported formats: JPG, JPEG, PNG, WebP</li><li>Ensure important elements aren't too close to edges</li><li>Review the preview carefully before adding to cart</li><li>Keep text concise for better visual appeal</li></ul>"
+                    },
+                    {
+                        q: "Before processing my order, will I receive a proof?",
+                        a: "Yes! Our customization tool provides a real-time preview of your product. What you see in the preview is exactly what you'll receive. You can review and adjust your design before placing the order."
+                    }
+                ]
+            },
+            communication: {
+                title: "Communication and Feedback",
+                questions: [
+                    {
+                        q: "How to Communicate With Us?",
+                        a: "You can reach us through WhatsApp at +91 9392577498, email at support@xidlz.com, or use the Contact Us link on our website. We're available Monday to Saturday, 10 AM to 7 PM IST."
+                    },
+                    {
+                        q: "How can I leave Feedback?",
+                        a: "We'd love to hear from you! You can leave feedback through WhatsApp, email us at support@xidlz.com, or share your experience on our social media pages. Your feedback helps us improve!"
+                    },
+                    {
+                        q: "How Much Time Will It Take To Respond After Placing A Query?",
+                        a: "We typically respond within 2-4 hours during business hours (10 AM - 7 PM IST, Monday to Saturday). For urgent queries, WhatsApp is the fastest way to reach us."
+                    },
+                    {
+                        q: "Xidlz Contact Information",
+                        a: "<p>You can reach us through:</p><ul><li>WhatsApp: +91 9392577498</li><li>Email: support@xidlz.com</li><li>Instagram: @xidlz_official</li><li>Business Hours: Mon-Sat, 10 AM - 7 PM IST</li></ul>"
+                    },
+                    {
+                        q: "How Can I Trust This Website?",
+                        a: "Xidlz is a trusted brand with thousands of happy customers across India. We use secure payment gateways (Razorpay), offer quality products with satisfaction guarantee, and have genuine customer reviews. Our transparent policies and responsive customer support ensure a safe shopping experience."
+                    }
+                ]
+            },
+            order: {
+                title: "How to Place Order?",
+                questions: [
+                    {
+                        q: "Can I Add More to an Order I've Just Placed?",
+                        a: "Unfortunately, once an order is placed, items cannot be added as production begins quickly. You can place a new order for additional items. Contact us within 2 hours if you need to modify your original order."
+                    },
+                    {
+                        q: "How Much Time Will it Take To Receive My Order?",
+                        a: "Standard delivery takes 5-7 business days. This includes 2-3 days for production and 3-4 days for shipping, depending on your location. You'll receive tracking updates via SMS."
+                    },
+                    {
+                        q: "How Will I Be Billed for GST on Different Products?",
+                        a: "GST is included in the displayed price. You'll receive a GST invoice via email after your order is confirmed. The invoice will show the breakup of product cost and applicable GST."
+                    },
+                    {
+                        q: "I Cannot Track My Order Or My Order Is Missing.",
+                        a: "Go to 'My Orders' to check your order status and tracking details. If tracking isn't updated or you can't find your order, contact us via WhatsApp with your order ID and we'll investigate immediately."
+                    },
+                    {
+                        q: "What Is The Process To Place An Order from Xidlz?",
+                        a: "<p>Placing an order is simple:</p><ul><li>Browse and select your product</li><li>Upload your photo and customize</li><li>Preview and add to cart</li><li>Proceed to checkout</li><li>Enter delivery details</li><li>Complete payment</li><li>Receive order confirmation</li></ul>"
+                    },
+                    {
+                        q: "What Happens After Placing My Order?",
+                        a: "After placing your order, you'll receive an order confirmation via SMS and email. Our team will then prepare your customized product (2-3 days), ship it with a tracking number, and you'll receive delivery updates throughout."
+                    },
+                    {
+                        q: "Do You Accept Bulk Order? Any Discounts Available?",
+                        a: "Yes, we accept bulk orders! For orders of 10+ items, contact us via WhatsApp or email for special bulk pricing. Corporate and event orders also qualify for discounts."
+                    }
+                ]
+            },
+            payment: {
+                title: "Payment and Security",
+                questions: [
+                    {
+                        q: "How Will I Get My Refund Amount?",
+                        a: "Refunds are processed within 5-7 business days after approval. The amount will be credited to your original payment method. You'll receive a confirmation email once the refund is initiated."
+                    },
+                    {
+                        q: "What If I Am Not Available When The Courier Boy Delivers The Product?",
+                        a: "The courier will attempt delivery 2-3 times. You'll receive a call/SMS before delivery. If unavailable, you can reschedule or pick up from the nearest courier hub."
+                    },
+                    {
+                        q: "What Are The Payment Options Available?",
+                        a: "We accept UPI (PhonePe, GPay, Paytm), Credit/Debit Cards (Visa, Mastercard, RuPay), Net Banking, and popular wallets. All payments are processed securely through Razorpay."
+                    },
+                    {
+                        q: "What Should I Do If Payment Transaction Fails?",
+                        a: "If payment fails, no amount is deducted. Simply try again with the same or a different payment method. If money was deducted but order wasn't placed, it will be automatically refunded within 5-7 business days."
+                    },
+                    {
+                        q: "My Bank Charged Me Twice for The Transaction What Should I Do?",
+                        a: "Contact us immediately with your transaction details and bank statement screenshot. We'll verify with our payment gateway and ensure the duplicate charge is refunded within 5-7 business days."
+                    },
+                    {
+                        q: "Are The Online Transactions Secured?",
+                        a: "Absolutely! We use Razorpay, a PCI-DSS compliant payment gateway. Your card details are never stored on our servers. All transactions are encrypted with SSL technology for complete security."
+                    },
+                    {
+                        q: "Amount Is Deducted From My Bank Account, But I Haven't Received Confirmation Mail?",
+                        a: "Don't worry! Check your spam folder first. If you still don't see the confirmation, contact us with your transaction ID. We'll verify the payment and confirm your order status."
+                    },
+                    {
+                        q: "I Have Placed Order Twice With Xidlz By Mistake, What Should I Do?",
+                        a: "Contact us immediately via WhatsApp with both order IDs. If the duplicate order hasn't entered production, we can cancel it and process a full refund."
+                    }
+                ]
+            },
+            shipping: {
+                title: "Shipping and Delivery",
+                questions: [
+                    {
+                        q: "Can I Change the Delivery Address After Placing the Order?",
+                        a: "Address changes are possible before the order is shipped. Contact us immediately via WhatsApp with your order ID and new address. Once shipped, address changes aren't possible."
+                    },
+                    {
+                        q: "What Are the Shipping Charges?",
+                        a: "Shipping is FREE on all orders above ₹499. For orders below ₹499, a flat shipping fee of ₹49 is charged."
+                    },
+                    {
+                        q: "What If I Am Not Available When The Courier Boy Delivers The Product?",
+                        a: "The courier will attempt delivery 2-3 times. You'll receive a call/SMS before delivery. You can reschedule or authorize someone else to receive the package."
+                    },
+                    {
+                        q: "Do You Ship All Over India?",
+                        a: "Yes! We deliver across India to all PIN codes serviceable by our courier partners (Delhivery, Blue Dart, DTDC)."
+                    },
+                    {
+                        q: "Do You Ship Internationally?",
+                        a: "Currently, we only deliver within India. International shipping may be available in the future. Follow us on social media for updates!"
+                    },
+                    {
+                        q: "What Should I Do If My Parcel is Not Delivered?",
+                        a: "Contact us immediately with your order ID if your parcel is delayed beyond the expected date. We'll coordinate with the courier partner and resolve the issue."
+                    },
+                    {
+                        q: "Who Are Your Courier Partners?",
+                        a: "We partner with Delhivery, Blue Dart, and DTDC for reliable delivery across India. The courier partner is assigned based on your location for fastest delivery."
+                    },
+                    {
+                        q: "Do You Have Next Business Day Delivery Option?",
+                        a: "Currently, we don't offer express/next-day delivery. All orders follow our standard timeline of 5-7 business days including production and shipping."
+                    },
+                    {
+                        q: "How Can I Change My Address After Placing An Order?",
+                        a: "Contact us via WhatsApp within 24 hours of placing the order with your order ID and new address. Changes are only possible before the order is dispatched."
+                    },
+                    {
+                        q: "I Have Received A Damaged Product What Should I Do?",
+                        a: "We're sorry to hear that! Don't accept damaged packages. If already accepted, contact us within 24 hours with photos/videos of the damage. We'll arrange a free replacement."
+                    },
+                    {
+                        q: "While Tracking Delivery, Destination Addresses Are Different, What Should I Do?",
+                        a: "Contact us immediately with your order ID and the tracking details. We'll verify with the courier and ensure your package reaches the correct address."
+                    },
+                    {
+                        q: "My Product is Not Delivered Yet, What Should I Do?",
+                        a: "Check your tracking status in 'My Orders'. If it shows delays, contact us with your order ID. We'll coordinate with the courier and provide an updated timeline."
+                    },
+                    {
+                        q: "How to Track My Order?",
+                        a: "Once shipped, you'll receive a tracking link via SMS. You can also track from 'My Orders' section by logging in with your phone number."
+                    },
+                    {
+                        q: "What Does Awaiting Courier Information Status Mean?",
+                        a: "This means your order is packed and ready for pickup by the courier. Tracking will be updated once the courier picks up the package, usually within 24 hours."
+                    },
+                    {
+                        q: "My Order is not Delivered, But the Online Status is Showing Delivered, Why?",
+                        a: "Contact us immediately with your order ID. We'll investigate with the courier partner. This could be a delivery error and we'll ensure you receive your product or a full refund."
+                    }
+                ]
+            },
+            account: {
+                title: "My Account / Order History",
+                questions: [
+                    {
+                        q: "Can I Add More to an Order I've Just Placed?",
+                        a: "Once an order is placed, additional items cannot be added. Please place a new order for additional products. Contact us within 2 hours if you need to modify the original order."
+                    },
+                    {
+                        q: "How to Find My Registered Mail ID?",
+                        a: "Your registered email is the one you provided during checkout. Go to 'My Profile' to view and update your email address."
+                    },
+                    {
+                        q: "How Will I Be Billed for GST on Different Products?",
+                        a: "GST is included in the product price. You'll receive a detailed GST invoice via email after order confirmation."
+                    },
+                    {
+                        q: "I Need Invoice of My Order, Where Can I Find?",
+                        a: "Go to 'My Orders', select the order, and click 'Download Invoice'. Invoices are also sent via email after order confirmation."
+                    },
+                    {
+                        q: "How to Register?",
+                        a: "Simply click 'Login' and enter your mobile number. Verify with OTP and your account is created automatically - no password needed!"
+                    },
+                    {
+                        q: "How to Login?",
+                        a: "Click on the profile icon, enter your registered mobile number, and verify with OTP. You'll be logged in instantly."
+                    },
+                    {
+                        q: "I Forgot My Account Password, What Should I Do?",
+                        a: "We use OTP-based login, so there's no password to remember! Just enter your phone number and verify with OTP to access your account."
+                    },
+                    {
+                        q: "How to Change Password for My Account?",
+                        a: "We don't use passwords at Xidlz. Login is done via OTP sent to your registered mobile number for enhanced security."
+                    },
+                    {
+                        q: "How to Check My Order Status in My Account?",
+                        a: "After logging in, go to 'My Orders' to view all your orders with their current status, tracking information, and delivery updates."
+                    },
+                    {
+                        q: "How to Save Design in My Account?",
+                        a: "Your design is automatically saved when you add it to cart. You can access saved cart items after logging in from the same device."
+                    },
+                    {
+                        q: "How to Check Credit in My Account?",
+                        a: "If you have store credit from refunds or promotions, it will be visible in 'My Profile' section and can be applied at checkout."
+                    },
+                    {
+                        q: "How to Check Saved Designs in My Account?",
+                        a: "Saved designs are stored in your cart. Go to cart to view and edit your saved customizations before checkout."
+                    },
+                    {
+                        q: "How to Change Shipping Details in My Account?",
+                        a: "Go to 'My Profile' to update your default shipping address. You can also add new addresses during checkout."
+                    },
+                    {
+                        q: "How to Change Account Info for My Account?",
+                        a: "Go to 'My Profile' to update your name, email, and address. To change your phone number, contact customer support for verification."
+                    },
+                    {
+                        q: "How can I use My Store Credit in My Account?",
+                        a: "Store credit is automatically applied at checkout. If you have available credit, you'll see an option to use it during payment."
+                    },
+                    {
+                        q: "My order status is ON HOLD Why?",
+                        a: "Orders may be on hold due to payment verification, address confirmation, or stock issues. We'll contact you to resolve the matter quickly."
+                    }
+                ]
+            },
+            returns: {
+                title: "Cancellation and Returns",
+                questions: [
+                    {
+                        q: "Can I Cancel My Order Any Time?",
+                        a: "Orders can be cancelled within 2 hours of placing, before production begins. After that, cancellation isn't possible as your custom product is being made."
+                    },
+                    {
+                        q: "Can I get Replace/Refund after Return due to Design mistakes?",
+                        a: "Please review your design carefully before ordering. We produce exactly what you approve. Refunds for customer design errors are handled case-by-case."
+                    },
+                    {
+                        q: "Can I get Replace/Refund after Return due to My Own Mistake?",
+                        a: "Since products are custom-made to your specifications, returns for customer errors may not be accepted. Always preview carefully before ordering."
+                    },
+                    {
+                        q: "Can I get Replace/Refund after Return due to Quality Mismatch?",
+                        a: "If the product quality doesn't match our standards, contact us within 24 hours with photos. We'll replace the product at no extra cost."
+                    },
+                    {
+                        q: "Can I Raise a Return Request after Receiving Product?",
+                        a: "Returns are only accepted for manufacturing defects or damage during delivery. Contact us within 24 hours of delivery with photos."
+                    },
+                    {
+                        q: "How Can I Cancel My Order?",
+                        a: "Go to 'My Orders', select the order, and click 'Cancel Order' if available (within 2 hours). Or contact us immediately via WhatsApp."
+                    },
+                    {
+                        q: "How many days will I have time to return after Receiving My Order?",
+                        a: "For defective or damaged products, contact us within 24 hours of delivery. Quick reporting helps us resolve issues faster."
+                    },
+                    {
+                        q: "How will I get a Refund for Cancelled Order?",
+                        a: "Refunds for cancelled orders are processed within 5-7 business days to your original payment method. You'll receive email confirmation."
+                    },
+                    {
+                        q: "How to Raise a Complaint for Defective Product?",
+                        a: "Go to 'My Orders', select the order, click 'Report Issue', and upload photos. Or contact us via WhatsApp with order ID and images."
+                    }
+                ]
+            },
+            coupons: {
+                title: "Coupons and Offers",
+                questions: [
+                    {
+                        q: "Cashback/Discount offers at Xidlz",
+                        a: "We regularly offer discounts and cashback on orders. Follow us on Instagram and subscribe to WhatsApp updates for exclusive offers and seasonal promotions."
+                    },
+                    {
+                        q: "Where Can I Find Discount Coupons?",
+                        a: "Follow us on Instagram @xidlz_official and subscribe to our WhatsApp updates for exclusive discount codes. We also announce offers on our website homepage."
+                    },
+                    {
+                        q: "How to use Xidlz Discount Coupons?",
+                        a: "Enter your coupon code in the 'Promo Code' field on the checkout page and click 'Apply'. The discount will be reflected in your order total immediately."
+                    },
+                    {
+                        q: "Why Discount Coupon is Not Working?",
+                        a: "<p>Coupons may not work if:</p><ul><li>The coupon has expired</li><li>Minimum order value not met</li><li>Coupon not applicable to items in cart</li><li>Coupon already used (single-use codes)</li></ul>"
+                    },
+                    {
+                        q: "How to Get Latest Offers and Discounts from Xidlz?",
+                        a: "Follow us on Instagram @xidlz_official, join our WhatsApp broadcast list, and check our website for the latest offers and seasonal promotions."
+                    }
+                ]
+            },
+            about: {
+                title: "About Xidlz",
+                questions: [
+                    {
+                        q: "Who We are and What Xidlz does?",
+                        a: "Xidlz is a premium custom photo framing brand based in India. We specialize in turning your precious memories into beautiful wall art with high-quality frames, acrylic prints, LED frames, and personalized gifts."
+                    },
+                    {
+                        q: "Where is Xidlz Located?",
+                        a: "We're based in Hyderabad, India. Our production facility handles all orders with care, attention to quality, and craftsmanship that ensures your memories are perfectly preserved."
+                    },
+                    {
+                        q: "Xidlz Working Hours?",
+                        a: "Our customer support is available Monday to Saturday, 10 AM to 7 PM IST. Orders can be placed 24/7 through our website."
+                    },
+                    {
+                        q: "Terms & Policies",
+                        a: "Our complete Terms & Conditions, Privacy Policy, and Return Policy are available on our Terms and Conditions page. We encourage all customers to review these before placing orders."
+                    },
+                    {
+                        q: "Xidlz on Social Media",
+                        a: "<p>Connect with us:</p><ul><li>Instagram: @xidlz_official</li><li>WhatsApp: +91 9392577498</li><li>Email: support@xidlz.com</li></ul><p>Follow us for latest products, offers, and customer showcases!</p>"
+                    }
+                ]
+            }
+        };
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const category = urlParams.get('category');
+
+            if (category && faqData[category]) {
+                loadCategory(category);
+            } else {
+                window.location.href = 'faq.html';
+            }
+        });
+
+        function loadCategory(category) {
+            const data = faqData[category];
+            document.getElementById('categoryTitle').textContent = data.title;
+            document.getElementById('headerTitle').textContent = data.title;
+            document.getElementById('questionCount').textContent = `${data.questions.length} Questions`;
+            document.title = `${data.title} - FAQ - Xidlz`;
+
+            const faqList = document.getElementById('faqList');
+            faqList.innerHTML = '';
+
+            data.questions.forEach((item, index) => {
+                const faqItem = document.createElement('div');
+                faqItem.className = 'faq-item';
+                faqItem.innerHTML = `
+                    <div class="faq-question" onclick="toggleFaq(${index})">
+                        <h3>${item.q}</h3>
+                        <div class="faq-toggle">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-content">${item.a.startsWith('<') ? item.a : '<p>' + item.a + '</p>'}</div>
+                    </div>
+                `;
+                faqList.appendChild(faqItem);
+            });
+        }
+
+        function toggleFaq(index) {
+            const items = document.querySelectorAll('.faq-item');
+            const clickedItem = items[index];
+            
+            items.forEach((item, i) => {
+                if (i !== index) {
+                    item.classList.remove('active');
+                }
+            });
+            
+            clickedItem.classList.toggle('active');
+        }
+
+        function filterQuestions() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            const items = document.querySelectorAll('.faq-item');
+            let visibleCount = 0;
+
+            items.forEach(item => {
+                const question = item.querySelector('h3').textContent.toLowerCase();
+                const answer = item.querySelector('.faq-answer-content').textContent.toLowerCase();
+
+                if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                    item.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            document.getElementById('noResults').style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>

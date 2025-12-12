@@ -5740,6 +5740,17 @@ button i {
         grid-template-columns: 1fr;
         gap: 0.65rem;
     }
+    
+    .footer-quick-links .footer-links li {
+        text-align: center;
+    }
+    
+    .footer-quick-links .footer-links a {
+        justify-content: center;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
 
     .social-icon {
         width: 40px;
