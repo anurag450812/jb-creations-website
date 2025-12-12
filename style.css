@@ -2692,7 +2692,7 @@ button i {
         background: rgba(255, 255, 255, 0.96);
         box-shadow: 0 -6px 20px rgba(0,0,0,0.12);
         border-top: 1px solid rgba(0,0,0,0.06);
-        padding: 8px 10px calc(12px + env(safe-area-inset-bottom, 0px));
+        padding: 8px 6px calc(12px + env(safe-area-inset-bottom, 0px));
         z-index: 5000;
         display: none; /* hidden until body.has-upload */
         flex-direction: column;
@@ -2712,8 +2712,9 @@ button i {
 
     .customize-page .bar-tabs {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 6px;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4px;
+        width: 100%;
     }
 
     .customize-page .bar-tab {
@@ -2726,9 +2727,11 @@ button i {
         border: 1px solid rgba(130, 192, 204, 0.35);
         color: #16697A;
         border-radius: 10px;
-        padding: 6px 4px;
+        padding: 8px 2px;
         font-size: 10px;
         font-weight: 700;
+        flex: 1;
+        min-width: 0;
     }
 
     .customize-page .bar-tab.active {
