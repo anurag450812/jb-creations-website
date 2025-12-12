@@ -5972,6 +5972,12 @@ button i {
     border-radius: 0;
 }
 
+@media (max-width: 768px) {
+    .product-images-section {
+        margin-top: -20px;
+    }
+}
+
 .product-images-slider-container {
     overflow-x: auto;
     overflow-y: hidden;
