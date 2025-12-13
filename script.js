@@ -247,41 +247,121 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize mobile room preview page functionality
     initMobileRoomPreview();
+    
+    // Check if returning from cart to room preview
+    checkReturnToRoomPreview();
 });
 
-// Handle mobile back button - return to upload section instead of homepage
+// ===========================
+// MOBILE 3-PAGE NAVIGATION SYSTEM
+// ===========================
+// Page 1: Upload Page (uploadHeroWrapper)
+// Page 2: Live Preview Page (mainCustomizeContainer with previewSection)
+// Page 3: Room Preview Page (mobileRoomPreviewPage)
+
+// Track current mobile page for navigation
+let currentMobilePage = 'upload'; // 'upload', 'livePreview', 'roomPreview'
+
+// Navigate to specific mobile page
+function navigateToMobilePage(page) {
+    if (window.innerWidth > 600) return; // Desktop doesn't use this navigation
+    
+    const uploadHeroWrapper = document.getElementById('uploadHeroWrapper');
+    const mainContainer = document.getElementById('mainCustomizeContainer') || document.querySelector('.container');
+    const mobileRoomPreviewPage = document.getElementById('mobileRoomPreviewPage');
+    const bottomBar = document.getElementById('mobileBottomBar') || document.querySelector('.mobile-bottom-bar');
+    const mobileDropup = document.getElementById('mobileDropup');
+    
+    console.log(`📱 Navigating to: ${page} (from: ${currentMobilePage})`);
+    
+    // Hide all pages first
+    if (uploadHeroWrapper) uploadHeroWrapper.style.display = 'none';
+    if (mainContainer) mainContainer.style.display = 'none';
+    if (mobileRoomPreviewPage) mobileRoomPreviewPage.style.display = 'none';
+    
+    // Hide bottom bar and dropup by default
+    if (bottomBar) bottomBar.style.display = 'none';
+    if (mobileDropup) {
+        mobileDropup.classList.remove('active');
+        mobileDropup.setAttribute('aria-hidden', 'true');
+    }
+    
+    // Remove room preview active class
+    document.body.classList.remove('room-preview-active');
+    
+    switch(page) {
+        case 'upload':
+            if (uploadHeroWrapper) {
+                uploadHeroWrapper.style.display = '';
+                uploadHeroWrapper.scrollTo({ top: 0 });
+            }
+            // Always hide the old upload section inside mainContainer
+            const oldUploadSection = document.getElementById('uploadSection');
+            if (oldUploadSection) {
+                oldUploadSection.classList.add('hidden');
+            }
+            currentMobilePage = 'upload';
+            break;
+            
+        case 'livePreview':
+            if (mainContainer) {
+                mainContainer.style.display = 'grid';
+            }
+            // Show bottom bar if we have an upload
+            if (bottomBar && document.body.classList.contains('has-upload')) {
+                bottomBar.style.display = '';
+            }
+            currentMobilePage = 'livePreview';
+            break;
+            
+        case 'roomPreview':
+            if (mobileRoomPreviewPage) {
+                mobileRoomPreviewPage.style.display = 'block';
+            }
+            document.body.classList.add('room-preview-active');
+            currentMobilePage = 'roomPreview';
+            break;
+    }
+    
+    // Scroll to top
+    window.scrollTo(0, 0);
+    
+    // Push history state for back button navigation
+    history.pushState({ mobilePage: page }, '', window.location.href);
+}
+
+// Handle mobile back button - comprehensive navigation management
 window.addEventListener('popstate', function(event) {
-    // Check if we're on mobile and in preview mode
+    // Check if we're on mobile
     if (window.innerWidth <= 600) {
-        const uploadSection = document.getElementById('uploadSection');
+        const mobileRoomPreviewPage = document.getElementById('mobileRoomPreviewPage');
         const previewSection = document.getElementById('previewSection');
-        const mobileSection = document.getElementById('mobileCustomizationSection');
+        const mainContainer = document.getElementById('mainCustomizeContainer');
         
-        // If preview is visible, go back to upload section
-        if (previewSection && !previewSection.classList.contains('hidden')) {
-            // Prevent default navigation
+        // Determine current page from DOM state
+        const isRoomPreviewVisible = mobileRoomPreviewPage && mobileRoomPreviewPage.style.display !== 'none';
+        const isLivePreviewVisible = mainContainer && mainContainer.style.display !== 'none' && 
+                                     previewSection && !previewSection.classList.contains('hidden');
+        
+        // Navigate based on current visible page
+        if (isRoomPreviewVisible) {
+            // From Room Preview -> Go back to Live Preview
             event.preventDefault();
-            
-            // Show upload section, hide preview
-            uploadSection.classList.remove('hidden');
-            previewSection.classList.add('hidden');
-            
-            // Hide mobile customization section
-            if (mobileSection) {
-                mobileSection.style.display = 'none';
-            }
-            
-            // Scroll to top of upload wrapper
-            const uploadWrapper = document.getElementById('uploadHeroWrapper');
-            if (uploadWrapper) {
-                uploadWrapper.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-            
-            // Push state again so further back presses also work correctly
-            history.pushState({ inUpload: true }, '', window.location.href);
-            
-            console.log('📱 Mobile back: Returned to upload section');
+            navigateToMobilePage('livePreview');
+            console.log('📱 Mobile back: Room Preview → Live Preview');
+            return;
         }
+        
+        if (isLivePreviewVisible) {
+            // From Live Preview -> Go back to Upload
+            event.preventDefault();
+            navigateToMobilePage('upload');
+            console.log('📱 Mobile back: Live Preview → Upload');
+            return;
+        }
+        
+        // If on upload page, let browser handle normally (exit page)
+        console.log('📱 Mobile back: On upload page, allowing default behavior');
     }
 });
 
@@ -1303,11 +1383,17 @@ function initializeEventListeners() {
     const mobileChangeImageBtn = document.getElementById('mobileChangeImage');
     
     function handleChangeImage() {
-        console.log('handleChangeImage called - about to reload page');
+        console.log('handleChangeImage called');
         // Hide mobile customization UI until next upload
         document.body.classList.remove('has-upload');
-        // Reload the page to start fresh with image upload
-        window.location.reload();
+        
+        // On mobile, use the 3-page navigation system
+        if (window.innerWidth <= 600) {
+            navigateToMobilePage('upload');
+        } else {
+            // Desktop: Reload the page to start fresh with image upload
+            window.location.reload();
+        }
     }
     
     if (changeImageBtn) {
@@ -1380,9 +1466,10 @@ function handleImageUpload(file) {
                 mobileSection.style.display = 'block';
             }
             
-            // Push history state so mobile back button returns to upload section
+            // On mobile, use the 3-page navigation system
             if (window.innerWidth <= 600) {
-                history.pushState({ inPreview: true }, '', window.location.href);
+                currentMobilePage = 'livePreview';
+                history.pushState({ mobilePage: 'livePreview' }, '', window.location.href);
             }
 
             // Store the TRUE original image (full resolution, uncompressed) for print quality
@@ -5486,11 +5573,15 @@ function initMobileRoomPreview() {
                 // Update specs display
                 updateMobileSpecs();
                 
-                // Hide main container and show mobile room preview page
+                // Hide main container and show mobile room preview page using navigation system
                 console.log('Switching to room preview mode. Container:', container);
                 if (container) container.style.display = 'none';
                 mobileRoomPreviewPage.style.display = 'block';
                 document.body.classList.add('room-preview-active');
+                
+                // Update navigation state
+                currentMobilePage = 'roomPreview';
+                history.pushState({ mobilePage: 'roomPreview' }, '', window.location.href);
                 
                 // Explicitly hide bottom bar and close drawers to ensure they don't overlap
                 const bottomBarEl = document.getElementById('mobileBottomBar');
@@ -5554,28 +5645,11 @@ function initMobileRoomPreview() {
         });
     }
     
-    // Back to Edit button click
+    // Back to Edit button click - uses navigation system
     if (backToEditBtn) {
         backToEditBtn.addEventListener('click', function() {
-            // Hide mobile room preview page and show main container
-            mobileRoomPreviewPage.style.display = 'none';
-            document.body.classList.remove('room-preview-active');
-            if (container) container.style.display = '';
-            
-            // Show bottom customization bar again if it exists and we have an upload
-            const bottomBar = document.getElementById('mobileBottomBar') || document.querySelector('.mobile-bottom-bar');
-            if (bottomBar && document.body.classList.contains('has-upload')) {
-                bottomBar.style.display = ''; // Reset to CSS default (flex)
-            }
-
-            // Show adjustments container if it exists
-            const adjustmentsContainer = document.querySelector('.mobile-adjustments-container');
-            if (adjustmentsContainer) {
-                adjustmentsContainer.style.display = ''; // Reset to CSS default
-            }
-
-            // Scroll to top
-            window.scrollTo(0, 0);
+            navigateToMobilePage('livePreview');
+            console.log('Back to Edit clicked - Returning to live preview');
         });
     }
     
@@ -5583,25 +5657,7 @@ function initMobileRoomPreview() {
     const changeFrameSizeBtn = document.getElementById('changeFrameSizeBtn');
     if (changeFrameSizeBtn) {
         changeFrameSizeBtn.addEventListener('click', function() {
-            // Hide mobile room preview page and show main container
-            mobileRoomPreviewPage.style.display = 'none';
-            document.body.classList.remove('room-preview-active');
-            if (container) container.style.display = '';
-            
-            // Show bottom customization bar again if it exists and we have an upload
-            const bottomBar = document.getElementById('mobileBottomBar') || document.querySelector('.mobile-bottom-bar');
-            if (bottomBar && document.body.classList.contains('has-upload')) {
-                bottomBar.style.display = ''; // Reset to CSS default (flex)
-            }
-
-            // Show adjustments container if it exists
-            const adjustmentsContainer = document.querySelector('.mobile-adjustments-container');
-            if (adjustmentsContainer) {
-                adjustmentsContainer.style.display = ''; // Reset to CSS default
-            }
-
-            // Scroll to top of the live preview section
-            window.scrollTo(0, 0);
+            navigateToMobilePage('livePreview');
             
             // The live preview state is already preserved in the global state object
             // (image, frameSize, frameColor, frameTexture, adjustments, position, zoom)
@@ -5692,6 +5748,12 @@ function initMobileRoomPreview() {
                     mobileRoomAddToCartBtn.style.background = '#27ae60';
                     
                     setTimeout(() => {
+                        // Store that we came from room preview for back button navigation
+                        sessionStorage.setItem('cartSourcePage', 'roomPreview');
+                        
+                        // Save state to sessionStorage so it can be restored when returning from cart
+                        saveStateForCartReturn();
+                        
                         // Redirect to cart page
                         window.location.href = 'cart.html';
                     }, 1000);
@@ -5827,5 +5889,122 @@ function updateMobileSpecs() {
     // Enable add to cart button if image exists
     if (mobileRoomAddToCartBtn && state.image && state.frameSize) {
         mobileRoomAddToCartBtn.disabled = false;
+    }
+}
+
+// ===========================
+// CHECK RETURN TO ROOM PREVIEW
+// ===========================
+// If user pressed back button from cart page and came from room preview,
+// automatically show the room preview page again
+
+// Save state to sessionStorage before navigating to cart
+function saveStateForCartReturn() {
+    try {
+        const stateToSave = {
+            image: state.image,
+            trueOriginalImage: state.trueOriginalImage,
+            originalImage: state.originalImage,
+            frameSize: state.frameSize,
+            frameColor: state.frameColor,
+            frameTexture: state.frameTexture,
+            whiteBorder: state.whiteBorder,
+            borderThickness: state.borderThickness,
+            price: state.price,
+            adjustments: state.adjustments,
+            zoom: state.zoom,
+            position: state.position,
+            originalImageDimensions: state.originalImageDimensions
+        };
+        sessionStorage.setItem('customizeStateForReturn', JSON.stringify(stateToSave));
+        console.log('💾 State saved for cart return');
+    } catch (e) {
+        console.warn('Could not save state for cart return:', e);
+    }
+}
+
+// Restore state from sessionStorage when returning from cart
+function restoreStateFromCartReturn() {
+    try {
+        const savedState = sessionStorage.getItem('customizeStateForReturn');
+        if (savedState) {
+            const parsed = JSON.parse(savedState);
+            
+            // Restore state properties
+            if (parsed.image) state.image = parsed.image;
+            if (parsed.trueOriginalImage) state.trueOriginalImage = parsed.trueOriginalImage;
+            if (parsed.originalImage) state.originalImage = parsed.originalImage;
+            if (parsed.frameSize) state.frameSize = parsed.frameSize;
+            if (parsed.frameColor) state.frameColor = parsed.frameColor;
+            if (parsed.frameTexture) state.frameTexture = parsed.frameTexture;
+            if (parsed.whiteBorder !== undefined) state.whiteBorder = parsed.whiteBorder;
+            if (parsed.borderThickness) state.borderThickness = parsed.borderThickness;
+            if (parsed.price) state.price = parsed.price;
+            if (parsed.adjustments) state.adjustments = parsed.adjustments;
+            if (parsed.zoom) state.zoom = parsed.zoom;
+            if (parsed.position) state.position = parsed.position;
+            if (parsed.originalImageDimensions) state.originalImageDimensions = parsed.originalImageDimensions;
+            
+            console.log('📥 State restored from cart return:', {
+                hasImage: !!state.image,
+                frameSize: state.frameSize
+            });
+            
+            return true;
+        }
+    } catch (e) {
+        console.warn('Could not restore state from cart return:', e);
+    }
+    return false;
+}
+
+function checkReturnToRoomPreview() {
+    const returnToRoomPreview = sessionStorage.getItem('returnToRoomPreview');
+    
+    if (returnToRoomPreview === 'true' && window.innerWidth <= 768) {
+        // Clear the flag
+        sessionStorage.removeItem('returnToRoomPreview');
+        
+        // Try to restore state from sessionStorage
+        const stateRestored = restoreStateFromCartReturn();
+        
+        // Clear the saved state after restoring
+        sessionStorage.removeItem('customizeStateForReturn');
+        
+        // Check if we have the necessary state to show room preview
+        if (stateRestored && state.image && state.frameSize) {
+            console.log('📱 Returning to room preview from cart with restored state');
+            
+            // First we need to show the preview section and set up the UI
+            const uploadHeroWrapper = document.getElementById('uploadHeroWrapper');
+            const mainContainer = document.getElementById('mainCustomizeContainer');
+            const previewSection = document.getElementById('previewSection');
+            const uploadSection = document.getElementById('uploadSection');
+            
+            // Hide upload hero, show main container
+            if (uploadHeroWrapper) uploadHeroWrapper.style.display = 'none';
+            if (mainContainer) mainContainer.style.display = 'grid';
+            if (uploadSection) uploadSection.classList.add('hidden');
+            if (previewSection) previewSection.classList.remove('hidden');
+            
+            // Set up the preview image
+            const previewImage = document.getElementById('previewImage');
+            if (previewImage && state.image) {
+                previewImage.src = state.image;
+            }
+            
+            // Mark that we have an upload
+            document.body.classList.add('has-upload');
+            
+            // Now show the room preview page
+            setTimeout(() => {
+                const mobileSeeRoomPreviewBtn = document.getElementById('mobileSeeRoomPreview');
+                if (mobileSeeRoomPreviewBtn) {
+                    mobileSeeRoomPreviewBtn.click();
+                }
+            }, 500);
+        } else {
+            console.log('📱 Could not restore room preview - state not available');
+        }
     }
 }

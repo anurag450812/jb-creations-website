@@ -3704,25 +3704,39 @@ button i {
         color: var(--primary-color);
     }
 
-    /* Size Card Specific Styles */
+    /* Size Card Specific Styles - Horizontal Scrollable Layout */
     .mobile-size-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 6px;
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 8px 4px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+    }
+    
+    .mobile-size-grid::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
     }
 
     .mobile-size-btn {
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center; /* center contents vertically */
-        padding: 8px 4px;
+        justify-content: center;
+        padding: 10px 12px;
         background: #f8f9fa;
         border: 1px solid #ddd;
-        border-radius: 8px;
+        border-radius: 10px;
         cursor: pointer;
         transition: all 0.3s ease;
         position: relative;
+        min-width: 85px;
+        flex-shrink: 0;
+        scroll-snap-align: start;
     }
 
     .mobile-size-btn:hover,
@@ -3757,31 +3771,45 @@ button i {
         justify-content: center;
         width: 100%;
         gap: 2px;
+        white-space: nowrap;
     }
 
     .size-text {
         font-size: 0.75rem;
         font-weight: bold;
         display: block;
+        color: #333;
     }
 
     .orientation {
         font-size: 0.65rem;
         display: block;
         opacity: 0.8;
+        color: #555;
     }
 
     .price {
         font-size: 0.7rem;
         font-weight: bold;
-        color: #fff; /* make price visible even before click */
+        color: white !important; /* always white for visibility */
         display: block;
         margin-top: 2px;
+        text-align: center;
+        width: 100%;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3); /* shadow for readability on any background */
     }
 
+    .mobile-size-btn .price,
     .mobile-size-btn:hover .price,
     .mobile-size-btn.active .price {
-        color: white;
+        color: white !important;
+    }
+    
+    .mobile-size-btn:hover .size-text,
+    .mobile-size-btn:hover .orientation,
+    .mobile-size-btn.active .size-text,
+    .mobile-size-btn.active .orientation {
+        color: white !important;
     }
 
     /* Color Card Specific Styles */
@@ -6396,14 +6424,15 @@ button i {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    width: calc(100% - 2rem);
-    margin: 0 1rem 1rem;
-    padding: 12px 20px;
+    width: auto;
+    max-width: 220px;
+    margin: 0 auto 1rem auto;
+    padding: 10px 24px;
     background: linear-gradient(135deg, #82C0CC 0%, #16697A 100%);
     color: white;
     border: none;
-    border-radius: 12px;
-    font-size: 1rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -6729,13 +6758,19 @@ button i {
         font-size: 0.9rem;
     }
 }
-/* Darker Add to Cart Button for Room Preview */
+/* Yellow Add to Cart Button for Room Preview - matches theme */
 #mobileRoomAddToCart {
-    background-color: #2C6E7F !important;
+    background: linear-gradient(135deg, #FFA62B 0%, #FF8C00 100%) !important;
     color: white !important;
+    box-shadow: 0 4px 15px rgba(255, 166, 43, 0.4) !important;
+}
+#mobileRoomAddToCart:hover {
+    background: linear-gradient(135deg, #FF8C00 0%, #e67300 100%) !important;
+    box-shadow: 0 6px 20px rgba(255, 166, 43, 0.5) !important;
 }
 #mobileRoomAddToCart .btn-price {
-    color: #e0e0e0 !important;
+    color: white !important;
+    font-weight: bold;
 }
 
 /* Header and Dropdown Styles - Standardized from customize.html */

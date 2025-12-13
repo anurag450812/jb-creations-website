@@ -493,7 +493,29 @@ function aboutUs() {
 let cartManager;
 document.addEventListener('DOMContentLoaded', function() {
     cartManager = new CartManager();
+    
+    // Set up back button navigation for mobile
+    setupCartBackNavigation();
 });
+
+// Handle mobile back button - go to home page
+function setupCartBackNavigation() {
+    // Only for mobile
+    if (window.innerWidth <= 768) {
+        // Push a history state so we can intercept back button
+        history.pushState({ inCart: true }, '', window.location.href);
+        
+        window.addEventListener('popstate', function(event) {
+            // Clear any saved state flags
+            sessionStorage.removeItem('cartSourcePage');
+            sessionStorage.removeItem('returnToRoomPreview');
+            sessionStorage.removeItem('customizeStateForReturn');
+            
+            // Always go to home page when pressing back from cart
+            window.location.href = 'index.html';
+        });
+    }
+}
 
 // Add CSS animation for messages
 const style = document.createElement('style');
