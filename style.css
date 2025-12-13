@@ -6509,7 +6509,7 @@ button i {
 }
 
 .current-price {
-    color: #489FB5;
+    color: #28a745;
     font-size: 1.8rem;
     font-weight: 800;
 }
@@ -6763,6 +6763,7 @@ button i {
     background: linear-gradient(135deg, #FFA62B 0%, #FF8C00 100%) !important;
     color: white !important;
     box-shadow: 0 4px 15px rgba(255, 166, 43, 0.4) !important;
+    transition: all 0.3s ease !important;
 }
 #mobileRoomAddToCart:hover {
     background: linear-gradient(135deg, #FF8C00 0%, #e67300 100%) !important;
@@ -6771,6 +6772,16 @@ button i {
 #mobileRoomAddToCart .btn-price {
     color: white !important;
     font-weight: bold;
+}
+
+/* Green "Added to Cart" state for room preview button */
+#mobileRoomAddToCart.added-to-cart {
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4) !important;
+}
+#mobileRoomAddToCart.added-to-cart:hover {
+    background: linear-gradient(135deg, #218838 0%, #1e7e34 100%) !important;
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.5) !important;
 }
 
 /* Header and Dropdown Styles - Standardized from customize.html */
@@ -7023,6 +7034,331 @@ body.room-preview-active .mobile-adjustments-container {
 body.room-preview-active .mobile-dropup,
 body.room-preview-active #mobileDropup {
     display: none !important;
+}
+
+/* ========================================
+   POLICY SECTION STYLES
+   ======================================== */
+.policy-info-section {
+    background: linear-gradient(135deg, #fff9f0 0%, #fff5e6 100%);
+    padding: 1.25rem;
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255, 166, 43, 0.2);
+    box-shadow: 0 4px 15px rgba(255, 166, 43, 0.1);
+}
+
+.policy-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.policy-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.875rem;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    border: 1px solid rgba(22, 105, 122, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.policy-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 10px rgba(22, 105, 122, 0.1);
+}
+
+.policy-icon {
+    font-size: 1.5rem;
+    min-width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(22, 105, 122, 0.1);
+    border-radius: 10px;
+}
+
+.policy-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.policy-label {
+    color: var(--primary-color);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.policy-desc {
+    color: var(--text-color);
+    opacity: 0.8;
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.view-full-policy-link {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.6rem 1.25rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, #489FB5 100%);
+    color: white !important;
+    text-decoration: none;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(22, 105, 122, 0.25);
+}
+
+.view-full-policy-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(22, 105, 122, 0.35);
+}
+
+/* ========================================
+   CUSTOMER REVIEWS SECTION STYLES
+   ======================================== */
+.customer-reviews-section {
+    background: linear-gradient(135deg, #f0f9fb 0%, #e8f4f6 100%);
+    padding: 1.25rem;
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(22, 105, 122, 0.15);
+    box-shadow: 0 4px 15px rgba(22, 105, 122, 0.08);
+}
+
+.reviews-summary {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(22, 105, 122, 0.1);
+    flex-wrap: wrap;
+}
+
+.reviews-rating-big {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 100px;
+}
+
+.big-rating-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    line-height: 1;
+}
+
+.big-rating-stars {
+    color: var(--highlight-color);
+    font-size: 0.875rem;
+    margin: 0.5rem 0;
+}
+
+.total-reviews-text {
+    color: var(--text-color);
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.rating-bars {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 180px;
+}
+
+.rating-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-color);
+}
+
+.rating-bar-row > span:first-child {
+    min-width: 35px;
+}
+
+.rating-bar-row > span:last-child {
+    min-width: 30px;
+    text-align: right;
+    opacity: 0.7;
+}
+
+.rating-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(22, 105, 122, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.rating-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--highlight-color) 0%, #ffbe5c 100%);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+/* Individual Review Card */
+.reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.review-card {
+    background: white;
+    border-radius: 14px;
+    padding: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(22, 105, 122, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.review-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(22, 105, 122, 0.12);
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
+}
+
+.reviewer-info {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.reviewer-avatar {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, #489FB5 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.reviewer-name {
+    font-weight: 600;
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.review-date {
+    font-size: 0.75rem;
+    color: var(--text-color);
+    opacity: 0.6;
+}
+
+.review-stars {
+    color: var(--highlight-color);
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.review-text {
+    color: var(--text-color);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    opacity: 0.9;
+}
+
+.review-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.6rem;
+    padding: 0.3rem 0.6rem;
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.review-badge i {
+    font-size: 0.65rem;
+}
+
+/* Load More Reviews Button */
+.load-more-reviews-btn {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.8rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, #489FB5 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 12px rgba(22, 105, 122, 0.25);
+}
+
+.load-more-reviews-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 18px rgba(22, 105, 122, 0.35);
+}
+
+.load-more-reviews-btn:active {
+    transform: translateY(0);
+}
+
+/* Clickable rating section */
+.product-rating {
+    cursor: pointer;
+    padding: 0.4rem 0.6rem;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+}
+
+.product-rating:hover {
+    background: rgba(22, 105, 122, 0.08);
+}
+
+.product-rating:active {
+    background: rgba(22, 105, 122, 0.15);
+}
+
+/* Scrollbar for reviews */
+.reviews-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.reviews-list::-webkit-scrollbar-track {
+    background: rgba(22, 105, 122, 0.05);
+    border-radius: 4px;
+}
+
+.reviews-list::-webkit-scrollbar-thumb {
+    background: rgba(22, 105, 122, 0.2);
+    border-radius: 4px;
+}
+
+.reviews-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(22, 105, 122, 0.35);
 }
 
 

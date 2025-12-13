@@ -2,12 +2,31 @@
 class CartManager {
     constructor() {
         this.cart = this.loadCart();
-        this.promoCodes = {
-            'WELCOME10': { discount: 10, type: 'percentage', description: '10% off your first order' },
-            'SAVE50': { discount: 50, type: 'fixed', description: '₹50 off your order' },
-            'FRAME20': { discount: 20, type: 'percentage', description: '20% off all frames' }
-        };
-        this.appliedPromo = null;
+        // New coupon system with order-based coupons
+        this.availableCoupons = [
+            { 
+                id: 'SAVE100', 
+                discount: 100, 
+                minOrder: 500, 
+                description: '₹100 OFF on orders above ₹500',
+                emoji: '🎁'
+            },
+            { 
+                id: 'SAVE250', 
+                discount: 250, 
+                minOrder: 1000, 
+                description: '₹250 OFF on orders above ₹1000',
+                emoji: '🎉'
+            },
+            { 
+                id: 'SAVE300', 
+                discount: 300, 
+                minOrder: 1500, 
+                description: '₹300 OFF on orders above ₹1500',
+                emoji: '💎'
+            }
+        ];
+        this.appliedCoupon = null;
         this.init();
     }
 
@@ -109,31 +128,39 @@ class CartManager {
             });
         }
 
-        // Coupon section toggle
-        document.getElementById('applyCouponBtn').addEventListener('click', () => {
-            const promoSection = document.getElementById('promoSection');
-            const applyCouponBtn = document.getElementById('applyCouponBtn');
-            
-            if (promoSection.style.display === 'none' || promoSection.style.display === '') {
-                promoSection.style.display = 'block';
-                applyCouponBtn.textContent = 'Hide Coupon';
-            } else {
-                promoSection.style.display = 'none';
-                applyCouponBtn.textContent = 'Apply Coupon';
-            }
-        });
+        // Coupon modal button
+        const applyCouponBtn = document.getElementById('applyCouponBtn');
+        if (applyCouponBtn) {
+            applyCouponBtn.addEventListener('click', () => {
+                this.openCouponModal();
+            });
+        }
 
-        // Promo code application
-        document.getElementById('applyPromoBtn').addEventListener('click', () => {
-            this.applyPromoCode();
-        });
+        // Close coupon modal
+        const closeCouponModal = document.getElementById('closeCouponModal');
+        if (closeCouponModal) {
+            closeCouponModal.addEventListener('click', () => {
+                this.closeCouponModal();
+            });
+        }
 
-        // Enter key for promo code
-        document.getElementById('promoCodeInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.applyPromoCode();
-            }
-        });
+        // Close modal on overlay click
+        const couponModalOverlay = document.getElementById('couponModalOverlay');
+        if (couponModalOverlay) {
+            couponModalOverlay.addEventListener('click', (e) => {
+                if (e.target === couponModalOverlay) {
+                    this.closeCouponModal();
+                }
+            });
+        }
+
+        // Remove coupon button
+        const removeCouponBtn = document.getElementById('removeCouponBtn');
+        if (removeCouponBtn) {
+            removeCouponBtn.addEventListener('click', () => {
+                this.removeCoupon();
+            });
+        }
 
         // Header functionality
         this.setupHeaderFunctionality();
@@ -306,7 +333,7 @@ class CartManager {
 
     clearCart() {
         this.cart = [];
-        this.appliedPromo = null;
+        this.appliedCoupon = null;
         this.saveCart();
         this.renderCart();
     }
@@ -321,32 +348,36 @@ class CartManager {
         // Platform fee is free
         const platformFee = 0;
         
-        // Apply discount if promo code is applied
-        let discount = 0;
-        if (this.appliedPromo) {
-            if (this.appliedPromo.type === 'percentage') {
-                discount = Math.round(subtotal * (this.appliedPromo.discount / 100));
-            } else {
-                discount = this.appliedPromo.discount;
-            }
+        // Apply coupon discount if valid
+        let couponDiscount = 0;
+        if (this.appliedCoupon && subtotal >= this.appliedCoupon.minOrder) {
+            couponDiscount = this.appliedCoupon.discount;
+        } else if (this.appliedCoupon && subtotal < this.appliedCoupon.minOrder) {
+            // Cart total dropped below minimum, remove coupon
+            this.appliedCoupon = null;
+            this.updateAppliedCouponDisplay();
         }
         
-        const total = subtotal - discount;
+        const total = Math.max(0, subtotal - couponDiscount);
 
         // Update DOM elements
         document.getElementById('itemCount').textContent = itemCount;
         document.getElementById('subtotalAmount').textContent = subtotal;
-        document.getElementById('shippingAmount').textContent = 'Free';
-        document.getElementById('platformFee').textContent = 'Free';
+        document.getElementById('shippingAmount').textContent = 'FREE';
+        document.getElementById('platformFee').textContent = 'FREE';
         document.getElementById('totalAmount').textContent = total;
+        
+        // Update discount on MRP (50% off)
+        const discountOnMRP = subtotal; // Since original price is 2x, discount equals subtotal
+        document.getElementById('discountAmount').textContent = discountOnMRP;
 
-        // Show/hide discount row
-        const discountRow = document.getElementById('discountRow');
-        if (discount > 0) {
-            document.getElementById('discountAmount').textContent = discount;
-            discountRow.style.display = 'flex';
+        // Show/hide coupon discount row
+        const couponDiscountRow = document.getElementById('couponDiscountRow');
+        if (couponDiscount > 0) {
+            document.getElementById('couponDiscountAmount').textContent = couponDiscount;
+            if (couponDiscountRow) couponDiscountRow.style.display = 'flex';
         } else {
-            discountRow.style.display = 'none';
+            if (couponDiscountRow) couponDiscountRow.style.display = 'none';
         }
 
         // Enable/disable checkout button
@@ -358,32 +389,79 @@ class CartManager {
             checkoutBtn.style.opacity = '1';
             checkoutBtn.style.pointerEvents = 'auto';
         }
+        
+        // Update applied coupon display
+        this.updateAppliedCouponDisplay();
     }
 
-    applyPromoCode() {
-        const promoInput = document.getElementById('promoCodeInput');
-        const promoCode = promoInput.value.trim().toUpperCase();
+    // Coupon Modal Functions
+    openCouponModal() {
+        const subtotal = this.cart.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
+        const modalBody = document.getElementById('couponModalBody');
+        
+        modalBody.innerHTML = this.availableCoupons.map(coupon => {
+            const isEligible = subtotal >= coupon.minOrder;
+            const isApplied = this.appliedCoupon && this.appliedCoupon.id === coupon.id;
+            
+            let statusClass = isApplied ? 'applied-status' : (isEligible ? 'available' : 'not-eligible');
+            let statusText = isApplied ? '✅ Applied' : (isEligible ? '✨ Available' : `Add ₹${coupon.minOrder - subtotal} more`);
+            let cardClass = isApplied ? 'applied' : (isEligible ? '' : 'disabled');
+            
+            return `
+                <div class="coupon-card ${cardClass}" data-coupon-id="${coupon.id}" ${isEligible ? 'onclick="cartManager.applyCoupon(\'' + coupon.id + '\')"' : ''}>
+                    <span class="coupon-emoji">${coupon.emoji}</span>
+                    <div class="coupon-discount">₹${coupon.discount} OFF</div>
+                    <div class="coupon-condition">${coupon.description}</div>
+                    <span class="coupon-status ${statusClass}">${statusText}</span>
+                </div>
+            `;
+        }).join('');
+        
+        document.getElementById('couponModalOverlay').classList.add('active');
+    }
 
-        if (!promoCode) {
-            alert('Please enter a promo code');
+    closeCouponModal() {
+        document.getElementById('couponModalOverlay').classList.remove('active');
+    }
+
+    applyCoupon(couponId) {
+        const coupon = this.availableCoupons.find(c => c.id === couponId);
+        const subtotal = this.cart.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
+        
+        if (!coupon) {
+            this.showMessage('Coupon not found!', 'error');
             return;
         }
+        
+        if (subtotal < coupon.minOrder) {
+            this.showMessage(`Add ₹${coupon.minOrder - subtotal} more to use this coupon`, 'error');
+            return;
+        }
+        
+        this.appliedCoupon = coupon;
+        this.closeCouponModal();
+        this.updateSummary();
+        this.showMessage(`🎉 ${coupon.emoji} Coupon applied! You save ₹${coupon.discount}`, 'success');
+    }
 
-        if (this.promoCodes[promoCode]) {
-            this.appliedPromo = this.promoCodes[promoCode];
-            promoInput.value = '';
-            promoInput.placeholder = `Applied: ${promoCode}`;
-            promoInput.style.background = 'rgba(39, 174, 96, 0.1)';
-            document.getElementById('applyPromoBtn').textContent = 'Applied!';
-            document.getElementById('applyPromoBtn').style.background = '#27ae60';
-            
-            this.updateSummary();
-            
-            // Show success message
-            this.showMessage(`Promo code applied! ${this.appliedPromo.description}`, 'success');
+    removeCoupon() {
+        this.appliedCoupon = null;
+        this.updateSummary();
+        this.showMessage('Coupon removed', 'error');
+    }
+
+    updateAppliedCouponDisplay() {
+        const display = document.getElementById('appliedCouponDisplay');
+        const textEl = document.getElementById('appliedCouponText');
+        const applyBtn = document.getElementById('applyCouponBtn');
+        
+        if (this.appliedCoupon) {
+            display.classList.add('active');
+            textEl.textContent = `₹${this.appliedCoupon.discount} OFF Applied!`;
+            if (applyBtn) applyBtn.textContent = 'Change Coupon';
         } else {
-            this.showMessage('Invalid promo code. Please try again.', 'error');
-            promoInput.focus();
+            display.classList.remove('active');
+            if (applyBtn) applyBtn.textContent = 'View Coupons';
         }
     }
 

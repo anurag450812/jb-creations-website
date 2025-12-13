@@ -1004,16 +1004,16 @@
                 <div class="product-info-section">
                     <!-- Title and Rating -->
                     <div class="product-header">
-                        <h2 class="product-title">Customized Photo Frame</h2>
-                        <div class="product-rating">
-                            <span class="rating-stars">
+                        <h2 class="product-title">🖼️ Customized Photo Frame</h2>
+                        <div class="product-rating" id="productRatingClickable" onclick="scrollToReviews()" style="cursor: pointer;">
+                            <span class="rating-stars" id="ratingStarsDisplay">
                                 <i class="fas fa-star"></i>
                                 <i class="fas fa-star"></i>
                                 <i class="fas fa-star"></i>
                                 <i class="fas fa-star"></i>
                                 <i class="fas fa-star-half-alt"></i>
                             </span>
-                            <span class="rating-text">4.5 (1,234 reviews)</span>
+                            <span class="rating-text" id="ratingCountDisplay">4.5 (<span id="totalRatingsCount">500</span> ratings) ⭐</span>
                         </div>
                     </div>
                     
@@ -1055,32 +1055,108 @@
                     
                     <!-- Features Section -->
                     <div class="product-features-section">
-                        <h3 class="section-title">Key Features</h3>
+                        <h3 class="section-title">✨ Key Features</h3>
                         <ul class="features-list">
                             <li><i class="fas fa-check-circle"></i> High-quality photo printing</li>
                             <li><i class="fas fa-check-circle"></i> Premium frame material</li>
                             <li><i class="fas fa-check-circle"></i> Easy wall mounting</li>
                             <li><i class="fas fa-check-circle"></i> Scratch resistant</li>
+                            <li><i class="fas fa-check-circle"></i> Safe & secure packaging</li>
+                            <li><i class="fas fa-check-circle"></i> Perfect for gifting</li>
                         </ul>
                     </div>
                     
                     <!-- Delivery Info -->
                     <div class="delivery-info-section">
-                        <h3 class="section-title">Delivery & Returns</h3>
+                        <h3 class="section-title">🚚 Delivery & Returns</h3>
                         <div class="delivery-item">
                             <i class="fas fa-truck"></i>
                             <div class="delivery-text">
-                                <span class="delivery-label">Free Delivery</span>
-                                <span class="delivery-desc">Estimated delivery by Dec 10</span>
+                                <span class="delivery-label">📦 Free Delivery</span>
+                                <span class="delivery-desc" id="estimatedDeliveryDate">Estimated delivery in 5-7 business days</span>
                             </div>
                         </div>
                         <div class="delivery-item">
-                            <i class="fas fa-undo"></i>
+                            <i class="fas fa-shield-alt"></i>
                             <div class="delivery-text">
-                                <span class="delivery-label">Cancellation & Refund Policy</span>
-                                <span class="delivery-desc">Delivery charges apply on cancellation or return as these are customized orders</span>
+                                <span class="delivery-label">🛡️ Damage Protection</span>
+                                <span class="delivery-desc">Free replacement if damaged during transit due to courier mishandling</span>
                             </div>
                         </div>
+                    </div>
+                    
+                    <!-- Cancellation & Refund Policy Section -->
+                    <div class="policy-info-section">
+                        <h3 class="section-title">📋 Cancellation & Refund Policy</h3>
+                        <div class="policy-card">
+                            <div class="policy-item">
+                                <span class="policy-icon">⏰</span>
+                                <div class="policy-content">
+                                    <span class="policy-label">24-Hour Cancellation Window</span>
+                                    <span class="policy-desc">Cancel within 24 hours of placing order for full refund. After 24 hours or once sent to production, cancellation is case-by-case.</span>
+                                </div>
+                            </div>
+                            <div class="policy-item">
+                                <span class="policy-icon">🎨</span>
+                                <div class="policy-content">
+                                    <span class="policy-label">Customized Product Policy</span>
+                                    <span class="policy-desc">Since these are personalized items made just for you, returns/exchanges only apply for damaged, defective, or incorrectly printed products.</span>
+                                </div>
+                            </div>
+                            <div class="policy-item">
+                                <span class="policy-icon">📸</span>
+                                <div class="policy-content">
+                                    <span class="policy-label">7-Day Return Window</span>
+                                    <span class="policy-desc">Return requests must be submitted within 24 hours of receiving the product with order ID, photos & reason. Products must be in original packaging.</span>
+                                </div>
+                            </div>
+                            <div class="policy-item">
+                                <span class="policy-icon">💰</span>
+                                <div class="policy-content">
+                                    <span class="policy-label">Refund Process</span>
+                                    <span class="policy-desc">Refunds processed within 7-10 business days after approval. Refund only for products completely different from order, damaged, defective or with printing issues.</span>
+                                </div>
+                            </div>
+                            <div class="policy-item">
+                                <span class="policy-icon">👀</span>
+                                <div class="policy-content">
+                                    <span class="policy-label">Preview Before You Buy</span>
+                                    <span class="policy-desc">Please verify all details (spelling, alignment, picture placement) in the preview before confirming. You're responsible for reviewing your order.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="terms-and-conditions.html" class="view-full-policy-link">📄 View Full Terms & Conditions</a>
+                    </div>
+                    
+                    <!-- Customer Reviews Section -->
+                    <div class="customer-reviews-section" id="customerReviewsSection">
+                        <h3 class="section-title">⭐ Customer Reviews</h3>
+                        <div class="reviews-summary">
+                            <div class="reviews-rating-big">
+                                <span class="big-rating-number">4.5</span>
+                                <div class="big-rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <span class="total-reviews-text"><span id="totalReviewsCount">68</span> Reviews</span>
+                            </div>
+                            <div class="rating-bars">
+                                <div class="rating-bar-row"><span>5 ⭐</span><div class="rating-bar"><div class="rating-fill" style="width: 65%;"></div></div><span>65%</span></div>
+                                <div class="rating-bar-row"><span>4 ⭐</span><div class="rating-bar"><div class="rating-fill" style="width: 22%;"></div></div><span>22%</span></div>
+                                <div class="rating-bar-row"><span>3 ⭐</span><div class="rating-bar"><div class="rating-fill" style="width: 8%;"></div></div><span>8%</span></div>
+                                <div class="rating-bar-row"><span>2 ⭐</span><div class="rating-bar"><div class="rating-fill" style="width: 3%;"></div></div><span>3%</span></div>
+                                <div class="rating-bar-row"><span>1 ⭐</span><div class="rating-bar"><div class="rating-fill" style="width: 2%;"></div></div><span>2%</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="reviews-list" id="reviewsList">
+                            <!-- Reviews will be dynamically loaded here -->
+                        </div>
+                        
+                        <button class="load-more-reviews-btn" id="loadMoreReviewsBtn" onclick="loadMoreReviews()">Show More Reviews 👇</button>
                     </div>
                 </div>
             </div>

@@ -966,6 +966,230 @@
             font-size: 12px;
         }
 
+        /* Coupon Modal Styles */
+        .coupon-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(4px);
+        }
+
+        .coupon-modal-overlay.active {
+            display: flex;
+        }
+
+        .coupon-modal {
+            background: white;
+            border-radius: 16px;
+            max-width: 340px;
+            width: 88%;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .coupon-modal-header {
+            background: linear-gradient(135deg, #16697A 0%, #489FB5 100%);
+            color: white;
+            padding: 14px 18px;
+            text-align: center;
+        }
+
+        .coupon-modal-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .coupon-modal-header p {
+            margin: 5px 0 0;
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .coupon-modal-body {
+            padding: 14px;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        .coupon-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px dashed #16697A;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .coupon-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(22, 105, 122, 0.2);
+            border-color: #489FB5;
+        }
+
+        .coupon-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f0f0f0;
+        }
+
+        .coupon-card.disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .coupon-card.applied {
+            border-color: #27ae60;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        }
+
+        .coupon-discount {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #16697A;
+            margin-bottom: 3px;
+        }
+
+        .coupon-condition {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .coupon-status {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .coupon-emoji {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            font-size: 1.5rem;
+        }
+
+        /* Discount value styling */
+        .discount-value {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .discount-percent {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #e17055;
+        }
+
+        .coupon-status.available {
+            background: #27ae60;
+            color: white;
+        }
+
+        .coupon-status.not-eligible {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .coupon-status.applied-status {
+            background: #16697A;
+            color: white;
+        }
+
+        .coupon-emoji {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 2rem;
+        }
+
+        .coupon-modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+
+        .close-coupon-modal {
+            background: #636e72;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-coupon-modal:hover {
+            background: #2d3436;
+        }
+
+        /* Applied coupon display */
+        .applied-coupon-display {
+            display: none;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 2px solid #27ae60;
+            border-radius: 12px;
+            padding: 12px 15px;
+            margin-top: 10px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .applied-coupon-display.active {
+            display: flex;
+        }
+
+        .applied-coupon-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .applied-coupon-info span {
+            font-weight: 600;
+            color: #155724;
+        }
+
+        .remove-coupon-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .remove-coupon-btn:hover {
+            background: #c0392b;
+        }
+
         /* Mobile Responsive Styles */
         @media (max-width: 768px) {
             .cart-page {
@@ -995,18 +1219,18 @@
 
     <div class="cart-container">
         <div class="cart-header">
-            <h1 class="cart-title">Shopping Cart</h1>
+            <h1 class="cart-title">🛒 Shopping Cart</h1>
         </div>
 
         <div class="cart-content">
             <div class="cart-items-section">
                 <div class="cart-empty" id="cartEmpty" style="display: none;">
                     <i class="fas fa-shopping-cart"></i>
-                    <h3>Your cart is empty</h3>
-                    <p>Add some beautiful frames to get started!</p>
+                    <h3>Your cart is empty 😔</h3>
+                    <p>Add some beautiful frames to get started! 🖼️</p>
                     <a href="customize.html" class="action-btn checkout-btn">
                         <i class="fas fa-palette"></i>
-                        Start Customizing
+                        Start Customizing ✨
                     </a>
                 </div>
                 
@@ -1016,43 +1240,45 @@
             </div>
 
             <div class="cart-summary">
-                <h3 class="summary-title">PRICE DETAILS (<span id="itemCount">0</span> Item)</h3>
+                <h3 class="summary-title">💰 PRICE DETAILS (<span id="itemCount">0</span> Item)</h3>
                 
                 <div class="summary-row">
                     <span class="summary-label">Total MRP</span>
                     <span class="summary-value">₹<span id="subtotalAmount">0</span></span>
                 </div>
                 
-                <div class="summary-row">
+                <div class="summary-row" id="discountRow">
                     <span class="summary-label">Discount on MRP</span>
-                    <span class="summary-value" style="color: #27ae60;">-₹<span id="discountAmount">0</span></span>
+                    <span class="summary-value discount-value">-₹<span id="discountAmount">0</span> <span class="discount-percent">(50% OFF)</span></span>
                 </div>
                 
-                <div class="summary-row" id="discountRow" style="display: none;">
-                    <span class="summary-label">Applied Discount</span>
-                    <span class="summary-value" style="color: #27ae60;">-₹<span id="appliedDiscountAmount">0</span></span>
+                <div class="summary-row" id="couponDiscountRow" style="display: none;">
+                    <span class="summary-label">Coupon Discount</span>
+                    <span class="summary-value" style="color: #27ae60;">-₹<span id="couponDiscountAmount">0</span></span>
                 </div>
                 
                 <div class="summary-row">
-                    <span class="summary-label">Coupon Discount</span>
-                    <button class="apply-coupon-btn" id="applyCouponBtn">Apply Coupon</button>
+                    <span class="summary-label">Apply Coupon</span>
+                    <button class="apply-coupon-btn" id="applyCouponBtn">View Coupons</button>
                 </div>
 
-                <div class="promo-section" id="promoSection" style="display: none;">
-                    <div class="promo-input">
-                        <input type="text" class="promo-code-input" id="promoCodeInput" placeholder="Enter coupon code">
-                        <button class="apply-promo-btn" id="applyPromoBtn">Apply</button>
+                <!-- Applied coupon display -->
+                <div class="applied-coupon-display" id="appliedCouponDisplay">
+                    <div class="applied-coupon-info">
+                        <span>🎟️</span>
+                        <span id="appliedCouponText">Coupon Applied!</span>
                     </div>
+                    <button class="remove-coupon-btn" id="removeCouponBtn">Remove</button>
                 </div>
                 
                 <div class="summary-row">
                     <span class="summary-label">Shipping</span>
-                    <span class="summary-value" style="color: #27ae60;" id="shippingAmount">Free</span>
+                    <span class="summary-value" style="color: #27ae60;" id="shippingAmount">FREE</span>
                 </div>
                 
                 <div class="summary-row">
                     <span class="summary-label">Platform Fee</span>
-                    <span class="summary-value" style="color: #27ae60;" id="platformFee">Free</span>
+                    <span class="summary-value" style="color: #27ae60;" id="platformFee">FREE</span>
                 </div>
                 
                 <div class="summary-row summary-total">
@@ -1066,9 +1292,25 @@
 
                 <div class="cart-actions">
                     <a href="checkout.html" class="action-btn checkout-btn" id="checkoutBtn">
-                        PLACE ORDER
+                        🛍️ PLACE ORDER
                     </a>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coupon Modal -->
+    <div class="coupon-modal-overlay" id="couponModalOverlay">
+        <div class="coupon-modal">
+            <div class="coupon-modal-header">
+                <h3>🎉 Available Coupons 🎁</h3>
+                <p>Select a coupon to apply discount</p>
+            </div>
+            <div class="coupon-modal-body" id="couponModalBody">
+                <!-- Coupons will be dynamically populated -->
+            </div>
+            <div class="coupon-modal-footer">
+                <button class="close-coupon-modal" id="closeCouponModal">Close</button>
             </div>
         </div>
     </div>

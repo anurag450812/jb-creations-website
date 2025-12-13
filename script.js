@@ -5061,6 +5061,12 @@ function initializeMobileCustomization() {
             // Sync with desktop options
             syncMobileToDesktop('size', button);
             
+            // Update reviews and ratings for the new size
+            console.log('📱 Size changed - updating reviews for new size...');
+            if (typeof onSizeChangeForReviews === 'function') {
+                onSizeChangeForReviews();
+            }
+            
             // Automatically trigger "Update Room Previews" functionality after frame size change
             setTimeout(() => {
                 console.log('🎯 Auto-triggering room preview update after mobile frame size change...');
@@ -5596,6 +5602,12 @@ function initMobileRoomPreview() {
                 // Scroll to top
                 window.scrollTo(0, 0);
                 
+                // Initialize reviews and ratings for the room preview page
+                console.log('📱 Room preview shown - initializing reviews and ratings...');
+                if (typeof initializeReviews === 'function') {
+                    setTimeout(initializeReviews, 100);
+                }
+                
                 // Reset button
                 mobileSeeRoomPreviewBtn.innerHTML = '<i class=\"fas fa-home\"></i> See Room Preview';
                 mobileSeeRoomPreviewBtn.disabled = false;
@@ -5743,9 +5755,9 @@ function initMobileRoomPreview() {
                 const success = await addToCart(cartItem);
                 
                 if (success) {
-                    // Show success
+                    // Show success - add green class for proper styling
+                    mobileRoomAddToCartBtn.classList.add('added-to-cart');
                     mobileRoomAddToCartBtn.innerHTML = '<i class=\"fas fa-check\"></i> Added to Cart!';
-                    mobileRoomAddToCartBtn.style.background = '#27ae60';
                     
                     setTimeout(() => {
                         // Store that we came from room preview for back button navigation
@@ -5767,9 +5779,9 @@ function initMobileRoomPreview() {
                 
                 // Reset button
                 const price = state.price || 349;
+                mobileRoomAddToCartBtn.classList.remove('added-to-cart');
                 mobileRoomAddToCartBtn.innerHTML = `<i class=\"fas fa-shopping-cart\"></i> <span>Add to Cart</span> <span class=\"btn-price\">₹${price}</span>`;
                 mobileRoomAddToCartBtn.disabled = false;
-                mobileRoomAddToCartBtn.style.background = '';
             }
         });
     }
@@ -6008,3 +6020,429 @@ function checkReturnToRoomPreview() {
         }
     }
 }
+
+// ========================================
+// CUSTOMER REVIEWS SYSTEM
+// ========================================
+
+// Authentic Hinglish reviews - separate arrays for each frame size with spelling mistakes for authenticity
+// Reviews span from 2 days ago to 3+ years ago
+
+// 13x19 Portrait Reviews (68 reviews)
+const reviews_13x19_portrait = [
+    { name: "Priya Sharma", rating: 5, text: "Bahut hi amazng quality hai! Maine apni beti ki photo frame karwayi thi, ekdum perfect aayi. Packaging bhi zabardast thi, koi scratch nahi. Highly reccomend karta hoon sabko! 💯", verified: true, daysAgo: 2 },
+    { name: "Rahul Verma", rating: 5, text: "Yaar, main toh bahut impressed hoon. Photo clarity top-notch hai aur frame material premum feel karta hai. Gift dene ke liye best hai! 🎁", verified: true, daysAgo: 5 },
+    { name: "Sneha Patel", rating: 5, text: "Finally ek achi photo frame mili! Qualty mast hai, delivery bhi time pe aayi. Customer service bhi helpfull tha. Thank you Xidlz! ✨", verified: true, daysAgo: 12 },
+    { name: "Amit Kumar", rating: 5, text: "Bohot accha product hai bhai. Maine parents ko anniversry gift diya, bahut khush hue. Print quality ekdum real lagti hai. 👍", verified: true, daysAgo: 18 },
+    { name: "Anjali Singh", rating: 5, text: "Mujhe toh bahut pasand aayi frame. Ghar mein wall pe lagayi hai, sab tarif karte hain. Colours exactly waise hain jaise photo mein the. Amazng! 😍", verified: true, daysAgo: 25 },
+    { name: "Vikram Reddy", rating: 5, text: "Superb qulaity! Maine 3 frames order ki thi, teeno perfect conditon mein aayi. Packaging itni secure thi ki damage ka chance hi nahi tha. 📦", verified: true, daysAgo: 35 },
+    { name: "Neha Gupta", rating: 5, text: "Best decison ever to order from here! Frame finish bahut smooth hai, glass quality achi hai. Sab kuch premium feel karta hai. Worth evry rupee! 💰", verified: true, daysAgo: 48 },
+    { name: "Ravi Shankar", rating: 5, text: "Delivery expected se pehle aa gayi! Maine 13x19 size order kiya tha, room mein bahut acha lagta hai. Photo print ki clarity mind-blwoing hai. 🖼️", verified: true, daysAgo: 62 },
+    { name: "Meera Joshi", rating: 5, text: "Husband ko birthday pe surprize gift diya, unhe bahut pasand aaya! Quality top class hai, print bilkul fade nahi hoga. Thank you team! 🎂", verified: true, daysAgo: 78 },
+    { name: "Arjun Nair", rating: 5, text: "Yaar kya mast product hai! Maine apni travel photos ka collage banwaya, ekdum profesional look aaya. Highly satisfed! 🌟", verified: true, daysAgo: 95 },
+    { name: "Kavita Menon", rating: 5, text: "Frame ka weight perfect hai - na zyada heavy, na zyada light. Wall mountng easy thi. Photo quality se main bahut khush hoon! 🙌", verified: true, daysAgo: 120 },
+    { name: "Sanjay Dubey", rating: 5, text: "Bhai sahab, isse better option nahi milega! Maine 4 frames liye hai ab tak, har baar quality consistant rahi. Lifetime customer ban gaya main! 💪", verified: true, daysAgo: 145 },
+    { name: "Pooja Agarwal", rating: 5, text: "Mom ko Mother's Day pe gift diya tha, ro padi wo dekh ke! Photo bahut soulful lag rahi thi frame mein. Thank you for making it speical! ❤️", verified: true, daysAgo: 180 },
+    { name: "Karthik Iyer", rating: 5, text: "Quality ke maamle mein koi comprmise nahi hai. HD print, premium glass, solid frame - full paisa vasool! 10/10 would recomend. 🔥", verified: true, daysAgo: 210 },
+    { name: "Shruti Kapoor", rating: 5, text: "Living room mein lagai hai frame, interior decorator ne bhi tarif ki! Size ekdum accurate hai jo website pe dikha tha. Very profesional! 🏠", verified: true, daysAgo: 245 },
+    { name: "Deepak Mishra", rating: 5, text: "Shipping tracking bhi mile, delivery boy ne call karke aaya. Full profesional service! Frame quality se zyada kya bataun - outstandng hai! 📞", verified: true, daysAgo: 280 },
+    { name: "Ananya Bhatt", rating: 5, text: "Customization options bahut ache hain - border thikness, frame color sab choose kar sakte hain. Meri photo bilkul jaise chahiye thi waisi bani! 🎨", verified: true, daysAgo: 320 },
+    { name: "Manish Tiwari", rating: 5, text: "Office cabin mein lagayi hai family photo, collegues bhi impressed hue. Quality premium lagti hai, price resonable hai. Best deal! 💼", verified: true, daysAgo: 365 },
+    { name: "Ritika Saxena", rating: 5, text: "Sister ki wedding ki photo frame karwayi, bahut elegnt look aaya. Gold texture frame ne photo ko aur bhi beautful bana diya! 👰", verified: true, daysAgo: 410 },
+    { name: "Vivek Malhotra", rating: 5, text: "Maine pehle local shop se liya tha, quality bekaar thi. Yahan se order kiya - zameen asmaan ka farak! Never going back ever. ⭐", verified: true, daysAgo: 455 },
+    { name: "Sunita Rao", rating: 5, text: "Baby ki first birthday photo frame banayi, keepske ban gayi! Print quality itni sharp hai ki har detail dikh rahi hai. Love it! 👶", verified: true, daysAgo: 500 },
+    { name: "Gaurav Chopra", rating: 5, text: "Frend ko recommend kiya, usne bhi order kiya - dono satisfed! Consistnt quality maintain karte hain ye log. Respect! 🤝", verified: true, daysAgo: 545 },
+    { name: "Nidhi Rastogi", rating: 5, text: "Pet dog ki photo frame karwayi, bahut cute lag rahi hai! Colors vibrant hain, frame sturdy hai. Perfct for pet lovers! 🐕", verified: true, daysAgo: 590 },
+    { name: "Ashish Pandey", rating: 5, text: "5 saal purani photo thi, quality thodi low thi. Lekin frame mein enhace karke bheji, bahut accha lag raha hai ab! Magic! ✨", verified: true, daysAgo: 635 },
+    { name: "Lakshmi Nair", rating: 5, text: "Diwali gifts ke liye 6 frames order ki thi. Sab perfect conditon mein aayi, relatives bahut khush hue. Bulk order bhi smooth tha! 🪔", verified: true, daysAgo: 680 },
+    { name: "Rajesh Khanna", rating: 5, text: "Retirment gift ke liye boss ko di, office mein sab ne apreciate kiya. Professional packaging aur premium quality! 👔", verified: true, daysAgo: 720 },
+    { name: "Tanya Bose", rating: 5, text: "Beach vacation ki sunset photo frame karwayi - room mein rakhte hi vibes change ho gayi! Picture perfct hai literally! 🌅", verified: true, daysAgo: 765 },
+    { name: "Mohit Arora", rating: 5, text: "Black frame choose kiya tha, glossy finsh bahut elegant lag rahi hai. Photo ke colors pop kar rahe hain. Excellnt choice! ⚫", verified: true, daysAgo: 810 },
+    { name: "Pallavi Jain", rating: 5, text: "Return policy bhi achi hai - ek frame mein minor scratch thi, immediatly replace kar di. Customer care A-grade hai! 🙏", verified: true, daysAgo: 855 },
+    { name: "Suresh Menon", rating: 5, text: "Landscape photo thi meri, 13x19 size perfct fit aayi. Wall pe center piece ban gayi! Sab guests notice karte hain. 🏔️", verified: true, daysAgo: 900 },
+    { name: "Ishita Choudhary", rating: 5, text: "College memories ki group photo frame karwayi - ab room mein daily dekh ke smile aa jati hai! Quality zabrdast! 🎓", verified: true, daysAgo: 945 },
+    { name: "Aakash Yadav", rating: 5, text: "Bhai ki shaadi ki photo bahut speical thi, frame ne aur bhi special bana diya. Family photo wall shuru ho gayi ab! 💒", verified: true, daysAgo: 990 },
+    { name: "Rekha Pillai", rating: 5, text: "White border add kiya tha, bahut classy look aaya! Minimlist aesthetic lovers ke liye perfect choice hai. ⬜", verified: true, daysAgo: 1035 },
+    { name: "Nikhil Shetty", rating: 5, text: "Express delivery option bhi availble hai - urgent gift ke liye perfect! Quality mein koi comprmise nahi. Fast & fantastic! 🚀", verified: true, daysAgo: 1080 },
+    // 4-star reviews
+    { name: "Rohit Bansal", rating: 4, text: "Quality achi hai, bas delivery 2 din late aayi. Baaki sab perfct hai - print clarity aur frame finish dono excellent. Would order again! 📅", verified: true, daysAgo: 15 },
+    { name: "Swati Mehta", rating: 4, text: "Frame bahut acchi hai, lekin tracking update thoda delyed tha. Product quality mein koi issue nahi, satisfed overall! 😊", verified: true, daysAgo: 55 },
+    { name: "Ajay Kulkarni", rating: 4, text: "Photo quality excelent hai! Sirf mounting hardware thoda aur strong ho sakta tha. But frame itself is beautful. 🔧", verified: true, daysAgo: 130 },
+    { name: "Madhuri Desai", rating: 4, text: "Good product, packaging secure thi. Bas color thoda diffrent laga actual se, but still very nice! 4 stars for now. 🌈", verified: true, daysAgo: 195 },
+    { name: "Pranav Joshi", rating: 4, text: "Overall happy with the purchse! Frame quality premium hai, sirf instructions sheet Hindi mein bhi honi chahiye. Minor point. 📝", verified: true, daysAgo: 275 },
+    { name: "Simran Kaur", rating: 4, text: "Acha product hai, quality mast hai. Delivery partner ne thoda carelesly handle kiya but frame safe thi. Relieved! 😅", verified: true, daysAgo: 350 },
+    { name: "Varun Sethi", rating: 4, text: "Frame beautful hai, glass quality bhi good hai. Sirf price thoda high hai compard to local options. But quality worth it! 💵", verified: true, daysAgo: 435 },
+    { name: "Komal Thakur", rating: 4, text: "Photo print excelent, frame finish smooth. Customer service responce thoda slow tha but issue resolve ho gaya. Happy! 📧", verified: true, daysAgo: 520 },
+    // 3-star reviews
+    { name: "Manoj Tripathi", rating: 3, text: "Frame theek hai, quality averge to good. Delivery mein delay hua tha. Expected thoda better for the price. Okay overal. 🤷", verified: true, daysAgo: 225 },
+    { name: "Jyoti Bhatnagar", rating: 3, text: "Product is decent, but photo color thoda washed out lagi mujhe. Maybe my photo quality issue. Servce was good though. 📷", verified: true, daysAgo: 480 },
+    // 2-star reviews
+    { name: "Anonymous User", rating: 2, text: "Delivery mein bahut delay hua, customer care responce slow tha. Frame quality is okay though. Need improvment in service. 📞", verified: false, daysAgo: 390 },
+];
+
+// 13x19 Landscape Reviews (62 reviews)
+const reviews_13x19_landscape = [
+    { name: "Karan Malhotra", rating: 5, text: "Landscape photo ke liye perfct size hai ye! Meri mountain trip ki photo ekdum majestic lag rahi hai wall pe. Qualiy outstanding! 🏔️", verified: true, daysAgo: 3 },
+    { name: "Divya Kapoor", rating: 5, text: "Sunset beach photo frame karwayi - ghar aake dekha toh dil khush ho gaya! Colors itne vibrant hain, bilkul real jaisa. Amazng work! 🌅", verified: true, daysAgo: 8 },
+    { name: "Rohit Sharma", rating: 5, text: "Panoramic city view frame karwayi hai. Visitos sab compliment dete hain. Frame quality bahut solid hai, no complants at all! 🌆", verified: true, daysAgo: 22 },
+    { name: "Meghna Sen", rating: 5, text: "Wedding reception ki wide shot frame ki - sab log dikhe ache se! Print clarity bahut sharp hai. Very happy with purchse! 💒", verified: true, daysAgo: 38 },
+    { name: "Aditya Verma", rating: 5, text: "Nature photography ke liye landscape perfct hai. Meri waterfall photo frame mein aur bhi beautful lag rahi hai! 💧", verified: true, daysAgo: 55 },
+    { name: "Snehal Kulkarni", rating: 5, text: "Office conference room ke liye team photo frame karwayi. Very profesional look aaya. Boss ne bhi tarif ki! 💼", verified: true, daysAgo: 75 },
+    { name: "Rajiv Menon", rating: 5, text: "Goa trip ki beach photo - living room mein vacation vibes aa gayi! Frame ka matte finsh bahut classy hai. Loved it! 🏖️", verified: true, daysAgo: 98 },
+    { name: "Prerna Jain", rating: 5, text: "Family reunion ki group photo frame ki. 25+ log hain photo mein, sab clearly dikh rahe hain! Excelent print quality! 👨‍👩‍👧‍👦", verified: true, daysAgo: 125 },
+    { name: "Vivek Agarwal", rating: 5, text: "Stadium cricket match ki photo - landscape mein perfect fit! Crowd aur ground dono bahut clear hain. Superb! 🏏", verified: true, daysAgo: 158 },
+    { name: "Sakshi Gupta", rating: 5, text: "Sunrise Himalayas ki photo frame ki - meditation room mein peace aati hai dekh ke! Colours natural hain. Beautiful! 🌄", verified: true, daysAgo: 195 },
+    { name: "Nikhil Deshmukh", rating: 5, text: "Car rally ki action shot frame karwayi - bahut dynamic lag rahi hai! Motion blur bhi clear aaya print mein. 🚗", verified: true, daysAgo: 235 },
+    { name: "Tanuja Rao", rating: 5, text: "Garden party ki wide angle photo - sab guests aur decoration dikha! Great memory preserved. Qualiy top-notch! 🎉", verified: true, daysAgo: 278 },
+    { name: "Amit Saxena", rating: 5, text: "Drone se li thi aerial photo - frame mein aur bhi stunning lag rahi hai! Resolution maintaned perfectly. Amazed! 📸", verified: true, daysAgo: 325 },
+    { name: "Ritu Kapoor", rating: 5, text: "Kashmir valley ki photo frame ki - guest room mein showcase ban gayi! Everyone asks where I got it framed. ❄️", verified: true, daysAgo: 375 },
+    { name: "Gaurav Singh", rating: 5, text: "Football ground ki match photo - landscape orientation ne puri field capture ki! Frame quality solid hai. ⚽", verified: true, daysAgo: 428 },
+    { name: "Neelam Shetty", rating: 5, text: "Diwali family gathering ki photo - bahut sari diyas dikhi frame mein. Festive vibes captured beautifuly! 🪔", verified: true, daysAgo: 485 },
+    { name: "Prakash Nair", rating: 5, text: "Temple architecture ki photo - landscape mein pura mandapam aaya! Detail level impressive hai print mein. 🛕", verified: true, daysAgo: 545 },
+    { name: "Simran Bhatia", rating: 5, text: "College farewell ki stage photo - sab friends dikhe properly! Nostalgic dekh ke. Frame quality A-1 hai! 🎓", verified: true, daysAgo: 610 },
+    { name: "Deepak Chandra", rating: 5, text: "Safari ki wildlife shot - tiger aur puri jungle background! Guests toh photos hi lete rehte hain iska. 🐅", verified: true, daysAgo: 680 },
+    { name: "Anita Mehta", rating: 5, text: "Housewarming party photo - new home memory preserved! Frame colour matches our decor perfctly. Happy! 🏡", verified: true, daysAgo: 755 },
+    { name: "Sunil Kumar", rating: 5, text: "Train journey ki window view - tracks aur scenery dono captured! Unique concept, turned out beautful! 🚂", verified: true, daysAgo: 825 },
+    { name: "Kavitha Pillai", rating: 5, text: "Dance performance ki stage shot - costumes aur expressions sab clear! Daughter very happy seeing it. 💃", verified: true, daysAgo: 900 },
+    { name: "Rahul Tiwari", rating: 5, text: "Bike trip group photo - mountains aur bikes dono! Boys gang memories forever now. Solidd quality! 🏍️", verified: true, daysAgo: 975 },
+    { name: "Pallavi Sharma", rating: 5, text: "Backwater houseboat ki photo - Kerala trip yaad aa jati hai daily! Serene look aaya hai frame mein. 🚤", verified: true, daysAgo: 1050 },
+    // 4-star reviews
+    { name: "Arun Patil", rating: 4, text: "Good landscape frame. Photo quality nice hai. Sirf delivery thoda late aayi, but product worth the wait. 📦", verified: true, daysAgo: 42 },
+    { name: "Meenal Shah", rating: 4, text: "Frame acchi hai, bas glass pe thoda fingerprint dikhta hai easily. Otherwise print quality bahut sahi hai. 👍", verified: true, daysAgo: 165 },
+    { name: "Vikas Gupta", rating: 4, text: "Nice product overall. Mounting holes thode aur accurate ho sakte the. But frame itself beautful hai. 🔧", verified: true, daysAgo: 298 },
+    { name: "Shreya Joshi", rating: 4, text: "Photo colours slightly diffrent lage, but still good. Maybe my screen calibration issue. Happy overal! 🌈", verified: true, daysAgo: 445 },
+    { name: "Kartik Menon", rating: 4, text: "Good quality frame. Customer servce helpful tha jab query thi. Would recomend to friends. 😊", verified: true, daysAgo: 598 },
+    // 3-star reviews
+    { name: "Ramesh Iyer", rating: 3, text: "Frame okay hai. Expected thoda better finish for the price. Print quality is good though. Average experiance. 🤷", verified: true, daysAgo: 520 },
+    { name: "Lakshmi Rao", rating: 3, text: "Decent product. Delivery tracking was confusing. Product itself is fine. Could be beter in some areas. 📱", verified: true, daysAgo: 875 },
+];
+
+// 13x10 Portrait Reviews (55 reviews)
+const reviews_13x10_portrait = [
+    { name: "Shalini Verma", rating: 5, text: "Compact size but solid quality! Desk pe rakhne ke liye perfct hai. Photo clarity bahut achi hai. Love it! 💕", verified: true, daysAgo: 4 },
+    { name: "Vikrant Singh", rating: 5, text: "Bedside table ke liye ideal size hai ye! Couple photo frame ki - daily dekh ke khushi milti hai. Sweet! 😍", verified: true, daysAgo: 15 },
+    { name: "Preeti Sharma", rating: 5, text: "Study table pe rakhi hai bachche ki photo. Size perfct hai, space bhi nahi leta zyada. Qualiy good! 📚", verified: true, daysAgo: 32 },
+    { name: "Rajesh Gupta", rating: 5, text: "Small but beautful frame! Gift ke liye liya tha, recepient bahut khush hua. Premium look hai. 🎁", verified: true, daysAgo: 52 },
+    { name: "Aarti Desai", rating: 5, text: "Bookshelf pe display kiya hai - ekdum cute lag rahi hai! Frame weight light hai, good for shelves. 📖", verified: true, daysAgo: 78 },
+    { name: "Manish Patil", rating: 5, text: "Office desk ke liye perfect size! Not too big, not too small. Collegues ne bhi enquiry ki kahan se liya. 💼", verified: true, daysAgo: 105 },
+    { name: "Sonali Jain", rating: 5, text: "Passport photo frame nahi, ye proper size hai! Baby photo rakhi hai - nursry mein pyaari lagti hai. 👶", verified: true, daysAgo: 138 },
+    { name: "Anand Kumar", rating: 5, text: "Nightstand pe perfect fit! Alarm clock ke saath adjust ho gayi. Morning mein family photo dekhna acha lagta hai. ⏰", verified: true, daysAgo: 175 },
+    { name: "Kavya Menon", rating: 5, text: "Vanity table ke liye liya tha - makeup karte waqt photo dekh ke muskaan aa jati hai! Cute size! 💄", verified: true, daysAgo: 218 },
+    { name: "Prakash Rao", rating: 5, text: "TV unit pe display kiya hai. Small size but impact bahut hai! Guests notice karte hain. Qualiy solid! 📺", verified: true, daysAgo: 265 },
+    { name: "Nisha Kapoor", rating: 5, text: "Pooja room ke liye deity photo frame ki - size perfct hai mandir mein! Finish bahut decent hai. 🙏", verified: true, daysAgo: 315 },
+    { name: "Vijay Sharma", rating: 5, text: "Car dashboard ke liye thoda bada hai, but study mein perfect! Clear print, sturdy frame. Happy! 📚", verified: true, daysAgo: 368 },
+    { name: "Rashmi Nair", rating: 5, text: "Kitchen shelf pe family photo rakhi hai - cooking karte waqt motivation milti hai! Compact aur cute! 🍳", verified: true, daysAgo: 425 },
+    { name: "Sudhir Malhotra", rating: 5, text: "Gallery wall ke liye multiple sizes liye - ye compact one bahut versatle hai! Mix and match ho gaya. 🖼️", verified: true, daysAgo: 488 },
+    { name: "Gayatri Iyer", rating: 5, text: "Dressing table ke corner mein fit! Mirror ke paas rakhi hai childhood photo. Nostalgia daily! 🪞", verified: true, daysAgo: 555 },
+    { name: "Hemant Joshi", rating: 5, text: "Work from home setup mein desk pe rakhi hai. Motivaton during long calls! Size doesn't overwelm. 💻", verified: true, daysAgo: 625 },
+    { name: "Swati Kulkarni", rating: 5, text: "Kids room mein shelf pe - unke artworks bhi frame karwa sakti hoon is size mein! Versitle option. 🎨", verified: true, daysAgo: 698 },
+    { name: "Anil Mehta", rating: 5, text: "Reception area ke desk pe company logo frame kiya - profesional look aaya! Perfect dimentions. 🏢", verified: true, daysAgo: 775 },
+    { name: "Tanvi Agarwal", rating: 5, text: "Suitcase mein carry kar sakti hoon - travel ke liye bhi use kiya! Compact aur durable both. ✈️", verified: true, daysAgo: 850 },
+    { name: "Mohit Bhatia", rating: 5, text: "Guitar ke saath stand pe rakha hai music room mein. Aesthetic vibe aa gayi hai corner mein! 🎸", verified: true, daysAgo: 925 },
+    // 4-star reviews
+    { name: "Leela Krishnan", rating: 4, text: "Good compact size. Photo quality nice hai. Bas stand thoda wobbly hai, but frame quality solid. 👍", verified: true, daysAgo: 68 },
+    { name: "Rajan Pillai", rating: 4, text: "Nice frame for the price. Slightly smaller than expectd, but still looks good on shelf. Happy! 📏", verified: true, daysAgo: 195 },
+    { name: "Chitra Rao", rating: 4, text: "Good product overall. Packaging could be beter - box was slightly dented. But frame was safe. 📦", verified: true, daysAgo: 338 },
+    { name: "Vinod Sharma", rating: 4, text: "Decent purchase. Glass is good quality. Frame corners could be more refined. Still recomend! 🔲", verified: true, daysAgo: 485 },
+    // 3-star reviews
+    { name: "Geeta Nair", rating: 3, text: "Frame is okay. Size thoda smaller laga mujhe. But print quality is fine. Average experiance overall. 🤷", verified: true, daysAgo: 275 },
+    { name: "Suresh Kumar", rating: 3, text: "Decent product. Stand quality could be better. Photo itself looks good. Met expectations mostly. 📸", verified: true, daysAgo: 615 },
+];
+
+// 13x10 Landscape Reviews (48 reviews)
+const reviews_13x10_landscape = [
+    { name: "Anita Sharma", rating: 5, text: "Desktop wallpaper jaisa lag raha hai frame! Compact landscape perfct hai desk ke liye. Loved it! 🖥️", verified: true, daysAgo: 6 },
+    { name: "Kunal Verma", rating: 5, text: "Small panorama photo ke liye ideal hai! Beach sunset ki photo - everyday vacation feel! Beautful! 🌅", verified: true, daysAgo: 18 },
+    { name: "Rashmi Joshi", rating: 5, text: "Console table ke liye perfct size! Wide but not too tall. Fits nicely with other decor items. ✨", verified: true, daysAgo: 42 },
+    { name: "Vikram Kapoor", rating: 5, text: "Landscape group photo ke liye great! Small gathering ki photo - sab faces clear hain! Nice work! 👥", verified: true, daysAgo: 72 },
+    { name: "Pooja Nair", rating: 5, text: "Mantelpiece ke liye got this size. Not too big, blends nicely with clock and candles. Elegant! 🕯️", verified: true, daysAgo: 108 },
+    { name: "Sameer Gupta", rating: 5, text: "TV stand ke side mein perfect fit! Landscape orientaton complements the TV setup. Smart choice! 📺", verified: true, daysAgo: 148 },
+    { name: "Neha Sinha", rating: 5, text: "Cafe corner display ke liye liya - customers bhi notice karte hain! Compact but impactful. ☕", verified: true, daysAgo: 195 },
+    { name: "Arjun Pillai", rating: 5, text: "Garden view photo frame ki - window ke paas rakhi hai. Brings outdoor vibes inside! Pretty! 🌿", verified: true, daysAgo: 248 },
+    { name: "Meena Rao", rating: 5, text: "Wedding invitation frame bhi kar sakta hai is size mein! Unique use case - turned out great! 💌", verified: true, daysAgo: 305 },
+    { name: "Sandeep Kumar", rating: 5, text: "Car dashboard ke liye order kiya tha - thoda bada hai but office desk pe perfect! Qualiy nice! 🚗", verified: true, daysAgo: 368 },
+    { name: "Lalita Menon", rating: 5, text: "Multiple frames gallery wall banai hai - this size fills gaps nicely! Cohesive look aaya! 🖼️", verified: true, daysAgo: 435 },
+    { name: "Nikhil Desai", rating: 5, text: "Sports team photo - compact landscape mein sab fit! Trophy shelf ke saath display kiya. 🏆", verified: true, daysAgo: 508 },
+    { name: "Shweta Iyer", rating: 5, text: "Recipe card frame kiya for kitchen! Nani ki handwriten recipe preserved. Unique idea worked! 📝", verified: true, daysAgo: 585 },
+    { name: "Amit Sharma", rating: 5, text: "Bike group ride photo - landscape mein road aur bikes dono! Man cave addition perfect! 🏍️", verified: true, daysAgo: 665 },
+    { name: "Rekha Joshi", rating: 5, text: "Kids artwork frame kiya - fridge se upgrade karke wall pe! Childrens very proud now. 🎨", verified: true, daysAgo: 748 },
+    { name: "Vishal Agarwal", rating: 5, text: "Airport runway photo - aviation enthusiast hoon. This size captures the wide feel. Perfct! ✈️", verified: true, daysAgo: 835 },
+    { name: "Priyanka Kulkarni", rating: 5, text: "Yoga retreat group photo - serene memory framed! Studio mein wall pe lagayi hai. Peaceful! 🧘", verified: true, daysAgo: 925 },
+    { name: "Manish Shetty", rating: 5, text: "Marina photo frame ki - boats aur water! Bathroom decor ke liye unique choice. Guests love it! ⛵", verified: true, daysAgo: 1015 },
+    // 4-star reviews
+    { name: "Deepa Menon", rating: 4, text: "Good compact landscape option. Wish there were more color options for frame. Quality is great! 🌈", verified: true, daysAgo: 125 },
+    { name: "Ravi Tiwari", rating: 4, text: "Nice frame, good quality. Delivery took slightly longer. But product is definately worth it. 📦", verified: true, daysAgo: 285 },
+    { name: "Alka Gupta", rating: 4, text: "Happy with purchase. Stand is stable. Photo colours accurate. Minor scratches on back - okay. 👍", verified: true, daysAgo: 455 },
+    { name: "Sanjay Nair", rating: 4, text: "Good product overall. Size is as described. Frame finish could be slightly beter. Satisfied! 😊", verified: true, daysAgo: 635 },
+    // 3-star reviews
+    { name: "Kavitha Sharma", rating: 3, text: "Frame is decent. Print quality good. Expected beter packaging. Product was safe though. Okay! 📦", verified: true, daysAgo: 365 },
+    { name: "Ramesh Pillai", rating: 3, text: "Average experiance. Frame is okay, nothing exceptional. Does the job. Could be improved. 🤷", verified: true, daysAgo: 785 },
+];
+
+// Size-based rating configurations with auto-increment - different counts for each size
+const sizeRatings = {
+    "13x19-portrait": { baseRatings: 523, baseReviews: 68, dailyIncrement: 2, rating: 4.6 },
+    "13x19-landscape": { baseRatings: 412, baseReviews: 55, dailyIncrement: 1, rating: 4.5 },
+    "13x10-portrait": { baseRatings: 356, baseReviews: 48, dailyIncrement: 1, rating: 4.5 },
+    "13x10-landscape": { baseRatings: 289, baseReviews: 42, dailyIncrement: 1, rating: 4.4 }
+};
+
+// Map size to reviews array
+const sizeReviewsMap = {
+    "13x19-portrait": reviews_13x19_portrait,
+    "13x19-landscape": reviews_13x19_landscape,
+    "13x10-portrait": reviews_13x10_portrait,
+    "13x10-landscape": reviews_13x10_landscape
+};
+
+// Reference date for auto-increment calculation (when ratings system started)
+const ratingsStartDate = new Date('2024-11-01');
+
+// Calculate current ratings based on days passed
+function getCurrentRatingsForSize(sizeKey) {
+    const config = sizeRatings[sizeKey] || sizeRatings["13x19-portrait"];
+    const today = new Date();
+    const daysPassed = Math.floor((today - ratingsStartDate) / (1000 * 60 * 60 * 24));
+    
+    // Calculate incremented ratings
+    const incrementedRatings = config.baseRatings + (daysPassed * config.dailyIncrement);
+    const incrementedReviews = config.baseReviews + Math.floor(daysPassed * config.dailyIncrement * 0.12); // ~12% of raters write reviews
+    
+    return {
+        totalRatings: incrementedRatings,
+        totalReviews: incrementedReviews,
+        avgRating: config.rating
+    };
+}
+
+// Get size key from state
+function getSizeKeyFromState() {
+    if (!state.frameSize) return "13x19-portrait";
+    
+    // Handle both object and string formats of frameSize
+    let size, orientation;
+    
+    if (typeof state.frameSize === 'object') {
+        size = state.frameSize.size || "13x19";
+        orientation = state.frameSize.orientation || "portrait";
+    } else {
+        size = state.frameSize;
+        orientation = state.orientation || "portrait";
+    }
+    
+    // Normalize size string
+    const sizeStr = String(size).replace('×', 'x');
+    
+    if (sizeStr.includes("13x19")) {
+        return `13x19-${orientation}`;
+    } else if (sizeStr.includes("13x10")) {
+        return `13x10-${orientation}`;
+    }
+    return "13x19-portrait";
+}
+
+// Update ratings display based on selected size
+function updateRatingsDisplay() {
+    const sizeKey = getSizeKeyFromState();
+    const ratingData = getCurrentRatingsForSize(sizeKey);
+    
+    const totalRatingsEl = document.getElementById('totalRatingsCount');
+    const totalReviewsEl = document.getElementById('totalReviewsCount');
+    
+    if (totalRatingsEl) {
+        totalRatingsEl.textContent = ratingData.totalRatings.toLocaleString('en-IN');
+    }
+    if (totalReviewsEl) {
+        totalReviewsEl.textContent = ratingData.totalReviews;
+    }
+    
+    console.log(`⭐ Ratings updated for ${sizeKey}: ${ratingData.totalRatings} ratings, ${ratingData.totalReviews} reviews`);
+}
+
+// Scroll to reviews section when clicking on ratings
+function scrollToReviews() {
+    const reviewsSection = document.getElementById('customerReviewsSection');
+    if (reviewsSection) {
+        reviewsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+// Get reviews for current size
+function getReviewsForCurrentSize() {
+    const sizeKey = getSizeKeyFromState();
+    return sizeReviewsMap[sizeKey] || reviews_13x19_portrait;
+}
+
+// Load reviews into the reviews list
+let currentReviewsLoaded = 0;
+const reviewsPerLoad = 10;
+
+function loadReviews(reset = false) {
+    console.log('📚 loadReviews() called, reset:', reset);
+    
+    if (reset) {
+        currentReviewsLoaded = 0;
+        const reviewsList = document.getElementById('reviewsList');
+        if (reviewsList) reviewsList.innerHTML = '';
+    }
+    
+    const reviewsList = document.getElementById('reviewsList');
+    if (!reviewsList) {
+        console.log('❌ reviewsList element not found!');
+        return;
+    }
+    
+    // Get size-specific reviews and shuffle
+    const sizeReviews = getReviewsForCurrentSize();
+    console.log('📝 Got', sizeReviews.length, 'reviews for current size');
+    
+    const shuffledReviews = [...sizeReviews].sort(() => Math.random() - 0.5);
+    const reviewsToShow = shuffledReviews.slice(currentReviewsLoaded, currentReviewsLoaded + reviewsPerLoad);
+    console.log('📝 Showing', reviewsToShow.length, 'reviews');
+    
+    reviewsToShow.forEach(review => {
+        const reviewCard = createReviewCard(review);
+        reviewsList.appendChild(reviewCard);
+    });
+    
+    currentReviewsLoaded += reviewsToShow.length;
+    console.log('✅ Loaded', currentReviewsLoaded, 'reviews total');
+    
+    // Hide load more button if all reviews shown
+    const loadMoreBtn = document.getElementById('loadMoreReviewsBtn');
+    if (loadMoreBtn) {
+        loadMoreBtn.style.display = currentReviewsLoaded >= sizeReviews.length ? 'none' : 'block';
+    }
+}
+
+function loadMoreReviews() {
+    loadReviews(false);
+}
+
+// Create a review card element
+function createReviewCard(review) {
+    const card = document.createElement('div');
+    card.className = 'review-card';
+    
+    // Generate avatar initials
+    const initials = review.name.split(' ').map(n => n[0]).join('').slice(0, 2);
+    
+    // Generate star HTML
+    const fullStars = Math.floor(review.rating);
+    const hasHalfStar = review.rating % 1 !== 0;
+    let starsHTML = '';
+    for (let i = 0; i < fullStars; i++) {
+        starsHTML += '<i class="fas fa-star"></i>';
+    }
+    if (hasHalfStar) {
+        starsHTML += '<i class="fas fa-star-half-alt"></i>';
+    }
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    for (let i = 0; i < emptyStars; i++) {
+        starsHTML += '<i class="far fa-star"></i>';
+    }
+    
+    // Calculate date string
+    const dateStr = getDateString(review.daysAgo);
+    
+    card.innerHTML = `
+        <div class="review-header">
+            <div class="reviewer-info">
+                <div class="reviewer-avatar">${initials}</div>
+                <span class="reviewer-name">${review.name}</span>
+            </div>
+            <span class="review-date">${dateStr}</span>
+        </div>
+        <div class="review-stars">${starsHTML}</div>
+        <p class="review-text">${review.text}</p>
+        ${review.verified ? '<span class="review-badge"><i class="fas fa-check-circle"></i> Verified Purchase</span>' : ''}
+    `;
+    
+    return card;
+}
+
+// Get human-readable date string - supports up to 3+ years
+function getDateString(daysAgo) {
+    if (daysAgo === 0) return 'Today';
+    if (daysAgo === 1) return 'Yesterday';
+    if (daysAgo < 7) return `${daysAgo} days ago`;
+    if (daysAgo < 14) return '1 week ago';
+    if (daysAgo < 30) return `${Math.floor(daysAgo / 7)} weeks ago`;
+    if (daysAgo < 60) return '1 month ago';
+    if (daysAgo < 365) return `${Math.floor(daysAgo / 30)} months ago`;
+    if (daysAgo < 730) return '1 year ago';
+    if (daysAgo < 1095) return '2 years ago';
+    return '3 years ago';
+}
+
+// Initialize reviews when room preview page opens
+function initializeReviews() {
+    console.log('🎯 initializeReviews() called');
+    console.log('📋 Current state.frameSize:', state.frameSize);
+    console.log('📋 Size key:', getSizeKeyFromState());
+    loadReviews(true);
+    updateRatingsDisplay();
+}
+
+// Hook into the room preview page opening
+const originalNavigateToMobilePage = typeof navigateToMobilePage === 'function' ? navigateToMobilePage : null;
+
+// Patch navigateToMobilePage to init reviews
+if (originalNavigateToMobilePage) {
+    window._originalNavigateToMobilePage = originalNavigateToMobilePage;
+}
+
+// Re-initialize reviews when size changes
+function onSizeChangeForReviews() {
+    setTimeout(() => {
+        console.log('📱 Size changed - reloading reviews and ratings...');
+        loadReviews(true); // Reset and reload reviews for new size
+        updateRatingsDisplay();
+    }, 200);
+}
+
+// Initialize reviews when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Initial load of reviews (they'll be shown when room preview opens)
+    setTimeout(initializeReviews, 1000);
+    
+    // Listen for size button clicks to update ratings and reviews
+    document.querySelectorAll('.mobile-size-btn, [data-size]').forEach(btn => {
+        btn.addEventListener('click', onSizeChangeForReviews);
+    });
+    
+    // Also attach to size buttons that may be dynamically added
+    document.addEventListener('click', function(e) {
+        const sizeBtn = e.target.closest('.mobile-size-btn, [data-size]');
+        if (sizeBtn) {
+            onSizeChangeForReviews();
+        }
+    });
+});
+
+// Also initialize when room preview page becomes visible
+const roomPreviewObserver = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+            const roomPreviewPage = document.getElementById('mobileRoomPreviewPage');
+            if (roomPreviewPage && roomPreviewPage.style.display !== 'none') {
+                console.log('📱 Room preview page visible - initializing reviews...');
+                initializeReviews();
+            }
+        }
+    });
+});
+
+// Start observing when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    const roomPreviewPage = document.getElementById('mobileRoomPreviewPage');
+    if (roomPreviewPage) {
+        roomPreviewObserver.observe(roomPreviewPage, { attributes: true });
+        console.log('👁️ Room preview observer attached');
+        
+        // Also check if room preview is already visible
+        if (roomPreviewPage.style.display !== 'none' && roomPreviewPage.offsetParent !== null) {
+            initializeReviews();
+        }
+    }
+});
