@@ -961,6 +961,7 @@ function initializeEventListeners() {
                     frameColor: state.frameColor || '#8B4513',
                     frameTexture: state.frameTexture || 'wood',
                     whiteBorder: state.whiteBorder || false,
+                    borderThickness: state.borderThickness || 15,
                     adjustments: { ...state.adjustments },
                     zoom: state.zoom || 1,
                     position: { ...state.position },
@@ -2236,10 +2237,9 @@ function captureHighQualityPrintImage() {
                     
                     // Draw white border inside frame if enabled (for high-quality print)
                     if (state.whiteBorder) {
-                        // Calculate white border width proportional to frame border
-                        // The frame border is frameInnerPadding (20px) in preview
-                        // Scale it to canvas resolution
-                        const whiteBorderWidth = frameInnerPadding * canvasScaleX;
+                        // Use state.borderThickness for the white border width
+                        // Scale it from preview pixels to canvas resolution
+                        const whiteBorderWidth = state.borderThickness * canvasScaleX;
                         
                         ctx.fillStyle = '#ffffff';
                         // Top border
@@ -2251,7 +2251,7 @@ function captureHighQualityPrintImage() {
                         // Right border
                         ctx.fillRect(canvas.width - whiteBorderWidth, 0, whiteBorderWidth, canvas.height);
                         
-                        console.log('🖼️ White border added to high-quality image with width:', whiteBorderWidth);
+                        console.log('🖼️ White border added to high-quality image with width:', whiteBorderWidth, '(thickness:', state.borderThickness + 'px)');
                     }
                     
                     // Convert to high-quality JPEG
@@ -2402,10 +2402,9 @@ function captureFramedImage() {
                     
                     // Draw white border inside frame if enabled (for admin panel download)
                     if (state.whiteBorder) {
-                        // Calculate white border width proportional to frame border
-                        // The frame border is frameInnerPadding (20px) in preview
-                        // Scale it to canvas resolution
-                        const whiteBorderWidth = frameInnerPadding * scaleX;
+                        // Use state.borderThickness for the white border width
+                        // Scale it from preview pixels to canvas resolution
+                        const whiteBorderWidth = state.borderThickness * scaleX;
                         
                         ctx.fillStyle = '#ffffff';
                         // Top border
@@ -2417,7 +2416,7 @@ function captureFramedImage() {
                         // Right border
                         ctx.fillRect(canvas.width - whiteBorderWidth, 0, whiteBorderWidth, canvas.height);
                         
-                        console.log('White border added to admin image with width:', whiteBorderWidth);
+                        console.log('White border added to admin image with width:', whiteBorderWidth, '(thickness:', state.borderThickness + 'px)');
                     }
                     
                     // Convert to data URL with optimized quality
@@ -3265,14 +3264,11 @@ function captureFramePreview() {
 
                     // Draw white border inside frame if enabled
                     if (state.whiteBorder) {
-                        // The white border width should match the frame border width
-                        // Use the calculated frameBorderWidth which is the actual visual distance
-                        // from the frame edge to the image container edge
-                        const whiteBorderWidth = Math.min(frameBorderWidth, frameBorderHeight);
+                        // Use state.borderThickness directly since this captures at preview resolution
+                        const whiteBorderWidth = state.borderThickness;
                         
                         console.log('White border calculation:', {
-                            frameBorderWidth,
-                            frameBorderHeight,
+                            borderThickness: state.borderThickness,
                             whiteBorderWidth,
                             containerWidth,
                             containerHeight
@@ -3289,7 +3285,7 @@ function captureFramePreview() {
                         // Right border
                         ctx.fillRect(containerX + containerWidth - whiteBorderWidth, containerY, whiteBorderWidth, containerHeight);
                         
-                        console.log('White border drawn with width:', whiteBorderWidth, 'container:', containerWidth, 'x', containerHeight);
+                        console.log('White border drawn with width:', whiteBorderWidth, '(thickness:', state.borderThickness + 'px)');
                     }
 
                     // Convert to data URL
@@ -5165,6 +5161,9 @@ function initializeMobileCustomization() {
                         frameSize: state.frameSize,
                         frameColor: state.frameColor || '#8B4513',
                         frameTexture: state.frameTexture || 'wood',
+                        // White border settings
+                        whiteBorder: state.whiteBorder || false,
+                        borderThickness: state.borderThickness || 15,
                         // Image adjustments applied
                         adjustments: { ...state.adjustments },
                         // Position and zoom settings
@@ -5674,6 +5673,8 @@ function initMobileRoomPreview() {
                     frameSize: state.frameSize,
                     frameColor: state.frameColor || 'black',
                     frameTexture: state.frameTexture || 'smooth',
+                    whiteBorder: state.whiteBorder || false,
+                    borderThickness: state.borderThickness || 15,
                     adjustments: { ...state.adjustments },
                     position: { ...state.position },
                     zoom: state.zoom,

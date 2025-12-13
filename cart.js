@@ -218,7 +218,7 @@ class CartManager {
                         </div>
                         <div class="cart-item-spec">
                             <i class="fas fa-border-style"></i>
-                            Border: ${item.whiteBorder ? 'Yes' : 'No'}
+                            Border: ${item.whiteBorder ? 'Yes (' + (item.borderThickness || 15) + 'px)' : 'No'}
                         </div>
                     </div>
                 </div>

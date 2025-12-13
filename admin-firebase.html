@@ -3892,6 +3892,10 @@
                             <span class="detail-value">${item.whiteBorder ? 'Yes' : 'No'}</span>
                         </div>
                         <div class="detail-row">
+                            <span class="detail-label">Border Thickness:</span>
+                            <span class="detail-value">${item.whiteBorder ? (item.borderThickness || 15) + 'px' : 'N/A'}</span>
+                        </div>
+                        <div class="detail-row">
                             <span class="detail-label">Price:</span>
                             <span class="detail-value">₹${item.price || '349'}</span>
                         </div>
