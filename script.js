@@ -28,6 +28,7 @@ const state = {
     frameColor: 'black',
     frameTexture: 'smooth',
     whiteBorder: false, // White border option: false = No, true = Yes
+    borderThickness: 15, // Border thickness in pixels (5-40)
     price: 349,
     adjustments: {
         brightness: 100,
@@ -248,6 +249,42 @@ document.addEventListener('DOMContentLoaded', function() {
     initMobileRoomPreview();
 });
 
+// Handle mobile back button - return to upload section instead of homepage
+window.addEventListener('popstate', function(event) {
+    // Check if we're on mobile and in preview mode
+    if (window.innerWidth <= 600) {
+        const uploadSection = document.getElementById('uploadSection');
+        const previewSection = document.getElementById('previewSection');
+        const mobileSection = document.getElementById('mobileCustomizationSection');
+        
+        // If preview is visible, go back to upload section
+        if (previewSection && !previewSection.classList.contains('hidden')) {
+            // Prevent default navigation
+            event.preventDefault();
+            
+            // Show upload section, hide preview
+            uploadSection.classList.remove('hidden');
+            previewSection.classList.add('hidden');
+            
+            // Hide mobile customization section
+            if (mobileSection) {
+                mobileSection.style.display = 'none';
+            }
+            
+            // Scroll to top of upload wrapper
+            const uploadWrapper = document.getElementById('uploadHeroWrapper');
+            if (uploadWrapper) {
+                uploadWrapper.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            
+            // Push state again so further back presses also work correctly
+            history.pushState({ inUpload: true }, '', window.location.href);
+            
+            console.log('📱 Mobile back: Returned to upload section');
+        }
+    }
+});
+
 // Also update cart count on window load as a fallback
 window.addEventListener('load', function() {
     updateCartCount();
@@ -276,6 +313,7 @@ function initMobileBottomBar() {
         const textureGrid = tempContent.querySelector('.mobile-texture-grid');
         const adjustments = tempContent.querySelector('.mobile-adjustments-container');
         const borderGrid = tempContent.querySelector('.mobile-border-grid');
+        const borderThicknessContainer = tempContent.querySelector('.mobile-border-thickness-container');
 
         if (sizeGrid && drawers.size && drawers.size.children.length === 0) {
             drawers.size.appendChild(sizeGrid.cloneNode(true));
@@ -288,19 +326,16 @@ function initMobileBottomBar() {
         }
         if (adjustments && drawers.adjust && drawers.adjust.children.length === 0) {
             const adjClone = adjustments.cloneNode(true);
-            // Avoid duplicate IDs by renaming clones and linking to originals
-            adjClone.querySelectorAll('input[id]').forEach(input => {
-                const origId = input.id;
-                input.dataset.sourceId = origId;
-                input.removeAttribute('id');
-                // Initialize clone value from original if present
-                const original = document.getElementById(origId);
-                if (original) input.value = original.value;
-            });
+            // Keep IDs for our new slider-based system since we handle everything via data attributes
             drawers.adjust.appendChild(adjClone);
         }
         if (borderGrid && drawers.border && drawers.border.children.length === 0) {
             drawers.border.appendChild(borderGrid.cloneNode(true));
+            // Also add border thickness container
+            if (borderThicknessContainer) {
+                const thicknessClone = borderThicknessContainer.cloneNode(true);
+                drawers.border.appendChild(thicknessClone);
+            }
         }
     }
 
@@ -348,6 +383,12 @@ function initMobileBottomBar() {
             if (drawers.border) {
                 drawers.border.querySelectorAll('.mobile-border-btn').forEach(btn => btn.classList.remove('active'));
                 borderBtn.classList.add('active');
+                
+                // Show/hide border thickness slider based on selection
+                const thicknessContainer = drawers.border.querySelector('.mobile-border-thickness-container');
+                if (thicknessContainer) {
+                    thicknessContainer.style.display = state.whiteBorder ? 'block' : 'none';
+                }
             }
             // Also update desktop buttons if present
             document.querySelectorAll('.desktop-border-btn').forEach(btn => {
@@ -356,20 +397,99 @@ function initMobileBottomBar() {
                     btn.classList.add('selected');
                 }
             });
+            // Show/hide desktop thickness slider too
+            const desktopThicknessContainer = document.getElementById('desktopBorderThicknessContainer');
+            if (desktopThicknessContainer) {
+                desktopThicknessContainer.style.display = state.whiteBorder ? 'block' : 'none';
+            }
             // Trigger room preview update button state
             if (window.updateRoomPreviewButtonState) {
                 setTimeout(() => window.updateRoomPreviewButtonState(), 50);
+            }
+        }
+        
+        // Mobile Adjust Option Buttons (brightness, contrast, vibrance, highlights, shadows)
+        const adjustBtn = e.target.closest('.mobile-adjust-option-btn');
+        if (adjustBtn) {
+            const adjustType = adjustBtn.dataset.adjust;
+            if (adjustType && drawers.adjust) {
+                // Toggle active state on buttons
+                const allAdjustBtns = drawers.adjust.querySelectorAll('.mobile-adjust-option-btn');
+                const wasActive = adjustBtn.classList.contains('active');
+                const slidersArea = drawers.adjust.querySelector('.mobile-adjust-sliders-area');
+                
+                // Deactivate all buttons and hide all sliders with animation
+                allAdjustBtns.forEach(btn => btn.classList.remove('active'));
+                const allSliderContainers = drawers.adjust.querySelectorAll('.mobile-adjust-slider-container');
+                allSliderContainers.forEach(container => container.classList.remove('active'));
+                
+                // If wasn't active, activate this button and show its slider with slide down animation
+                if (!wasActive) {
+                    adjustBtn.classList.add('active');
+                    const sliderContainer = drawers.adjust.querySelector(`.mobile-adjust-slider-container[data-slider="${adjustType}"]`);
+                    if (sliderContainer) {
+                        sliderContainer.classList.add('active');
+                        if (slidersArea) slidersArea.classList.add('show');
+                    }
+                } else {
+                    // Slide up (hide) the sliders area
+                    if (slidersArea) slidersArea.classList.remove('show');
+                }
             }
         }
     });
 
     // Adjustments sliders - sync value to originals on input
     dropup.addEventListener('input', (e) => {
+        // Handle border thickness slider
+        if (e.target.classList.contains('mobile-border-thickness-slider')) {
+            updateBorderThickness(e.target.value);
+            // Update the value display next to this slider
+            const wrapper = e.target.closest('.mobile-border-thickness-slider-wrapper');
+            if (wrapper) {
+                const valueEl = wrapper.querySelector('.mobile-border-thickness-value');
+                if (valueEl) valueEl.textContent = e.target.value + 'px';
+            }
+            return;
+        }
+        
+        // Handle adjustment sliders
+        if (e.target.classList.contains('mobile-adjust-thick-slider')) {
+            const sliderContainer = e.target.closest('.mobile-adjust-slider-container');
+            const sliderType = sliderContainer ? sliderContainer.dataset.slider : null;
+            
+            if (sliderType) {
+                const val = parseInt(e.target.value, 10);
+                
+                // Update the value display next to this slider
+                const valueEl = sliderContainer.querySelector('.mobile-adjust-slider-value');
+                if (valueEl) valueEl.textContent = val;
+                
+                // Update state directly
+                if (state.adjustments && sliderType in state.adjustments) {
+                    state.adjustments[sliderType] = val;
+                    updateImageFilters();
+                }
+                
+                // Also sync the desktop slider if present
+                const desktop = document.getElementById(sliderType);
+                if (desktop) desktop.value = val;
+            }
+            return;
+        }
+        
         const id = e.target.dataset.sourceId || e.target.id;
         if (!id) return;
+        
+        // Handle adjustment sliders by ID fallback
         const mobileIds = ['mobileBrightness','mobileContrast','mobileHighlights','mobileShadows','mobileVibrance'];
         if (mobileIds.includes(id)) {
             const val = parseInt(e.target.value, 10);
+            
+            // Update the value display
+            const valueDisplay = document.getElementById(id + 'Value');
+            if (valueDisplay) valueDisplay.textContent = val;
+            
             // Try to update the original (if present)
             const original = document.getElementById(id);
             if (original && original !== e.target) {
@@ -783,12 +903,26 @@ function initializeEventListeners() {
             state.whiteBorder = button.dataset.border === 'yes';
             updateWhiteBorder();
             
+            // Show/hide border thickness slider based on selection
+            const thicknessContainer = document.getElementById('desktopBorderThicknessContainer');
+            if (thicknessContainer) {
+                thicknessContainer.style.display = state.whiteBorder ? 'block' : 'none';
+            }
+            
             // No auto-update; let user press Update button for room previews
             if (window.updateRoomPreviewButtonState) {
                 setTimeout(() => window.updateRoomPreviewButtonState(), 50);
             }
         });
     });
+    
+    // Desktop Border Thickness Slider
+    const desktopBorderThicknessSlider = document.getElementById('desktopBorderThickness');
+    if (desktopBorderThicknessSlider) {
+        desktopBorderThicknessSlider.addEventListener('input', (e) => {
+            updateBorderThickness(e.target.value);
+        });
+    }
 
     // Add to cart functionality
     console.log('Setting up Add to Cart button:', elements.addToCartBtn);
@@ -1243,6 +1377,11 @@ function handleImageUpload(file) {
             const mobileSection = document.getElementById('mobileCustomizationSection');
             if (mobileSection && window.innerWidth <= 600) {
                 mobileSection.style.display = 'block';
+            }
+            
+            // Push history state so mobile back button returns to upload section
+            if (window.innerWidth <= 600) {
+                history.pushState({ inPreview: true }, '', window.location.href);
             }
 
             // Store the TRUE original image (full resolution, uncompressed) for print quality
@@ -4142,13 +4281,52 @@ function updateFrameColor() {
 
 // Function to update white border inside frame
 function updateWhiteBorder() {
-    const frameElements = document.querySelectorAll('.preview-section .frame');
-    frameElements.forEach(frame => {
-        // Set data attribute for CSS-based white border effect
-        frame.setAttribute('data-white-border', state.whiteBorder ? 'yes' : 'no');
+    const imageContainers = document.querySelectorAll('.preview-section .frame .image-container');
+    imageContainers.forEach(container => {
+        // Find or create the white border overlay element
+        let borderOverlay = container.querySelector('.white-border-overlay');
+        
+        if (state.whiteBorder) {
+            // Create overlay if it doesn't exist
+            if (!borderOverlay) {
+                borderOverlay = document.createElement('div');
+                borderOverlay.className = 'white-border-overlay';
+                container.appendChild(borderOverlay);
+            }
+            // Apply the border width directly as inline style
+            borderOverlay.style.borderWidth = state.borderThickness + 'px';
+            borderOverlay.style.display = 'block';
+        } else {
+            // Hide or remove the overlay
+            if (borderOverlay) {
+                borderOverlay.style.display = 'none';
+            }
+        }
     });
     
-    console.log('White border updated:', state.whiteBorder ? 'Yes' : 'No');
+    console.log('White border updated:', state.whiteBorder ? 'Yes' : 'No', '| Thickness:', state.borderThickness + 'px');
+}
+
+// Function to update border thickness
+function updateBorderThickness(thickness) {
+    state.borderThickness = parseInt(thickness, 10);
+    
+    // Apply to all white border overlay elements directly
+    document.querySelectorAll('.white-border-overlay').forEach(overlay => {
+        overlay.style.borderWidth = state.borderThickness + 'px';
+    });
+    
+    // Update all thickness value displays - including cloned ones in drawers
+    document.querySelectorAll('.border-thickness-value, .mobile-border-thickness-value').forEach(el => {
+        el.textContent = state.borderThickness + 'px';
+    });
+    
+    // Sync all border thickness sliders
+    document.querySelectorAll('.border-thickness-slider, .mobile-border-thickness-slider').forEach(slider => {
+        slider.value = state.borderThickness;
+    });
+    
+    console.log('Border thickness updated:', state.borderThickness + 'px');
 }
 
 // Function to update frame texture (sets data attribute for CSS styling)

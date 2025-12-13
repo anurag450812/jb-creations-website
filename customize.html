@@ -217,12 +217,11 @@
 
         .instructions-steps {
             display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            grid-template-rows: auto auto;
+            grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
             gap: 8px;
             align-items: center;
             justify-items: center;
-            max-width: 400px;
+            max-width: 700px;
             margin: 0 auto;
         }
 
@@ -266,28 +265,38 @@
             font-size: 1.2rem;
             color: #FFA62B;
         }
-
-        /* Grid positions for 2x2 layout - 2 rows only */
-        .instruction-step:nth-child(1) { grid-column: 1; grid-row: 1; } /* Upload Photo - top left */
-        .step-arrow:nth-child(2) { grid-column: 2; grid-row: 1; } /* Arrow right */
-        .instruction-step:nth-child(3) { grid-column: 3; grid-row: 1; } /* Adjust & Crop - top right */
-        .instruction-step:nth-child(4) { grid-column: 1; grid-row: 2; } /* Customize Frame - bottom left */
-        .step-arrow:nth-child(5) { grid-column: 2; grid-row: 2; } /* Arrow right */
-        .instruction-step:nth-child(6) { grid-column: 3; grid-row: 2; } /* Add to Cart - bottom right */
+        
+        /* Desktop: Hide down arrows, show right arrows using CSS */
+        .step-arrow i.fa-arrow-down {
+            transform: rotate(-90deg);
+        }
 
         @media (max-width: 768px) {
+            /* Full-screen swipeable sections on mobile */
             .upload-hero-wrapper {
-                padding: 8px;
+                padding: 0;
+                height: calc(100vh - 56px);
+                overflow: hidden;
+                scroll-snap-type: y mandatory;
+                overflow-y: auto;
             }
 
             .upload-hero-section {
+                min-height: calc(100vh - 56px);
+                height: calc(100vh - 56px);
                 padding: 20px 16px;
-                border-radius: 16px;
+                border-radius: 0;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                scroll-snap-align: start;
             }
             
             .upload-hero-section h1 {
-                font-size: 1.3rem;
-                margin-bottom: 8px;
+                font-size: 1.4rem;
+                margin-bottom: 12px;
             }
             
             .upload-hero-section > p {
@@ -295,57 +304,136 @@
             }
             
             .upload-hero-badge {
-                padding: 6px 12px;
-                font-size: 0.75rem;
-                margin-bottom: 12px;
+                padding: 8px 16px;
+                font-size: 0.8rem;
+                margin-bottom: 16px;
             }
 
+            /* Restore previous upload box styling - NOT full width */
             .upload-box-wrapper {
-                padding: 16px;
+                padding: 20px;
+                background: rgba(255,255,255,0.95);
+                border-radius: 20px;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+                width: 90%;
+                max-width: 350px;
             }
             
-            .upload-box-wrapper .upload-header h2 {
-                font-size: 1rem;
+            /* Hide "Select Your Image" header on mobile */
+            .upload-box-wrapper .upload-header {
+                display: none !important;
             }
             
             .upload-box-wrapper .frame {
-                min-height: 180px !important;
+                min-height: 200px !important;
+                border-radius: 12px;
+                background: #f8f6f4 !important;
             }
             
             .upload-box-wrapper .image-container {
-                min-height: 180px !important;
+                min-height: 200px !important;
             }
 
-            .instructions-steps {
-                max-width: 320px;
-                gap: 6px;
-            }
-
-            .step-icon-box {
-                width: 40px;
-                height: 40px;
-                font-size: 1.2rem;
-            }
-
-            .instruction-step h4 {
-                font-size: 0.7rem;
-            }
-
-            .step-arrow {
-                font-size: 1rem;
-            }
-            
+            /* Full-screen instructions section */
             .upload-instructions {
-                padding: 16px;
-                border-radius: 16px;
+                min-height: calc(100vh - 56px);
+                height: calc(100vh - 56px);
+                padding: 32px 24px;
+                border-radius: 0;
+                background: linear-gradient(180deg, #EDE7E3 0%, #ffffff 100%);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                scroll-snap-align: start;
             }
             
             .instructions-header {
-                margin-bottom: 12px;
+                margin-bottom: 40px;
+                text-align: center;
             }
             
             .instructions-header h2 {
-                font-size: 1.1rem;
+                font-size: 1.8rem;
+                color: #16697A;
+                font-weight: 800;
+            }
+
+            /* Vertical layout for steps on mobile - BIGGER */
+            .instructions-steps {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 0;
+                max-width: 320px;
+                margin: 0 auto;
+            }
+
+            .instruction-step {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 20px;
+                padding: 12px 16px;
+                width: 100%;
+                text-align: left;
+            }
+
+            /* BIGGER icons on mobile */
+            .step-icon-box {
+                width: 70px;
+                height: 70px;
+                font-size: 2rem;
+                flex-shrink: 0;
+                border-radius: 16px;
+            }
+
+            /* BIGGER text on mobile */
+            .instruction-step h4 {
+                font-size: 1.2rem;
+                font-weight: 700;
+                color: #1a3a42;
+            }
+
+            /* Vertical arrows */
+            .step-arrow {
+                display: flex;
+                justify-content: center;
+                padding: 6px 0;
+            }
+            
+            /* Reset arrow rotation on mobile - point downward */
+            .step-arrow i.fa-arrow-down {
+                transform: rotate(0deg) !important;
+                font-size: 1.5rem;
+                color: #FFA62B;
+            }
+
+            /* Reset grid positioning for mobile vertical layout */
+            .instruction-step:nth-child(1),
+            .step-arrow:nth-child(2),
+            .instruction-step:nth-child(3),
+            .instruction-step:nth-child(4),
+            .step-arrow:nth-child(5),
+            .instruction-step:nth-child(6) {
+                grid-column: auto;
+                grid-row: auto;
+            }
+
+            /* Swipe hint indicator */
+            .upload-hero-section::after {
+                content: '↓ Swipe up to learn more';
+                position: absolute;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 0.8rem;
+                color: rgba(255,255,255,0.8);
+                animation: bounce 2s infinite;
+            }
+            
+            @keyframes bounce {
+                0%, 100% { transform: translateX(-50%) translateY(0); }
+                50% { transform: translateX(-50%) translateY(-5px); }
             }
         }
     </style>
@@ -388,28 +476,31 @@
             </div>
         </section>
 
-        <!-- Instructions Section - Compact 2x2 Grid -->
+        <!-- Instructions Section - Vertical on Mobile, 2x2 Grid on Desktop -->
         <section class="upload-instructions">
             <div class="instructions-header">
                 <h2>What Happens Next? 🎨</h2>
             </div>
             <div class="instructions-steps">
-                <!-- Row 1: Upload Photo → Adjust & Crop -->
+                <!-- Step 1: Upload Photo -->
                 <div class="instruction-step">
                     <div class="step-icon-box">📤</div>
                     <h4>Upload Photo</h4>
                 </div>
-                <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="step-arrow"><i class="fas fa-arrow-down"></i></div>
+                <!-- Step 2: Adjust & Crop -->
                 <div class="instruction-step">
                     <div class="step-icon-box">✂️</div>
                     <h4>Adjust & Crop</h4>
                 </div>
-                <!-- Row 2: Customize Frame → Add to Cart -->
+                <div class="step-arrow"><i class="fas fa-arrow-down"></i></div>
+                <!-- Step 3: Customize Frame -->
                 <div class="instruction-step">
                     <div class="step-icon-box">🎨</div>
                     <h4>Customize Frame</h4>
                 </div>
-                <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="step-arrow"><i class="fas fa-arrow-down"></i></div>
+                <!-- Step 4: Add to Cart -->
                 <div class="instruction-step">
                     <div class="step-icon-box">🛒</div>
                     <h4>Add to Cart</h4>
@@ -640,6 +731,13 @@
                                         <i class="fas fa-check-circle"></i>
                                         <span>Yes</span>
                                     </button>
+                                </div>
+                                <div class="border-thickness-container" id="desktopBorderThicknessContainer" style="display: none;">
+                                    <label class="border-thickness-label">Border Thickness</label>
+                                    <div class="border-thickness-slider-wrapper">
+                                        <input type="range" id="desktopBorderThickness" class="border-thickness-slider" min="0" max="30" value="15">
+                                        <span class="border-thickness-value" id="desktopBorderThicknessValue">15px</span>
+                                    </div>
                                 </div>
                                 <p class="border-description">Add a white border inside the frame around your photo</p>
                             </div>
@@ -996,6 +1094,13 @@
                     <span>Yes</span>
                 </button>
             </div>
+            <div class="mobile-border-thickness-container" style="display: none;">
+                <label class="border-thickness-label">Thickness</label>
+                <div class="mobile-border-thickness-slider-wrapper">
+                    <input type="range" class="mobile-border-thickness-slider" min="0" max="30" value="15">
+                    <span class="mobile-border-thickness-value">15px</span>
+                </div>
+            </div>
             <div class="mobile-size-grid">
                 <button class="mobile-size-btn" data-size="13x19" data-orientation="portrait" data-price="499">
                     <i class="fas fa-portrait"></i>
@@ -1051,25 +1156,56 @@
                 </button>
             </div>
             <div class="mobile-adjustments-container">
-                <div class="mobile-adjustment-item">
-                    <i class="fas fa-sun"></i>
-                    <input type="range" id="mobileBrightness" min="0" max="200" value="100">
+                <!-- Slider Area (slides down from above the buttons) -->
+                <div class="mobile-adjust-sliders-area">
+                    <div class="mobile-adjust-slider-container" data-slider="brightness">
+                        <label class="mobile-adjust-slider-label">☀️ Brightness</label>
+                        <input type="range" id="mobileBrightness" class="mobile-adjust-thick-slider" min="0" max="200" value="100">
+                        <span class="mobile-adjust-slider-value" id="mobileBrightnessValue">100</span>
+                    </div>
+                    <div class="mobile-adjust-slider-container" data-slider="contrast">
+                        <label class="mobile-adjust-slider-label">🔲 Contrast</label>
+                        <input type="range" id="mobileContrast" class="mobile-adjust-thick-slider" min="0" max="200" value="100">
+                        <span class="mobile-adjust-slider-value" id="mobileContrastValue">100</span>
+                    </div>
+                    <div class="mobile-adjust-slider-container" data-slider="vibrance">
+                        <label class="mobile-adjust-slider-label">🎨 Vibrance</label>
+                        <input type="range" id="mobileVibrance" class="mobile-adjust-thick-slider" min="0" max="200" value="100">
+                        <span class="mobile-adjust-slider-value" id="mobileVibranceValue">100</span>
+                    </div>
+                    <div class="mobile-adjust-slider-container" data-slider="highlights">
+                        <label class="mobile-adjust-slider-label">✨ Highlights</label>
+                        <input type="range" id="mobileHighlights" class="mobile-adjust-thick-slider" min="0" max="200" value="100">
+                        <span class="mobile-adjust-slider-value" id="mobileHighlightsValue">100</span>
+                    </div>
+                    <div class="mobile-adjust-slider-container" data-slider="shadows">
+                        <label class="mobile-adjust-slider-label">🌑 Shadows</label>
+                        <input type="range" id="mobileShadows" class="mobile-adjust-thick-slider" min="0" max="200" value="100">
+                        <span class="mobile-adjust-slider-value" id="mobileShadowsValue">100</span>
+                    </div>
                 </div>
-                <div class="mobile-adjustment-item">
-                    <i class="fas fa-adjust"></i>
-                    <input type="range" id="mobileContrast" min="0" max="200" value="100">
-                </div>
-                <div class="mobile-adjustment-item">
-                    <i class="fas fa-lightbulb"></i>
-                    <input type="range" id="mobileHighlights" min="0" max="200" value="100">
-                </div>
-                <div class="mobile-adjustment-item">
-                    <i class="fas fa-moon"></i>
-                    <input type="range" id="mobileShadows" min="0" max="200" value="100">
-                </div>
-                <div class="mobile-adjustment-item">
-                    <i class="fas fa-paint-brush"></i>
-                    <input type="range" id="mobileVibrance" min="0" max="200" value="100">
+                <!-- Adjustment Buttons Row (horizontal scrollable) -->
+                <div class="mobile-adjust-buttons-row">
+                    <button class="mobile-adjust-option-btn" data-adjust="brightness">
+                        <span class="adjust-emoji">☀️</span>
+                        <span>Brightness</span>
+                    </button>
+                    <button class="mobile-adjust-option-btn" data-adjust="contrast">
+                        <span class="adjust-emoji">🔲</span>
+                        <span>Contrast</span>
+                    </button>
+                    <button class="mobile-adjust-option-btn" data-adjust="vibrance">
+                        <span class="adjust-emoji">🎨</span>
+                        <span>Vibrance</span>
+                    </button>
+                    <button class="mobile-adjust-option-btn" data-adjust="highlights">
+                        <span class="adjust-emoji">✨</span>
+                        <span>Highlights</span>
+                    </button>
+                    <button class="mobile-adjust-option-btn" data-adjust="shadows">
+                        <span class="adjust-emoji">🌑</span>
+                        <span>Shadows</span>
+                    </button>
                 </div>
             </div>
         </template>
@@ -1364,13 +1500,13 @@
         <!-- Mobile Fixed Bottom Customization Bar (always visible after image upload) -->
         <div class="mobile-bottom-bar" id="mobileBottomBar" aria-hidden="false">
             <div class="bar-tabs" role="tablist">
-                <button class="bar-tab" data-target="border" role="tab" aria-selected="false">
-                    <i class="fas fa-border-style"></i>
-                    <span>Border</span>
-                </button>
                 <button class="bar-tab" data-target="size" role="tab" aria-selected="false">
                     <i class="fas fa-ruler-combined"></i>
                     <span>Size</span>
+                </button>
+                <button class="bar-tab" data-target="border" role="tab" aria-selected="false">
+                    <i class="fas fa-border-style"></i>
+                    <span>Border</span>
                 </button>
                 <button class="bar-tab" data-target="color" role="tab" aria-selected="false">
                     <i class="fas fa-fill-drip"></i>
