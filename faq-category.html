@@ -44,7 +44,6 @@
             display: flex;
             align-items: center;
             padding: 0 20px;
-            box-shadow: 0 2px 10px rgba(22, 105, 122, 0.1);
         }
 
         .back-btn {
@@ -373,19 +372,15 @@
                 questions: [
                     {
                         q: "How to Communicate With Us?",
-                        a: "You can reach us through WhatsApp at +91 9392577498, email at support@xidlz.com, or use the Contact Us link on our website. We're available Monday to Saturday, 10 AM to 7 PM IST."
+                        a: "<p>To communicate with us:</p><ul><li>For order-related queries: Go to 'My Orders' section and use the Chat option to communicate for your specific order.</li><li>For general queries: Go to the Home page → Quick Links → Contact Us button to reach us.</li></ul><p>We're available Monday to Saturday, 10 AM to 7 PM IST.</p>"
                     },
                     {
                         q: "How can I leave Feedback?",
-                        a: "We'd love to hear from you! You can leave feedback through WhatsApp, email us at support@xidlz.com, or share your experience on our social media pages. Your feedback helps us improve!"
+                        a: "We'd love to hear from you! You can email us at xidlzzzzzz@gmail.com or share your experience on our social media pages. Your feedback helps us improve!"
                     },
                     {
                         q: "How Much Time Will It Take To Respond After Placing A Query?",
-                        a: "We typically respond within 2-4 hours during business hours (10 AM - 7 PM IST, Monday to Saturday). For urgent queries, WhatsApp is the fastest way to reach us."
-                    },
-                    {
-                        q: "Xidlz Contact Information",
-                        a: "<p>You can reach us through:</p><ul><li>WhatsApp: +91 9392577498</li><li>Email: support@xidlz.com</li><li>Instagram: @xidlz_official</li><li>Business Hours: Mon-Sat, 10 AM - 7 PM IST</li></ul>"
+                        a: "We typically respond within 2-4 hours during business hours (10 AM - 7 PM IST, Monday to Saturday). For urgent queries, use the chat option in your order section."
                     },
                     {
                         q: "How Can I Trust This Website?",
@@ -472,7 +467,7 @@
                     },
                     {
                         q: "What Are the Shipping Charges?",
-                        a: "Shipping is FREE on all orders above ₹499. For orders below ₹499, a flat shipping fee of ₹49 is charged."
+                        a: "Shipping is FREE for all the orders that you place on our website."
                     },
                     {
                         q: "What If I Am Not Available When The Courier Boy Delivers The Product?",
@@ -698,14 +693,26 @@
             if (category && faqData[category]) {
                 loadCategory(category);
             } else {
-                window.location.href = 'faq.html';
+                window.location.replace('faq.html');
+            }
+        });
+
+        // Handle browser back button properly
+        window.addEventListener('popstate', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const category = urlParams.get('category');
+            
+            if (category && faqData[category]) {
+                loadCategory(category);
+            } else {
+                window.location.replace('faq.html');
             }
         });
 
         function loadCategory(category) {
             const data = faqData[category];
             document.getElementById('categoryTitle').textContent = data.title;
-            document.getElementById('headerTitle').textContent = data.title;
+            document.getElementById('headerTitle').textContent = 'FAQ';
             document.getElementById('questionCount').textContent = `${data.questions.length} Questions`;
             document.title = `${data.title} - FAQ - Xidlz`;
 

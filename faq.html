@@ -44,7 +44,6 @@
             display: flex;
             align-items: center;
             padding: 0 20px;
-            box-shadow: 0 2px 10px rgba(22, 105, 122, 0.1);
         }
 
         .back-btn {
@@ -305,6 +304,12 @@
             visibility: hidden;
         }
 
+        @media (max-width: 768px) {
+            .back-to-top {
+                display: none !important;
+            }
+        }
+
         .back-to-top.visible {
             opacity: 1;
             visibility: visible;
@@ -371,7 +376,7 @@
                         <path d="M56 36l-8 8v-8"/>
                     </svg>
                 </div>
-                <span class="category-title">Communication and Feedback (5)</span>
+                <span class="category-title">Communication and Feedback (4)</span>
             </a>
 
             <!-- How to Place Order -->
