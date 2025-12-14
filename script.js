@@ -464,10 +464,14 @@ function initMobileBottomBar() {
                 drawers.border.querySelectorAll('.mobile-border-btn').forEach(btn => btn.classList.remove('active'));
                 borderBtn.classList.add('active');
                 
-                // Show/hide border thickness slider based on selection
+                // Show/hide border thickness slider with smooth animation
                 const thicknessContainer = drawers.border.querySelector('.mobile-border-thickness-container');
                 if (thicknessContainer) {
-                    thicknessContainer.style.display = state.whiteBorder ? 'block' : 'none';
+                    if (state.whiteBorder) {
+                        thicknessContainer.classList.add('show');
+                    } else {
+                        thicknessContainer.classList.remove('show');
+                    }
                 }
             }
             // Also update desktop buttons if present
@@ -477,10 +481,14 @@ function initMobileBottomBar() {
                     btn.classList.add('selected');
                 }
             });
-            // Show/hide desktop thickness slider too
+            // Show/hide desktop thickness slider with smooth animation
             const desktopThicknessContainer = document.getElementById('desktopBorderThicknessContainer');
             if (desktopThicknessContainer) {
-                desktopThicknessContainer.style.display = state.whiteBorder ? 'block' : 'none';
+                if (state.whiteBorder) {
+                    desktopThicknessContainer.classList.add('show');
+                } else {
+                    desktopThicknessContainer.classList.remove('show');
+                }
             }
             // Trigger room preview update button state
             if (window.updateRoomPreviewButtonState) {
@@ -983,10 +991,14 @@ function initializeEventListeners() {
             state.whiteBorder = button.dataset.border === 'yes';
             updateWhiteBorder();
             
-            // Show/hide border thickness slider based on selection
+            // Show/hide border thickness slider with smooth animation
             const thicknessContainer = document.getElementById('desktopBorderThicknessContainer');
             if (thicknessContainer) {
-                thicknessContainer.style.display = state.whiteBorder ? 'block' : 'none';
+                if (state.whiteBorder) {
+                    thicknessContainer.classList.add('show');
+                } else {
+                    thicknessContainer.classList.remove('show');
+                }
             }
             
             // No auto-update; let user press Update button for room previews
@@ -1033,6 +1045,17 @@ function initializeEventListeners() {
                 elements.addToCartBtn.disabled = true;
                 elements.addToCartBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
                 
+                // Calculate MRP based on frame size
+                let mrp = 0;
+                if (state.frameSize && state.frameSize.size === '13x19') {
+                    mrp = 999;
+                } else if (state.frameSize && (state.frameSize.size === '13x10' || state.frameSize.size === '10x13')) {
+                    mrp = 799;
+                } else {
+                    // Default MRP - roughly 2x the price
+                    mrp = (state.price || 349) * 2;
+                }
+                
                 // Prepare cart item with basic data first
                 const cartItem = {
                     id: Date.now(),
@@ -1046,6 +1069,7 @@ function initializeEventListeners() {
                     zoom: state.zoom || 1,
                     position: { ...state.position },
                     price: state.price || 349,
+                    mrp: mrp, // Add MRP to cart item
                     orderDate: new Date().toISOString(),
                     timestamp: new Date().toISOString()
                 };
@@ -6179,12 +6203,14 @@ const reviews_13x10_landscape = [
     { name: "Ramesh Pillai", rating: 3, text: "Average experiance. Frame is okay, nothing exceptional. Does the job. Could be improved. 🤷", verified: true, daysAgo: 785 },
 ];
 
-// Size-based rating configurations with auto-increment - different counts for each size
+// Size-based rating configurations - FIXED counts (no auto-increment)
+// These are the base counts that were established when the system started
+// User reviews will add to these counts
 const sizeRatings = {
-    "13x19-portrait": { baseRatings: 523, baseReviews: 68, dailyIncrement: 2, rating: 4.6 },
-    "13x19-landscape": { baseRatings: 412, baseReviews: 55, dailyIncrement: 1, rating: 4.5 },
-    "13x10-portrait": { baseRatings: 356, baseReviews: 48, dailyIncrement: 1, rating: 4.5 },
-    "13x10-landscape": { baseRatings: 289, baseReviews: 42, dailyIncrement: 1, rating: 4.4 }
+    "13x19-portrait": { baseRatings: 587, baseReviews: 11, rating: 4.6 },
+    "13x19-landscape": { baseRatings: 456, baseReviews: 9, rating: 4.5 },
+    "13x10-portrait": { baseRatings: 398, baseReviews: 8, rating: 4.4 },
+    "13x10-landscape": { baseRatings: 321, baseReviews: 6, rating: 4.1 }
 };
 
 // Map size to reviews array
@@ -6195,25 +6221,140 @@ const sizeReviewsMap = {
     "13x10-landscape": reviews_13x10_landscape
 };
 
-// Reference date for auto-increment calculation (when ratings system started)
-const ratingsStartDate = new Date('2024-11-01');
+// ==================== USER REVIEWS SYSTEM ====================
+// Storage key for user-submitted reviews
+const USER_REVIEWS_KEY = 'jb_user_reviews';
 
-// Calculate current ratings based on days passed
+// Get user reviews from localStorage
+function getUserReviews() {
+    try {
+        const stored = localStorage.getItem(USER_REVIEWS_KEY);
+        return stored ? JSON.parse(stored) : {};
+    } catch (e) {
+        console.error('Error loading user reviews:', e);
+        return {};
+    }
+}
+
+// Save user reviews to localStorage
+function saveUserReviews(reviews) {
+    try {
+        localStorage.setItem(USER_REVIEWS_KEY, JSON.stringify(reviews));
+    } catch (e) {
+        console.error('Error saving user reviews:', e);
+    }
+}
+
+// Add a new user review
+function addUserReview(sizeKey, review) {
+    const userReviews = getUserReviews();
+    if (!userReviews[sizeKey]) {
+        userReviews[sizeKey] = [];
+    }
+    
+    // Add review with timestamp
+    review.submittedAt = new Date().toISOString();
+    review.isUserReview = true;
+    review.daysAgo = 0; // Will be calculated dynamically
+    
+    userReviews[sizeKey].unshift(review); // Add to beginning
+    saveUserReviews(userReviews);
+    
+    console.log(`✅ User review added for ${sizeKey}:`, review);
+    return true;
+}
+
+// Get user reviews for a specific size
+function getUserReviewsForSize(sizeKey) {
+    const allUserReviews = getUserReviews();
+    const reviews = allUserReviews[sizeKey] || [];
+    
+    // Calculate daysAgo dynamically for user reviews
+    return reviews.map(review => {
+        if (review.submittedAt) {
+            const submittedDate = new Date(review.submittedAt);
+            const today = new Date();
+            review.daysAgo = Math.floor((today - submittedDate) / (1000 * 60 * 60 * 24));
+        }
+        return review;
+    });
+}
+
+// Get combined reviews (static + user reviews) for current size
+function getCombinedReviewsForSize(sizeKey) {
+    const staticReviews = sizeReviewsMap[sizeKey] || reviews_13x19_portrait;
+    const userReviews = getUserReviewsForSize(sizeKey);
+    
+    // Put user reviews first, then static reviews
+    return [...userReviews, ...staticReviews];
+}
+
+// Calculate current ratings with user reviews count added
 function getCurrentRatingsForSize(sizeKey) {
     const config = sizeRatings[sizeKey] || sizeRatings["13x19-portrait"];
-    const today = new Date();
-    const daysPassed = Math.floor((today - ratingsStartDate) / (1000 * 60 * 60 * 24));
+    const userReviews = getUserReviewsForSize(sizeKey);
+    const userReviewCount = userReviews.length;
     
-    // Calculate incremented ratings
-    const incrementedRatings = config.baseRatings + (daysPassed * config.dailyIncrement);
-    const incrementedReviews = config.baseReviews + Math.floor(daysPassed * config.dailyIncrement * 0.12); // ~12% of raters write reviews
+    // Add user reviews to base counts
+    const totalRatings = config.baseRatings + userReviewCount;
+    const totalReviews = config.baseReviews + userReviewCount;
+    
+    // Recalculate average rating if there are user reviews
+    let avgRating = config.rating;
+    if (userReviewCount > 0) {
+        const userRatingSum = userReviews.reduce((sum, r) => sum + (r.rating || 5), 0);
+        const staticRatingSum = config.rating * config.baseRatings;
+        avgRating = (staticRatingSum + userRatingSum) / totalRatings;
+        avgRating = Math.round(avgRating * 10) / 10; // Round to 1 decimal
+    }
     
     return {
-        totalRatings: incrementedRatings,
-        totalReviews: incrementedReviews,
-        avgRating: config.rating
+        totalRatings: totalRatings,
+        totalReviews: totalReviews,
+        avgRating: avgRating
     };
 }
+
+// Submit review from orders page (called from my-orders.html or order-details.html)
+window.submitUserReview = function(orderData, reviewData) {
+    // Determine size key from order data
+    let sizeKey = "13x19-portrait"; // Default
+    if (orderData && orderData.frameSize) {
+        const size = typeof orderData.frameSize === 'object' ? orderData.frameSize.size : orderData.frameSize;
+        const orientation = typeof orderData.frameSize === 'object' ? orderData.frameSize.orientation : 'portrait';
+        
+        if (size && size.includes('13x10')) {
+            sizeKey = `13x10-${orientation || 'portrait'}`;
+        } else {
+            sizeKey = `13x19-${orientation || 'portrait'}`;
+        }
+    }
+    
+    // Create review object
+    const review = {
+        name: reviewData.name || 'Anonymous',
+        rating: reviewData.rating || 5,
+        text: reviewData.text || '',
+        verified: true, // Coming from orders page means verified purchase
+        orderNumber: orderData.orderNumber || ''
+    };
+    
+    // Add review
+    const success = addUserReview(sizeKey, review);
+    
+    // Trigger UI update if on main page
+    if (success && typeof loadReviews === 'function') {
+        loadReviews(true);
+        updateRatingsDisplay();
+    }
+    
+    return success;
+};
+
+// Make review functions globally available
+window.addUserReview = addUserReview;
+window.getUserReviews = getUserReviews;
+window.getCurrentRatingsForSize = getCurrentRatingsForSize;
 
 // Get size key from state
 function getSizeKeyFromState() {
@@ -6248,6 +6389,8 @@ function updateRatingsDisplay() {
     
     const totalRatingsEl = document.getElementById('totalRatingsCount');
     const totalReviewsEl = document.getElementById('totalReviewsCount');
+    const bigRatingNumber = document.querySelector('.big-rating-number');
+    const ratingCountDisplay = document.getElementById('ratingCountDisplay');
     
     if (totalRatingsEl) {
         totalRatingsEl.textContent = ratingData.totalRatings.toLocaleString('en-IN');
@@ -6256,7 +6399,56 @@ function updateRatingsDisplay() {
         totalReviewsEl.textContent = ratingData.totalReviews;
     }
     
-    console.log(`⭐ Ratings updated for ${sizeKey}: ${ratingData.totalRatings} ratings, ${ratingData.totalReviews} reviews`);
+    // Update the big rating number in reviews section
+    if (bigRatingNumber) {
+        bigRatingNumber.textContent = ratingData.avgRating.toFixed(1);
+    }
+    
+    // Update the rating text display (e.g., "4.5 (500 ratings)")
+    if (ratingCountDisplay) {
+        const ratingsSpan = ratingCountDisplay.querySelector('#totalRatingsCount');
+        if (ratingsSpan) {
+            // Update just the rating number text before the span
+            ratingCountDisplay.innerHTML = `${ratingData.avgRating.toFixed(1)} (<span id="totalRatingsCount">${ratingData.totalRatings.toLocaleString('en-IN')}</span> ratings) ⭐`;
+        }
+    }
+    
+    // Update star displays based on rating
+    updateStarDisplay(ratingData.avgRating);
+    
+    console.log(`⭐ Ratings updated for ${sizeKey}: ${ratingData.avgRating} stars, ${ratingData.totalRatings} ratings, ${ratingData.totalReviews} reviews`);
+}
+
+// Update star displays based on rating value
+function updateStarDisplay(rating) {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.25 && rating % 1 < 0.75;
+    const hasFullInsteadOfHalf = rating % 1 >= 0.75;
+    
+    let starsHTML = '';
+    const actualFullStars = fullStars + (hasFullInsteadOfHalf ? 1 : 0);
+    
+    for (let i = 0; i < actualFullStars; i++) {
+        starsHTML += '<i class="fas fa-star"></i>';
+    }
+    if (hasHalfStar) {
+        starsHTML += '<i class="fas fa-star-half-alt"></i>';
+    }
+    const emptyStars = 5 - actualFullStars - (hasHalfStar ? 1 : 0);
+    for (let i = 0; i < emptyStars; i++) {
+        starsHTML += '<i class="far fa-star"></i>';
+    }
+    
+    // Update all star displays
+    const ratingStarsDisplay = document.getElementById('ratingStarsDisplay');
+    const bigRatingStars = document.querySelector('.big-rating-stars');
+    
+    if (ratingStarsDisplay) {
+        ratingStarsDisplay.innerHTML = starsHTML;
+    }
+    if (bigRatingStars) {
+        bigRatingStars.innerHTML = starsHTML;
+    }
 }
 
 // Scroll to reviews section when clicking on ratings
@@ -6267,10 +6459,10 @@ function scrollToReviews() {
     }
 }
 
-// Get reviews for current size
+// Get reviews for current size (including user reviews)
 function getReviewsForCurrentSize() {
     const sizeKey = getSizeKeyFromState();
-    return sizeReviewsMap[sizeKey] || reviews_13x19_portrait;
+    return getCombinedReviewsForSize(sizeKey);
 }
 
 // Load reviews into the reviews list
@@ -6323,6 +6515,9 @@ function loadMoreReviews() {
 function createReviewCard(review) {
     const card = document.createElement('div');
     card.className = 'review-card';
+    if (review.isUserReview) {
+        card.classList.add('user-review-card');
+    }
     
     // Generate avatar initials
     const initials = review.name.split(' ').map(n => n[0]).join('').slice(0, 2);
@@ -6345,6 +6540,14 @@ function createReviewCard(review) {
     // Calculate date string
     const dateStr = getDateString(review.daysAgo);
     
+    // Determine badge text
+    let badgeHTML = '';
+    if (review.isUserReview) {
+        badgeHTML = '<span class="review-badge user-badge"><i class="fas fa-user-check"></i> Your Review</span>';
+    } else if (review.verified) {
+        badgeHTML = '<span class="review-badge"><i class="fas fa-check-circle"></i> Verified Purchase</span>';
+    }
+    
     card.innerHTML = `
         <div class="review-header">
             <div class="reviewer-info">
@@ -6355,7 +6558,7 @@ function createReviewCard(review) {
         </div>
         <div class="review-stars">${starsHTML}</div>
         <p class="review-text">${review.text}</p>
-        ${review.verified ? '<span class="review-badge"><i class="fas fa-check-circle"></i> Verified Purchase</span>' : ''}
+        ${badgeHTML}
     `;
     
     return card;

@@ -744,7 +744,7 @@
                                         <span>Yes</span>
                                     </button>
                                 </div>
-                                <div class="border-thickness-container" id="desktopBorderThicknessContainer" style="display: none;">
+                                <div class="border-thickness-container" id="desktopBorderThicknessContainer">
                                     <label class="border-thickness-label">Border Thickness</label>
                                     <div class="border-thickness-slider-wrapper">
                                         <input type="range" id="desktopBorderThickness" class="border-thickness-slider" min="0" max="30" value="15">
@@ -1182,7 +1182,7 @@
                     <span>Yes</span>
                 </button>
             </div>
-            <div class="mobile-border-thickness-container" style="display: none;">
+            <div class="mobile-border-thickness-container">
                 <label class="border-thickness-label">Thickness</label>
                 <div class="mobile-border-thickness-slider-wrapper">
                     <input type="range" class="mobile-border-thickness-slider" min="0" max="30" value="15">
@@ -1576,12 +1576,27 @@
         
         // Contact us function
         function contactUs() {
-            alert('Contact Us\n\nEmail: contact@jbcreations.com\nPhone: +91 12345 67890\nAddress: 123 Art Street, Creative City, India\n\nWe\'d love to hear from you!');
+            // Open chat support - same logic as openContactChat
+            if (window.supportChat && window.supportChat.openChat) {
+                window.supportChat.openChat();
+            } else {
+                // Initialize chat with forceInit and hideFloatingButton options
+                if (typeof SupportChat !== 'undefined') {
+                    window.supportChat = new SupportChat({ forceInit: true, hideFloatingButton: true });
+                    setTimeout(() => {
+                        if (window.supportChat && window.supportChat.openChat) {
+                            window.supportChat.openChat();
+                        }
+                    }, 300);
+                } else {
+                    window.location.href = 'mailto:jbcreationssss@gmail.com?subject=Support%20Request';
+                }
+            }
         }
 
         // About us function
         function aboutUs() {
-            alert('About Xidlz\n\nWe are passionate about turning your precious memories into beautiful wall art. With years of experience in custom photo framing, we use premium materials and professional craftsmanship to create frames that last a lifetime.\n\nOur mission is to help you showcase your most cherished moments in style.');
+            window.location.href = 'about-us.html';
         }
     </script>
 

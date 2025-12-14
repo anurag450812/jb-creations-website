@@ -394,9 +394,13 @@
                 height: 160px;
             }
 
+            /* Colorful content sections for mobile - like policy/reviews sections */
             .content-section {
                 padding: 28px 20px;
                 border-radius: 16px;
+                background: linear-gradient(135deg, #f0f9fb 0%, #e8f4f6 100%) !important;
+                border: 1px solid rgba(22, 105, 122, 0.15) !important;
+                box-shadow: 0 4px 15px rgba(22, 105, 122, 0.08) !important;
             }
 
             .content-section h2 {
@@ -409,6 +413,42 @@
 
             .features-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            /* Colorful feature cards for mobile */
+            .feature-card {
+                background: rgba(255, 255, 255, 0.85) !important;
+                border: 1px solid rgba(22, 105, 122, 0.1) !important;
+                box-shadow: 0 2px 10px rgba(22, 105, 122, 0.08) !important;
+                border-radius: 12px !important;
+                transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+            }
+            
+            .feature-card:hover {
+                transform: translateX(4px) !important;
+                box-shadow: 0 4px 15px rgba(22, 105, 122, 0.12) !important;
+            }
+            
+            /* Colorful expertise list items */
+            .expertise-list li {
+                background: rgba(255, 255, 255, 0.85) !important;
+                border: 1px solid rgba(22, 105, 122, 0.08) !important;
+                border-left: 4px solid var(--primary) !important;
+                border-radius: 12px !important;
+                transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+            }
+            
+            .expertise-list li:hover {
+                transform: translateX(4px) !important;
+                box-shadow: 0 2px 10px rgba(22, 105, 122, 0.1) !important;
+            }
+            
+            /* Colorful note box */
+            .note-box {
+                background: linear-gradient(135deg, #fff9f0 0%, #fff5e6 100%) !important;
+                border: 1px solid rgba(255, 166, 43, 0.2) !important;
+                box-shadow: 0 4px 15px rgba(255, 166, 43, 0.1) !important;
+                border-radius: 16px !important;
             }
 
             .image-text-row {

@@ -252,25 +252,47 @@
                 grid-template-columns: 1fr;
             }
 
+            /* Colorful FAQ category cards for mobile - like policy/reviews sections */
+            .faq-category-card {
+                background: linear-gradient(135deg, #f0f9fb 0%, #e8f4f6 100%) !important;
+                border: 1px solid rgba(22, 105, 122, 0.15) !important;
+                box-shadow: 0 4px 15px rgba(22, 105, 122, 0.08) !important;
+                border-radius: 16px !important;
+                padding: 20px;
+                transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+            }
+            
+            .faq-category-card:hover {
+                transform: translateX(4px) !important;
+                box-shadow: 0 4px 18px rgba(22, 105, 122, 0.15) !important;
+            }
+            
+            /* Colorful search section */
             .faq-search {
+                background: linear-gradient(135deg, #fff9f0 0%, #fff5e6 100%);
+                border: 1px solid rgba(255, 166, 43, 0.2);
+                box-shadow: 0 4px 15px rgba(255, 166, 43, 0.1);
+                border-radius: 16px;
+                padding: 16px;
                 flex-direction: column;
             }
 
             .faq-search input {
                 padding: 14px 20px;
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.9);
             }
 
             .faq-search button {
                 padding: 14px 20px;
-            }
-
-            .faq-category-card {
-                padding: 20px;
+                border-radius: 12px;
             }
 
             .category-icon {
                 width: 50px;
                 height: 50px;
+                background: rgba(22, 105, 122, 0.1);
+                border-radius: 12px;
             }
 
             .category-icon svg {

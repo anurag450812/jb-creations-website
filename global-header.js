@@ -835,15 +835,30 @@ if (typeof viewOrders === 'undefined') {
 
 if (typeof contactUs === 'undefined') {
     window.contactUs = function() {
-        // Open contact modal or redirect to contact page
-        alert('Contact us at: support@jbcreations.com\nPhone: +91 XXXXXXXXXX');
+        // Open chat support - same logic as openContactChat in quick links
+        if (window.supportChat && window.supportChat.openChat) {
+            window.supportChat.openChat();
+        } else {
+            // Initialize chat with forceInit and hideFloatingButton options
+            if (typeof SupportChat !== 'undefined') {
+                window.supportChat = new SupportChat({ forceInit: true, hideFloatingButton: true });
+                setTimeout(() => {
+                    if (window.supportChat && window.supportChat.openChat) {
+                        window.supportChat.openChat();
+                    }
+                }, 300);
+            } else {
+                // Fallback to email if chat not available
+                window.location.href = 'mailto:jbcreationssss@gmail.com?subject=Support%20Request';
+            }
+        }
     };
 }
 
 if (typeof aboutUs === 'undefined') {
     window.aboutUs = function() {
-        // Open about modal or redirect to about page
-        alert('Xidlz - Beautiful Memories Deserve a Frame\n\nWe specialize in custom photo framing with high-quality materials and perfect craftsmanship.');
+        // Navigate to About Us page
+        window.location.href = 'about-us.html';
     };
 }
 

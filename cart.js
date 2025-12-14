@@ -250,7 +250,15 @@ class CartManager {
                     </div>
                 </div>
                 <div class="cart-item-actions">
-                    <div class="cart-item-price">₹${item.price}</div>
+                    <div class="cart-item-price">
+                        ${item.mrp && item.mrp > item.price ? 
+                            `<span style="text-decoration: line-through; color: #999; font-size: 0.75em; margin-right: 6px;">₹${item.mrp}</span>` : 
+                            ''}
+                        <span>₹${item.price}</span>
+                        ${item.mrp && item.mrp > item.price ? 
+                            `<span style="color: #28a745; font-size: 0.7em; margin-left: 4px;">${Math.round(((item.mrp - item.price) / item.mrp) * 100)}% OFF</span>` : 
+                            ''}
+                    </div>
                     <div class="cart-item-controls">
                         <div class="quantity-control">
                             <button class="quantity-btn quantity-decrease" data-index="${index}">
@@ -342,6 +350,23 @@ class CartManager {
         const itemCount = this.cart.reduce((total, item) => total + (item.quantity || 1), 0);
         const subtotal = this.cart.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
         
+        // Calculate total MRP (sum of all MRPs)
+        const totalMRP = this.cart.reduce((total, item) => {
+            // Use stored MRP if available, otherwise calculate based on size
+            let itemMRP = item.mrp;
+            if (!itemMRP) {
+                // Fallback MRP calculation based on frame size
+                if (item.frameSize && item.frameSize.size === '13x19') {
+                    itemMRP = 999;
+                } else if (item.frameSize && (item.frameSize.size === '13x10' || item.frameSize.size === '10x13')) {
+                    itemMRP = 799;
+                } else {
+                    itemMRP = item.price * 2; // Default to 2x price
+                }
+            }
+            return total + (itemMRP * (item.quantity || 1));
+        }, 0);
+        
         // Shipping is always free
         const shippingCost = 0;
         
@@ -362,13 +387,13 @@ class CartManager {
 
         // Update DOM elements
         document.getElementById('itemCount').textContent = itemCount;
-        document.getElementById('subtotalAmount').textContent = subtotal;
+        document.getElementById('subtotalAmount').textContent = totalMRP; // Show total MRP
         document.getElementById('shippingAmount').textContent = 'FREE';
         document.getElementById('platformFee').textContent = 'FREE';
         document.getElementById('totalAmount').textContent = total;
         
-        // Update discount on MRP (50% off)
-        const discountOnMRP = subtotal; // Since original price is 2x, discount equals subtotal
+        // Update discount on MRP (Total MRP - Total Sale Price)
+        const discountOnMRP = totalMRP - subtotal;
         document.getElementById('discountAmount').textContent = discountOnMRP;
 
         // Show/hide coupon discount row
@@ -560,11 +585,26 @@ function viewOrders() {
 }
 
 function contactUs() {
-    alert('Contact Us\n\nEmail: contact@jbcreations.com\nPhone: +91 12345 67890\nAddress: 123 Art Street, Creative City, India\n\nWe\'d love to hear from you!');
+    // Open chat support - same logic as openContactChat
+    if (window.supportChat && window.supportChat.openChat) {
+        window.supportChat.openChat();
+    } else {
+        // Initialize chat with forceInit and hideFloatingButton options
+        if (typeof SupportChat !== 'undefined') {
+            window.supportChat = new SupportChat({ forceInit: true, hideFloatingButton: true });
+            setTimeout(() => {
+                if (window.supportChat && window.supportChat.openChat) {
+                    window.supportChat.openChat();
+                }
+            }, 300);
+        } else {
+            window.location.href = 'mailto:jbcreationssss@gmail.com?subject=Support%20Request';
+        }
+    }
 }
 
 function aboutUs() {
-    alert('About Xidlz\n\nWe are passionate about turning your precious memories into beautiful wall art. With years of experience in custom photo framing, we use premium materials and professional craftsmanship to create frames that last a lifetime.\n\nOur mission is to help you showcase your most cherished moments in style.');
+    window.location.href = 'about-us.html';
 }
 
 // Initialize cart manager when page loads

@@ -32,6 +32,35 @@
             .orders-container {
                 padding-top: 80px !important;
             }
+            
+            /* Colorful orders-section styling for mobile */
+            .orders-section {
+                background: linear-gradient(135deg, #f0f9fb 0%, #e8f4f6 100%) !important;
+                border: 1px solid rgba(22, 105, 122, 0.15) !important;
+                box-shadow: 0 4px 15px rgba(22, 105, 122, 0.08) !important;
+                border-radius: 16px !important;
+            }
+            
+            /* Style each order card like colorful cards */
+            .order-card {
+                background: rgba(255, 255, 255, 0.85) !important;
+                border-radius: 12px !important;
+                border: 1px solid rgba(22, 105, 122, 0.1) !important;
+                margin: 12px !important;
+                transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+            }
+            
+            .order-card:hover {
+                transform: translateX(4px) !important;
+                box-shadow: 0 4px 15px rgba(22, 105, 122, 0.15) !important;
+            }
+            
+            /* Colorful page-header for mobile */
+            .page-header {
+                background: linear-gradient(135deg, #fff9f0 0%, #fff5e6 100%) !important;
+                border: 1px solid rgba(255, 166, 43, 0.2) !important;
+                box-shadow: 0 4px 15px rgba(255, 166, 43, 0.1) !important;
+            }
         }
         
         @media (max-width: 480px) {
@@ -1797,11 +1826,26 @@
         }
         
         function contactUs() {
-            alert('Contact Us\n\nEmail: jbcreationssss@gmail.com\nPhone: 9424772998');
+            // Open chat support - same logic as openContactChat
+            if (window.supportChat && window.supportChat.openChat) {
+                window.supportChat.openChat();
+            } else {
+                // Initialize chat with forceInit and hideFloatingButton options
+                if (typeof SupportChat !== 'undefined') {
+                    window.supportChat = new SupportChat({ forceInit: true, hideFloatingButton: true });
+                    setTimeout(() => {
+                        if (window.supportChat && window.supportChat.openChat) {
+                            window.supportChat.openChat();
+                        }
+                    }, 300);
+                } else {
+                    window.location.href = 'mailto:jbcreationssss@gmail.com?subject=Support%20Request';
+                }
+            }
         }
 
         function aboutUs() {
-            alert('About Xidlz\n\nWe are passionate about turning your precious memories into beautiful wall art.');
+            window.location.href = 'about-us.html';
         }
 
         // Close dropdown on outside click

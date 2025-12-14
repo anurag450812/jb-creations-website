@@ -1356,22 +1356,44 @@ function updateOrderSummary() {
         const fallbackImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiBmaWxsPSIjZjhmOWZhIiBzdHJva2U9IiNlOWVjZWYiIHN0cm9rZS13aWR0aD0iMiIvPgo8cGF0aCBkPSJNNDAgNDBINDBWNDBINDBINDBaTTQwIDQwTDgwIDQwTDcwIDYwTDUwIDYwTDQwIDQwWiIgZmlsbD0iIzE2Njk3QSIgZmlsbC1vcGFjaXR5PSIwLjMiLz4KPGNpcmNsZSBjeD0iNTUiIGN5PSI1NSIgcj0iOCIgZmlsbD0iIzE2Njk3QSIgZmlsbC1vcGFjaXR5PSIwLjMiLz4KPHR5cGUgdGV4dD0iUGhvdG8iIHg9IjYwIiB5PSI5MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjMTY2OTdBIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5QaG90bzwvdGV4dD4KPC9zdmc+';
         
         const itemHTML = `
-            <img src="${imageSource || fallbackImage}" 
-                 alt="Framed Photo" 
-                 class="order-item-image" 
-                 onerror="this.src='${fallbackImage}'; this.onerror=null;"
-                 onload="console.log('Image loaded successfully for item ${index + 1}')">
+            <div class="order-item-image">
+                ${imageSource ? 
+                    `<img src="${imageSource}" alt="Framed Photo" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-image\\'></i>'">` : 
+                    '<i class="fas fa-image"></i>'
+                }
+            </div>
             <div class="order-item-details">
-                <div class="order-item-title">Custom Framed Photo #${index + 1}</div>
-                <div class="order-item-meta">${item.frameSize?.size || 'N/A'} ${item.frameSize?.orientation || ''} • ${item.frameColor || 'Default'}${item.frameTexture ? ' ' + item.frameTexture : ''}</div>
+                <h4 class="order-item-title">Custom Photo Frame</h4>
                 <div class="order-item-specs">
-                    <strong>Size:</strong> ${item.frameSize?.size || 'N/A'}<br>
-                    <strong>Orientation:</strong> ${item.frameSize?.orientation || 'N/A'}<br>
-                    <strong>Frame:</strong> ${item.frameColor || 'Default'} ${item.frameTexture || 'texture'}<br>
-                    <strong>Quantity:</strong> ${item.quantity || 1}<br>
-                    <strong>Added:</strong> ${item.timestamp ? new Date(item.timestamp).toLocaleDateString() : new Date(item.orderDate || Date.now()).toLocaleDateString()}
+                    <div class="order-item-spec">
+                        <i class="fas fa-ruler-combined"></i>
+                        ${item.frameSize?.size || 'N/A'}
+                    </div>
+                    <div class="order-item-spec">
+                        <i class="fas fa-palette"></i>
+                        ${item.frameColor || 'Default'}
+                    </div>
+                    <div class="order-item-spec">
+                        <i class="fas fa-image"></i>
+                        ${item.frameSize?.orientation || 'Portrait'}
+                    </div>
+                    <div class="order-item-spec">
+                        <i class="fas fa-border-style"></i>
+                        Border: ${item.whiteBorder ? 'Yes' : 'No'}
+                    </div>
                 </div>
-                <div class="order-item-price">₹${item.price || 349}</div>
+            </div>
+            <div class="order-item-actions">
+                <div class="order-item-price">
+                    ${item.mrp && item.mrp > item.price ? 
+                        `<span style="text-decoration: line-through; color: #999; font-size: 0.75em; margin-right: 6px;">₹${item.mrp}</span>` : 
+                        ''}
+                    <span>₹${item.price || 349}</span>
+                    ${item.mrp && item.mrp > item.price ? 
+                        `<span style="color: #28a745; font-size: 0.7em; margin-left: 4px;">${Math.round(((item.mrp - item.price) / item.mrp) * 100)}% OFF</span>` : 
+                        ''}
+                </div>
+                <div class="order-item-qty">Qty: ${item.quantity || 1}</div>
             </div>
         `;
         if (summaryContainer) {

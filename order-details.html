@@ -11,9 +11,22 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            padding-top: 90px; /* Space for fixed header */
             padding-bottom: 100px;
             background-color: var(--background-color);
             min-height: 100vh;
+        }
+
+        @media (max-width: 768px) {
+            .order-details-container {
+                padding-top: 80px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .order-details-container {
+                padding-top: 70px !important;
+            }
         }
 
         .order-header-section {
@@ -421,6 +434,186 @@
             color: white;
         }
 
+        .btn-review {
+            background: linear-gradient(135deg, #FFB800 0%, #FFA62B 100%);
+            color: #333;
+            border: none;
+        }
+
+        .btn-review:hover {
+            background: linear-gradient(135deg, #FFA62B 0%, #FF9500 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 166, 43, 0.3);
+        }
+
+        /* Review Modal Styles */
+        .review-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .review-modal-overlay.active {
+            display: flex;
+        }
+
+        .review-modal {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 450px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .review-modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .review-modal-header h3 {
+            margin: 0;
+            color: #16697A;
+            font-size: 1.25rem;
+        }
+
+        .close-review-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 5px;
+            line-height: 1;
+        }
+
+        .close-review-modal:hover {
+            color: #333;
+        }
+
+        .review-modal-body {
+            padding: 20px;
+        }
+
+        .star-rating-input {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .star-rating-input i {
+            font-size: 32px;
+            color: #ddd;
+            cursor: pointer;
+            transition: color 0.2s, transform 0.2s;
+        }
+
+        .star-rating-input i:hover {
+            transform: scale(1.2);
+        }
+
+        .star-rating-input i.active {
+            color: #FFB800;
+        }
+
+        .star-rating-input i.hovered {
+            color: #FFC107;
+        }
+
+        .review-form-group {
+            margin-bottom: 16px;
+        }
+
+        .review-form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .review-form-group input,
+        .review-form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .review-form-group input:focus,
+        .review-form-group textarea:focus {
+            outline: none;
+            border-color: #16697A;
+        }
+
+        .review-form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .submit-review-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #16697A 0%, #489FB5 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-review-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(22, 105, 122, 0.3);
+        }
+
+        .submit-review-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .review-submitted-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.15) 0%, rgba(40, 167, 69, 0.1) 100%);
+            color: #28a745;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
         /* Order Summary */
         .summary-row {
             display: flex;
@@ -494,6 +687,41 @@
         </div>
     </div>
 
+    <!-- Review Modal -->
+    <div id="reviewModalOverlay" class="review-modal-overlay">
+        <div class="review-modal">
+            <div class="review-modal-header">
+                <h3><i class="fas fa-star"></i> Write a Review</h3>
+                <button class="close-review-modal" onclick="closeReviewModal()">&times;</button>
+            </div>
+            <div class="review-modal-body">
+                <p style="text-align: center; color: #6c757d; margin-bottom: 20px;">How was your experience with this order?</p>
+                
+                <div class="star-rating-input" id="starRatingInput">
+                    <i class="far fa-star" data-rating="1"></i>
+                    <i class="far fa-star" data-rating="2"></i>
+                    <i class="far fa-star" data-rating="3"></i>
+                    <i class="far fa-star" data-rating="4"></i>
+                    <i class="far fa-star" data-rating="5"></i>
+                </div>
+                
+                <div class="review-form-group">
+                    <label>Your Name</label>
+                    <input type="text" id="reviewerName" placeholder="Enter your name" />
+                </div>
+                
+                <div class="review-form-group">
+                    <label>Your Review</label>
+                    <textarea id="reviewText" placeholder="Tell us about your experience with the frame quality, delivery, etc."></textarea>
+                </div>
+                
+                <button class="submit-review-btn" id="submitReviewBtn" onclick="submitReview()">
+                    <i class="fas fa-paper-plane"></i> Submit Review
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
@@ -501,7 +729,6 @@
     <script src="fast2sms-client.js?v=3.0"></script>
     <script src="otp-auth-realsms.js?v=3.0"></script>
     <script src="auth.js?v=3.0"></script>
-    <script src="support-chat.js?v=1.0"></script>
 
     <script>
         let currentUser = null;
@@ -750,6 +977,17 @@
                     </div>
                 </div>
 
+                <!-- Write Review Section -->
+                <div class="detail-section">
+                    <div class="section-header">
+                        <i class="fas fa-star"></i>
+                        <h2>Rate Your Purchase</h2>
+                    </div>
+                    <div class="section-content" id="reviewSection">
+                        ${renderReviewSection(orderData)}
+                    </div>
+                </div>
+
                 <!-- Actions -->
                 <div class="detail-section">
                     <div class="section-content">
@@ -906,14 +1144,17 @@
         }
 
         function contactSupport(orderNumber) {
-            // Open support chat with order context
-            if (typeof openSupportChat === 'function') {
-                openSupportChat(orderNumber);
+            // Open support chat - exactly like openContactChat in index.html
+            if (window.supportChat && window.supportChat.openChat) {
+                window.supportChat.openChat();
             } else {
-                // Fallback to email if chat not available
-                const subject = encodeURIComponent(`Help with Order #${orderNumber}`);
-                const body = encodeURIComponent(`Hi Xidlz Team,\n\nI need help with my order #${orderNumber}.\n\n[Please describe your issue here]\n\nThank you!`);
-                window.location.href = `mailto:jbcreationssss@gmail.com?subject=${subject}&body=${body}`;
+                // Initialize chat with forceInit and hideFloatingButton options
+                window.supportChat = new SupportChat({ forceInit: true, hideFloatingButton: true });
+                setTimeout(() => {
+                    if (window.supportChat && window.supportChat.openChat) {
+                        window.supportChat.openChat();
+                    }
+                }, 300);
             }
         }
 
@@ -929,28 +1170,276 @@
                 </div>
             `;
         }
+
+        // ==================== REVIEW FUNCTIONS ====================
+        
+        // Storage key for submitted reviews (to track which orders have been reviewed)
+        const SUBMITTED_REVIEWS_KEY = 'jb_submitted_order_reviews';
+        
+        // Check if order has already been reviewed
+        function hasOrderBeenReviewed(orderNumber) {
+            try {
+                const submitted = localStorage.getItem(SUBMITTED_REVIEWS_KEY);
+                const reviews = submitted ? JSON.parse(submitted) : [];
+                return reviews.includes(orderNumber);
+            } catch (e) {
+                return false;
+            }
+        }
+        
+        // Mark order as reviewed
+        function markOrderAsReviewed(orderNumber) {
+            try {
+                const submitted = localStorage.getItem(SUBMITTED_REVIEWS_KEY);
+                const reviews = submitted ? JSON.parse(submitted) : [];
+                if (!reviews.includes(orderNumber)) {
+                    reviews.push(orderNumber);
+                    localStorage.setItem(SUBMITTED_REVIEWS_KEY, JSON.stringify(reviews));
+                }
+            } catch (e) {
+                console.error('Error marking order as reviewed:', e);
+            }
+        }
+        
+        // Render the review section (button or "reviewed" badge)
+        function renderReviewSection(order) {
+            const orderNumber = order.orderNumber || order.orderId || '';
+            const status = (order.status || '').toLowerCase();
+            
+            // Only show review option for delivered orders
+            if (status !== 'delivered') {
+                return `
+                    <div style="text-align: center; color: #6c757d; padding: 10px;">
+                        <i class="fas fa-info-circle"></i>
+                        You can write a review once your order is delivered.
+                    </div>
+                `;
+            }
+            
+            // Check if already reviewed
+            if (hasOrderBeenReviewed(orderNumber)) {
+                return `
+                    <div style="text-align: center; padding: 10px;">
+                        <span class="review-submitted-badge">
+                            <i class="fas fa-check-circle"></i>
+                            Thanks for your review!
+                        </span>
+                        <p style="margin-top: 10px; color: #6c757d; font-size: 13px;">
+                            Your review helps other customers make informed decisions.
+                        </p>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div style="text-align: center;">
+                    <p style="color: #6c757d; margin-bottom: 15px;">Share your experience with this order</p>
+                    <button class="action-btn btn-review" onclick="openReviewModal()">
+                        <i class="fas fa-star"></i>
+                        Write a Review
+                    </button>
+                </div>
+            `;
+        }
+        
+        // Selected rating
+        let selectedRating = 0;
+        
+        // Open review modal
+        function openReviewModal() {
+            document.getElementById('reviewModalOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Pre-fill name if user is logged in
+            const nameInput = document.getElementById('reviewerName');
+            if (nameInput && currentUser?.name) {
+                nameInput.value = currentUser.name;
+            }
+            
+            // Setup star rating interaction
+            setupStarRating();
+        }
+        
+        // Close review modal
+        function closeReviewModal() {
+            document.getElementById('reviewModalOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+            
+            // Reset form
+            selectedRating = 0;
+            document.getElementById('reviewText').value = '';
+            updateStars(0);
+        }
+        
+        // Setup star rating click handlers
+        function setupStarRating() {
+            const stars = document.querySelectorAll('#starRatingInput i');
+            
+            stars.forEach(star => {
+                // Hover effect
+                star.addEventListener('mouseenter', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    updateStars(rating, true);
+                });
+                
+                // Mouse leave
+                star.addEventListener('mouseleave', function() {
+                    updateStars(selectedRating, false);
+                });
+                
+                // Click to select
+                star.addEventListener('click', function() {
+                    selectedRating = parseInt(this.dataset.rating);
+                    updateStars(selectedRating, false);
+                });
+            });
+        }
+        
+        // Update star display
+        function updateStars(rating, isHover = false) {
+            const stars = document.querySelectorAll('#starRatingInput i');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.remove('far');
+                    star.classList.add('fas', isHover ? 'hovered' : 'active');
+                    if (!isHover) star.classList.remove('hovered');
+                } else {
+                    star.classList.remove('fas', 'active', 'hovered');
+                    star.classList.add('far');
+                }
+            });
+        }
+        
+        // Submit review
+        function submitReview() {
+            const name = document.getElementById('reviewerName').value.trim();
+            const text = document.getElementById('reviewText').value.trim();
+            
+            if (selectedRating === 0) {
+                alert('Please select a star rating');
+                return;
+            }
+            
+            if (!name) {
+                alert('Please enter your name');
+                return;
+            }
+            
+            if (!text || text.length < 10) {
+                alert('Please write a review (at least 10 characters)');
+                return;
+            }
+            
+            // Disable button during submission
+            const submitBtn = document.getElementById('submitReviewBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            
+            // Get order info for size determination
+            const orderNumber = orderData.orderNumber || orderData.orderId;
+            const firstItem = orderData.items ? orderData.items[0] : null;
+            
+            // Build order data for review submission
+            const orderInfo = {
+                orderNumber: orderNumber,
+                frameSize: firstItem?.frameSize || '13x19'
+            };
+            
+            // Build review data
+            const reviewData = {
+                name: name,
+                rating: selectedRating,
+                text: text
+            };
+            
+            // Submit to the global review system (defined in script.js)
+            try {
+                // Add to localStorage-based review storage
+                const sizeKey = getSizeKeyFromOrder(firstItem);
+                
+                const USER_REVIEWS_KEY = 'jb_user_reviews';
+                let userReviews = {};
+                try {
+                    const stored = localStorage.getItem(USER_REVIEWS_KEY);
+                    userReviews = stored ? JSON.parse(stored) : {};
+                } catch (e) {}
+                
+                if (!userReviews[sizeKey]) {
+                    userReviews[sizeKey] = [];
+                }
+                
+                userReviews[sizeKey].unshift({
+                    name: reviewData.name,
+                    rating: reviewData.rating,
+                    text: reviewData.text,
+                    verified: true,
+                    isUserReview: true,
+                    submittedAt: new Date().toISOString(),
+                    orderNumber: orderNumber
+                });
+                
+                localStorage.setItem(USER_REVIEWS_KEY, JSON.stringify(userReviews));
+                
+                // Mark order as reviewed
+                markOrderAsReviewed(orderNumber);
+                
+                // Show success
+                submitBtn.innerHTML = '<i class="fas fa-check"></i> Review Submitted!';
+                submitBtn.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                
+                setTimeout(() => {
+                    closeReviewModal();
+                    
+                    // Update the review section
+                    const reviewSection = document.getElementById('reviewSection');
+                    if (reviewSection) {
+                        reviewSection.innerHTML = renderReviewSection(orderData);
+                    }
+                    
+                    // Reset button
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Review';
+                    submitBtn.style.background = '';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Error submitting review:', error);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Review';
+                alert('Error submitting review. Please try again.');
+            }
+        }
+        
+        // Get size key from order item
+        function getSizeKeyFromOrder(item) {
+            if (!item || !item.frameSize) return '13x19-portrait';
+            
+            const frameSize = item.frameSize;
+            let size, orientation;
+            
+            if (typeof frameSize === 'object') {
+                size = frameSize.size || '13x19';
+                orientation = frameSize.orientation || 'portrait';
+            } else {
+                size = String(frameSize);
+                orientation = 'portrait';
+            }
+            
+            if (size.includes('13x10')) {
+                return `13x10-${orientation}`;
+            }
+            return `13x19-${orientation}`;
+        }
+        
+        // Close modal on overlay click
+        document.getElementById('reviewModalOverlay')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeReviewModal();
+            }
+        });
     </script>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-column">
-                <a href="index.html" class="footer-logo">XIDLZ</a>
-                <div class="footer-tagline">Custom Photo Frames & Memories</div>
-            </div>
-            <div class="footer-column">
-                <h3>Quick Links</h3>
-                <ul class="footer-links">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="customize.html">Our Services</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <div class="footer-bottom-content">
-                <div class="copyright">© 2024 XIDLZ. All rights reserved.</div>
-            </div>
-        </div>
-    </footer>
+    <!-- Support Chat Widget -->
+    <script src="support-chat.js?v=1.1"></script>
 </body>
 </html>

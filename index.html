@@ -1046,8 +1046,13 @@
     <script src="script.js?v=4.0"></script>
     
     <script>
-        // Profile dropdown functions
+        // Profile dropdown functions - Only used as fallback if GlobalWebsiteHeader is not handling it
         function setProfileDropdownState(isOpen) {
+            // Skip if GlobalWebsiteHeader is handling the dropdown
+            if (window.GlobalWebsiteHeader && document.getElementById('globalSiteHeader')) {
+                return GlobalWebsiteHeader.setProfileDropdownState(isOpen);
+            }
+            
             const dropdownContainer = document.getElementById('profileDropdown');
             const dropdownMenu = document.getElementById('profileDropdownMenu');
             const profileBtn = document.getElementById('profileBtn');
@@ -1060,6 +1065,11 @@
         }
 
         function toggleProfileDropdown() {
+            // Skip if GlobalWebsiteHeader is handling the dropdown
+            if (window.GlobalWebsiteHeader && document.getElementById('globalSiteHeader')) {
+                return GlobalWebsiteHeader.toggleProfileDropdown();
+            }
+            
             const dropdownContainer = document.getElementById('profileDropdown');
             if (!dropdownContainer) return;
             const isOpen = dropdownContainer.classList.contains('open');
@@ -1067,6 +1077,12 @@
         }
 
         function setupProfileDropdown() {
+            // Skip setup if GlobalWebsiteHeader is handling the dropdown
+            if (window.GlobalWebsiteHeader && document.getElementById('globalSiteHeader')) {
+                console.log('setupProfileDropdown: GlobalWebsiteHeader is handling dropdown, skipping');
+                return;
+            }
+            
             const dropdownContainer = document.getElementById('profileDropdown');
             const dropdownMenu = document.getElementById('profileDropdownMenu');
             const profileBtn = document.getElementById('profileBtn');
@@ -1145,15 +1161,35 @@
         }
 
         function contactUs() {
-            alert('Contact Us\n\nEmail: jbcreationssss@gmail.com\nPhone: 9424772998');
+            // Open chat support - same logic as openContactChat
+            if (window.supportChat && window.supportChat.openChat) {
+                window.supportChat.openChat();
+            } else {
+                // Initialize chat with forceInit and hideFloatingButton options
+                if (typeof SupportChat !== 'undefined') {
+                    window.supportChat = new SupportChat({ forceInit: true, hideFloatingButton: true });
+                    setTimeout(() => {
+                        if (window.supportChat && window.supportChat.openChat) {
+                            window.supportChat.openChat();
+                        }
+                    }, 300);
+                } else {
+                    window.location.href = 'mailto:jbcreationssss@gmail.com?subject=Support%20Request';
+                }
+            }
         }
 
         function aboutUs() {
-            alert('About Xidlz\n\nWe turn your precious memories into beautiful wall art with premium materials and professional craftsmanship.');
+            window.location.href = 'about-us.html';
         }
 
-        // Close dropdown on outside click
+        // Close dropdown on outside click - only if GlobalWebsiteHeader is NOT handling it
         document.addEventListener('click', function(event) {
+            // Skip if GlobalWebsiteHeader is handling the dropdown
+            if (window.GlobalWebsiteHeader && document.getElementById('globalSiteHeader')) {
+                return; // GlobalWebsiteHeader has its own click handler
+            }
+            
             const dropdownContainer = document.getElementById('profileDropdown');
             if (dropdownContainer && !dropdownContainer.contains(event.target)) {
                 setProfileDropdownState(false);
@@ -1161,6 +1197,11 @@
         });
 
         document.addEventListener('keydown', function(event) {
+            // Skip if GlobalWebsiteHeader is handling the dropdown
+            if (window.GlobalWebsiteHeader && document.getElementById('globalSiteHeader')) {
+                return; // GlobalWebsiteHeader has its own keydown handler
+            }
+            
             if (event.key === 'Escape') setProfileDropdownState(false);
         });
 

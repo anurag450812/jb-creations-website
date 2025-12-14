@@ -898,13 +898,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const currentPage = window.location.pathname.split('/').pop();
     
     if (autoInitPages.includes(currentPage)) {
+        // For order-details, we need forceInit since it's not my-orders
+        const needsForceInit = currentPage !== 'my-orders.html';
+        
         // Wait for Firebase to be ready
         if (window.jbAPI) {
-            window.supportChat = new SupportChat();
+            window.supportChat = new SupportChat({ forceInit: needsForceInit, hideFloatingButton: needsForceInit });
         } else {
             window.addEventListener('firebaseReady', () => {
-                window.supportChat = new SupportChat();
+                window.supportChat = new SupportChat({ forceInit: needsForceInit, hideFloatingButton: needsForceInit });
             });
+            // Also init after a timeout in case firebaseReady doesn't fire
+            setTimeout(() => {
+                if (!window.supportChat) {
+                    window.supportChat = new SupportChat({ forceInit: needsForceInit, hideFloatingButton: needsForceInit });
+                }
+            }, 2000);
         }
     }
 });
