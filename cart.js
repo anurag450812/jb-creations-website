@@ -180,16 +180,21 @@ class CartManager {
     renderCart() {
         const cartItemsContainer = document.getElementById('cartItems');
         const cartEmptyContainer = document.getElementById('cartEmpty');
+        const cartSummary = document.querySelector('.cart-summary');
 
         if (this.cart.length === 0) {
             cartItemsContainer.style.display = 'none';
             cartEmptyContainer.style.display = 'block';
+            // Hide price details section when cart is empty
+            if (cartSummary) cartSummary.style.display = 'none';
             this.updateSummary();
             return;
         }
 
         cartEmptyContainer.style.display = 'none';
         cartItemsContainer.style.display = 'block';
+        // Show price details section when cart has items
+        if (cartSummary) cartSummary.style.display = 'block';
 
         cartItemsContainer.innerHTML = this.cart.map((item, index) => {
             // Resolve a thumbnail source: prefer precomputed, else look into sessionStorage compressed images
@@ -466,7 +471,43 @@ class CartManager {
         this.appliedCoupon = coupon;
         this.closeCouponModal();
         this.updateSummary();
-        this.showMessage(`🎉 ${coupon.emoji} Coupon applied! You save ₹${coupon.discount}`, 'success');
+        // Show beautiful coupon applied animation
+        this.showCouponAppliedAnimation(coupon);
+    }
+
+    showCouponAppliedAnimation(coupon) {
+        // Create celebration overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'coupon-celebration-overlay';
+        overlay.innerHTML = `
+            <div class="coupon-celebration-content">
+                <div class="celebration-confetti"></div>
+                <div class="celebration-emoji">${coupon.emoji}</div>
+                <div class="celebration-checkmark">
+                    <svg viewBox="0 0 52 52">
+                        <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                        <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                    </svg>
+                </div>
+                <h3 class="celebration-title">Coupon Applied! 🎉</h3>
+                <p class="celebration-savings">You save <span>₹${coupon.discount}</span></p>
+                <p class="celebration-code">${coupon.id}</p>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        // Trigger animation
+        requestAnimationFrame(() => {
+            overlay.classList.add('active');
+        });
+
+        // Auto-remove after animation
+        setTimeout(() => {
+            overlay.classList.add('fade-out');
+            setTimeout(() => {
+                overlay.remove();
+            }, 400);
+        }, 2200);
     }
 
     removeCoupon() {

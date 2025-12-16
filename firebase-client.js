@@ -577,6 +577,23 @@ class JBCreationsAPI {
         }
     }
 
+    // Update order with any data (for Shiprocket integration, etc.)
+    async updateOrder(orderId, updateData) {
+        try {
+            const orderRef = doc(this.db, 'orders', orderId);
+            await updateDoc(orderRef, {
+                ...updateData,
+                updatedAt: serverTimestamp()
+            });
+
+            console.log('✅ Order updated:', orderId, Object.keys(updateData));
+            return { success: true, orderId };
+        } catch (error) {
+            console.error('❌ Error updating order:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
     // Send order notifications (placeholder - you can integrate with email service)
     async sendOrderNotifications(orderData) {
         try {

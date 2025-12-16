@@ -390,6 +390,188 @@
             font-style: italic;
         }
 
+        /* Enhanced Live Tracking Styles */
+        .live-tracking-loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+
+        .live-tracking-loading i {
+            margin-right: 8px;
+            color: #16697A;
+        }
+
+        .live-tracking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .live-tracking-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .live-tracking-status i {
+            font-size: 1.2rem;
+        }
+
+        .refresh-tracking-btn {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #6c757d;
+            transition: all 0.3s;
+        }
+
+        .refresh-tracking-btn:hover {
+            background: #16697A;
+            color: white;
+            border-color: #16697A;
+        }
+
+        .refresh-tracking-btn.spinning i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .tracking-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .tracking-info-row {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .tracking-label {
+            font-size: 11px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tracking-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .tracking-value.highlight {
+            color: #16697A;
+        }
+
+        .tracking-value.success {
+            color: #28a745;
+        }
+
+        .tracking-timeline-container {
+            margin: 20px 0;
+        }
+
+        .timeline-title {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timeline-title i {
+            color: #16697A;
+        }
+
+        .tracking-timeline {
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .timeline-event {
+            position: relative;
+            padding-bottom: 20px;
+            padding-left: 20px;
+            border-left: 2px solid #e9ecef;
+        }
+
+        .timeline-event:last-child {
+            border-left: 2px solid transparent;
+            padding-bottom: 0;
+        }
+
+        .timeline-event .event-dot {
+            position: absolute;
+            left: -9px;
+            top: 2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #e9ecef;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #e9ecef;
+        }
+
+        .timeline-event.current .event-dot {
+            background: #28a745;
+            box-shadow: 0 0 0 2px #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.8); }
+            50% { box-shadow: 0 0 0 6px rgba(40, 167, 69, 0.2); }
+        }
+
+        .event-content {
+            background: #f8f9fa;
+            padding: 10px 12px;
+            border-radius: 8px;
+        }
+
+        .event-time {
+            font-size: 11px;
+            color: #6c757d;
+            margin-bottom: 4px;
+        }
+
+        .event-status {
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+
+        .event-location {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .track-btn.external {
+            display: inline-flex;
+            margin-top: 15px;
+        }
+
         /* Action Buttons */
         .action-buttons {
             display: flex;
@@ -1102,9 +1284,10 @@
         }
 
         function renderTracking(order) {
-            const trackingNumber = order.trackingNumber || order.shipmentId;
+            const shiprocketData = order.shiprocket || null;
             const status = (order.status || 'pending').toLowerCase();
             
+            // Not yet shipped
             if (!['shipped', 'out-for-delivery', 'delivered'].includes(status.replace(' ', '-'))) {
                 return `
                     <div class="tracking-card">
@@ -1116,6 +1299,36 @@
                 `;
             }
             
+            // Has Shiprocket data
+            if (shiprocketData && shiprocketData.awbCode) {
+                return `
+                    <div class="tracking-card" id="live-tracking-card">
+                        <div class="live-tracking-loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Loading live tracking...
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Shipped but no AWB yet
+            if (shiprocketData && shiprocketData.orderId) {
+                return `
+                    <div class="tracking-card">
+                        <div class="tracking-info-row">
+                            <span class="tracking-label">Shiprocket Order</span>
+                            <span class="tracking-value">#${shiprocketData.orderId}</span>
+                        </div>
+                        <p class="tracking-pending" style="margin-top: 10px;">
+                            <i class="fas fa-truck"></i>
+                            Your order is being prepared for shipment. Tracking details will be updated soon.
+                        </p>
+                    </div>
+                `;
+            }
+            
+            // Legacy tracking number
+            const trackingNumber = order.trackingNumber || order.shipmentId;
             if (trackingNumber) {
                 return `
                     <div class="tracking-card">
@@ -1138,6 +1351,147 @@
                 </div>
             `;
         }
+        
+        // Load live tracking from Shiprocket
+        async function loadLiveTracking(order) {
+            const trackingCard = document.getElementById('live-tracking-card');
+            if (!trackingCard) return;
+            
+            const shiprocketData = order.shiprocket;
+            if (!shiprocketData || !shiprocketData.awbCode) return;
+            
+            try {
+                // Wait for shiprocket client to load
+                let attempts = 0;
+                while (!window.shiprocketClient && attempts < 10) {
+                    await new Promise(r => setTimeout(r, 200));
+                    attempts++;
+                }
+                
+                if (!window.shiprocketClient) {
+                    throw new Error('Tracking service unavailable');
+                }
+                
+                const result = await window.shiprocketClient.getTrackingByAWB(shiprocketData.awbCode);
+                const trackingInfo = window.shiprocketClient.formatTrackingForDisplay(result);
+                
+                if (!trackingInfo) {
+                    throw new Error('Tracking data not available');
+                }
+                
+                const statusColor = window.shiprocketClient.getStatusColor(trackingInfo.currentStatus);
+                const statusIcon = window.shiprocketClient.getStatusIcon(trackingInfo.currentStatus);
+                
+                trackingCard.innerHTML = `
+                    <div class="live-tracking-header">
+                        <div class="live-tracking-status" style="color: ${statusColor}">
+                            <i class="${statusIcon}"></i>
+                            <span>${trackingInfo.currentStatus || 'In Transit'}</span>
+                        </div>
+                        <button class="refresh-tracking-btn" onclick="refreshTrackingData()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="tracking-info-grid">
+                        <div class="tracking-info-row">
+                            <span class="tracking-label">AWB Number</span>
+                            <span class="tracking-value">${trackingInfo.awb}</span>
+                        </div>
+                        <div class="tracking-info-row">
+                            <span class="tracking-label">Courier</span>
+                            <span class="tracking-value">${trackingInfo.courier || shiprocketData.courierName || 'N/A'}</span>
+                        </div>
+                        ${trackingInfo.estimatedDelivery ? `
+                            <div class="tracking-info-row">
+                                <span class="tracking-label">Est. Delivery</span>
+                                <span class="tracking-value highlight">${trackingInfo.estimatedDelivery}</span>
+                            </div>
+                        ` : ''}
+                        ${trackingInfo.deliveredDate ? `
+                            <div class="tracking-info-row">
+                                <span class="tracking-label">Delivered On</span>
+                                <span class="tracking-value success">${trackingInfo.deliveredDate}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    ${trackingInfo.activities && trackingInfo.activities.length > 0 ? `
+                        <div class="tracking-timeline-container">
+                            <h4 class="timeline-title">
+                                <i class="fas fa-route"></i>
+                                Shipment Timeline
+                            </h4>
+                            <div class="tracking-timeline">
+                                ${trackingInfo.activities.slice(0, 6).map((activity, index) => `
+                                    <div class="timeline-event ${index === 0 ? 'current' : ''}">
+                                        <div class="event-dot"></div>
+                                        <div class="event-content">
+                                            <div class="event-time">${activity.date}</div>
+                                            <div class="event-status">${activity.status}</div>
+                                            <div class="event-location">${activity.location || activity.activity || ''}</div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <a href="https://www.shiprocket.in/shipment-tracking/" target="_blank" class="track-btn external">
+                        <i class="fas fa-external-link-alt"></i>
+                        Track on Shiprocket
+                    </a>
+                `;
+                
+            } catch (error) {
+                console.error('Error loading tracking:', error);
+                trackingCard.innerHTML = `
+                    <div class="tracking-info-row">
+                        <span class="tracking-label">AWB Number</span>
+                        <span class="tracking-value">${shiprocketData.awbCode}</span>
+                    </div>
+                    ${shiprocketData.courierName ? `
+                        <div class="tracking-info-row">
+                            <span class="tracking-label">Courier</span>
+                            <span class="tracking-value">${shiprocketData.courierName}</span>
+                        </div>
+                    ` : ''}
+                    <a href="https://www.shiprocket.in/shipment-tracking/" target="_blank" class="track-btn external" style="margin-top: 15px;">
+                        <i class="fas fa-external-link-alt"></i>
+                        Track on Shiprocket
+                    </a>
+                `;
+            }
+        }
+        
+        // Refresh tracking data
+        async function refreshTrackingData() {
+            if (!orderData || !orderData.shiprocket) return;
+            
+            const btn = document.querySelector('.refresh-tracking-btn');
+            if (btn) {
+                btn.classList.add('spinning');
+            }
+            
+            await loadLiveTracking(orderData);
+            
+            if (btn) {
+                btn.classList.remove('spinning');
+            }
+        }
+        
+        // Call loadLiveTracking after renderOrderDetails if order has shiprocket data
+        const originalRenderOrderDetails = renderOrderDetails;
+        renderOrderDetails = function() {
+            originalRenderOrderDetails();
+            
+            // Load live tracking after a short delay
+            setTimeout(() => {
+                if (orderData && orderData.shiprocket && orderData.shiprocket.awbCode) {
+                    loadLiveTracking(orderData);
+                }
+            }, 100);
+        };
 
         function goBack() {
             window.location.href = 'my-orders.html';
@@ -1441,5 +1795,8 @@
 
     <!-- Support Chat Widget -->
     <script src="support-chat.js?v=1.1"></script>
+    
+    <!-- Shiprocket Client for live tracking -->
+    <script src="shiprocket-client.js"></script>
 </body>
 </html>

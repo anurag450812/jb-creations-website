@@ -310,6 +310,24 @@ class JBCreationsAPI {
         }
     }
 
+    // Update order with any data (for Shiprocket integration, etc.)
+    async updateOrder(orderId, updateData) {
+        try {
+            console.log('📦 Updating order in Firebase:', orderId, Object.keys(updateData));
+            
+            await this.db.collection('orders').doc(orderId).update({
+                ...updateData,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            console.log('✅ Order updated successfully:', orderId);
+            return { success: true, orderId };
+        } catch (error) {
+            console.error('❌ Error updating order:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
     // Get all orders (admin)
     async getAllOrders() {
         try {

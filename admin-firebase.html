@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
         // Admin Panel Protection
         (function() {
@@ -597,6 +598,26 @@
 
         .bulk-actions-bar .btn-delete-selected:hover {
             background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .bulk-actions-bar .btn-bulk-ship {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .bulk-actions-bar .btn-bulk-ship:hover {
+            background: var(--primary-dark);
             transform: translateY(-1px);
         }
 
@@ -2158,6 +2179,1521 @@
                 min-height: 400px;
             }
         }
+
+        /* ==================== SHIPROCKET INTEGRATION STYLES ==================== */
+        
+        /* Shiprocket Dashboard Header */
+        .shiprocket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .shiprocket-header h2 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+            color: var(--text-primary);
+        }
+        
+        .shiprocket-header h2 img {
+            height: 28px;
+        }
+        
+        .shiprocket-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        /* Order Workflow Tabs */
+        .order-workflow-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 0.5rem;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            overflow-x: auto;
+        }
+        
+        .workflow-tab {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            background: white;
+            border-radius: var(--radius-md);
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+            min-width: fit-content;
+        }
+        
+        .workflow-tab:hover {
+            border-color: var(--primary-light);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .workflow-tab.active {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(99, 102, 241, 0.1));
+        }
+        
+        .workflow-tab i {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+        }
+        
+        .workflow-tab.active i {
+            color: var(--primary);
+        }
+        
+        .workflow-tab .tab-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        
+        .workflow-tab.active .tab-label {
+            color: var(--primary);
+        }
+        
+        .workflow-tab .tab-count {
+            background: var(--primary);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            min-width: 24px;
+            text-align: center;
+        }
+        
+        .workflow-tab[data-workflow="new"] .tab-count {
+            background: var(--warning);
+        }
+        
+        .workflow-tab[data-workflow="downloaded"] .tab-count {
+            background: var(--success);
+        }
+        
+        .workflow-tab[data-workflow="shiprocket"] .tab-count {
+            background: var(--info);
+        }
+        
+        /* Order Workflow Status Badge */
+        .workflow-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius-md);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .workflow-status-badge.status-new {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+        }
+        
+        .workflow-status-badge.status-downloaded {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+        }
+        
+        .workflow-status-badge.status-shiprocket {
+            background: rgba(99, 102, 241, 0.1);
+            color: #4f46e5;
+        }
+        
+        /* Shipping Stats Grid */
+        .shipping-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .shipping-stat-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            border: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .shipping-stat-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        
+        .shipping-stat-card.active {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(99, 102, 241, 0.1));
+        }
+        
+        .shipping-stat-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+        
+        .shipping-stat-card.stat-new::before { background: var(--primary); }
+        .shipping-stat-card.stat-pickup::before { background: #3b82f6; }
+        .shipping-stat-card.stat-transit::before { background: #f59e0b; }
+        .shipping-stat-card.stat-ofd::before { background: #10b981; }
+        .shipping-stat-card.stat-delivered::before { background: #22c55e; }
+        .shipping-stat-card.stat-rto::before { background: #ef4444; }
+        .shipping-stat-card.stat-ndr::before { background: #f97316; }
+        
+        .shipping-stat-card .stat-count {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+        
+        .shipping-stat-card .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+        
+        .shipping-stat-card .stat-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2.5rem;
+            opacity: 0.1;
+        }
+        
+        /* Shiprocket-style Tabs Interface */
+        .shiprocket-tabs-container {
+            background: white;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            border: 1px solid var(--border-light);
+            border-bottom: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-right: 1rem;
+        }
+        
+        .shiprocket-tabs {
+            display: flex;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .shiprocket-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .shiprocket-tab {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .shiprocket-tab:hover {
+            color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+        
+        .shiprocket-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: rgba(99, 102, 241, 0.08);
+        }
+        
+        .shiprocket-tab .tab-count {
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            min-width: 20px;
+            text-align: center;
+        }
+        
+        .shiprocket-tab.active .tab-count {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .shiprocket-header-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+        
+        .shiprocket-content {
+            background: white;
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+            border: 1px solid var(--border-light);
+            border-top: none;
+        }
+        
+        .shiprocket-action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-light);
+            background: var(--bg-tertiary);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .action-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .action-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        
+        .shiprocket-table-wrapper {
+            overflow-x: auto;
+        }
+        
+        .shiprocket-orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+        
+        .shiprocket-orders-table th {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-light);
+            white-space: nowrap;
+        }
+        
+        .shiprocket-orders-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-light);
+            vertical-align: top;
+        }
+        
+        .shiprocket-orders-table tbody tr:hover {
+            background: var(--bg-tertiary);
+        }
+        
+        .shiprocket-orders-table tbody tr.selected {
+            background: rgba(99, 102, 241, 0.08);
+        }
+        
+        /* Shiprocket Table Cell Styles */
+        .sr-order-cell {
+            min-width: 150px;
+        }
+        
+        .sr-order-id {
+            font-weight: 600;
+            color: var(--primary);
+            cursor: pointer;
+        }
+        
+        .sr-order-id:hover {
+            text-decoration: underline;
+        }
+        
+        .sr-order-date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        
+        .sr-awb-number {
+            font-family: monospace;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .sr-customer-cell {
+            min-width: 180px;
+        }
+        
+        .sr-customer-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .sr-customer-phone {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        
+        .sr-customer-city {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.15rem;
+        }
+        
+        .sr-package-cell {
+            min-width: 120px;
+        }
+        
+        .sr-package-dims {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+        
+        .sr-package-weight {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        
+        .sr-payment-cell {
+            min-width: 100px;
+        }
+        
+        .sr-payment-amount {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .sr-payment-mode {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 0.25rem;
+        }
+        
+        .sr-payment-mode.prepaid {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+        }
+        
+        .sr-payment-mode.cod {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+        }
+        
+        .sr-pickup-cell {
+            min-width: 150px;
+            max-width: 180px;
+        }
+        
+        .sr-pickup-address {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+        
+        .sr-status-cell {
+            min-width: 140px;
+        }
+        
+        .sr-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        .sr-status-badge.status-new {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+        }
+        
+        .sr-status-badge.status-ready {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+        
+        .sr-status-badge.status-pickup {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+        }
+        
+        .sr-status-badge.status-intransit {
+            background: rgba(147, 51, 234, 0.1);
+            color: #9333ea;
+        }
+        
+        .sr-status-badge.status-ofd {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+        }
+        
+        .sr-status-badge.status-delivered {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+        }
+        
+        .sr-status-badge.status-rto {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+        }
+        
+        .sr-status-badge.status-ndr {
+            background: rgba(249, 115, 22, 0.1);
+            color: #ea580c;
+        }
+        
+        .sr-courier-name {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.35rem;
+        }
+        
+        .sr-actions-cell {
+            min-width: 150px;
+        }
+        
+        .sr-action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-right: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .sr-action-btn.btn-awb {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8b5cf6;
+        }
+        
+        .sr-action-btn.btn-awb:hover {
+            background: #8b5cf6;
+            color: white;
+        }
+        
+        .sr-action-btn.btn-label {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+        
+        .sr-action-btn.btn-label:hover {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .sr-action-btn.btn-pickup {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+        
+        .sr-action-btn.btn-pickup:hover {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .sr-action-btn.btn-track {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+        
+        .sr-action-btn.btn-track:hover {
+            background: #10b981;
+            color: white;
+        }
+        
+        .sr-action-btn.btn-cancel {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+        
+        .sr-action-btn.btn-cancel:hover {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .sr-action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .sr-action-btn:disabled:hover {
+            background: inherit;
+            color: inherit;
+        }
+        
+        /* Shiprocket Bulk Action Buttons */
+        .sr-bulk-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .sr-bulk-btn.primary {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+        }
+        
+        .sr-bulk-btn.primary:hover {
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        .sr-bulk-btn.secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+        }
+        
+        .sr-bulk-btn.secondary:hover {
+            background: var(--bg-tertiary);
+        }
+        
+        .sr-bulk-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* Shiprocket Pagination */
+        .shiprocket-pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--border-light);
+            background: var(--bg-tertiary);
+        }
+        
+        .items-per-page-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            background: white;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+        
+        /* Empty State for Shiprocket */
+        .sr-empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+        
+        .sr-empty-state i {
+            font-size: 4rem;
+            opacity: 0.3;
+            margin-bottom: 1rem;
+        }
+        
+        .sr-empty-state h3 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .sr-empty-state p {
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive Shiprocket Tabs */
+        @media (max-width: 768px) {
+            .shiprocket-tabs-container {
+                flex-direction: column;
+                padding: 0;
+            }
+            
+            .shiprocket-tabs {
+                width: 100%;
+                padding: 0.5rem;
+            }
+            
+            .shiprocket-tab {
+                padding: 0.75rem 1rem;
+                font-size: 0.8rem;
+            }
+            
+            .shiprocket-header-actions {
+                width: 100%;
+                justify-content: center;
+                padding: 0.75rem;
+                border-top: 1px solid var(--border-light);
+            }
+            
+            .shiprocket-action-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .action-bar-left, .action-bar-right {
+                justify-content: center;
+            }
+        }
+
+        /* Order Table Enhanced */
+        .order-table-wrapper {
+            background: white;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+        }
+        
+        .order-table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-light);
+            background: var(--bg-tertiary);
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        
+        .order-table-header .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .bulk-select-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .bulk-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .bulk-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem 0.875rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.8125rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-light);
+        }
+        
+        .bulk-btn:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-medium);
+        }
+        
+        .bulk-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .bulk-btn.btn-ship { color: var(--primary); }
+        .bulk-btn.btn-label { color: #06b6d4; }
+        .bulk-btn.btn-pickup { color: #10b981; }
+        .bulk-btn.btn-download { color: #8b5cf6; }
+        .bulk-btn.btn-cancel { color: #ef4444; }
+        
+        .bulk-btn.btn-ship:hover { background: rgba(99, 102, 241, 0.1); border-color: var(--primary); }
+        .bulk-btn.btn-label:hover { background: rgba(6, 182, 212, 0.1); border-color: #06b6d4; }
+        .bulk-btn.btn-pickup:hover { background: rgba(16, 185, 129, 0.1); border-color: #10b981; }
+        .bulk-btn.btn-download:hover { background: rgba(139, 92, 246, 0.1); border-color: #8b5cf6; }
+        .bulk-btn.btn-cancel:hover { background: rgba(239, 68, 68, 0.1); border-color: #ef4444; }
+        
+        /* Enhanced Table Styles */
+        .shiprocket-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .shiprocket-table thead {
+            background: var(--bg-tertiary);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .shiprocket-table th {
+            padding: 0.875rem 1rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .shiprocket-table td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 0.875rem;
+            vertical-align: middle;
+        }
+        
+        .shiprocket-table tbody tr {
+            transition: var(--transition);
+        }
+        
+        .shiprocket-table tbody tr:hover {
+            background: var(--bg-tertiary);
+        }
+        
+        .shiprocket-table tbody tr.selected {
+            background: rgba(99, 102, 241, 0.08);
+        }
+        
+        /* Order Info Cell */
+        .order-info-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .order-number-link {
+            font-weight: 600;
+            color: var(--primary);
+            cursor: pointer;
+        }
+        
+        .order-number-link:hover {
+            text-decoration: underline;
+        }
+        
+        .order-date {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        /* Customer Info Cell */
+        .customer-info-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 0.125rem;
+        }
+        
+        .customer-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .customer-phone {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        /* Package Info Cell */
+        .package-info-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .package-weight {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .package-weight:hover {
+            background: var(--bg-secondary);
+        }
+        
+        .package-weight i {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+        
+        /* AWB/Courier Cell */
+        .awb-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .awb-number {
+            font-family: monospace;
+            font-size: 0.8125rem;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+        
+        .awb-number:hover {
+            color: var(--primary);
+        }
+        
+        .courier-name {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        /* Status Cell */
+        .status-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .shiprocket-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.625rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            width: fit-content;
+        }
+        
+        .shiprocket-status.status-new {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+        
+        .shiprocket-status.status-pickup-scheduled {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+        
+        .shiprocket-status.status-picked-up,
+        .shiprocket-status.status-in-transit {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+        
+        .shiprocket-status.status-out-for-delivery {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+        
+        .shiprocket-status.status-delivered {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+        
+        .shiprocket-status.status-cancelled,
+        .shiprocket-status.status-rto {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+        
+        .shiprocket-status.status-ndr {
+            background: rgba(249, 115, 22, 0.1);
+            color: #f97316;
+        }
+        
+        .shiprocket-status.status-pending {
+            background: rgba(107, 114, 128, 0.1);
+            color: #6b7280;
+        }
+        
+        .status-eta {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+        
+        /* Action Buttons Cell */
+        .action-btns {
+            display: flex;
+            gap: 0.375rem;
+        }
+        
+        .action-icon-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-light);
+            background: white;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            transition: var(--transition);
+        }
+        
+        .action-icon-btn:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-medium);
+        }
+        
+        .action-icon-btn.btn-view:hover { color: var(--primary); border-color: var(--primary); }
+        .action-icon-btn.btn-label:hover { color: #06b6d4; border-color: #06b6d4; }
+        .action-icon-btn.btn-track:hover { color: #f59e0b; border-color: #f59e0b; }
+        .action-icon-btn.btn-pickup:hover { color: #10b981; border-color: #10b981; }
+        .action-icon-btn.btn-delete:hover { color: #ef4444; border-color: #ef4444; }
+        
+        /* Weight Edit Modal */
+        .weight-edit-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1200;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+        
+        .weight-edit-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .weight-edit-content {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .weight-edit-content h3 {
+            margin: 0 0 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .weight-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .weight-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.375rem;
+        }
+        
+        .weight-input-group label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        
+        .weight-input-group input {
+            padding: 0.625rem;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+        }
+        
+        .weight-input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .dimensions-inputs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+        
+        .weight-edit-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+        
+        /* Empty State for orders */
+        .orders-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+        
+        .orders-empty-state i {
+            font-size: 4rem;
+            opacity: 0.2;
+            margin-bottom: 1rem;
+        }
+        
+        .orders-empty-state h3 {
+            margin: 0 0 0.5rem 0;
+            color: var(--text-secondary);
+        }
+        
+        /* Mobile responsiveness for shiprocket table */
+        @media (max-width: 1024px) {
+            .shiprocket-table thead {
+                display: none;
+            }
+            
+            .shiprocket-table tbody tr {
+                display: block;
+                padding: 1rem;
+                margin-bottom: 0.75rem;
+                background: white;
+                border: 1px solid var(--border-light);
+                border-radius: var(--radius-md);
+            }
+            
+            .shiprocket-table tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                padding: 0.5rem 0;
+                border: none;
+            }
+            
+            .shiprocket-table tbody td::before {
+                content: attr(data-label);
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                flex-shrink: 0;
+                width: 100px;
+            }
+            
+            .order-table-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .bulk-actions {
+                justify-content: center;
+            }
+        }
+        
+        /* Shipping section in order modal */
+        .shipping-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f8f9ff, #f0f4ff);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--primary-light);
+        }
+
+        .shipping-section h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .shipping-section h3 i {
+            color: var(--primary);
+        }
+
+        /* Shipping status card */
+        .shipping-status-card {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .shipping-status-card.status-shipped {
+            border-left-color: var(--info);
+        }
+
+        .shipping-status-card.status-in-transit {
+            border-left-color: var(--warning);
+        }
+
+        .shipping-status-card.status-delivered {
+            border-left-color: var(--success);
+        }
+
+        .shipping-status-card.status-cancelled {
+            border-left-color: var(--danger);
+        }
+
+        .shipping-status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .shipping-status-header .status-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .shipping-status-header .status-value {
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .shipping-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .shipping-info-item {
+            background: var(--bg-tertiary);
+            padding: 0.75rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .shipping-info-item .label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .shipping-info-item .value {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        /* Shipping action buttons */
+        .shipping-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .shipping-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .shipping-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .shipping-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .shipping-btn.btn-create-shipment {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .shipping-btn.btn-generate-awb {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+
+        .shipping-btn.btn-generate-label {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            color: white;
+        }
+
+        .shipping-btn.btn-request-pickup {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .shipping-btn.btn-track {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .shipping-btn.btn-cancel {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .shipping-btn.btn-invoice {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+        }
+
+        /* Tracking timeline */
+        .tracking-timeline {
+            margin-top: 1rem;
+            padding-left: 1rem;
+        }
+
+        .tracking-event {
+            position: relative;
+            padding-left: 2rem;
+            padding-bottom: 1.5rem;
+            border-left: 2px solid var(--border-light);
+        }
+
+        .tracking-event:last-child {
+            border-left: 2px solid transparent;
+            padding-bottom: 0;
+        }
+
+        .tracking-event::before {
+            content: '';
+            position: absolute;
+            left: -7px;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        .tracking-event.current::before {
+            background: var(--success);
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+        }
+
+        .tracking-event .event-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .tracking-event .event-status {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .tracking-event .event-location {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Shiprocket loading state */
+        .shiprocket-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+
+        .shiprocket-loading i {
+            margin-right: 0.5rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Courier selection modal */
+        .courier-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .courier-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .courier-modal-content {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .courier-modal h3 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .courier-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .courier-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border: 2px solid var(--border-light);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .courier-option:hover {
+            border-color: var(--primary);
+            background: var(--bg-tertiary);
+        }
+
+        .courier-option.selected {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .courier-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .courier-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .courier-eta {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .courier-price {
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        /* Shipping badge in table */
+        .shipping-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .shipping-badge.badge-new {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .shipping-badge.badge-shipped {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .shipping-badge.badge-transit {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .shipping-badge.badge-delivered {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .shipping-badge.badge-cancelled {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .shipping-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .shipping-actions {
+                flex-direction: column;
+            }
+
+            .shipping-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* ==================== END SHIPROCKET STYLES ==================== */
     </style>
 </head>
 <body>
@@ -2402,115 +3938,130 @@
                     </div>
                 </div>
 
-                <!-- Orders View -->
+                <!-- Orders View - Simplified Workflow -->
                 <div id="orders-view" class="view" style="display: none;">
-                    <div class="card">
-                        <div class="card-body">
-                            <!-- Order Status Tabs -->
-                            <div class="order-tabs">
-                                <button class="order-tab" data-tab="all" onclick="switchOrderTab('all')">
-                                    All Orders <span class="tab-count" id="tab-count-all">0</span>
-                                </button>
-                                <button class="order-tab active" data-tab="pending-labels" onclick="switchOrderTab('pending-labels')">
-                                    Pending Labels <span class="tab-count" id="tab-count-pending-labels">0</span>
-                                </button>
-                                <button class="order-tab" data-tab="pending-rtd" onclick="switchOrderTab('pending-rtd')">
-                                    Pending RTD <span class="tab-count" id="tab-count-pending-rtd">0</span>
-                                </button>
-                                <button class="order-tab" data-tab="pending-handover" onclick="switchOrderTab('pending-handover')">
-                                    Pending Handover <span class="tab-count" id="tab-count-pending-handover">0</span>
-                                </button>
-                                <button class="order-tab" data-tab="completed" onclick="switchOrderTab('completed')">
-                                    Completed <span class="tab-count" id="tab-count-completed">0</span>
-                                </button>
-                            </div>
-                            
-                            <!-- Search and Filter -->
-                            <div class="search-filter-bar">
-                                <input type="text" class="search-input" placeholder="Search orders..." id="order-search">
-                                <select class="filter-select" id="date-sort-filter">
+                    <!-- Orders Header -->
+                    <div class="shiprocket-header">
+                        <h2>
+                            <i class="fas fa-shopping-bag" style="color: var(--primary);"></i>
+                            Order Management
+                        </h2>
+                        <div class="shiprocket-actions">
+                            <button class="btn btn-primary btn-sm" onclick="refreshOrders()">
+                                <i class="fas fa-refresh"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Order Workflow Tabs -->
+                    <div class="order-workflow-tabs">
+                        <div class="workflow-tab active" onclick="filterOrdersWorkflow('all')" data-workflow="all">
+                            <i class="fas fa-boxes"></i>
+                            <span class="tab-label">All Orders</span>
+                            <span class="tab-count" id="workflow-all-count">0</span>
+                        </div>
+                        <div class="workflow-tab" onclick="filterOrdersWorkflow('new')" data-workflow="new">
+                            <i class="fas fa-plus-circle"></i>
+                            <span class="tab-label">New Orders</span>
+                            <span class="tab-count" id="workflow-new-count">0</span>
+                        </div>
+                        <div class="workflow-tab" onclick="filterOrdersWorkflow('downloaded')" data-workflow="downloaded">
+                            <i class="fas fa-download"></i>
+                            <span class="tab-label">Image Downloaded</span>
+                            <span class="tab-count" id="workflow-downloaded-count">0</span>
+                        </div>
+                        <div class="workflow-tab" onclick="filterOrdersWorkflow('shiprocket')" data-workflow="shiprocket">
+                            <i class="fas fa-shipping-fast"></i>
+                            <span class="tab-label">Sent to Shiprocket</span>
+                            <span class="tab-count" id="workflow-shiprocket-count">0</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Order Table -->
+                    <div class="order-table-wrapper">
+                        <!-- Table Header with Search and Bulk Actions -->
+                        <div class="order-table-header">
+                            <div class="header-left">
+                                <div class="bulk-select-info">
+                                    <input type="checkbox" id="select-all-orders" onchange="toggleSelectAllOrders(this)">
+                                    <span id="selected-count-text">0 selected</span>
+                                </div>
+                                <input type="text" class="search-input" placeholder="Search orders, customer..." id="order-search" style="min-width: 250px;">
+                                <select class="filter-select" id="date-sort-filter" onchange="applyOrdersWorkflowFilter()">
                                     <option value="latest">Latest First</option>
                                     <option value="oldest">Oldest First</option>
-                                    <option value="email-asc">Sort by Email (A-Z)</option>
-                                    <option value="email-desc">Sort by Email (Z-A)</option>
-                                    <option value="name-asc">Sort by Name (A-Z)</option>
-                                    <option value="name-desc">Sort by Name (Z-A)</option>
-                                    <option value="phone-asc">Sort by Mobile (Asc)</option>
-                                    <option value="phone-desc">Sort by Mobile (Desc)</option>
+                                    <option value="name-asc">Name (A-Z)</option>
+                                    <option value="name-desc">Name (Z-A)</option>
                                 </select>
                             </div>
-                            
-                            <!-- Bulk Actions Bar for All Orders -->
-                            <div class="bulk-actions-bar compact" id="all-orders-bulk-actions">
-                                <span class="selected-count"><span id="all-selected-count">0</span> selected</span>
-                                <button class="btn-delete-selected" onclick="deleteSelectedAllOrders()">
-                                    <i class="fas fa-trash"></i>
+                            <div class="bulk-actions" id="bulk-actions-container">
+                                <button class="bulk-btn btn-download" onclick="downloadSelectedImagesAsZip()" title="Download Images as ZIP" id="bulk-download-btn">
+                                    <i class="fas fa-file-archive"></i> Download Images (ZIP)
                                 </button>
-                                <button class="btn-clear-selection" onclick="clearAllOrdersSelection()">✕</button>
+                                <button class="bulk-btn btn-shiprocket" onclick="moveSelectedToShiprocket()" title="Move to Shiprocket" id="bulk-shiprocket-btn" style="background: linear-gradient(135deg, #7c3aed, #a855f7);">
+                                    <i class="fas fa-shipping-fast"></i> Move to Shiprocket
+                                </button>
+                                <button class="bulk-btn btn-cancel" onclick="deleteSelectedAllOrders()" title="Delete Selected">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
                             </div>
-                            
-                            <!-- Mobile Select All Bar -->
-                            <div class="mobile-select-all-bar" id="mobile-select-all-bar">
-                                <label class="mobile-select-all-label">
-                                    <input type="checkbox" id="mobile-select-all" onchange="toggleSelectAllOrders(this)">
-                                    <span>Select All Orders</span>
-                                </label>
+                        </div>
+                        
+                        <!-- Loading State -->
+                        <div class="loading" id="all-orders-loading">
+                            <div class="spinner"></div>
+                        </div>
+                        
+                        <!-- Table Container -->
+                        <div id="all-orders-table-container" style="display: none; overflow-x: auto;">
+                            <table class="shiprocket-table orders-workflow-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40px;"><input type="checkbox" id="all-select-all" onchange="toggleSelectAllOrders(this)"></th>
+                                        <th>Order</th>
+                                        <th>Customer</th>
+                                        <th>Items</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="all-orders-table-body">
+                                    <!-- Orders will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination Controls -->
+                        <div class="pagination-container" style="padding: 1rem;">
+                            <div class="pagination-info">
+                                Showing <span id="showing-start">1</span> - <span id="showing-end">10</span> of <span id="total-orders-count">0</span> orders
                             </div>
-                            
-                            <div class="loading" id="all-orders-loading">
-                                <div class="spinner"></div>
-                            </div>
-                            <div class="table-container" id="all-orders-table-container" style="display: none;">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th><input type="checkbox" class="select-all-checkbox" id="all-select-all" onchange="toggleSelectAllOrders(this)"></th>
-                                            <th>Order ID</th>
-                                            <th>Customer</th>
-                                            <th>Email</th>
-                                            <th>Qty</th>
-                                            <th>Date</th>
-                                            <th>Amount</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="all-orders-table-body">
-                                        <!-- All orders will be populated here -->
-                                    </tbody>
-                                </table>
-                                
-                                <!-- Pagination Controls -->
-                                <div class="pagination-container">
-                                    <div class="pagination-info">
-                                        Showing <span id="showing-start">1</span> - <span id="showing-end">10</span> of <span id="total-orders-count">0</span> orders
-                                    </div>
-                                    <div class="pagination-controls">
-                                        <div class="items-per-page">
-                                            <label>Show:</label>
-                                            <select id="items-per-page" onchange="changeItemsPerPage(this.value)">
-                                                <option value="10">10</option>
-                                                <option value="50">50</option>
-                                                <option value="100">100</option>
-                                            </select>
-                                        </div>
-                                        <button class="pagination-btn" id="prev-page-btn" onclick="goToPage(currentPage - 1)" disabled>
-                                            <i class="fas fa-chevron-left"></i>
-                                        </button>
-                                        <div class="pagination-pages" id="pagination-pages">
-                                            <!-- Page buttons will be generated here -->
-                                        </div>
-                                        <button class="pagination-btn" id="next-page-btn" onclick="goToPage(currentPage + 1)">
-                                            <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                    </div>
+                            <div class="pagination-controls">
+                                <div class="items-per-page">
+                                    <label>Show:</label>
+                                    <select id="items-per-page" onchange="changeItemsPerPage(this.value)">
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select>
                                 </div>
+                                <button class="pagination-btn" id="prev-page-btn" onclick="goToPage(currentPage - 1)" disabled>
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <div class="pagination-pages" id="pagination-pages">
+                                    <!-- Page buttons will be generated here -->
+                                </div>
+                                <button class="pagination-btn" id="next-page-btn" onclick="goToPage(currentPage + 1)">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Other views placeholder -->
+                <!-- Customers View -->
                 <div id="customers-view" class="view" style="display: none;">
                     <!-- Customer Stats Grid -->
                     <div class="stats-grid" style="margin-bottom: 2rem;">
@@ -3076,8 +4627,8 @@
             // Set up search and filter
             setupSearchAndFilter();
             
-            // Set up periodic refresh
-            setInterval(loadDashboardData, 30000); // Refresh every 30 seconds
+            // Auto-refresh disabled - orders refresh when clicking tabs
+            // setInterval(loadDashboardData, 30000);
         });
 
         function initNavigation() {
@@ -3172,6 +4723,7 @@
             const titles = {
                 'dashboard': 'Dashboard',
                 'orders': 'Orders',
+                'shiprocket': 'Shiprocket',
                 'customers': 'Customers',
                 'support': 'Support Chats',
                 'analytics': 'Analytics',
@@ -3184,7 +4736,8 @@
             
             const subtitles = {
                 'dashboard': 'Welcome to your admin dashboard',
-                'orders': 'Manage all customer orders',
+                'orders': 'Manage orders and download images',
+                'shiprocket': 'Manage shipments, AWB, labels and tracking',
                 'customers': 'View and manage customers',
                 'support': 'Chat with customers and provide support',
                 'analytics': 'Business insights and analytics',
@@ -3203,6 +4756,7 @@
             switch(viewName) {
                 case 'orders':
                     loadAllOrders();
+                    updateOrderWorkflowCounts();
                     break;
                 case 'customers':
                     loadCustomers();
@@ -3322,7 +4876,14 @@
                             images: order.images || [], // Use the actual images array
                             deliveryMethod: order.deliveryMethod || 'standard',
                             usingCloudinary: order.usingCloudinary || false,
-                            paymentId: order.paymentId || null
+                            paymentId: order.paymentId || null,
+                            shiprocket: order.shiprocket || null, // Preserve Shiprocket data
+                            packageWeight: order.packageWeight || null,
+                            packageDimensions: order.packageDimensions || null,
+                            imageDownloaded: order.imageDownloaded || false, // Track if images downloaded
+                            imageDownloadedAt: order.imageDownloadedAt || null,
+                            sentToShiprocket: order.sentToShiprocket || false, // Track if sent to Shiprocket
+                            sentToShiprocketAt: order.sentToShiprocketAt || null
                         }));
                         
                         filteredOrders = [...orders];
@@ -3409,6 +4970,10 @@
             // Hide loading, show table
             loading.style.display = 'none';
             tableContainer.style.display = 'block';
+            
+            // Apply workflow filter
+            updateOrderWorkflowCounts();
+            applyOrdersWorkflowFilter();
         }
 
         // Track selected orders for All Orders table
@@ -3433,101 +4998,654 @@
         }
         
         function applyTabFilter() {
-            // First apply search filters
+            // Redirect to the workflow filter which properly handles all filtering
+            applyOrdersWorkflowFilter();
+        }
+        
+        function updateTabCounts() {
+            // Update workflow counts for Orders section
+            updateOrderWorkflowCounts();
+        }
+        
+        // Update shipping statistics - legacy function, kept for compatibility
+        function updateShippingStats() {
+            // No longer needed since Shiprocket section was removed
+        }
+        
+        // Current workflow filter for Orders section
+        let currentWorkflowFilter = 'all';
+        
+        // ============ ORDER WORKFLOW FUNCTIONS ============
+        
+        // Filter orders by workflow stage
+        async function filterOrdersWorkflow(workflow) {
+            currentWorkflowFilter = workflow;
+            
+            // Update active state on tabs
+            document.querySelectorAll('.workflow-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.workflow === workflow) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            currentPage = 1;
+            
+            // Reload orders from Firebase silently (no toast messages)
+            await loadDashboardData();
+        }
+        
+        // Apply workflow filter
+        function applyOrdersWorkflowFilter() {
             const searchTerm = document.getElementById('order-search')?.value.toLowerCase() || '';
             const dateSortFilter = document.getElementById('date-sort-filter')?.value || 'latest';
             
-            let baseOrders = orders.filter(order => {
+            // Filter by search
+            let filteredOrders = orders.filter(order => {
                 const matchesSearch = !searchTerm || 
-                    order.orderNumber.toLowerCase().includes(searchTerm) ||
+                    order.orderNumber?.toLowerCase().includes(searchTerm) ||
                     order.customer?.name?.toLowerCase().includes(searchTerm) ||
-                    order.customer?.email?.toLowerCase().includes(searchTerm) ||
                     order.customer?.phone?.toLowerCase().includes(searchTerm);
-                
                 return matchesSearch;
             });
             
-            // Then apply tab filter
-            switch(currentTab) {
-                case 'pending-labels':
-                    tabFilteredOrders = baseOrders.filter(o => o.status === 'pending');
+            // Filter by workflow stage
+            switch(currentWorkflowFilter) {
+                case 'new':
+                    // New orders: No imageDownloaded flag and not sent to Shiprocket
+                    filteredOrders = filteredOrders.filter(o => !o.imageDownloaded && !o.sentToShiprocket);
                     break;
-                case 'pending-rtd':
-                    tabFilteredOrders = baseOrders.filter(o => o.status === 'processing');
+                case 'downloaded':
+                    // Image downloaded but not sent to Shiprocket
+                    filteredOrders = filteredOrders.filter(o => o.imageDownloaded && !o.sentToShiprocket);
                     break;
-                case 'pending-handover':
-                    tabFilteredOrders = baseOrders.filter(o => o.status === 'shipped');
+                case 'shiprocket':
+                    // Sent to Shiprocket
+                    filteredOrders = filteredOrders.filter(o => o.sentToShiprocket);
                     break;
-                case 'completed':
-                    tabFilteredOrders = baseOrders.filter(o => o.status === 'completed' || o.status === 'delivered');
-                    break;
-                default:
-                    tabFilteredOrders = baseOrders;
             }
             
-            // Sort orders based on selected option
-            tabFilteredOrders.sort((a, b) => {
+            // Sort orders
+            filteredOrders.sort((a, b) => {
                 switch(dateSortFilter) {
                     case 'oldest':
                         return getOrderDate(a.orderDate) - getOrderDate(b.orderDate);
-                    case 'email-asc':
-                        return (a.customer?.email || '').localeCompare(b.customer?.email || '');
-                    case 'email-desc':
-                        return (b.customer?.email || '').localeCompare(a.customer?.email || '');
                     case 'name-asc':
                         return (a.customer?.name || '').localeCompare(b.customer?.name || '');
                     case 'name-desc':
                         return (b.customer?.name || '').localeCompare(a.customer?.name || '');
-                    case 'phone-asc':
-                        return (a.customer?.phone || '').localeCompare(b.customer?.phone || '');
-                    case 'phone-desc':
-                        return (b.customer?.phone || '').localeCompare(a.customer?.phone || '');
-                    default: // 'latest'
+                    default:
                         return getOrderDate(b.orderDate) - getOrderDate(a.orderDate);
                 }
             });
             
-            // Update table with pagination
-            updateAllOrdersTable(tabFilteredOrders);
+            // Update table
+            renderOrdersWorkflowTable(filteredOrders);
+        }
+        
+        // Update workflow tab counts
+        function updateOrderWorkflowCounts() {
+            const allCount = orders.length;
+            const newCount = orders.filter(o => !o.imageDownloaded && !o.sentToShiprocket).length;
+            const downloadedCount = orders.filter(o => o.imageDownloaded && !o.sentToShiprocket).length;
+            const shiprocketCount = orders.filter(o => o.sentToShiprocket).length;
             
-            // Ensure loading is hidden and table is shown
+            const allEl = document.getElementById('workflow-all-count');
+            const newEl = document.getElementById('workflow-new-count');
+            const downloadedEl = document.getElementById('workflow-downloaded-count');
+            const shiprocketEl = document.getElementById('workflow-shiprocket-count');
+            
+            if (allEl) allEl.textContent = allCount;
+            if (newEl) newEl.textContent = newCount;
+            if (downloadedEl) downloadedEl.textContent = downloadedCount;
+            if (shiprocketEl) shiprocketEl.textContent = shiprocketCount;
+        }
+        
+        // Render orders table for workflow view
+        function renderOrdersWorkflowTable(ordersToShow) {
+            const tableBody = document.getElementById('all-orders-table-body');
+            if (!tableBody) return;
+            
+            // Clear selection
+            selectedAllOrders.clear();
+            updateAllBulkActionsBar();
+            
+            // Calculate pagination
+            const totalOrders = ordersToShow.length;
+            const totalPages = Math.ceil(totalOrders / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, totalOrders);
+            const paginatedOrders = ordersToShow.slice(startIndex, endIndex);
+            
+            // Update pagination info
+            document.getElementById('showing-start').textContent = totalOrders > 0 ? startIndex + 1 : 0;
+            document.getElementById('showing-end').textContent = endIndex;
+            document.getElementById('total-orders-count').textContent = totalOrders;
+            
+            if (paginatedOrders.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                            No orders found in this section
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tableBody.innerHTML = paginatedOrders.map(order => {
+                const orderDate = formatShortDate(order.orderDate);
+                const amount = order.totals?.total || order.totalAmount || 299;
+                const itemCount = order.items?.length || 1;
+                const isSelected = selectedAllOrders.has(order.orderNumber);
+                
+                // Determine workflow status
+                let workflowStatus = '';
+                let workflowBadge = '';
+                if (order.sentToShiprocket) {
+                    workflowStatus = 'shiprocket';
+                    workflowBadge = '<span class="workflow-status-badge status-shiprocket"><i class="fas fa-shipping-fast"></i> Sent to Shiprocket</span>';
+                } else if (order.imageDownloaded) {
+                    workflowStatus = 'downloaded';
+                    workflowBadge = '<span class="workflow-status-badge status-downloaded"><i class="fas fa-check-circle"></i> Image Downloaded</span>';
+                } else {
+                    workflowStatus = 'new';
+                    workflowBadge = '<span class="workflow-status-badge status-new"><i class="fas fa-clock"></i> New Order</span>';
+                }
+                
+                return `
+                    <tr data-order="${order.orderNumber}" class="${isSelected ? 'selected' : ''}">
+                        <td>
+                            <input type="checkbox" class="order-checkbox all-order-checkbox" 
+                                   data-order-id="${order.orderNumber}"
+                                   onchange="toggleAllOrderSelection(this)"
+                                   ${isSelected ? 'checked' : ''}>
+                        </td>
+                        <td>
+                            <div style="font-weight: 600; color: var(--primary); cursor: pointer;" onclick="viewOrder('${order.orderNumber}')">
+                                #${order.orderNumber}
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">${orderDate}</div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 500;">${order.customer?.name || 'Guest'}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">${order.customer?.phone || ''}</div>
+                        </td>
+                        <td>
+                            <span style="background: var(--bg-tertiary); padding: 0.25rem 0.5rem; border-radius: 4px;">
+                                ${itemCount} item${itemCount > 1 ? 's' : ''}
+                            </span>
+                        </td>
+                        <td style="font-weight: 600;">₹${amount}</td>
+                        <td>${workflowBadge}</td>
+                        <td>
+                            <div class="action-buttons" style="display: flex; gap: 0.5rem;">
+                                <button class="action-icon-btn btn-view" onclick="viewOrder('${order.orderNumber}')" title="View Order">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                ${currentWorkflowFilter === 'new' ? `
+                                    <button class="action-icon-btn btn-download" onclick="downloadOrderImages('${order.orderNumber}')" title="Download Images">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                ` : ''}
+                                ${currentWorkflowFilter === 'downloaded' ? `
+                                    <button class="action-icon-btn btn-shiprocket" onclick="moveToShiprocket('${order.orderNumber}')" title="Move to Shiprocket" style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: white;">
+                                        <i class="fas fa-shipping-fast"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // Update pagination - use updatePaginationButtons
+            updatePaginationButtons(totalPages);
+            
+            // Hide loading
             const loading = document.getElementById('all-orders-loading');
             const tableContainer = document.getElementById('all-orders-table-container');
             if (loading) loading.style.display = 'none';
             if (tableContainer) tableContainer.style.display = 'block';
         }
         
-        function updateTabCounts() {
-            // All orders
-            document.getElementById('tab-count-all').textContent = orders.length;
+        // Download images for a single order
+        async function downloadOrderImages(orderNumber) {
+            const order = orders.find(o => o.orderNumber === orderNumber);
+            if (!order || !order.items) {
+                showShippingToast('Order not found', 'error');
+                return;
+            }
             
-            // Pending Labels (pending status)
-            const pendingLabelsCount = orders.filter(o => o.status === 'pending').length;
-            document.getElementById('tab-count-pending-labels').textContent = pendingLabelsCount;
+            showShippingToast('Downloading images...', 'info');
             
-            // Pending RTD (processing status)
-            const pendingRTDCount = orders.filter(o => o.status === 'processing').length;
-            document.getElementById('tab-count-pending-rtd').textContent = pendingRTDCount;
+            let downloaded = 0;
+            for (let i = 0; i < order.items.length; i++) {
+                const item = order.items[i];
+                const imageUrl = item.printImagePath || item.enhancedPrintPath || item.displayImagePath || 
+                                 item.originalImagePath || item.cloudinaryUrl;
+                
+                if (imageUrl) {
+                    try {
+                        const response = await fetch(imageUrl);
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `${orderNumber}_item${i + 1}.jpg`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                        downloaded++;
+                        await new Promise(r => setTimeout(r, 300));
+                    } catch (e) {
+                        console.error('Download failed:', e);
+                    }
+                }
+            }
             
-            // Pending Handover (shipped status)
-            const pendingHandoverCount = orders.filter(o => o.status === 'shipped').length;
-            document.getElementById('tab-count-pending-handover').textContent = pendingHandoverCount;
-            
-            // Completed (completed or delivered status)
-            const completedCount = orders.filter(o => o.status === 'completed' || o.status === 'delivered').length;
-            document.getElementById('tab-count-completed').textContent = completedCount;
+            if (downloaded > 0) {
+                // Mark as downloaded
+                await markSingleOrderDownloaded(orderNumber);
+                showShippingToast(`Downloaded ${downloaded} image(s)! Order marked as downloaded.`, 'success');
+            } else {
+                showShippingToast('No images found to download', 'error');
+            }
         }
+        
+        // Mark single order as downloaded
+        async function markSingleOrderDownloaded(orderNumber) {
+            const order = orders.find(o => o.orderNumber === orderNumber);
+            if (!order) return;
+            
+            order.imageDownloaded = true;
+            order.imageDownloadedAt = new Date().toISOString();
+            
+            // Save to Firebase
+            if (window.jbAPI && typeof window.jbAPI.updateOrder === 'function') {
+                await window.jbAPI.updateOrder(order.orderId || order.id, {
+                    imageDownloaded: true,
+                    imageDownloadedAt: new Date().toISOString()
+                });
+            }
+            
+            updateOrderWorkflowCounts();
+            applyOrdersWorkflowFilter();
+        }
+        
+        // Download selected images as ZIP file
+        async function downloadSelectedImagesAsZip() {
+            const selectedOrderNumbers = Array.from(selectedAllOrders);
+            if (selectedOrderNumbers.length === 0) {
+                showShippingToast('No orders selected', 'error');
+                return;
+            }
+            
+            showShippingToast(`Preparing ZIP for ${selectedOrderNumbers.length} orders...`, 'info');
+            
+            try {
+                const zip = new JSZip();
+                let totalImages = 0;
+                
+                for (const orderNumber of selectedOrderNumbers) {
+                    const order = orders.find(o => o.orderNumber === orderNumber);
+                    if (!order || !order.items) continue;
+                    
+                    // Create a folder for each order
+                    const orderFolder = zip.folder(`Order_${orderNumber}`);
+                    
+                    for (let i = 0; i < order.items.length; i++) {
+                        const item = order.items[i];
+                        const imageUrl = item.printImagePath || item.enhancedPrintPath || item.displayImagePath || 
+                                         item.originalImagePath || item.cloudinaryUrl;
+                        
+                        if (imageUrl) {
+                            try {
+                                const response = await fetch(imageUrl);
+                                const blob = await response.blob();
+                                const fileName = `${orderNumber}_item${i + 1}.jpg`;
+                                orderFolder.file(fileName, blob);
+                                totalImages++;
+                            } catch (e) {
+                                console.error(`Failed to fetch image for ${orderNumber}:`, e);
+                            }
+                        }
+                    }
+                    
+                    // Mark as downloaded
+                    await markSingleOrderDownloaded(orderNumber);
+                }
+                
+                if (totalImages === 0) {
+                    showShippingToast('No images found to download', 'error');
+                    return;
+                }
+                
+                showShippingToast(`Creating ZIP with ${totalImages} images...`, 'info');
+                
+                // Generate the ZIP file
+                const content = await zip.generateAsync({ type: 'blob' });
+                
+                // Create download link
+                const url = window.URL.createObjectURL(content);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `orders_images_${new Date().toISOString().split('T')[0]}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                showShippingToast(`ZIP downloaded with ${totalImages} images from ${selectedOrderNumbers.length} orders!`, 'success');
+                clearAllOrdersSelection();
+                
+            } catch (error) {
+                console.error('ZIP creation failed:', error);
+                showShippingToast('Failed to create ZIP file', 'error');
+            }
+        }
+        
+        // Download selected images (kept for single order download)
+        async function downloadSelectedImages() {
+            const selectedOrderNumbers = Array.from(selectedAllOrders);
+            if (selectedOrderNumbers.length === 0) {
+                showShippingToast('No orders selected', 'error');
+                return;
+            }
+            
+            showShippingToast(`Downloading images for ${selectedOrderNumbers.length} orders...`, 'info');
+            
+            for (const orderNumber of selectedOrderNumbers) {
+                await downloadOrderImages(orderNumber);
+            }
+            
+            showShippingToast('All images downloaded!', 'success');
+        }
+        
+        // Send single order to Shiprocket
+        async function sendSingleToShiprocket(orderNumber) {
+            const order = orders.find(o => o.orderNumber === orderNumber);
+            if (!order) {
+                showShippingToast('Order not found', 'error');
+                return;
+            }
+            
+            if (order.shiprocket?.orderId) {
+                showShippingToast('Order already sent to Shiprocket', 'error');
+                return;
+            }
+            
+            if (!confirm(`Send order #${orderNumber} to Shiprocket?`)) return;
+            
+            showShippingToast('Creating shipment in Shiprocket...', 'info');
+            
+            try {
+                const result = await window.shiprocketClient.createOrder(order);
+                console.log('📦 Shiprocket order created:', result);
+                
+                if (result.order_id) {
+                    const shiprocketData = {
+                        orderId: result.order_id,
+                        shipmentId: result.shipment_id,
+                        status: result.status || 'NEW',
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    // Update Firebase
+                    const firebaseDocId = order.orderId || order.id;
+                    if (window.jbAPI && typeof window.jbAPI.updateOrder === 'function') {
+                        await window.jbAPI.updateOrder(firebaseDocId, {
+                            shiprocket: shiprocketData,
+                            status: 'processing'
+                        });
+                    }
+                    
+                    order.shiprocket = shiprocketData;
+                    order.status = 'processing';
+                    
+                    showShippingToast('Order sent to Shiprocket successfully!', 'success');
+                    updateOrderWorkflowCounts();
+                    applyOrdersWorkflowFilter();
+                } else {
+                    showShippingToast('Failed: ' + (result.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Error sending to Shiprocket:', error);
+                showShippingToast('Failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Send selected orders to Shiprocket
+        async function sendToShiprocket() {
+            const selectedOrderNumbers = Array.from(selectedAllOrders);
+            if (selectedOrderNumbers.length === 0) {
+                showShippingToast('No orders selected', 'error');
+                return;
+            }
+            
+            // Filter to orders that haven't been sent yet
+            const ordersToSend = orders.filter(o => 
+                selectedOrderNumbers.includes(o.orderNumber) && 
+                !o.shiprocket?.orderId
+            );
+            
+            if (ordersToSend.length === 0) {
+                showShippingToast('Selected orders are already in Shiprocket', 'error');
+                return;
+            }
+            
+            if (!confirm(`Send ${ordersToSend.length} order(s) to Shiprocket?`)) return;
+            
+            showShippingToast(`Creating ${ordersToSend.length} shipments...`, 'info');
+            
+            let successCount = 0;
+            for (const order of ordersToSend) {
+                try {
+                    const result = await window.shiprocketClient.createOrder(order);
+                    
+                    if (result.order_id) {
+                        const shiprocketData = {
+                            orderId: result.order_id,
+                            shipmentId: result.shipment_id,
+                            status: result.status || 'NEW',
+                            createdAt: new Date().toISOString()
+                        };
+                        
+                        // Update Firebase
+                        if (window.jbAPI && typeof window.jbAPI.updateOrder === 'function') {
+                            await window.jbAPI.updateOrder(order.orderId || order.id, {
+                                shiprocket: shiprocketData,
+                                status: 'processing'
+                            });
+                        }
+                        
+                        order.shiprocket = shiprocketData;
+                        order.status = 'processing';
+                        successCount++;
+                    }
+                    
+                    await new Promise(r => setTimeout(r, 500));
+                } catch (error) {
+                    console.error(`Failed to send ${order.orderNumber}:`, error);
+                }
+            }
+            
+            showShippingToast(`Sent ${successCount}/${ordersToSend.length} orders to Shiprocket!`, successCount === ordersToSend.length ? 'success' : 'warning');
+            updateOrderWorkflowCounts();
+            applyOrdersWorkflowFilter();
+            clearAllOrdersSelection();
+        }
+        
+        // Move single order to Shiprocket (marks as sent and sends to Shiprocket API)
+        async function moveToShiprocket(orderNumber) {
+            const order = orders.find(o => o.orderNumber === orderNumber);
+            if (!order) {
+                showShippingToast('Order not found', 'error');
+                return;
+            }
+            
+            if (order.sentToShiprocket) {
+                showShippingToast('Order already sent to Shiprocket', 'error');
+                return;
+            }
+            
+            showShippingToast('Sending to Shiprocket...', 'info');
+            
+            try {
+                // Try to send to Shiprocket API first
+                let shiprocketSuccess = false;
+                let shiprocketData = null;
+                
+                if (window.shiprocketClient && typeof window.shiprocketClient.createOrder === 'function') {
+                    try {
+                        const result = await window.shiprocketClient.createOrder(order);
+                        console.log('📦 Shiprocket API result:', result);
+                        if (result.order_id) {
+                            shiprocketData = {
+                                orderId: result.order_id,
+                                shipmentId: result.shipment_id,
+                                status: result.status || 'NEW',
+                                createdAt: new Date().toISOString()
+                            };
+                            shiprocketSuccess = true;
+                        }
+                    } catch (apiError) {
+                        console.error('Shiprocket API error:', apiError);
+                        // Continue - will still mark as sent locally
+                    }
+                }
+                
+                // Mark as sent to Shiprocket in Firebase
+                const firebaseDocId = order.orderId || order.id;
+                console.log('📝 Updating Firebase order:', firebaseDocId);
+                
+                const updateData = {
+                    sentToShiprocket: true,
+                    sentToShiprocketAt: new Date().toISOString(),
+                    status: 'processing'
+                };
+                
+                if (shiprocketData) {
+                    updateData.shiprocket = shiprocketData;
+                }
+                
+                if (window.jbAPI && typeof window.jbAPI.updateOrder === 'function') {
+                    const result = await window.jbAPI.updateOrder(firebaseDocId, updateData);
+                    console.log('📝 Firebase update result:', result);
+                    
+                    if (!result.success) {
+                        throw new Error(result.error || 'Failed to update order in Firebase');
+                    }
+                } else {
+                    throw new Error('Firebase API not available');
+                }
+                
+                // Update local order data
+                order.sentToShiprocket = true;
+                order.sentToShiprocketAt = new Date().toISOString();
+                order.status = 'processing';
+                if (shiprocketData) {
+                    order.shiprocket = shiprocketData;
+                }
+                
+                if (shiprocketSuccess) {
+                    showShippingToast(`Order #${orderNumber} sent to Shiprocket!`, 'success');
+                } else {
+                    showShippingToast(`Order #${orderNumber} moved to Shiprocket section!`, 'success');
+                }
+                
+                updateOrderWorkflowCounts();
+                applyOrdersWorkflowFilter();
+            } catch (error) {
+                console.error('Error moving to Shiprocket:', error);
+                showShippingToast('Failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Move selected orders to Shiprocket
+        async function moveSelectedToShiprocket() {
+            const selectedOrderNumbers = Array.from(selectedAllOrders);
+            if (selectedOrderNumbers.length === 0) {
+                showShippingToast('No orders selected', 'error');
+                return;
+            }
+            
+            // Filter to orders that have images downloaded but not sent to Shiprocket
+            const ordersToMove = orders.filter(o => 
+                selectedOrderNumbers.includes(o.orderNumber) && 
+                o.imageDownloaded && 
+                !o.sentToShiprocket
+            );
+            
+            if (ordersToMove.length === 0) {
+                showShippingToast('No eligible orders to move (images must be downloaded first)', 'error');
+                return;
+            }
+            
+            if (!confirm(`Move ${ordersToMove.length} order(s) to Shiprocket?`)) return;
+            
+            showShippingToast(`Moving ${ordersToMove.length} orders to Shiprocket...`, 'info');
+            
+            let successCount = 0;
+            for (const order of ordersToMove) {
+                try {
+                    await moveToShiprocket(order.orderNumber);
+                    successCount++;
+                    await new Promise(r => setTimeout(r, 500));
+                } catch (error) {
+                    console.error(`Failed to move ${order.orderNumber}:`, error);
+                }
+            }
+            
+            showShippingToast(`Moved ${successCount}/${ordersToMove.length} orders to Shiprocket!`, successCount === ordersToMove.length ? 'success' : 'warning');
+            clearAllOrdersSelection();
+        }
+        
+        // ============ SHIPROCKET VIEW FUNCTIONS (REMOVED) ============
+        // Shiprocket section has been removed from admin panel
+        // Keeping stub functions to prevent errors from any lingering references
+        
+        let selectedShiprocketOrders = new Set();
+        let currentShiprocketTab = 'new';
+        let shiprocketCurrentPage = 1;
+        let shiprocketItemsPerPage = 25;
+        
+        function loadShiprocketOrders() { }
+        function switchShiprocketTab(tab) { }
+        function updateShiprocketBulkActions(tab) { }
+        function updateShiprocketTabCounts() { }
+        function refreshShiprocketView() { }
+        function renderShiprocketTable() { }
+        function getShiprocketEmptyMessage(tab) { return { icon: '', title: '', description: '' }; }
+        function getShiprocketStatusInfo(order) { return { label: '', class: '', icon: '' }; }
+        function getShiprocketActionButtons(order) { return ''; }
+        function renderShiprocketPagination(totalPages) { }
+        function goToShiprocketPage(page) { }
+        function changeShiprocketItemsPerPage(count) { }
+        function toggleShiprocketOrderSelection(orderNumber) { }
+        function toggleSelectAllShiprocketOrders(checkbox) { }
+        function trackShipment(awbCode) { }
+        function cancelShiprocketOrder(orderNumber) { }
+        function exportShiprocketData() { }
+        function bulkTrackOrders() { }
+        function bulkDownloadManifests() { }
+        function initiateRTOReturn() { }
         
         function updateAllOrdersTable(ordersToShow) {
             const tableBody = document.getElementById('all-orders-table-body');
             if (!tableBody) return;
+            
+            // No shipping filter needed - Orders section uses workflow filter now
+            let filteredByShipping = ordersToShow;
             
             // Clear selection when table updates
             selectedAllOrders.clear();
             updateAllBulkActionsBar();
             
             // Calculate pagination
-            const totalOrders = ordersToShow.length;
+            const totalOrders = filteredByShipping.length;
             const totalPages = Math.ceil(totalOrders / itemsPerPage);
             
             // Make sure current page is valid
@@ -3536,7 +5654,7 @@
             
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = Math.min(startIndex + itemsPerPage, totalOrders);
-            const paginatedOrders = ordersToShow.slice(startIndex, endIndex);
+            const paginatedOrders = filteredByShipping.slice(startIndex, endIndex);
             
             // Update pagination info
             document.getElementById('showing-start').textContent = totalOrders > 0 ? startIndex + 1 : 0;
@@ -3547,43 +5665,661 @@
             updatePaginationButtons(totalPages);
             
             if (paginatedOrders.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">No orders found</td></tr>';
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="9">
+                            <div class="orders-empty-state">
+                                <i class="fas fa-box-open"></i>
+                                <h3>No orders found</h3>
+                                <p>Try adjusting your filters or search criteria</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
                 return;
             }
             
             tableBody.innerHTML = paginatedOrders.map(order => {
                 const orderId = order.id || order.orderId || order.orderNumber;
                 const quantity = order.items ? order.items.length : (order.quantity || 1);
-                const customerName = order.customer.name || 'N/A';
-                const customerEmail = order.customer.email || 'N/A';
-                const customerPhone = order.customer.phone || 'N/A';
-                const amount = parseFloat(order.totals.total || 0).toFixed(2);
+                const customerName = order.customer?.name || 'N/A';
+                const customerPhone = order.customer?.phone || 'N/A';
+                const amount = parseFloat(order.totals?.total || 0).toFixed(2);
                 const date = formatDate(order.orderDate);
-                const statusBadge = getStatusBadge(order.status);
+                
+                // Package info
+                const weight = order.shiprocket?.weight || (quantity * 0.5);
+                const dimensions = order.shiprocket?.dimensions || { l: 40, b: 30, h: 5 };
+                
+                // AWB and courier
+                const awb = order.shiprocket?.awb || '-';
+                const courier = order.shiprocket?.courierName || '-';
+                
+                // Shipping status
+                const shippingStatus = getShippingStatusBadge(order);
+                const eta = order.shiprocket?.edd ? `ETA: ${formatShortDate(order.shiprocket.edd)}` : '';
+                
+                // Check if order is selected
+                const isSelected = selectedAllOrders.has(order.orderNumber);
                 
                 return `
-                <tr class="order-row clickable-row" data-order-id="${orderId}" data-order-number="${order.orderNumber}" onclick="handleOrderRowClick(event, '${order.orderNumber}')">
-                    <td class="col-checkbox" onclick="event.stopPropagation()"><input type="checkbox" class="order-checkbox all-order-checkbox" data-order-id="${orderId}" data-order-number="${order.orderNumber}" onchange="toggleAllOrderSelection(this)"></td>
-                    <td class="col-order-id"><strong>#${order.orderNumber}</strong></td>
-                    <td class="col-customer">${customerName}</td>
-                    <td class="col-email">${customerEmail}</td>
-                    <td class="col-phone">${customerPhone}</td>
-                    <td class="col-qty">${quantity}</td>
-                    <td class="col-date">${date}</td>
-                    <td class="col-amount"><strong style="color: var(--success);">₹${amount}</strong></td>
-                    <td class="col-status">${statusBadge}</td>
-                    <td class="col-actions" onclick="event.stopPropagation()">
-                        <button class="action-btn delete" onclick="deleteOrder('${orderId}', '${order.orderNumber}')" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                <tr class="${isSelected ? 'selected' : ''}" data-order-id="${orderId}" data-order-number="${order.orderNumber}">
+                    <td onclick="event.stopPropagation()">
+                        <input type="checkbox" class="order-checkbox all-order-checkbox" 
+                               data-order-id="${orderId}" 
+                               data-order-number="${order.orderNumber}" 
+                               ${isSelected ? 'checked' : ''}
+                               onchange="toggleAllOrderSelection(this)">
+                    </td>
+                    <td data-label="Order">
+                        <div class="order-info-cell">
+                            <span class="order-number-link" onclick="viewOrder('${order.orderNumber}')">#${order.orderNumber}</span>
+                            <span class="order-date">${date}</span>
+                        </div>
+                    </td>
+                    <td data-label="Customer">
+                        <div class="customer-info-cell">
+                            <span class="customer-name">${customerName}</span>
+                            <span class="customer-phone">${customerPhone}</span>
+                        </div>
+                    </td>
+                    <td data-label="Items">
+                        <span class="badge badge-info">${quantity} item${quantity > 1 ? 's' : ''}</span>
+                    </td>
+                    <td data-label="Amount">
+                        <strong style="color: var(--success);">₹${amount}</strong>
+                    </td>
+                    <td data-label="Package" onclick="event.stopPropagation()">
+                        <div class="package-info-cell">
+                            <span class="package-weight" onclick="openWeightEditModal('${order.orderNumber}')" title="Click to edit">
+                                ${weight} kg <i class="fas fa-pencil-alt"></i>
+                            </span>
+                        </div>
+                    </td>
+                    <td data-label="AWB">
+                        <div class="awb-cell">
+                            ${awb !== '-' ? `
+                                <span class="awb-number" onclick="copyToClipboard('${awb}')" title="Click to copy">${awb}</span>
+                                <span class="courier-name">${courier}</span>
+                            ` : `
+                                <span style="color: var(--text-muted);">-</span>
+                            `}
+                        </div>
+                    </td>
+                    <td data-label="Status">
+                        <div class="status-cell">
+                            ${shippingStatus}
+                            ${eta ? `<span class="status-eta">${eta}</span>` : ''}
+                        </div>
+                    </td>
+                    <td data-label="Actions" onclick="event.stopPropagation()">
+                        <div class="action-btns">
+                            <button class="action-icon-btn btn-view" onclick="viewOrder('${order.orderNumber}')" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            ${!order.shiprocket?.orderId ? `
+                                <button class="action-icon-btn btn-pickup" onclick="createSingleShipment('${order.orderNumber}')" title="Create Shipment">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            ` : ''}
+                            ${order.shiprocket?.orderId && !order.shiprocket?.awb ? `
+                                <button class="action-icon-btn btn-label" onclick="generateAWBForOrder('${order.orderNumber}', ${order.shiprocket?.shipmentId || 'null'})" title="Generate AWB">
+                                    <i class="fas fa-barcode"></i>
+                                </button>
+                            ` : ''}
+                            ${order.shiprocket?.awb ? `
+                                <button class="action-icon-btn btn-label" onclick="downloadLabel('${order.shiprocket.shipmentId}')" title="Download Label">
+                                    <i class="fas fa-tag"></i>
+                                </button>
+                                <button class="action-icon-btn btn-track" onclick="trackOrder('${order.shiprocket.awb}')" title="Track">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </button>
+                            ` : ''}
+                            <button class="action-icon-btn btn-delete" onclick="deleteOrder('${orderId}', '${order.orderNumber}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `;
             }).join('');
             
-            // Reset select all checkbox
+            // Update select all checkbox state
             const selectAllCheckbox = document.getElementById('all-select-all');
-            if (selectAllCheckbox) selectAllCheckbox.checked = false;
+            const selectAllCheckbox2 = document.getElementById('select-all-orders');
+            if (selectAllCheckbox) selectAllCheckbox.checked = selectedAllOrders.size === paginatedOrders.length && paginatedOrders.length > 0;
+            if (selectAllCheckbox2) selectAllCheckbox2.checked = selectedAllOrders.size === paginatedOrders.length && paginatedOrders.length > 0;
+        }
+        
+        // Get shipping status badge HTML
+        function getShippingStatusBadge(order) {
+            if (!order.shiprocket?.orderId) {
+                return `<span class="shiprocket-status status-pending"><i class="fas fa-clock"></i> Not Shipped</span>`;
+            }
+            
+            const status = (order.shiprocket?.status || 'NEW').toLowerCase();
+            
+            if (status.includes('delivered')) {
+                return `<span class="shiprocket-status status-delivered"><i class="fas fa-check-circle"></i> Delivered</span>`;
+            } else if (status.includes('out for delivery') || status === 'ofd') {
+                return `<span class="shiprocket-status status-out-for-delivery"><i class="fas fa-shipping-fast"></i> Out for Delivery</span>`;
+            } else if (status.includes('transit') || status.includes('picked')) {
+                return `<span class="shiprocket-status status-in-transit"><i class="fas fa-truck"></i> In Transit</span>`;
+            } else if (status.includes('pickup')) {
+                return `<span class="shiprocket-status status-pickup-scheduled"><i class="fas fa-hand-paper"></i> Pickup Scheduled</span>`;
+            } else if (status.includes('rto') || status.includes('return')) {
+                return `<span class="shiprocket-status status-rto"><i class="fas fa-undo"></i> RTO</span>`;
+            } else if (status.includes('ndr')) {
+                return `<span class="shiprocket-status status-ndr"><i class="fas fa-exclamation-circle"></i> NDR</span>`;
+            } else if (status.includes('cancel')) {
+                return `<span class="shiprocket-status status-cancelled"><i class="fas fa-times-circle"></i> Cancelled</span>`;
+            } else {
+                return `<span class="shiprocket-status status-new"><i class="fas fa-plus-circle"></i> ${order.shiprocket?.awb ? 'Ready' : 'New'}</span>`;
+            }
+        }
+        
+        // Format short date
+        function formatShortDate(dateInput) {
+            if (!dateInput) return '';
+            const date = new Date(dateInput);
+            return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+        }
+        
+        // Copy to clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showShippingToast(`Copied: ${text}`, 'success');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
+        }
+        
+        // Track order
+        async function trackOrder(awb) {
+            try {
+                showShippingToast('Loading tracking info...', 'info');
+                const result = await window.shiprocketClient.getTrackingByAWB(awb);
+                console.log('Tracking result:', result);
+                
+                // Show tracking modal
+                showTrackingModal(result);
+            } catch (error) {
+                console.error('Error tracking order:', error);
+                showShippingToast('Failed to load tracking: ' + error.message, 'error');
+            }
+        }
+        
+        // Show tracking modal
+        function showTrackingModal(trackingData) {
+            // Create or update tracking modal
+            let modal = document.getElementById('tracking-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'tracking-modal';
+                modal.className = 'modal';
+                document.body.appendChild(modal);
+            }
+            
+            const tracking = trackingData.tracking_data || trackingData;
+            const activities = tracking.shipment_track_activities || [];
+            
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h3 class="modal-title">
+                            <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
+                            Shipment Tracking
+                        </h3>
+                        <button class="modal-close" onclick="closeTrackingModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="shipping-status-card">
+                            <div class="shipping-info-grid">
+                                <div class="shipping-info-item">
+                                    <div class="label">AWB</div>
+                                    <div class="value">${tracking.awb_code || '-'}</div>
+                                </div>
+                                <div class="shipping-info-item">
+                                    <div class="label">Courier</div>
+                                    <div class="value">${tracking.courier_name || '-'}</div>
+                                </div>
+                                <div class="shipping-info-item">
+                                    <div class="label">Status</div>
+                                    <div class="value">${tracking.current_status || '-'}</div>
+                                </div>
+                                <div class="shipping-info-item">
+                                    <div class="label">EDD</div>
+                                    <div class="value">${tracking.edd || '-'}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h4 style="margin: 1.5rem 0 1rem; color: var(--text-primary);">
+                            <i class="fas fa-history" style="color: var(--text-muted);"></i> Activity Timeline
+                        </h4>
+                        <div class="tracking-timeline">
+                            ${activities.length > 0 ? activities.map((activity, index) => `
+                                <div class="tracking-event ${index === 0 ? 'current' : ''}">
+                                    <div class="event-time">${activity.date || ''}</div>
+                                    <div class="event-status">${activity['sr-status'] || activity.status || ''}</div>
+                                    <div class="event-location">${activity.location || ''} - ${activity.activity || ''}</div>
+                                </div>
+                            `).join('') : '<p style="color: var(--text-muted);">No tracking activities yet</p>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.add('show');
+        }
+        
+        function closeTrackingModal() {
+            const modal = document.getElementById('tracking-modal');
+            if (modal) modal.classList.remove('show');
+        }
+        
+        // Create single shipment
+        async function createSingleShipment(orderNumber) {
+            const order = orders.find(o => o.orderNumber === orderNumber);
+            if (!order) {
+                showShippingToast('Order not found', 'error');
+                return;
+            }
+            
+            if (order.shiprocket?.orderId) {
+                showShippingToast('Shipment already created for this order', 'error');
+                return;
+            }
+            
+            if (!confirm(`Create shipment for order #${orderNumber}?`)) return;
+            
+            showShippingToast('Creating shipment...', 'info');
+            
+            try {
+                const result = await window.shiprocketClient.createOrder(order);
+                console.log('📦 Shiprocket order created:', result);
+                
+                if (result.order_id) {
+                    // Update order with shiprocket data
+                    const shiprocketData = {
+                        orderId: result.order_id,
+                        shipmentId: result.shipment_id,
+                        status: result.status || 'NEW',
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    // Get Firebase document ID - use orderId (doc ID) or id
+                    const firebaseDocId = order.orderId || order.id;
+                    console.log('📝 Saving shiprocket data to Firebase doc:', firebaseDocId);
+                    
+                    if (window.jbAPI && typeof window.jbAPI.updateOrder === 'function') {
+                        const updateResult = await window.jbAPI.updateOrder(firebaseDocId, {
+                            shiprocket: shiprocketData,
+                            status: 'processing'
+                        });
+                        console.log('📝 Firebase update result:', updateResult);
+                        
+                        if (!updateResult.success) {
+                            console.error('❌ Failed to save shiprocket data to Firebase:', updateResult.error);
+                            showShippingToast('Warning: Shipment created but failed to save to database', 'warning');
+                        }
+                    } else {
+                        console.error('❌ updateOrder method not available on jbAPI');
+                    }
+                    
+                    // Update local order object
+                    order.shiprocket = shiprocketData;
+                    order.status = 'processing';
+                    
+                    showShippingToast('Shipment created successfully!', 'success');
+                    applyTabFilter();
+                } else {
+                    showShippingToast('Failed: ' + (result.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Error creating shipment:', error);
+                showShippingToast('Failed to create shipment: ' + error.message, 'error');
+            }
+        }
+        
+        // Download label
+        async function downloadLabel(shipmentId) {
+            try {
+                showShippingToast('Generating label...', 'info');
+                const result = await window.shiprocketClient.generateLabel(shipmentId);
+                
+                if (result.label_url) {
+                    window.open(result.label_url, '_blank');
+                    showShippingToast('Label downloaded!', 'success');
+                } else {
+                    showShippingToast('Label not available yet', 'error');
+                }
+            } catch (error) {
+                console.error('Error generating label:', error);
+                showShippingToast('Failed to generate label: ' + error.message, 'error');
+            }
+        }
+        
+        // Bulk generate labels
+        async function bulkGenerateLabels() {
+            const selectedOrderNumbers = Array.from(selectedAllOrders);
+            if (selectedOrderNumbers.length === 0) {
+                showShippingToast('No orders selected', 'error');
+                return;
+            }
+            
+            // Filter to orders with AWB
+            const ordersWithAWB = orders.filter(o => 
+                selectedOrderNumbers.includes(o.orderNumber) && o.shiprocket?.awb
+            );
+            
+            if (ordersWithAWB.length === 0) {
+                showShippingToast('Selected orders don\'t have AWB yet. Generate AWB first.', 'error');
+                return;
+            }
+            
+            showShippingToast(`Generating ${ordersWithAWB.length} labels...`, 'info');
+            
+            let successCount = 0;
+            for (const order of ordersWithAWB) {
+                try {
+                    const result = await window.shiprocketClient.generateLabel(order.shiprocket.shipmentId);
+                    if (result.label_url) {
+                        window.open(result.label_url, '_blank');
+                        successCount++;
+                        await new Promise(r => setTimeout(r, 500)); // Delay between downloads
+                    }
+                } catch (error) {
+                    console.error(`Error generating label for ${order.orderNumber}:`, error);
+                }
+            }
+            
+            showShippingToast(`Generated ${successCount}/${ordersWithAWB.length} labels`, successCount === ordersWithAWB.length ? 'success' : 'warning');
+        }
+        
+        // Bulk download labels (same as bulk generate)
+        function bulkDownloadLabels() {
+            bulkGenerateLabels();
+        }
+        
+        // Bulk request pickup
+        async function bulkRequestPickup() {
+            const selectedOrderNumbers = Array.from(selectedAllOrders);
+            if (selectedOrderNumbers.length === 0) {
+                showShippingToast('No orders selected', 'error');
+                return;
+            }
+            
+            // Filter to orders with AWB (AWB is required for pickup)
+            const ordersToPickup = orders.filter(o => 
+                selectedOrderNumbers.includes(o.orderNumber) && 
+                o.shiprocket?.shipmentId &&
+                o.shiprocket?.awbCode &&
+                !o.shiprocket?.pickupRequested
+            );
+            
+            if (ordersToPickup.length === 0) {
+                // Check if orders need AWB first
+                const ordersNeedingAWB = orders.filter(o => 
+                    selectedOrderNumbers.includes(o.orderNumber) && 
+                    o.shiprocket?.shipmentId &&
+                    !o.shiprocket?.awbCode
+                );
+                
+                if (ordersNeedingAWB.length > 0) {
+                    showShippingToast(`${ordersNeedingAWB.length} orders need AWB first. Click "Generate AWB" button.`, 'error');
+                } else {
+                    showShippingToast('Selected orders already have pickup scheduled or no shipments created', 'error');
+                }
+                return;
+            }
+            
+            if (!confirm(`Request pickup for ${ordersToPickup.length} order(s)?`)) return;
+            
+            showShippingToast(`Requesting pickup for ${ordersToPickup.length} orders...`, 'info');
+            
+            let successCount = 0;
+            for (const order of ordersToPickup) {
+                try {
+                    await window.shiprocketClient.requestPickup(order.shiprocket.shipmentId);
+                    
+                    // Update shiprocket data
+                    const updatedShiprocket = {
+                        ...order.shiprocket,
+                        pickupRequested: true,
+                        pickupRequestedAt: new Date().toISOString(),
+                        status: 'PICKUP SCHEDULED'
+                    };
+                    
+                    // Save to Firebase
+                    if (window.jbAPI && typeof window.jbAPI.updateOrder === 'function') {
+                        await window.jbAPI.updateOrder(order.orderId || order.id, {
+                            shiprocket: updatedShiprocket
+                        });
+                    }
+                    
+                    order.shiprocket = updatedShiprocket;
+                    successCount++;
+                    
+                    // Small delay between API calls
+                    await new Promise(r => setTimeout(r, 300));
+                } catch (error) {
+                    console.error(`Error requesting pickup for ${order.orderNumber}:`, error);
+                }
+            }
+            
+            showShippingToast(`Requested pickup for ${successCount}/${ordersToPickup.length} orders`, successCount === ordersToPickup.length ? 'success' : 'warning');
+            updateTabCounts();
+            applyTabFilter();
+            clearAllOrdersSelection();
+        }
+        
+        // Download bulk images for selected orders
+        async function downloadBulkImages() {
+            const selectedOrderNumbers = Array.from(selectedAllOrders);
+            if (selectedOrderNumbers.length === 0) {
+                showShippingToast('No orders selected', 'error');
+                return;
+            }
+            
+            showShippingToast(`Downloading images for ${selectedOrderNumbers.length} orders...`, 'info');
+            
+            let totalImages = 0;
+            let downloadedImages = 0;
+            
+            for (const orderNumber of selectedOrderNumbers) {
+                const order = orders.find(o => o.orderNumber === orderNumber);
+                if (order && order.items) {
+                    for (let i = 0; i < order.items.length; i++) {
+                        totalImages++;
+                        const item = order.items[i];
+                        
+                        // Find best image
+                        let bestImage = null;
+                        if (order.images && order.images[i]) {
+                            const orderImage = order.images[i];
+                            bestImage = orderImage.print || orderImage.original || orderImage.display ||
+                                       orderImage.originalImage || orderImage.printImage;
+                        }
+                        // Check *Path fields on item (newer Firebase structure)
+                        if (!bestImage) {
+                            bestImage = item.printImagePath || item.enhancedPrintPath || 
+                                       item.displayImagePath || item.originalImagePath;
+                        }
+                        // Fallback to older structure
+                        if (!bestImage) {
+                            bestImage = item.cloudinaryUrl || item.printImage || item.originalImage || item.displayImage;
+                        }
+                        
+                        if (bestImage) {
+                            const filename = `${orderNumber}_item${i + 1}_PRINT.jpg`;
+                            try {
+                                await downloadImageAsync(bestImage, filename);
+                                downloadedImages++;
+                                await new Promise(r => setTimeout(r, 300));
+                            } catch (e) {
+                                console.error(`Failed to download ${filename}:`, e);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            showShippingToast(`Downloaded ${downloadedImages}/${totalImages} images`, downloadedImages === totalImages ? 'success' : 'warning');
+        }
+        
+        // Sync Shiprocket orders status
+        async function syncShiprocketOrders() {
+            showShippingToast('Syncing order statuses...', 'info');
+            
+            const ordersWithAWB = orders.filter(o => o.shiprocket?.awb);
+            let updatedCount = 0;
+            
+            for (const order of ordersWithAWB) {
+                try {
+                    const tracking = await window.shiprocketClient.getTrackingByAWB(order.shiprocket.awb);
+                    if (tracking.tracking_data) {
+                        const newStatus = tracking.tracking_data.current_status;
+                        const edd = tracking.tracking_data.edd;
+                        
+                        if (order.shiprocket.status !== newStatus) {
+                            order.shiprocket.status = newStatus;
+                            order.shiprocket.edd = edd;
+                            
+                            // Update in Firebase
+                            if (window.jbAPI && typeof window.jbAPI.updateOrder === 'function') {
+                                await window.jbAPI.updateOrder(order.orderId || order.id, {
+                                    shiprocket: order.shiprocket
+                                });
+                            }
+                            updatedCount++;
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Error syncing ${order.orderNumber}:`, error);
+                }
+            }
+            
+            updateShippingStats();
+            applyTabFilter();
+            showShippingToast(`Synced ${updatedCount} order status updates`, 'success');
+        }
+        
+        // Refresh orders
+        async function refreshOrders() {
+            showShippingToast('Refreshing orders...', 'info');
+            await loadDashboardData();
+            showShippingToast('Orders refreshed!', 'success');
+        }
+        
+        // Weight edit modal
+        let currentEditingOrder = null;
+        
+        function openWeightEditModal(orderNumber) {
+            currentEditingOrder = orders.find(o => o.orderNumber === orderNumber);
+            if (!currentEditingOrder) return;
+            
+            const weight = currentEditingOrder.shiprocket?.weight || (currentEditingOrder.items?.length || 1) * 0.5;
+            const dims = currentEditingOrder.shiprocket?.dimensions || { l: 40, b: 30, h: 5 };
+            
+            let modal = document.getElementById('weight-edit-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'weight-edit-modal';
+                modal.className = 'weight-edit-modal';
+                document.body.appendChild(modal);
+            }
+            
+            modal.innerHTML = `
+                <div class="weight-edit-content">
+                    <h3><i class="fas fa-weight" style="color: var(--primary);"></i> Edit Package Details</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1rem;">Order: #${orderNumber}</p>
+                    
+                    <div class="weight-inputs">
+                        <div class="weight-input-group">
+                            <label>Weight (kg)</label>
+                            <input type="number" id="edit-weight" value="${weight}" step="0.1" min="0.1">
+                        </div>
+                        <div class="weight-input-group">
+                            <label>Dead Weight (kg)</label>
+                            <input type="number" id="edit-dead-weight" value="${currentEditingOrder.shiprocket?.deadWeight || weight}" step="0.1" min="0.1">
+                        </div>
+                    </div>
+                    
+                    <p style="font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Dimensions (cm)</p>
+                    <div class="dimensions-inputs">
+                        <div class="weight-input-group">
+                            <label>Length</label>
+                            <input type="number" id="edit-length" value="${dims.l}" step="1" min="1">
+                        </div>
+                        <div class="weight-input-group">
+                            <label>Breadth</label>
+                            <input type="number" id="edit-breadth" value="${dims.b}" step="1" min="1">
+                        </div>
+                        <div class="weight-input-group">
+                            <label>Height</label>
+                            <input type="number" id="edit-height" value="${dims.h}" step="1" min="1">
+                        </div>
+                    </div>
+                    
+                    <div class="weight-edit-actions">
+                        <button class="btn btn-secondary" onclick="closeWeightEditModal()">Cancel</button>
+                        <button class="btn btn-primary" onclick="saveWeightEdit()">Save</button>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.add('show');
+        }
+        
+        function closeWeightEditModal() {
+            const modal = document.getElementById('weight-edit-modal');
+            if (modal) modal.classList.remove('show');
+            currentEditingOrder = null;
+        }
+        
+        async function saveWeightEdit() {
+            if (!currentEditingOrder) return;
+            
+            const weight = parseFloat(document.getElementById('edit-weight').value);
+            const deadWeight = parseFloat(document.getElementById('edit-dead-weight').value);
+            const length = parseInt(document.getElementById('edit-length').value);
+            const breadth = parseInt(document.getElementById('edit-breadth').value);
+            const height = parseInt(document.getElementById('edit-height').value);
+            
+            if (!currentEditingOrder.shiprocket) {
+                currentEditingOrder.shiprocket = {};
+            }
+            
+            currentEditingOrder.shiprocket.weight = weight;
+            currentEditingOrder.shiprocket.deadWeight = deadWeight;
+            currentEditingOrder.shiprocket.dimensions = { l: length, b: breadth, h: height };
+            
+            // Save to Firebase
+            try {
+                if (window.jbAPI && typeof window.jbAPI.updateOrder === 'function') {
+                    await window.jbAPI.updateOrder(currentEditingOrder.orderId || currentEditingOrder.id, {
+                        shiprocket: currentEditingOrder.shiprocket
+                    });
+                }
+                showShippingToast('Package details updated!', 'success');
+                closeWeightEditModal();
+                applyTabFilter();
+            } catch (error) {
+                console.error('Error saving package details:', error);
+                showShippingToast('Failed to save: ' + error.message, 'error');
+            }
+        }
+        
+        // Update bulk actions bar with selected count
+        function updateAllBulkActionsBar() {
+            const count = selectedAllOrders.size;
+            const countText = document.getElementById('selected-count-text');
+            if (countText) {
+                countText.textContent = `${count} selected`;
+            }
         }
         
         function updatePaginationButtons(totalPages) {
@@ -3592,6 +6328,18 @@
             const nextBtn = document.getElementById('next-page-btn');
             
             if (!paginationPages) return;
+            
+            // If no pages or only 1 page, hide pagination
+            if (totalPages <= 1) {
+                paginationPages.innerHTML = totalPages === 1 ? '<button class="page-btn active">1</button>' : '';
+                if (prevBtn) prevBtn.disabled = true;
+                if (nextBtn) nextBtn.disabled = true;
+                return;
+            }
+            
+            // Make sure currentPage is valid
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
             
             // Update prev/next buttons
             if (prevBtn) prevBtn.disabled = currentPage <= 1;
@@ -3623,7 +6371,7 @@
         
         function goToPage(page) {
             currentPage = page;
-            applyTabFilter();
+            applyOrdersWorkflowFilter();
             
             // Scroll to top of table
             const tableContainer = document.getElementById('all-orders-table-container');
@@ -3635,7 +6383,7 @@
         function changeItemsPerPage(value) {
             itemsPerPage = parseInt(value);
             currentPage = 1; // Reset to first page
-            applyTabFilter();
+            applyOrdersWorkflowFilter();
         }
 
         // Utility functions
@@ -3831,7 +6579,26 @@
                     console.log(`- Found Cloudinary URL in item.cloudinaryUrl:`, cloudinaryUrl);
                 }
                 
-                // Also check the item itself for image data
+                // Check for *Path fields (newer Firebase structure)
+                if (!cloudinaryUrl) {
+                    // Priority: printImagePath > enhancedPrintPath > displayImagePath > originalImagePath
+                    const pathFields = [
+                        { name: 'printImagePath', value: item.printImagePath },
+                        { name: 'enhancedPrintPath', value: item.enhancedPrintPath },
+                        { name: 'displayImagePath', value: item.displayImagePath },
+                        { name: 'originalImagePath', value: item.originalImagePath }
+                    ];
+                    
+                    for (const field of pathFields) {
+                        if (field.value && field.value.startsWith('https://')) {
+                            cloudinaryUrl = field.value;
+                            console.log(`- Found Cloudinary URL in item.${field.name}:`, cloudinaryUrl);
+                            break;
+                        }
+                    }
+                }
+                
+                // Also check the item itself for image data (older structure without Path suffix)
                 if (!cloudinaryUrl && !base64Image) {
                     // Priority: printImage (processed image without frame) > previewImage (with frame borders)
                     if (item.printImage && item.printImage.startsWith('https://res.cloudinary.com/')) {
@@ -4036,9 +6803,932 @@
                     </div>
                     ${itemsHTML}
                 </div>
+                
+                <!-- Shiprocket Shipping Section -->
+                <div class="shipping-section" id="shipping-section-${order.orderNumber}">
+                    <h3>
+                        <i class="fas fa-shipping-fast"></i>
+                        Shipping & Fulfillment
+                    </h3>
+                    <div id="shipping-content-${order.orderNumber}">
+                        <div class="shiprocket-loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Loading shipping information...
+                        </div>
+                    </div>
+                </div>
             `;
             
             modal.classList.add('show');
+            
+            // Load shipping information asynchronously
+            loadShippingInfo(order);
+        }
+
+        // Load Shiprocket shipping information for an order
+        async function loadShippingInfo(order) {
+            const containerId = `shipping-content-${order.orderNumber}`;
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            try {
+                // Check if order has shiprocket data stored
+                const shiprocketData = order.shiprocket || null;
+                
+                if (shiprocketData && shiprocketData.orderId) {
+                    // Order is already in Shiprocket - show tracking
+                    await renderShippingStatus(container, order, shiprocketData);
+                } else {
+                    // Order not yet shipped - show create shipment option
+                    renderCreateShipmentUI(container, order);
+                }
+            } catch (error) {
+                console.error('Error loading shipping info:', error);
+                container.innerHTML = `
+                    <div style="color: var(--danger); padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: var(--radius-md);">
+                        <i class="fas fa-exclamation-circle"></i> Error loading shipping information: ${error.message}
+                    </div>
+                    <div class="shipping-actions" style="margin-top: 1rem;">
+                        <button class="shipping-btn btn-create-shipment" onclick="createShiprocketOrder('${order.orderNumber}')">
+                            <i class="fas fa-plus-circle"></i> Create Shipment
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Render the create shipment UI
+        function renderCreateShipmentUI(container, order) {
+            container.innerHTML = `
+                <div class="shipping-status-card">
+                    <div class="shipping-status-header">
+                        <span class="status-label">Shipping Status</span>
+                        <span class="status-value">
+                            <span class="shipping-badge badge-new">
+                                <i class="fas fa-clock"></i> Not Shipped
+                            </span>
+                        </span>
+                    </div>
+                    <p style="color: var(--text-muted); margin: 0.5rem 0;">
+                        This order hasn't been shipped yet. Create a shipment to get started.
+                    </p>
+                </div>
+                
+                <div class="shipping-actions">
+                    <button class="shipping-btn btn-create-shipment" onclick="createShiprocketOrder('${order.orderNumber}')">
+                        <i class="fas fa-plus-circle"></i> Create Shipment
+                    </button>
+                </div>
+            `;
+        }
+
+        // Render shipping status with tracking
+        async function renderShippingStatus(container, order, shiprocketData) {
+            // Try to get live tracking data
+            let trackingInfo = null;
+            
+            if (shiprocketData.awbCode) {
+                try {
+                    const result = await window.shiprocketClient.getTrackingByAWB(shiprocketData.awbCode);
+                    trackingInfo = window.shiprocketClient.formatTrackingForDisplay(result);
+                } catch (e) {
+                    console.log('Could not fetch tracking:', e);
+                }
+            }
+
+            const statusColor = window.shiprocketClient.getStatusColor(trackingInfo?.currentStatus || shiprocketData.status);
+            const statusIcon = window.shiprocketClient.getStatusIcon(trackingInfo?.currentStatus || shiprocketData.status);
+
+            container.innerHTML = `
+                <div class="shipping-status-card status-${(trackingInfo?.currentStatus || shiprocketData.status || '').toLowerCase().replace(/\s+/g, '-')}">
+                    <div class="shipping-status-header">
+                        <span class="status-label">Shiprocket Status</span>
+                        <span class="status-value" style="color: ${statusColor}">
+                            <i class="${statusIcon}"></i>
+                            ${trackingInfo?.currentStatus || shiprocketData.status || 'Processing'}
+                        </span>
+                    </div>
+                    
+                    <div class="shipping-info-grid">
+                        <div class="shipping-info-item">
+                            <div class="label">Shiprocket Order ID</div>
+                            <div class="value">${shiprocketData.orderId || 'N/A'}</div>
+                        </div>
+                        <div class="shipping-info-item">
+                            <div class="label">Shipment ID</div>
+                            <div class="value">${shiprocketData.shipmentId || 'N/A'}</div>
+                        </div>
+                        <div class="shipping-info-item">
+                            <div class="label">AWB Number</div>
+                            <div class="value">${shiprocketData.awbCode || 'Not assigned'}</div>
+                        </div>
+                        <div class="shipping-info-item">
+                            <div class="label">Courier</div>
+                            <div class="value">${trackingInfo?.courier || shiprocketData.courierName || 'Not assigned'}</div>
+                        </div>
+                        ${trackingInfo?.estimatedDelivery ? `
+                            <div class="shipping-info-item">
+                                <div class="label">Est. Delivery</div>
+                                <div class="value">${trackingInfo.estimatedDelivery}</div>
+                            </div>
+                        ` : ''}
+                        ${trackingInfo?.deliveredDate ? `
+                            <div class="shipping-info-item">
+                                <div class="label">Delivered On</div>
+                                <div class="value" style="color: var(--success)">${trackingInfo.deliveredDate}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                ${trackingInfo && trackingInfo.activities && trackingInfo.activities.length > 0 ? `
+                    <div style="margin-top: 1rem;">
+                        <h4 style="margin-bottom: 0.75rem; color: var(--text-primary); font-size: 0.95rem;">
+                            <i class="fas fa-route" style="margin-right: 0.5rem; color: var(--primary);"></i>
+                            Tracking Timeline
+                        </h4>
+                        <div class="tracking-timeline">
+                            ${trackingInfo.activities.slice(0, 5).map((activity, index) => `
+                                <div class="tracking-event ${index === 0 ? 'current' : ''}">
+                                    <div class="event-time">${activity.date}</div>
+                                    <div class="event-status">${activity.status}</div>
+                                    <div class="event-location">${activity.location || activity.activity}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <div class="shipping-actions">
+                    ${!shiprocketData.awbCode ? `
+                        <button class="shipping-btn btn-generate-awb" onclick="generateAWBForOrder('${order.orderNumber}', ${shiprocketData.shipmentId})">
+                            <i class="fas fa-barcode"></i> Generate AWB
+                        </button>
+                        <span style="color: var(--text-muted); font-size: 0.8rem; display: block; margin-top: 0.5rem;">
+                            <i class="fas fa-info-circle"></i> Generate AWB first to enable label printing
+                        </span>
+                    ` : ''}
+                    
+                    ${shiprocketData.awbCode ? `
+                        <button class="shipping-btn btn-track" onclick="refreshTracking('${order.orderNumber}', '${shiprocketData.awbCode}')">
+                            <i class="fas fa-sync-alt"></i> Refresh Tracking
+                        </button>
+                        <button class="shipping-btn btn-generate-label" onclick="generateLabel('${order.orderNumber}', ${shiprocketData.shipmentId})">
+                            <i class="fas fa-tag"></i> Print Label
+                        </button>
+                        <button class="shipping-btn btn-request-pickup" onclick="requestPickup('${order.orderNumber}', ${shiprocketData.shipmentId})">
+                            <i class="fas fa-truck-loading"></i> Request Pickup
+                        </button>
+                    ` : ''}
+                    
+                    <button class="shipping-btn btn-invoice" onclick="generateInvoice('${order.orderNumber}', ${shiprocketData.orderId})">
+                        <i class="fas fa-file-invoice"></i> Invoice
+                    </button>
+                    
+                    ${shiprocketData.status !== 'DELIVERED' && shiprocketData.status !== 'CANCELLED' ? `
+                        <button class="shipping-btn btn-cancel" onclick="cancelShipment('${order.orderNumber}', ${shiprocketData.orderId})">
+                            <i class="fas fa-times-circle"></i> Cancel
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Create a new shipment in Shiprocket
+        async function createShiprocketOrder(orderNumber) {
+            const order = orders.find(o => o.orderNumber === orderNumber);
+            if (!order) {
+                alert('Order not found');
+                return;
+            }
+
+            const container = document.getElementById(`shipping-content-${orderNumber}`);
+            if (container) {
+                container.innerHTML = `
+                    <div class="shiprocket-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Creating shipment in Shiprocket...
+                    </div>
+                `;
+            }
+
+            try {
+                // Create shipment via API
+                const result = await window.shiprocketClient.createOrder(order);
+                console.log('📦 Shiprocket order created:', result);
+
+                // Store shiprocket data in order
+                const shiprocketData = {
+                    orderId: result.order_id,
+                    shipmentId: result.shipment_id,
+                    status: result.status || 'NEW',
+                    createdAt: new Date().toISOString()
+                };
+
+                // Update order in Firebase with shiprocket data
+                if (window.jbAPI && typeof window.jbAPI.updateOrder === 'function') {
+                    await window.jbAPI.updateOrder(order.orderId || order.id, {
+                        shiprocket: shiprocketData,
+                        status: 'processing'
+                    });
+                }
+
+                // Update local order object
+                order.shiprocket = shiprocketData;
+                order.status = 'processing';
+
+                // Show success and reload shipping info
+                showShippingToast('Shipment created successfully!', 'success');
+                await loadShippingInfo(order);
+                
+                // Refresh orders table
+                updateTabCounts();
+                applyTabFilter();
+                
+            } catch (error) {
+                console.error('Error creating Shiprocket order:', error);
+                showShippingToast('Failed to create shipment: ' + error.message, 'error');
+                
+                // Re-render the create shipment UI
+                if (container) {
+                    renderCreateShipmentUI(container, order);
+                }
+            }
+        }
+
+        // Generate AWB for an order
+        async function generateAWBForOrder(orderNumber, shipmentId) {
+            const container = document.getElementById(`shipping-content-${orderNumber}`);
+            if (container) {
+                container.innerHTML = `
+                    <div class="shiprocket-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Generating AWB number...
+                    </div>
+                `;
+            }
+
+            try {
+                // First get available couriers
+                const order = orders.find(o => o.orderNumber === orderNumber);
+                if (!order) throw new Error('Order not found');
+
+                // Use customer's pincode - extract from address if not available
+                let deliveryPincode = order.customer.pincode || order.customer.zip;
+                if (!deliveryPincode && order.customer.address) {
+                    // Try to extract pincode from address (6 digit number)
+                    const pincodeMatch = order.customer.address.match(/\b(\d{6})\b/);
+                    deliveryPincode = pincodeMatch ? pincodeMatch[1] : '110001';
+                }
+                
+                // Get pickup pincode from Shiprocket account settings
+                let pickupPincode = '474006'; // Default fallback
+                if (window.shiprocketClient) {
+                    try {
+                        if (!window.shiprocketClient.pickupLocations) {
+                            await window.shiprocketClient.loadPickupLocations();
+                        }
+                        if (window.shiprocketClient.pickupLocations && window.shiprocketClient.pickupLocations.length > 0) {
+                            const primaryLocation = window.shiprocketClient.pickupLocations.find(l => l.is_primary_location === 1);
+                            pickupPincode = primaryLocation?.pin_code || window.shiprocketClient.pickupLocations[0]?.pin_code || pickupPincode;
+                        }
+                    } catch (e) {
+                        console.log('Could not get pickup pincode, using default');
+                    }
+                }
+                
+                // Get weight from order or use default
+                const weight = order.shiprocket?.weight || order.packageWeight || 0.5;
+
+                // Get available couriers
+                const couriersResult = await window.shiprocketClient.getAvailableCouriers(
+                    pickupPincode,
+                    deliveryPincode,
+                    weight,
+                    order.payment?.method === 'cod'
+                );
+
+                if (couriersResult.data && couriersResult.data.available_courier_companies && 
+                    couriersResult.data.available_courier_companies.length > 0) {
+                    // Show courier selection modal
+                    showCourierSelectionModal(orderNumber, shipmentId, couriersResult.data.available_courier_companies);
+                } else {
+                    throw new Error('No courier services available for this route');
+                }
+
+            } catch (error) {
+                console.error('Error generating AWB:', error);
+                showShippingToast('Failed to get couriers: ' + error.message, 'error');
+                
+                // Reload shipping info
+                const order = orders.find(o => o.orderNumber === orderNumber);
+                if (order) {
+                    await loadShippingInfo(order);
+                }
+            }
+        }
+
+        // Show courier selection modal
+        function showCourierSelectionModal(orderNumber, shipmentId, couriers) {
+            // Remove existing modal if any
+            const existingModal = document.getElementById('courier-selection-modal');
+            if (existingModal) existingModal.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'courier-selection-modal';
+            modal.className = 'courier-modal';
+            
+            modal.innerHTML = `
+                <div class="courier-modal-content">
+                    <h3><i class="fas fa-truck" style="margin-right: 0.5rem; color: var(--primary);"></i> Select Courier</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1rem;">Choose a courier service for this shipment:</p>
+                    
+                    <div class="courier-list">
+                        ${couriers.slice(0, 10).map(courier => `
+                            <div class="courier-option" onclick="selectCourier('${orderNumber}', ${shipmentId}, ${courier.courier_company_id}, '${courier.courier_name}')">
+                                <div class="courier-info">
+                                    <div>
+                                        <div class="courier-name">${courier.courier_name}</div>
+                                        <div class="courier-eta">
+                                            <i class="fas fa-clock" style="margin-right: 0.25rem;"></i>
+                                            ${courier.estimated_delivery_days || 'N/A'} days
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="courier-price">₹${courier.rate ? Math.round(courier.rate) : 'N/A'}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div style="margin-top: 1rem; text-align: right;">
+                        <button class="btn" onclick="closeCourierModal()" style="background: var(--gray-200); color: var(--text-primary);">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        // Close courier modal
+        function closeCourierModal() {
+            const modal = document.getElementById('courier-selection-modal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => modal.remove(), 300);
+            }
+        }
+
+        // Select a courier and generate AWB
+        async function selectCourier(orderNumber, shipmentId, courierId, courierName) {
+            closeCourierModal();
+
+            const container = document.getElementById(`shipping-content-${orderNumber}`);
+            if (container) {
+                container.innerHTML = `
+                    <div class="shiprocket-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Assigning ${courierName} and generating AWB...
+                    </div>
+                `;
+            }
+
+            try {
+                const result = await window.shiprocketClient.generateAWB(shipmentId, courierId);
+                console.log('📦 AWB generated:', result);
+                
+                // Check for Shiprocket errors (wallet balance, etc.)
+                if (result.status_code && result.status_code !== 1) {
+                    throw new Error(result.message || 'AWB generation failed');
+                }
+
+                // Update order with AWB info
+                const order = orders.find(o => o.orderNumber === orderNumber);
+                if (order) {
+                    const awbCode = result.response?.data?.awb_code || result.awb_code;
+                    
+                    if (!awbCode) {
+                        throw new Error(result.message || 'AWB code not received. Please check Shiprocket wallet balance.');
+                    }
+                    
+                    const updatedShiprocket = {
+                        ...order.shiprocket,
+                        awbCode: awbCode,
+                        courierName: courierName,
+                        courierId: courierId,
+                        status: 'PICKUP SCHEDULED'
+                    };
+
+                    // Update in Firebase - only if AWB code exists
+                    if (window.jbAPI && typeof window.jbAPI.updateOrder === 'function') {
+                        await window.jbAPI.updateOrder(order.orderId || order.id, {
+                            shiprocket: updatedShiprocket,
+                            status: 'shipped'
+                        });
+                    }
+
+                    order.shiprocket = updatedShiprocket;
+                    order.status = 'shipped';
+
+                    showShippingToast(`AWB ${awbCode} generated successfully!`, 'success');
+                    await loadShippingInfo(order);
+                    
+                    // Refresh orders table
+                    updateTabCounts();
+                    applyTabFilter();
+                }
+
+            } catch (error) {
+                console.error('Error generating AWB:', error);
+                showShippingToast('Failed to generate AWB: ' + error.message, 'error');
+                
+                const order = orders.find(o => o.orderNumber === orderNumber);
+                if (order) {
+                    await loadShippingInfo(order);
+                }
+            }
+        }
+
+        // Generate shipping label
+        async function generateLabel(orderNumber, shipmentId) {
+            // Check if AWB has been generated first
+            const order = orders.find(o => o.orderNumber === orderNumber);
+            if (order && !order.shiprocket?.awbCode && !order.shiprocket?.awb) {
+                showShippingToast('Please generate AWB first before generating label. Click "Generate AWB" button to assign a courier.', 'error');
+                return;
+            }
+            
+            try {
+                showShippingToast('Generating label...', 'info');
+                const result = await window.shiprocketClient.generateLabel(shipmentId);
+                
+                if (result.label_url) {
+                    window.open(result.label_url, '_blank');
+                    showShippingToast('Label generated! Opening in new tab...', 'success');
+                } else if (result.label_created === 0) {
+                    throw new Error('AWB not assigned yet. Please generate AWB first by selecting a courier.');
+                } else {
+                    throw new Error('Label URL not received. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error generating label:', error);
+                showShippingToast('Failed to generate label: ' + error.message, 'error');
+            }
+        }
+
+        // Request pickup
+        async function requestPickup(orderNumber, shipmentId) {
+            try {
+                showShippingToast('Requesting pickup...', 'info');
+                const result = await window.shiprocketClient.requestPickup(shipmentId);
+                
+                showShippingToast('Pickup scheduled successfully!', 'success');
+                
+                // Reload shipping info
+                const order = orders.find(o => o.orderNumber === orderNumber);
+                if (order) {
+                    await loadShippingInfo(order);
+                }
+            } catch (error) {
+                console.error('Error requesting pickup:', error);
+                showShippingToast('Failed to request pickup: ' + error.message, 'error');
+            }
+        }
+
+        // Generate invoice
+        async function generateInvoice(orderNumber, shiprocketOrderId) {
+            try {
+                showShippingToast('Generating invoice...', 'info');
+                const result = await window.shiprocketClient.generateInvoice([shiprocketOrderId]);
+                
+                if (result.invoice_url) {
+                    window.open(result.invoice_url, '_blank');
+                    showShippingToast('Invoice generated! Opening in new tab...', 'success');
+                } else {
+                    throw new Error('Invoice URL not received');
+                }
+            } catch (error) {
+                console.error('Error generating invoice:', error);
+                showShippingToast('Failed to generate invoice: ' + error.message, 'error');
+            }
+        }
+
+        // Cancel shipment
+        async function cancelShipment(orderNumber, shiprocketOrderId) {
+            if (!confirm('Are you sure you want to cancel this shipment? This action cannot be undone.')) {
+                return;
+            }
+
+            const container = document.getElementById(`shipping-content-${orderNumber}`);
+            if (container) {
+                container.innerHTML = `
+                    <div class="shiprocket-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Cancelling shipment...
+                    </div>
+                `;
+            }
+
+            try {
+                await window.shiprocketClient.cancelOrder([shiprocketOrderId]);
+
+                const order = orders.find(o => o.orderNumber === orderNumber);
+                if (order) {
+                    const updatedShiprocket = {
+                        ...order.shiprocket,
+                        status: 'CANCELLED'
+                    };
+
+                    // Update in Firebase
+                    if (window.jbAPI && typeof window.jbAPI.updateOrder === 'function') {
+                        await window.jbAPI.updateOrder(order.orderId || order.id, {
+                            shiprocket: updatedShiprocket,
+                            status: 'cancelled'
+                        });
+                    }
+
+                    order.shiprocket = updatedShiprocket;
+                    order.status = 'cancelled';
+
+                    showShippingToast('Shipment cancelled successfully!', 'success');
+                    await loadShippingInfo(order);
+                    
+                    // Refresh orders table
+                    updateTabCounts();
+                    applyTabFilter();
+                }
+
+            } catch (error) {
+                console.error('Error cancelling shipment:', error);
+                showShippingToast('Failed to cancel shipment: ' + error.message, 'error');
+                
+                const order = orders.find(o => o.orderNumber === orderNumber);
+                if (order) {
+                    await loadShippingInfo(order);
+                }
+            }
+        }
+
+        // Refresh tracking info
+        async function refreshTracking(orderNumber, awbCode) {
+            const container = document.getElementById(`shipping-content-${orderNumber}`);
+            if (container) {
+                container.innerHTML = `
+                    <div class="shiprocket-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Refreshing tracking information...
+                    </div>
+                `;
+            }
+
+            try {
+                const order = orders.find(o => o.orderNumber === orderNumber);
+                if (order) {
+                    await loadShippingInfo(order);
+                    showShippingToast('Tracking information updated!', 'success');
+                }
+            } catch (error) {
+                console.error('Error refreshing tracking:', error);
+                showShippingToast('Failed to refresh tracking: ' + error.message, 'error');
+            }
+        }
+
+        // Show shipping toast notification
+        function showShippingToast(message, type = 'info') {
+            // Remove existing toast
+            const existingToast = document.querySelector('.shipping-toast');
+            if (existingToast) existingToast.remove();
+
+            const toast = document.createElement('div');
+            toast.className = `shipping-toast toast-${type}`;
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--danger)' : 'var(--info)'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: var(--radius-md);
+                box-shadow: var(--shadow-lg);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                animation: slideIn 0.3s ease;
+            `;
+
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                info: 'fa-info-circle'
+            };
+
+            toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${message}`;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Add toast animation styles
+        if (!document.getElementById('shipping-toast-styles')) {
+            const style = document.createElement('style');
+            style.id = 'shipping-toast-styles';
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Bulk create shipments for selected orders
+        async function bulkCreateShipments() {
+            // Get selected orders
+            const selectedOrderNumbers = Array.from(selectedAllOrders);
+            if (selectedOrderNumbers.length === 0) {
+                showShippingToast('No orders selected', 'error');
+                return;
+            }
+
+            // Filter to only orders that don't already have shiprocket data
+            const ordersToShip = orders.filter(o => {
+                const orderNumber = o.orderNumber || o.id;
+                return selectedOrderNumbers.includes(orderNumber) && !o.shiprocket?.orderId;
+            });
+
+            if (ordersToShip.length === 0) {
+                showShippingToast('Selected orders are already shipped or have shipments created', 'error');
+                return;
+            }
+
+            // Confirm action
+            const skippedCount = selectedOrderNumbers.length - ordersToShip.length;
+            let confirmMsg = `Create shipments for ${ordersToShip.length} order(s)?`;
+            if (skippedCount > 0) {
+                confirmMsg += `\n\n(${skippedCount} order(s) will be skipped as they already have shipments)`;
+            }
+            
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            // Show progress toast
+            showShippingToast(`Creating ${ordersToShip.length} shipments...`, 'info');
+
+            try {
+                const result = await window.shiprocketClient.bulkCreateOrders(ordersToShip);
+                console.log('📦 Bulk shipment result:', result);
+
+                // Update orders in Firebase with shiprocket data
+                for (const success of result.results) {
+                    const order = orders.find(o => o.orderNumber === success.orderNumber);
+                    if (order && success.data) {
+                        const shiprocketData = {
+                            orderId: success.data.order_id,
+                            shipmentId: success.data.shipment_id,
+                            status: success.data.status || 'NEW',
+                            createdAt: new Date().toISOString()
+                        };
+
+                        // Update in Firebase
+                        if (window.jbAPI && typeof window.jbAPI.updateOrder === 'function') {
+                            await window.jbAPI.updateOrder(order.orderId || order.id, {
+                                shiprocket: shiprocketData,
+                                status: 'processing'
+                            });
+                        }
+
+                        // Update local order object
+                        order.shiprocket = shiprocketData;
+                        order.status = 'processing';
+                    }
+                }
+
+                // Show results
+                if (result.failed > 0) {
+                    showShippingToast(`Created ${result.successful}/${result.total} shipments. ${result.failed} failed.`, 'error');
+                    console.error('❌ Failed orders:', result.errors);
+                } else {
+                    showShippingToast(`Successfully created ${result.successful} shipments!`, 'success');
+                }
+
+                // Refresh table
+                updateTabCounts();
+                applyTabFilter();
+                clearAllOrdersSelection();
+
+            } catch (error) {
+                console.error('Error in bulk shipment:', error);
+                showShippingToast('Failed to create shipments: ' + error.message, 'error');
+            }
+        }
+        
+        // Bulk generate AWB for selected orders
+        async function bulkGenerateAWB() {
+            const selectedOrderNumbers = Array.from(selectedAllOrders);
+            if (selectedOrderNumbers.length === 0) {
+                showShippingToast('No orders selected', 'error');
+                return;
+            }
+            
+            // Filter to orders with shipments but no AWB
+            const ordersNeedingAWB = orders.filter(o => 
+                selectedOrderNumbers.includes(o.orderNumber) && 
+                o.shiprocket?.shipmentId && 
+                !o.shiprocket?.awbCode
+            );
+            
+            if (ordersNeedingAWB.length === 0) {
+                showShippingToast('Selected orders already have AWB or no shipment created yet. Create shipments first.', 'error');
+                return;
+            }
+            
+            // Get pickup pincode
+            let pickupPincode = '474006';
+            if (window.shiprocketClient) {
+                try {
+                    if (!window.shiprocketClient.pickupLocations) {
+                        await window.shiprocketClient.loadPickupLocations();
+                    }
+                    if (window.shiprocketClient.pickupLocations?.length > 0) {
+                        const primary = window.shiprocketClient.pickupLocations.find(l => l.is_primary_location === 1);
+                        pickupPincode = primary?.pin_code || window.shiprocketClient.pickupLocations[0]?.pin_code || pickupPincode;
+                    }
+                } catch (e) {
+                    console.log('Using default pickup pincode');
+                }
+            }
+            
+            // Show courier selection modal for bulk AWB
+            showBulkCourierSelectionModal(ordersNeedingAWB, pickupPincode);
+        }
+        
+        // Show modal to select courier for bulk AWB generation
+        async function showBulkCourierSelectionModal(ordersNeedingAWB, pickupPincode) {
+            showShippingToast(`Fetching courier options for ${ordersNeedingAWB.length} orders...`, 'info');
+            
+            try {
+                // Use first order's delivery pincode to get courier options
+                const firstOrder = ordersNeedingAWB[0];
+                let deliveryPincode = firstOrder.customer?.pincode || firstOrder.customer?.zip;
+                if (!deliveryPincode && firstOrder.customer?.address) {
+                    const match = firstOrder.customer.address.match(/\b(\d{6})\b/);
+                    deliveryPincode = match ? match[1] : '110001';
+                }
+                
+                const couriersResult = await window.shiprocketClient.getAvailableCouriers(
+                    pickupPincode,
+                    deliveryPincode,
+                    0.5,
+                    false
+                );
+                
+                if (!couriersResult.data?.available_courier_companies?.length) {
+                    throw new Error('No courier services available');
+                }
+                
+                const couriers = couriersResult.data.available_courier_companies;
+                
+                // Remove existing modal
+                const existingModal = document.getElementById('bulk-courier-modal');
+                if (existingModal) existingModal.remove();
+                
+                const modal = document.createElement('div');
+                modal.id = 'bulk-courier-modal';
+                modal.className = 'courier-modal';
+                
+                modal.innerHTML = `
+                    <div class="courier-modal-content" style="max-width: 600px;">
+                        <h3><i class="fas fa-barcode" style="margin-right: 0.5rem; color: var(--primary);"></i> Bulk AWB Generation</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 1rem;">
+                            Generate AWB for <strong>${ordersNeedingAWB.length}</strong> orders. Select a courier:
+                        </p>
+                        
+                        <div class="courier-list" style="max-height: 300px; overflow-y: auto;">
+                            ${couriers.slice(0, 10).map(courier => `
+                                <div class="courier-option" onclick="executeBulkAWB(${JSON.stringify(ordersNeedingAWB.map(o => ({
+                                    orderNumber: o.orderNumber,
+                                    shipmentId: o.shiprocket.shipmentId,
+                                    orderId: o.orderId || o.id
+                                }))).replace(/"/g, '&quot;')}, ${courier.courier_company_id}, '${courier.courier_name}')">
+                                    <div class="courier-info">
+                                        <span class="courier-name">${courier.courier_name}</span>
+                                        <span class="courier-details">
+                                            ETA: ${courier.estimated_delivery_days || courier.etd || '3-5'} days | 
+                                            Rating: ${courier.rating || 'N/A'}
+                                        </span>
+                                    </div>
+                                    <div class="courier-price">₹${courier.rate || courier.freight_charge || 0}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                            <button onclick="closeBulkCourierModal()" class="shipping-btn btn-cancel" style="width: 100%;">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                setTimeout(() => modal.classList.add('show'), 10);
+                
+            } catch (error) {
+                console.error('Error getting couriers for bulk AWB:', error);
+                showShippingToast('Failed to get courier options: ' + error.message, 'error');
+            }
+        }
+        
+        function closeBulkCourierModal() {
+            const modal = document.getElementById('bulk-courier-modal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => modal.remove(), 300);
+            }
+        }
+        
+        // Execute bulk AWB generation
+        async function executeBulkAWB(orderInfos, courierId, courierName) {
+            closeBulkCourierModal();
+            
+            showShippingToast(`Generating AWB for ${orderInfos.length} orders with ${courierName}...`, 'info');
+            
+            let successCount = 0;
+            let failCount = 0;
+            const errors = [];
+            
+            for (const orderInfo of orderInfos) {
+                try {
+                    const result = await window.shiprocketClient.generateAWB(orderInfo.shipmentId, courierId);
+                    
+                    if (result.status_code && result.status_code !== 1) {
+                        throw new Error(result.message || 'AWB generation failed');
+                    }
+                    
+                    const awbCode = result.response?.data?.awb_code || result.awb_code;
+                    
+                    if (!awbCode) {
+                        throw new Error(result.message || 'AWB code not received');
+                    }
+                    
+                    // Update order in local state
+                    const order = orders.find(o => o.orderNumber === orderInfo.orderNumber);
+                    if (order) {
+                        const updatedShiprocket = {
+                            ...order.shiprocket,
+                            awbCode: awbCode,
+                            courierName: courierName,
+                            courierId: courierId,
+                            status: 'PICKUP SCHEDULED'
+                        };
+                        
+                        // Update in Firebase
+                        if (window.jbAPI && typeof window.jbAPI.updateOrder === 'function') {
+                            await window.jbAPI.updateOrder(orderInfo.orderId, {
+                                shiprocket: updatedShiprocket,
+                                status: 'shipped'
+                            });
+                        }
+                        
+                        order.shiprocket = updatedShiprocket;
+                        order.status = 'shipped';
+                    }
+                    
+                    successCount++;
+                    
+                    // Small delay between API calls
+                    await new Promise(r => setTimeout(r, 500));
+                    
+                } catch (error) {
+                    console.error(`Error generating AWB for ${orderInfo.orderNumber}:`, error);
+                    errors.push({ orderNumber: orderInfo.orderNumber, error: error.message });
+                    failCount++;
+                }
+            }
+            
+            // Show results
+            if (failCount > 0) {
+                showShippingToast(`Generated ${successCount}/${orderInfos.length} AWBs. ${failCount} failed.`, 'warning');
+                console.error('❌ Failed AWB generations:', errors);
+            } else {
+                showShippingToast(`Successfully generated ${successCount} AWBs!`, 'success');
+            }
+            
+            // Refresh table
+            updateTabCounts();
+            applyTabFilter();
+            clearAllOrdersSelection();
         }
 
         function closeOrderModal() {
@@ -4186,7 +7876,7 @@
                 // Find the best image for this item (same logic as showOrderModal)
                 let bestImage = null;
                 
-                // Check Cloudinary URLs first
+                // Check Cloudinary URLs first from order.images array
                 if (order.images && order.images[i]) {
                     const orderImage = order.images[i];
                     bestImage = orderImage.print || orderImage.original || orderImage.display;
@@ -4198,7 +7888,13 @@
                     }
                 }
                 
-                // Fallback to item properties
+                // Check *Path fields on item (newer Firebase structure)
+                if (!bestImage) {
+                    bestImage = item.printImagePath || item.enhancedPrintPath || 
+                               item.displayImagePath || item.originalImagePath;
+                }
+                
+                // Fallback to item properties (older structure)
                 if (!bestImage) {
                     bestImage = item.cloudinaryUrl || item.printImage || item.originalImage || item.displayImage;
                 }
@@ -4552,16 +8248,19 @@
             });
             updateAllBulkActionsBar();
             
-            // Sync both select all checkboxes
+            // Sync all select all checkboxes
             const desktopCheckbox = document.getElementById('all-select-all');
             const mobileCheckbox = document.getElementById('mobile-select-all');
+            const headerCheckbox = document.getElementById('select-all-orders');
             if (desktopCheckbox) desktopCheckbox.checked = checkbox.checked;
             if (mobileCheckbox) mobileCheckbox.checked = checkbox.checked;
+            if (headerCheckbox) headerCheckbox.checked = checkbox.checked;
         }
         
         function updateAllSelectAllCheckbox() {
             const selectAllCheckbox = document.getElementById('all-select-all');
             const mobileSelectAllCheckbox = document.getElementById('mobile-select-all');
+            const headerSelectAllCheckbox = document.getElementById('select-all-orders');
             const checkboxes = document.querySelectorAll('.all-order-checkbox');
             if (checkboxes.length === 0) return;
             
@@ -4576,20 +8275,29 @@
                 mobileSelectAllCheckbox.checked = allChecked;
                 mobileSelectAllCheckbox.indeterminate = someChecked && !allChecked;
             }
+            if (headerSelectAllCheckbox) {
+                headerSelectAllCheckbox.checked = allChecked;
+                headerSelectAllCheckbox.indeterminate = someChecked && !allChecked;
+            }
         }
         
         function updateAllBulkActionsBar() {
             const bar = document.getElementById('all-orders-bulk-actions');
             const countSpan = document.getElementById('all-selected-count');
-            if (!bar || !countSpan) return;
+            const selectedCountText = document.getElementById('selected-count-text');
             
             const count = selectedAllOrders.size;
-            countSpan.textContent = count;
             
-            if (count > 0) {
-                bar.classList.add('show');
-            } else {
-                bar.classList.remove('show');
+            // Update both count displays
+            if (countSpan) countSpan.textContent = count;
+            if (selectedCountText) selectedCountText.textContent = `${count} selected`;
+            
+            if (bar) {
+                if (count > 0) {
+                    bar.classList.add('show');
+                } else {
+                    bar.classList.remove('show');
+                }
             }
         }
         
@@ -6063,5 +9771,8 @@
     
     <!-- Include Cloudinary configuration for image handling -->
     <script src="cloudinary-config.js"></script>
+    
+    <!-- Include Shiprocket client for shipping integration -->
+    <script src="shiprocket-client.js"></script>
 </body>
 </html>

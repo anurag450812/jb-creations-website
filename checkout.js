@@ -1729,12 +1729,27 @@ function validateForm() {
         if (isValid) alert('Please enter a valid 6-digit pincode');
     }
     
-    // Scroll to first error field
+    // Scroll to first error field with visual feedback
     if (!isValid && firstErrorField) {
+        // Smooth scroll to the field
         firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        firstErrorField.focus();
         
-        // Show a comprehensive error message
+        // Focus after scroll completes
+        setTimeout(() => {
+            firstErrorField.focus();
+            
+            // Add attention-grabbing animation to the field
+            const container = firstErrorField.closest('.phone-input-container') || firstErrorField;
+            container.classList.add('highlight-attention');
+            firstErrorField.classList.add('shake-attention');
+            
+            setTimeout(() => {
+                container.classList.remove('highlight-attention');
+                firstErrorField.classList.remove('shake-attention');
+            }, 2000);
+        }, 300);
+        
+        // Build error messages
         const errorMessages = [];
         if (document.getElementById('customerName').classList.contains('invalid')) {
             errorMessages.push('• Full name is required');
@@ -1761,12 +1776,45 @@ function validateForm() {
             errorMessages.push('• Valid 6-digit pincode is required');
         }
         
+        // Show toast notification instead of alert
         if (errorMessages.length > 0) {
-            alert('Please fix the following errors:\n\n' + errorMessages.join('\n'));
+            showFormErrorToast(errorMessages);
         }
     }
     
     return isValid;
+}
+
+// Show form validation error toast
+function showFormErrorToast(errorMessages) {
+    // Remove any existing toast
+    const existingToast = document.querySelector('.form-error-toast');
+    if (existingToast) existingToast.remove();
+    
+    const toast = document.createElement('div');
+    toast.className = 'form-error-toast';
+    toast.innerHTML = `
+        <div class="toast-header">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>Please fix the following:</span>
+            <button onclick="this.closest('.form-error-toast').remove()" class="toast-close">&times;</button>
+        </div>
+        <div class="toast-body">
+            ${errorMessages.join('<br>')}
+        </div>
+    `;
+    document.body.appendChild(toast);
+    
+    // Trigger animation
+    requestAnimationFrame(() => {
+        toast.classList.add('show');
+    });
+    
+    // Auto-remove after 6 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 6000);
 }
 
 // Prepare order data for submission
@@ -2295,6 +2343,50 @@ function resetProcessingOverlay() {
 
 // Main order placement function
 async function placeOrder() {
+    // Check if phone is verified - if not, scroll to verification and trigger it
+    if (!window.phoneVerified) {
+        const phoneInput = document.getElementById('customerPhone');
+        const verifyBtn = document.getElementById('verifyPhoneBtn');
+        const phoneVerifySection = document.getElementById('phoneVerifySection');
+        
+        // Scroll to phone input section smoothly
+        if (phoneInput) {
+            phoneInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Flash/highlight the phone section
+            const phoneContainer = phoneInput.closest('.phone-input-container');
+            if (phoneContainer) {
+                phoneContainer.classList.add('highlight-attention');
+                setTimeout(() => {
+                    phoneContainer.classList.remove('highlight-attention');
+                }, 2000);
+            }
+            
+            // If phone number is valid and verify button exists, auto-click it
+            const phone = phoneInput.value.replace(/\D/g, '');
+            if (phone.length === 10 && verifyBtn && !verifyBtn.disabled) {
+                // Wait for scroll to complete, then click verify
+                setTimeout(() => {
+                    if (phoneVerifySection) {
+                        phoneVerifySection.style.display = 'block';
+                    }
+                    verifyBtn.click();
+                }, 600);
+            } else if (phone.length !== 10) {
+                // Phone not entered - focus and shake the input
+                phoneInput.focus();
+                phoneInput.classList.add('shake-attention');
+                setTimeout(() => {
+                    phoneInput.classList.remove('shake-attention');
+                }, 600);
+            }
+        }
+        
+        // Show a message asking to verify
+        showVerificationRequiredMessage();
+        return;
+    }
+    
     // Validate form
     if (!validateForm()) {
         return;
@@ -3041,21 +3133,25 @@ function initializeOTPVerification() {
         }
     });
     
-    // Helper functions to enable/disable place order button
+    // Helper functions to enable/disable place order button (inner scope)
     function disablePlaceOrderButton() {
         const placeOrderBtn = document.getElementById('placeOrderBtn');
         const mobilePlaceOrderBtn = document.getElementById('mobilePlaceOrderBtn');
         
         if (placeOrderBtn) {
-            placeOrderBtn.disabled = true;
-            placeOrderBtn.style.opacity = '0.5';
-            placeOrderBtn.style.cursor = 'not-allowed';
-            placeOrderBtn.title = 'Please verify your phone number first';
+            placeOrderBtn.disabled = false; // Keep enabled to allow click handling
+            placeOrderBtn.classList.add('place-order-disabled');
+            placeOrderBtn.style.opacity = '0.6';
+            placeOrderBtn.style.background = 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)';
+            placeOrderBtn.style.cursor = 'pointer';
+            placeOrderBtn.title = 'Click to verify your phone number';
         }
         if (mobilePlaceOrderBtn) {
-            mobilePlaceOrderBtn.disabled = true;
-            mobilePlaceOrderBtn.style.opacity = '0.5';
-            mobilePlaceOrderBtn.style.cursor = 'not-allowed';
+            mobilePlaceOrderBtn.disabled = false; // Keep enabled to allow click handling
+            mobilePlaceOrderBtn.classList.add('place-order-disabled');
+            mobilePlaceOrderBtn.style.opacity = '0.6';
+            mobilePlaceOrderBtn.style.background = 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)';
+            mobilePlaceOrderBtn.style.cursor = 'pointer';
         }
     }
     
@@ -3065,14 +3161,18 @@ function initializeOTPVerification() {
         
         if (placeOrderBtn) {
             placeOrderBtn.disabled = false;
+            placeOrderBtn.classList.remove('place-order-disabled');
             placeOrderBtn.style.opacity = '1';
             placeOrderBtn.style.cursor = 'pointer';
+            placeOrderBtn.style.background = ''; // Reset to default CSS
             placeOrderBtn.title = '';
         }
         if (mobilePlaceOrderBtn) {
             mobilePlaceOrderBtn.disabled = false;
+            mobilePlaceOrderBtn.classList.remove('place-order-disabled');
             mobilePlaceOrderBtn.style.opacity = '1';
             mobilePlaceOrderBtn.style.cursor = 'pointer';
+            mobilePlaceOrderBtn.style.background = ''; // Reset to default CSS
         }
     }
 }
@@ -3084,14 +3184,18 @@ function enablePlaceOrderButton() {
     
     if (placeOrderBtn) {
         placeOrderBtn.disabled = false;
+        placeOrderBtn.classList.remove('place-order-disabled');
         placeOrderBtn.style.opacity = '1';
         placeOrderBtn.style.cursor = 'pointer';
+        placeOrderBtn.style.background = ''; // Reset to default CSS
         placeOrderBtn.title = '';
     }
     if (mobilePlaceOrderBtn) {
         mobilePlaceOrderBtn.disabled = false;
+        mobilePlaceOrderBtn.classList.remove('place-order-disabled');
         mobilePlaceOrderBtn.style.opacity = '1';
         mobilePlaceOrderBtn.style.cursor = 'pointer';
+        mobilePlaceOrderBtn.style.background = ''; // Reset to default CSS
     }
 }
 
@@ -3100,20 +3204,188 @@ function disablePlaceOrderButton() {
     const mobilePlaceOrderBtn = document.getElementById('mobilePlaceOrderBtn');
     
     if (placeOrderBtn) {
-        placeOrderBtn.disabled = true;
-        placeOrderBtn.style.opacity = '0.5';
-        placeOrderBtn.style.cursor = 'not-allowed';
-        placeOrderBtn.title = 'Please verify your phone number first';
+        placeOrderBtn.disabled = false; // Keep enabled to allow click handling
+        placeOrderBtn.classList.add('place-order-disabled');
+        placeOrderBtn.style.opacity = '0.6';
+        placeOrderBtn.style.background = 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)';
+        placeOrderBtn.style.cursor = 'pointer';
+        placeOrderBtn.title = 'Click to verify your phone number';
     }
     if (mobilePlaceOrderBtn) {
-        mobilePlaceOrderBtn.disabled = true;
-        mobilePlaceOrderBtn.style.opacity = '0.5';
-        mobilePlaceOrderBtn.style.cursor = 'not-allowed';
+        mobilePlaceOrderBtn.disabled = false; // Keep enabled to allow click handling
+        mobilePlaceOrderBtn.classList.add('place-order-disabled');
+        mobilePlaceOrderBtn.style.opacity = '0.6';
+        mobilePlaceOrderBtn.style.background = 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)';
+        mobilePlaceOrderBtn.style.cursor = 'pointer';
     }
+}
+
+// Show verification required message
+function showVerificationRequiredMessage() {
+    // Create a toast message
+    const toast = document.createElement('div');
+    toast.className = 'verification-toast';
+    toast.innerHTML = `
+        <i class="fas fa-shield-alt"></i>
+        <span>Please verify your phone number to place the order</span>
+    `;
+    document.body.appendChild(toast);
+    
+    // Trigger animation
+    requestAnimationFrame(() => {
+        toast.classList.add('show');
+    });
+    
+    // Auto-remove after 4 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 4000);
 }
 
 // Initialize OTP verification when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     initializeOTPVerification();
+    
+    // Add CSS for verification required effects
+    const style = document.createElement('style');
+    style.textContent = `
+        /* Phone input highlight attention animation */
+        .phone-input-container.highlight-attention {
+            animation: pulseHighlight 0.5s ease-in-out 3;
+            box-shadow: 0 0 0 4px rgba(255, 166, 43, 0.4) !important;
+            border-color: #FFA62B !important;
+        }
+        
+        @keyframes pulseHighlight {
+            0%, 100% { box-shadow: 0 0 0 4px rgba(255, 166, 43, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(255, 166, 43, 0.2); }
+        }
+        
+        /* Shake animation for invalid phone */
+        .shake-attention {
+            animation: shakeInput 0.5s ease-in-out;
+        }
+        
+        @keyframes shakeInput {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-10px); }
+            80% { transform: translateX(10px); }
+        }
+        
+        /* Verification toast message */
+        .verification-toast {
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: linear-gradient(135deg, #FFA62B 0%, #e5941f 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 10001;
+            box-shadow: 0 10px 30px rgba(255, 166, 43, 0.4);
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            font-weight: 600;
+            font-size: 15px;
+            max-width: 90%;
+            text-align: center;
+        }
+        
+        .verification-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .verification-toast i {
+            font-size: 20px;
+        }
+        
+        /* Grayed out place order button style */
+        .place-order-btn.place-order-disabled,
+        .mobile-place-order-btn.place-order-disabled {
+            position: relative;
+        }
+        
+        .place-order-btn.place-order-disabled::after,
+        .mobile-place-order-btn.place-order-disabled::after {
+            content: '🔒';
+            position: absolute;
+            right: 15px;
+            font-size: 16px;
+        }
+        
+        /* Form error toast */
+        .form-error-toast {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            z-index: 10002;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            max-width: 350px;
+            width: 90%;
+            overflow: hidden;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .form-error-toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .form-error-toast .toast-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .form-error-toast .toast-header i {
+            font-size: 18px;
+        }
+        
+        .form-error-toast .toast-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 5px;
+            line-height: 1;
+        }
+        
+        .form-error-toast .toast-body {
+            padding: 15px;
+            font-size: 14px;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* Highlight attention for any input */
+        input.highlight-attention,
+        textarea.highlight-attention,
+        .form-group.highlight-attention input,
+        .form-group.highlight-attention textarea {
+            animation: pulseHighlight 0.5s ease-in-out 3;
+            box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.3) !important;
+            border-color: #dc3545 !important;
+        }
+    `;
+    document.head.appendChild(style);
 });
 

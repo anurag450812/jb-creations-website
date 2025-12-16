@@ -1171,6 +1171,194 @@
             background: #2d3436;
         }
 
+        /* Coupon Applied Celebration Animation */
+        .coupon-celebration-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 20000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .coupon-celebration-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .coupon-celebration-overlay.fade-out {
+            opacity: 0;
+        }
+
+        .coupon-celebration-content {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 24px;
+            padding: 40px 50px;
+            text-align: center;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+            animation: celebrationBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+            overflow: hidden;
+            max-width: 340px;
+            width: 90%;
+        }
+
+        @keyframes celebrationBounce {
+            0% { transform: scale(0.3) translateY(50px); opacity: 0; }
+            50% { transform: scale(1.08) translateY(0); }
+            75% { transform: scale(0.95); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .celebration-confetti {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .celebration-confetti::before,
+        .celebration-confetti::after {
+            content: '🎊 🎉 ✨ 🌟 💫';
+            position: absolute;
+            font-size: 20px;
+            animation: confettiFall 2s ease-in-out forwards;
+        }
+
+        .celebration-confetti::before {
+            top: -30px;
+            left: 10%;
+            animation-delay: 0.1s;
+        }
+
+        .celebration-confetti::after {
+            top: -30px;
+            right: 10%;
+            animation-delay: 0.3s;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(280px) rotate(360deg); opacity: 0; }
+        }
+
+        .celebration-emoji {
+            font-size: 60px;
+            margin-bottom: 10px;
+            animation: emojiPop 0.5s ease 0.3s both;
+        }
+
+        @keyframes emojiPop {
+            0% { transform: scale(0) rotate(-20deg); }
+            50% { transform: scale(1.3) rotate(10deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .celebration-checkmark {
+            width: 70px;
+            height: 70px;
+            margin: 15px auto;
+        }
+
+        .celebration-checkmark svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .celebration-checkmark .checkmark-circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 2;
+            stroke-miterlimit: 10;
+            stroke: #27ae60;
+            fill: none;
+            animation: circleStroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) 0.4s forwards;
+        }
+
+        .celebration-checkmark .checkmark-check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            stroke: #27ae60;
+            stroke-width: 2;
+            animation: checkStroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 1s forwards;
+        }
+
+        @keyframes circleStroke {
+            100% { stroke-dashoffset: 0; }
+        }
+
+        @keyframes checkStroke {
+            100% { stroke-dashoffset: 0; }
+        }
+
+        .celebration-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #27ae60;
+            margin: 15px 0 10px;
+            animation: titleSlide 0.5s ease 0.5s both;
+        }
+
+        @keyframes titleSlide {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .celebration-savings {
+            font-size: 1.2rem;
+            color: #16697A;
+            margin: 10px 0;
+            animation: savingsSlide 0.5s ease 0.7s both;
+        }
+
+        .celebration-savings span {
+            font-weight: 800;
+            font-size: 1.6rem;
+            color: #27ae60;
+            display: inline-block;
+            animation: savingsPulse 0.6s ease 1.2s both;
+        }
+
+        @keyframes savingsSlide {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes savingsPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .celebration-code {
+            display: inline-block;
+            background: linear-gradient(135deg, #16697A 0%, #489FB5 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            margin-top: 15px;
+            animation: codeSlide 0.5s ease 0.9s both;
+        }
+
+        @keyframes codeSlide {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
         /* Applied coupon display */
         .applied-coupon-display {
             display: none;
