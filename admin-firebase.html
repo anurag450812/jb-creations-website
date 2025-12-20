@@ -5478,89 +5478,97 @@
             clearAllOrdersSelection();
         }
         
-        // Move single order to Shiprocket (marks as sent and sends to Shiprocket API)
+        // Move single order to Shiprocket (ONLY moves if API call succeeds)
         async function moveToShiprocket(orderNumber) {
             const order = orders.find(o => o.orderNumber === orderNumber);
             if (!order) {
                 showShippingToast('Order not found', 'error');
-                return;
+                return { success: false, error: 'Order not found' };
             }
             
             if (order.sentToShiprocket) {
                 showShippingToast('Order already sent to Shiprocket', 'error');
-                return;
+                return { success: false, error: 'Already sent' };
             }
             
             showShippingToast('Sending to Shiprocket...', 'info');
             
             try {
-                // Try to send to Shiprocket API first
-                let shiprocketSuccess = false;
-                let shiprocketData = null;
-                
-                if (window.shiprocketClient && typeof window.shiprocketClient.createOrder === 'function') {
-                    try {
-                        const result = await window.shiprocketClient.createOrder(order);
-                        console.log('📦 Shiprocket API result:', result);
-                        if (result.order_id) {
-                            shiprocketData = {
-                                orderId: result.order_id,
-                                shipmentId: result.shipment_id,
-                                status: result.status || 'NEW',
-                                createdAt: new Date().toISOString()
-                            };
-                            shiprocketSuccess = true;
-                        }
-                    } catch (apiError) {
-                        console.error('Shiprocket API error:', apiError);
-                        // Continue - will still mark as sent locally
-                    }
+                // Shiprocket API call is REQUIRED - order only moves if this succeeds
+                if (!window.shiprocketClient || typeof window.shiprocketClient.createOrder !== 'function') {
+                    throw new Error('Shiprocket client not available');
                 }
                 
-                // Mark as sent to Shiprocket in Firebase
+                // Try to send to Shiprocket API
+                const result = await window.shiprocketClient.createOrder(order);
+                console.log('📦 Shiprocket API result:', result);
+                
+                // Validate response - must have order_id to be considered successful
+                if (!result || !result.order_id) {
+                    throw new Error(result?.message || 'Shiprocket did not return an order ID');
+                }
+                
+                const shiprocketData = {
+                    orderId: result.order_id,
+                    shipmentId: result.shipment_id,
+                    status: result.status || 'NEW',
+                    awbCode: result.awb_code || null,
+                    courierName: result.courier_name || null,
+                    createdAt: new Date().toISOString()
+                };
+                
+                // Only update Firebase if Shiprocket API succeeded
                 const firebaseDocId = order.orderId || order.id;
                 console.log('📝 Updating Firebase order:', firebaseDocId);
                 
                 const updateData = {
                     sentToShiprocket: true,
                     sentToShiprocketAt: new Date().toISOString(),
-                    status: 'processing'
+                    status: 'processing',
+                    shiprocket: shiprocketData
                 };
                 
-                if (shiprocketData) {
-                    updateData.shiprocket = shiprocketData;
-                }
-                
                 if (window.jbAPI && typeof window.jbAPI.updateOrder === 'function') {
-                    const result = await window.jbAPI.updateOrder(firebaseDocId, updateData);
-                    console.log('📝 Firebase update result:', result);
+                    const fbResult = await window.jbAPI.updateOrder(firebaseDocId, updateData);
+                    console.log('📝 Firebase update result:', fbResult);
                     
-                    if (!result.success) {
-                        throw new Error(result.error || 'Failed to update order in Firebase');
+                    if (!fbResult.success) {
+                        throw new Error(fbResult.error || 'Failed to update order in Firebase');
                     }
                 } else {
                     throw new Error('Firebase API not available');
                 }
                 
-                // Update local order data
+                // Update local order data only after successful API call and Firebase update
                 order.sentToShiprocket = true;
                 order.sentToShiprocketAt = new Date().toISOString();
                 order.status = 'processing';
-                if (shiprocketData) {
-                    order.shiprocket = shiprocketData;
-                }
+                order.shiprocket = shiprocketData;
                 
-                if (shiprocketSuccess) {
-                    showShippingToast(`Order #${orderNumber} sent to Shiprocket!`, 'success');
-                } else {
-                    showShippingToast(`Order #${orderNumber} moved to Shiprocket section!`, 'success');
-                }
+                showShippingToast(`Order #${orderNumber} sent to Shiprocket! (ID: ${result.order_id})`, 'success');
                 
                 updateOrderWorkflowCounts();
                 applyOrdersWorkflowFilter();
+                
+                return { success: true, shiprocketOrderId: result.order_id };
+                
             } catch (error) {
-                console.error('Error moving to Shiprocket:', error);
-                showShippingToast('Failed: ' + error.message, 'error');
+                console.error('❌ Failed to send to Shiprocket:', error);
+                
+                // Provide helpful error message based on error type
+                let errorMessage = error.message;
+                if (error.message.includes('404') || error.message.includes('405')) {
+                    errorMessage = 'Shiprocket API not available (deploy site to Netlify)';
+                } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    errorMessage = 'Network error - check your internet connection';
+                } else if (error.message.includes('unavailable')) {
+                    errorMessage = 'Shiprocket API unavailable (run "netlify dev" locally or deploy to Netlify)';
+                }
+                
+                showShippingToast(`Failed to send #${orderNumber}: ${errorMessage}`, 'error');
+                
+                // Order remains in Image Downloaded - NOT moved
+                return { success: false, error: errorMessage };
             }
         }
         
@@ -5586,20 +5594,31 @@
             
             if (!confirm(`Move ${ordersToMove.length} order(s) to Shiprocket?`)) return;
             
-            showShippingToast(`Moving ${ordersToMove.length} orders to Shiprocket...`, 'info');
+            showShippingToast(`Sending ${ordersToMove.length} orders to Shiprocket...`, 'info');
             
             let successCount = 0;
+            let failedOrders = [];
+            
             for (const order of ordersToMove) {
-                try {
-                    await moveToShiprocket(order.orderNumber);
+                const result = await moveToShiprocket(order.orderNumber);
+                if (result && result.success) {
                     successCount++;
-                    await new Promise(r => setTimeout(r, 500));
-                } catch (error) {
-                    console.error(`Failed to move ${order.orderNumber}:`, error);
+                } else {
+                    failedOrders.push({ orderNumber: order.orderNumber, error: result?.error || 'Unknown error' });
                 }
+                // Small delay between API calls to avoid rate limiting
+                await new Promise(r => setTimeout(r, 500));
             }
             
-            showShippingToast(`Moved ${successCount}/${ordersToMove.length} orders to Shiprocket!`, successCount === ordersToMove.length ? 'success' : 'warning');
+            // Show appropriate message based on results
+            if (successCount === ordersToMove.length) {
+                showShippingToast(`All ${successCount} orders sent to Shiprocket successfully!`, 'success');
+            } else if (successCount > 0) {
+                showShippingToast(`${successCount}/${ordersToMove.length} orders sent. ${failedOrders.length} failed.`, 'warning');
+            } else {
+                showShippingToast(`Failed to send orders to Shiprocket. Check if site is deployed to Netlify.`, 'error');
+            }
+            
             clearAllOrdersSelection();
         }
         

@@ -1,12 +1,12 @@
 /**
  * Shiprocket Client Library
  * Frontend integration for Shiprocket shipping functionality
- * Supports both Netlify functions (production) and local proxy server (development)
+ * Production-ready: Always uses Netlify functions with automatic fallback
  */
 
 class ShiprocketClient {
     constructor(options = {}) {
-        // Detect if running locally
+        // Detect environment
         this.isLocal = window.location.hostname === 'localhost' || 
                        window.location.hostname === '127.0.0.1' ||
                        window.location.port === '5500' ||
@@ -16,17 +16,27 @@ class ShiprocketClient {
         this.pickupLocations = null;
         this.defaultPickupLocation = null;
         
-        // Use Netlify functions in production, local proxy server for development
+        // Retry configuration
+        this.maxRetries = options.maxRetries || 3;
+        this.retryDelay = options.retryDelay || 1000;
+        
+        // PRODUCTION MODE: Always use Netlify functions
+        // Local proxy is optional and will be used as fallback only if explicitly enabled
+        this.netlifyBaseURL = options.baseURL || '/.netlify/functions/shiprocket';
+        this.localProxyURL = 'http://localhost:3001';
+        this.useLocalProxy = false; // Disabled by default - set to true only for local development with proxy
+        
+        // For deployed sites (including when accessed via localhost on deployed URL)
+        // Always use Netlify functions
+        this.baseURL = this.netlifyBaseURL;
+        this.useDirectAPI = false;
+        
+        console.log('📦 ShiprocketClient initialized in PRODUCTION mode');
+        console.log(`📦 API endpoint: ${this.baseURL}`);
+        
         if (this.isLocal) {
-            // Use local proxy server to avoid CORS issues
-            this.baseURL = 'http://localhost:3001';
-            this.useDirectAPI = false; // Use proxy, not direct API
-            console.log('📦 ShiprocketClient initialized in LOCAL mode (proxy server at localhost:3001)');
-            console.log('📦 Make sure to run: node shiprocket-proxy.js');
-        } else {
-            this.baseURL = options.baseURL || '/.netlify/functions/shiprocket';
-            this.useDirectAPI = false;
-            console.log('📦 ShiprocketClient initialized in PRODUCTION mode (Netlify functions)');
+            console.log('📦 Running locally - using Netlify functions (deploy your site for this to work)');
+            console.log('📦 Tip: Use "netlify dev" to test functions locally');
         }
     }
 
@@ -63,11 +73,18 @@ class ShiprocketClient {
     }
 
     /**
-     * Make API request to Shiprocket backend
+     * Sleep utility for retry delays
      */
-    async request(endpoint, method = 'GET', data = null) {
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    /**
+     * Make API request to Shiprocket backend with retry logic
+     */
+    async request(endpoint, method = 'GET', data = null, retryCount = 0) {
         try {
-            console.log(`📦 Shiprocket API: ${method} ${endpoint}`);
+            console.log(`📦 Shiprocket API: ${method} ${endpoint}${retryCount > 0 ? ` (retry ${retryCount})` : ''}`);
             
             if (this.useDirectAPI) {
                 return await this.directRequest(endpoint, method, data);
@@ -76,6 +93,26 @@ class ShiprocketClient {
             }
         } catch (error) {
             console.error('❌ Shiprocket API error:', error);
+            
+            // Check if it's a network error that should be retried
+            const isNetworkError = error.message.includes('Failed to fetch') || 
+                                   error.message.includes('NetworkError') ||
+                                   error.message.includes('ERR_CONNECTION_REFUSED') ||
+                                   error.message.includes('ERR_NETWORK');
+            
+            if (isNetworkError && retryCount < this.maxRetries) {
+                console.log(`🔄 Retrying in ${this.retryDelay}ms... (attempt ${retryCount + 1}/${this.maxRetries})`);
+                await this.sleep(this.retryDelay * (retryCount + 1)); // Exponential backoff
+                return await this.request(endpoint, method, data, retryCount + 1);
+            }
+            
+            // If local and Netlify functions fail, provide helpful message
+            if (isNetworkError && this.isLocal) {
+                console.error('💡 Tip: Deploy your site to Netlify for Shiprocket integration to work.');
+                console.error('💡 Or run "netlify dev" locally to test Netlify functions.');
+                throw new Error('Shiprocket API unavailable. Please deploy your site or run "netlify dev" for local testing.');
+            }
+            
             throw error;
         }
     }
@@ -94,11 +131,23 @@ class ShiprocketClient {
             options.body = JSON.stringify(data);
         }
 
-        const response = await fetch(url, options);
-        const result = await response.json();
+        let response;
+        try {
+            response = await fetch(url, options);
+        } catch (fetchError) {
+            // Network-level error (no response at all)
+            throw new Error(`Failed to fetch: ${fetchError.message}`);
+        }
+
+        let result;
+        try {
+            result = await response.json();
+        } catch (jsonError) {
+            throw new Error(`Invalid JSON response from server: ${response.status} ${response.statusText}`);
+        }
 
         if (!response.ok) {
-            throw new Error(result.error || 'Shiprocket API request failed');
+            throw new Error(result.error || `Shiprocket API request failed: ${response.status}`);
         }
 
         return result;
@@ -339,25 +388,52 @@ class ShiprocketClient {
     }
 
     /**
-     * Check if Shiprocket API is connected
+     * Check if Shiprocket API is connected and available
+     * Returns status without throwing errors
      */
     async checkConnection() {
-        if (this.useDirectAPI) {
-            await this.authenticate();
-            return { success: true, message: 'Shiprocket API connected (direct mode)' };
+        try {
+            if (this.useDirectAPI) {
+                await this.authenticate();
+                return { success: true, message: 'Shiprocket API connected (direct mode)', available: true };
+            }
+            
+            const result = await this.request('/', 'GET');
+            this.apiAvailable = true;
+            return { ...result, available: true };
+        } catch (error) {
+            this.apiAvailable = false;
+            return { 
+                success: false, 
+                available: false, 
+                message: error.message,
+                hint: this.isLocal ? 'Deploy your site to Netlify or run "netlify dev" for local testing' : null
+            };
         }
-        return await this.request('/', 'GET');
+    }
+
+    /**
+     * Check if API is available (non-blocking, uses cached result)
+     */
+    isAvailable() {
+        return this.apiAvailable !== false;
     }
 
     /**
      * Create a new order in Shiprocket
      */
     async createOrder(order, pickupLocation = null) {
-        // Ensure we have pickup locations loaded
+        // Try to load pickup locations, but don't fail if unavailable
         if (!this.defaultPickupLocation) {
-            await this.loadPickupLocations();
+            try {
+                await this.loadPickupLocations();
+            } catch (error) {
+                console.warn('⚠️ Could not load pickup locations, using default "Primary"');
+                this.defaultPickupLocation = 'Primary';
+            }
         }
-        const location = pickupLocation || this.defaultPickupLocation;
+        const location = pickupLocation || this.defaultPickupLocation || 'Primary';
+        console.log(`📦 Creating order with pickup location: "${location}"`);
         return await this.request('/create-order', 'POST', { order, pickupLocation: location });
     }
 
@@ -365,11 +441,17 @@ class ShiprocketClient {
      * Bulk create orders in Shiprocket
      */
     async bulkCreateOrders(orders, pickupLocation = null) {
-        // Ensure we have pickup locations loaded
+        // Try to load pickup locations, but don't fail if unavailable
         if (!this.defaultPickupLocation) {
-            await this.loadPickupLocations();
+            try {
+                await this.loadPickupLocations();
+            } catch (error) {
+                console.warn('⚠️ Could not load pickup locations, using default "Primary"');
+                this.defaultPickupLocation = 'Primary';
+            }
         }
-        const location = pickupLocation || this.defaultPickupLocation;
+        const location = pickupLocation || this.defaultPickupLocation || 'Primary';
+        console.log(`📦 Creating ${orders.length} orders with pickup location: "${location}"`);
         return await this.request('/bulk-create-orders', 'POST', { orders, pickupLocation: location });
     }
 
@@ -377,6 +459,12 @@ class ShiprocketClient {
      * Load and cache pickup locations
      */
     async loadPickupLocations() {
+        // Return cached data if available
+        if (this.pickupLocations && this.defaultPickupLocation) {
+            console.log(`📍 Using cached pickup location: "${this.defaultPickupLocation}"`);
+            return this.pickupLocations;
+        }
+        
         try {
             const response = await this.request('/pickup-locations', 'GET');
             if (response && response.data && response.data.shipping_address) {
@@ -386,11 +474,17 @@ class ShiprocketClient {
                 this.defaultPickupLocation = primary ? primary.pickup_location : (this.pickupLocations[0]?.pickup_location || 'Primary');
                 console.log(`📍 Default pickup location: "${this.defaultPickupLocation}"`);
                 console.log(`📍 Available locations:`, this.pickupLocations.map(l => l.pickup_location));
+            } else {
+                // No pickup locations found, use default
+                console.warn('⚠️ No pickup locations found in response, using default "Primary"');
+                this.defaultPickupLocation = 'Primary';
             }
             return this.pickupLocations;
         } catch (error) {
             console.error('❌ Failed to load pickup locations:', error);
-            return null;
+            // Set default so we don't keep retrying
+            this.defaultPickupLocation = 'Primary';
+            throw error; // Re-throw so caller knows it failed
         }
     }
 
@@ -559,6 +653,23 @@ class ShiprocketClient {
 
 // Create global instance
 window.shiprocketClient = new ShiprocketClient();
+
+// Perform connection check on page load (non-blocking)
+(async function() {
+    try {
+        const status = await window.shiprocketClient.checkConnection();
+        if (status.available) {
+            console.log('✅ Shiprocket API is available and connected');
+        } else {
+            console.warn('⚠️ Shiprocket API is not available:', status.message);
+            if (status.hint) {
+                console.info('💡', status.hint);
+            }
+        }
+    } catch (error) {
+        console.warn('⚠️ Could not check Shiprocket API status:', error.message);
+    }
+})();
 
 // Export for module usage
 if (typeof module !== 'undefined' && module.exports) {
