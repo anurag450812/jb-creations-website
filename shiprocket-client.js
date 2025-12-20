@@ -256,21 +256,47 @@ class ShiprocketClient {
         const customer = order.customer || {};
         const items = order.items || [];
         const totalWeight = items.length * 0.5;
+        
+        // Calculate discount per item
+        const totalDiscount = order.totals?.discount || 0;
+        const itemDiscount = items.length > 0 ? Math.round((totalDiscount / items.length) * 100) / 100 : 0;
 
         const orderItems = items.map((item, index) => ({
             name: `Custom Photo Frame ${index + 1}`,
             sku: `FRAME-${order.orderNumber}-${index + 1}`,
             units: 1,
             selling_price: parseFloat(item.price) || 349,
-            discount: 0,
+            discount: itemDiscount,
             tax: 0,
             hsn: 44140000
         }));
 
-        const addressParts = (customer.address || '').split(',').map(p => p.trim());
-        const city = customer.city || addressParts[addressParts.length - 2] || 'Unknown';
-        const state = customer.state || addressParts[addressParts.length - 1] || 'Unknown';
-        const pincode = customer.pincode || customer.zip || '110001';
+        // Get address details - prefer structured addressDetails over parsed address
+        const addressDetails = customer.addressDetails || {};
+        
+        // Extract pincode from addressDetails, customer.pincode, or parse from address
+        let pincode = addressDetails.pincode || customer.pincode || customer.zip;
+        if (!pincode && customer.address) {
+            // Try to extract 6-digit pincode from address string
+            const pincodeMatch = customer.address.match(/\b(\d{6})\b/);
+            if (pincodeMatch) {
+                pincode = pincodeMatch[1];
+            }
+        }
+        pincode = pincode || '110001';
+        
+        // Get city and state from addressDetails first
+        let city = addressDetails.city || customer.city;
+        let state = addressDetails.state || customer.state;
+        
+        if (!city || !state) {
+            const addressParts = (customer.address || '').split(',').map(p => p.trim());
+            if (!city) city = addressParts[addressParts.length - 2] || 'Unknown';
+            if (!state) state = addressParts[addressParts.length - 1]?.replace(/\s*-?\s*\d{6}\s*$/, '') || 'Unknown';
+        }
+        
+        // Get street address
+        let streetAddress = addressDetails.street || customer.address || 'Address not provided';
 
         // Parse order date - handle Firebase Timestamp, Date objects, and strings
         let orderDate;
@@ -292,6 +318,17 @@ class ShiprocketClient {
             orderDate = new Date();
         }
         const orderDateStr = orderDate.toISOString().split('T')[0];
+        
+        // Calculate subtotal
+        const subtotal = parseFloat(order.totals?.total) || items.reduce((sum, item) => sum + (parseFloat(item.price) || 349), 0);
+        
+        console.log(`📦 Formatting order for Shiprocket:`, {
+            orderNumber: order.orderNumber,
+            pincode: pincode,
+            city: city,
+            state: state,
+            discount: totalDiscount
+        });
 
         return {
             order_id: order.orderNumber,
@@ -301,8 +338,8 @@ class ShiprocketClient {
             comment: customer.specialInstructions || "",
             billing_customer_name: customer.name || 'Customer',
             billing_last_name: "",
-            billing_address: customer.address || 'Address not provided',
-            billing_address_2: "",
+            billing_address: streetAddress,
+            billing_address_2: addressDetails.landmark || "",
             billing_city: city,
             billing_pincode: pincode,
             billing_state: state,
@@ -312,8 +349,8 @@ class ShiprocketClient {
             shipping_is_billing: true,
             shipping_customer_name: customer.name || 'Customer',
             shipping_last_name: "",
-            shipping_address: customer.address || 'Address not provided',
-            shipping_address_2: "",
+            shipping_address: streetAddress,
+            shipping_address_2: addressDetails.landmark || "",
             shipping_city: city,
             shipping_pincode: pincode,
             shipping_country: "India",
@@ -325,8 +362,8 @@ class ShiprocketClient {
             shipping_charges: order.deliveryMethod === 'express' ? 99 : 0,
             giftwrap_charges: 0,
             transaction_charges: 0,
-            total_discount: order.totals?.discount || 0,
-            sub_total: parseFloat(order.totals?.total) || items.reduce((sum, item) => sum + (parseFloat(item.price) || 349), 0),
+            total_discount: totalDiscount,
+            sub_total: subtotal,
             length: 40,
             breadth: 30,
             height: 5,

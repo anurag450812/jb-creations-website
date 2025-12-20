@@ -4834,12 +4834,14 @@
             // Handle Firebase Timestamp objects (with seconds and nanoseconds)
             if (dateInput && typeof dateInput === 'object' && dateInput.seconds) {
                 return new Date(dateInput.seconds * 1000);
-            } 
-            // Handle regular date strings or Date objects
-            else {
-                const date = new Date(dateInput);
-                return isNaN(date.getTime()) ? new Date(0) : date;
             }
+            // Handle Firestore Timestamp with toDate method
+            if (dateInput && typeof dateInput === 'object' && typeof dateInput.toDate === 'function') {
+                return dateInput.toDate();
+            }
+            // Handle ISO date strings or Date objects
+            const date = new Date(dateInput);
+            return isNaN(date.getTime()) ? new Date(0) : date;
         }
 
         // Data loading functions - Firebase version
@@ -4869,14 +4871,18 @@
                             },
                             status: order.status || 'pending',
                             orderDate: order.orderDate || order.createdAt,
+                            createdAt: order.createdAt || order.orderDate, // Keep original creation time
                             totals: order.totals || {
-                                total: order.totalAmount || 299
+                                total: order.totalAmount || 299,
+                                subtotal: order.subtotal || order.totalAmount || 299,
+                                discount: order.discount || 0
                             },
                             items: order.items || [], // Use the actual items array from new structure
                             images: order.images || [], // Use the actual images array
                             deliveryMethod: order.deliveryMethod || 'standard',
                             usingCloudinary: order.usingCloudinary || false,
                             paymentId: order.paymentId || null,
+                            payment: order.payment || null, // Payment method info
                             shiprocket: order.shiprocket || null, // Preserve Shiprocket data
                             packageWeight: order.packageWeight || null,
                             packageDimensions: order.packageDimensions || null,
@@ -5065,17 +5071,32 @@
                     break;
             }
             
-            // Sort orders
+            // Sort orders - use workflow-specific date for sorting when relevant
             filteredOrders.sort((a, b) => {
+                // Helper to get the relevant date for current workflow
+                const getWorkflowDate = (order) => {
+                    switch(currentWorkflowFilter) {
+                        case 'downloaded':
+                            // Sort by when image was downloaded
+                            return order.imageDownloadedAt ? getOrderDate(order.imageDownloadedAt) : getOrderDate(order.orderDate);
+                        case 'shiprocket':
+                            // Sort by when sent to Shiprocket
+                            return order.sentToShiprocketAt ? getOrderDate(order.sentToShiprocketAt) : getOrderDate(order.orderDate);
+                        default:
+                            // New orders / All orders - sort by order date
+                            return getOrderDate(order.orderDate);
+                    }
+                };
+                
                 switch(dateSortFilter) {
                     case 'oldest':
-                        return getOrderDate(a.orderDate) - getOrderDate(b.orderDate);
+                        return getWorkflowDate(a) - getWorkflowDate(b);
                     case 'name-asc':
                         return (a.customer?.name || '').localeCompare(b.customer?.name || '');
                     case 'name-desc':
                         return (b.customer?.name || '').localeCompare(a.customer?.name || '');
-                    default:
-                        return getOrderDate(b.orderDate) - getOrderDate(a.orderDate);
+                    default: // 'latest'
+                        return getWorkflowDate(b) - getWorkflowDate(a); // Latest first
                 }
             });
             
@@ -5136,9 +5157,18 @@
             
             tableBody.innerHTML = paginatedOrders.map(order => {
                 const orderDate = formatShortDate(order.orderDate);
+                const orderDateTime = formatFullDateTime(order.orderDate);
                 const amount = order.totals?.total || order.totalAmount || 299;
                 const itemCount = order.items?.length || 1;
                 const isSelected = selectedAllOrders.has(order.orderNumber);
+                
+                // Get workflow-specific timestamp
+                let workflowTimestamp = '';
+                if (order.sentToShiprocket && order.sentToShiprocketAt) {
+                    workflowTimestamp = `<div style="font-size: 0.7rem; color: #7c3aed; margin-top: 2px;"><i class="fas fa-shipping-fast"></i> ${formatFullDateTime(order.sentToShiprocketAt)}</div>`;
+                } else if (order.imageDownloaded && order.imageDownloadedAt) {
+                    workflowTimestamp = `<div style="font-size: 0.7rem; color: #10b981; margin-top: 2px;"><i class="fas fa-download"></i> ${formatFullDateTime(order.imageDownloadedAt)}</div>`;
+                }
                 
                 // Determine workflow status
                 let workflowStatus = '';
@@ -5166,7 +5196,8 @@
                             <div style="font-weight: 600; color: var(--primary); cursor: pointer;" onclick="viewOrder('${order.orderNumber}')">
                                 #${order.orderNumber}
                             </div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted);">${orderDate}</div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted);"><i class="fas fa-calendar-alt" style="margin-right: 3px;"></i>${orderDateTime}</div>
+                            ${workflowTimestamp}
                         </td>
                         <td>
                             <div style="font-weight: 500;">${order.customer?.name || 'Guest'}</div>
@@ -5837,11 +5868,46 @@
             }
         }
         
-        // Format short date
+        // Format short date - handles Firebase timestamps
         function formatShortDate(dateInput) {
-            if (!dateInput) return '';
-            const date = new Date(dateInput);
-            return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+            if (!dateInput) return 'N/A';
+            let date;
+            
+            // Handle Firebase Timestamp (has seconds property)
+            if (dateInput && typeof dateInput === 'object' && dateInput.seconds) {
+                date = new Date(dateInput.seconds * 1000);
+            } else if (dateInput && typeof dateInput === 'object' && dateInput.toDate) {
+                date = dateInput.toDate();
+            } else {
+                date = new Date(dateInput);
+            }
+            
+            if (isNaN(date.getTime())) return 'N/A';
+            return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+        
+        // Format full date and time
+        function formatFullDateTime(dateInput) {
+            if (!dateInput) return 'N/A';
+            let date;
+            
+            // Handle Firebase Timestamp (has seconds property)
+            if (dateInput && typeof dateInput === 'object' && dateInput.seconds) {
+                date = new Date(dateInput.seconds * 1000);
+            } else if (dateInput && typeof dateInput === 'object' && dateInput.toDate) {
+                date = dateInput.toDate();
+            } else {
+                date = new Date(dateInput);
+            }
+            
+            if (isNaN(date.getTime())) return 'N/A';
+            return date.toLocaleString('en-IN', { 
+                day: 'numeric', 
+                month: 'short', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
         }
         
         // Copy to clipboard
