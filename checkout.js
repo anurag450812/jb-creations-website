@@ -1186,7 +1186,7 @@ function loadCartItems() {
     
     if (cart.length === 0) {
         // Redirect back if cart is empty
-        alert('Your cart is empty!');
+        notifications.warning('Your cart is empty!');
         window.location.href = 'index.html';
         return;
     }
@@ -1567,7 +1567,7 @@ function applyPromoCode() {
     const promoCode = promoCodeInput.value.trim().toUpperCase();
     
     if (!promoCode) {
-        alert('Please enter a promo code');
+        notifications.warning('Please enter a promo code');
         return;
     }
     
@@ -1616,9 +1616,9 @@ function applyPromoCode() {
         promoCodeInput.disabled = true;
         promoCodeInput.value = `${promoCode} - Applied`;
         
-        alert(`Promo code applied! ${discount.description}`);
+        notifications.success(`Promo code applied! ${discount.description}`);
     } else {
-        alert('Invalid promo code. Please try again.');
+        notifications.error('Invalid promo code. Please try again.');
     }
 }
 
@@ -1663,7 +1663,7 @@ function validateForm() {
             emailInput.classList.add('invalid');
             if (!firstErrorField) firstErrorField = emailInput;
             isValid = false;
-            if (isValid) alert('Please enter a valid email address');
+            notifications.warning('Please enter a valid email address');
         }
     }
     
@@ -1680,7 +1680,7 @@ function validateForm() {
             if (phoneContainer) phoneContainer.classList.add('invalid');
             if (!firstErrorField) firstErrorField = phoneInput;
             isValid = false;
-            if (isValid) alert('Please enter a valid 10-digit phone number');
+            notifications.warning('Please enter a valid 10-digit phone number');
         } else {
             phoneInput.classList.remove('invalid');
             phoneInput.classList.add('valid');
@@ -1704,7 +1704,7 @@ function validateForm() {
             if (alternatePhoneContainer) alternatePhoneContainer.classList.add('invalid');
             if (!firstErrorField) firstErrorField = alternatePhoneInput;
             isValid = false;
-            if (isValid) alert('Please enter a valid 10-digit alternate phone number');
+            notifications.warning('Please enter a valid 10-digit alternate phone number');
         } else {
             alternatePhoneInput.classList.remove('invalid');
             alternatePhoneInput.classList.add('valid');
@@ -1726,7 +1726,7 @@ function validateForm() {
         pincodeInput.classList.add('invalid');
         if (!firstErrorField) firstErrorField = pincodeInput;
         isValid = false;
-        if (isValid) alert('Please enter a valid 6-digit pincode');
+        notifications.warning('Please enter a valid 6-digit pincode');
     }
     
     // Scroll to first error field with visual feedback
@@ -2401,6 +2401,8 @@ async function placeOrder() {
     const mobileBtn = document.getElementById('mobilePlaceOrderBtn');
     if (mobileBtn) mobileBtn.disabled = true;
 
+    let shouldEnableButtons = true;
+
     try {
         // Prepare order data (includes guest customer information)
         const orderData = prepareOrderData();
@@ -2416,9 +2418,9 @@ async function placeOrder() {
         const totalAmount = orderData.totals.total;
         
         // Hide processing overlay before showing Razorpay
-    resetProcessingOverlay();
-    document.getElementById('placeOrderBtn').disabled = false;
-    if (mobileBtn) mobileBtn.disabled = false;
+        resetProcessingOverlay();
+        document.getElementById('placeOrderBtn').disabled = false;
+        if (mobileBtn) mobileBtn.disabled = false;
 
         // Simple direct payment (works for both guests and logged-in users)
         const paymentResult = await processSimplePayment(totalAmount, orderData, user);
@@ -2475,6 +2477,8 @@ async function placeOrder() {
                     // Show success animation before redirecting
                     showOrderSuccessAnimation();
                     
+                    shouldEnableButtons = false; // Don't enable buttons on success redirect
+
                     // Delay redirect to show success animation
                     setTimeout(() => {
                         // Redirect to success page ONLY for Firebase success
@@ -2490,29 +2494,20 @@ async function placeOrder() {
                     // For localStorage fallback, show error instead of success
                     console.error('❌ Order not saved to Firebase - showing error message instead of success');
                     
-                    // Hide processing overlay
-                    resetProcessingOverlay();
-                    document.getElementById('placeOrderBtn').disabled = false;
-                    if (mobileBtn) mobileBtn.disabled = false;
-                    
-                    alert('❌ Order Creation Failed!\n\nYour payment was successful, but there was an error creating the order in our system.\n\nPlease contact support with your payment details:\nPayment ID: ' + paymentResult.paymentId + '\nOrder Number: ' + orderData.orderNumber);
+                    notifications.error('❌ Order Creation Failed!<br><br>Your payment was successful, but there was an error creating the order in our system.<br><br>Please contact support with your payment details:<br>Payment ID: ' + paymentResult.paymentId + '<br>Order Number: ' + orderData.orderNumber, 'Order Creation Failed');
                     return;
                 }
             } else {
                 // Handle specific error types
                 if (result.needsFirestoreSetup) {
-                    alert(`Payment Successful! However, there's a database configuration issue.\n\nPayment ID: ${paymentResult.paymentId}\n\nYour payment was processed successfully, but the order database needs to be set up. Please contact support with your payment ID to complete your order.\n\nNext steps:\n1. Save this Payment ID: ${paymentResult.paymentId}\n2. The website owner needs to configure Firestore database rules\n3. Contact support to ensure your order is processed`);
+                    notifications.warning(`Payment Successful! However, there's a database configuration issue.<br><br>Payment ID: ${paymentResult.paymentId}<br><br>Your payment was processed successfully, but the order database needs to be set up. Please contact support with your payment ID to complete your order.<br><br>Next steps:<br>1. Save this Payment ID: ${paymentResult.paymentId}<br>2. The website owner needs to configure Firestore database rules<br>3. Contact support to ensure your order is processed`, 'Database Configuration Issue');
                 } else if (result.critical) {
-                    alert(`Critical error occurred!\n\nPayment ID: ${paymentResult.paymentId}\n\nYour payment was successful, but there was an issue saving your order. Please contact support immediately with this payment ID.\n\nError: ${result.error}`);
+                    notifications.error(`Critical error occurred!<br><br>Payment ID: ${paymentResult.paymentId}<br><br>Your payment was successful, but there was an issue saving your order. Please contact support immediately with this payment ID.<br><br>Error: ${result.error}`, 'Critical Error');
                 } else {
-                    alert(`Order processing error!\n\nPayment ID: ${paymentResult.paymentId}\n\nYour payment was processed, but there was an issue with order submission. Please contact support.\n\nError: ${result.error}`);
+                    notifications.error(`Order processing error!<br><br>Payment ID: ${paymentResult.paymentId}<br><br>Your payment was processed, but there was an issue with order submission. Please contact support.<br><br>Error: ${result.error}`, 'Order Processing Error');
                 }
                 
                 // Don't redirect on error - let user contact support
-                // Hide processing overlay
-                resetProcessingOverlay();
-                document.getElementById('placeOrderBtn').disabled = false;
-                if (mobileBtn) mobileBtn.disabled = false;
                 return;
             }
         }
@@ -2522,17 +2517,19 @@ async function placeOrder() {
         
         // Show appropriate error message
         if (error.message && error.message.includes('Razorpay')) {
-            alert('Payment system error: ' + error.message);
+            notifications.error('Payment system error: ' + error.message);
         } else if (error.message && error.message.includes('Payment cancelled')) {
-            alert('Payment was cancelled. Your order was not placed.');
+            notifications.info('Payment was cancelled. Your order was not placed.');
         } else {
-            alert('Sorry, there was an error processing your payment. Please try again or contact us directly.');
+            notifications.error('Sorry, there was an error processing your payment. Please try again or contact us directly.');
         }
-        
-        // Hide processing overlay
-        resetProcessingOverlay();
-        document.getElementById('placeOrderBtn').disabled = false;
-        if (mobileBtn) mobileBtn.disabled = false;
+    } finally {
+        if (shouldEnableButtons) {
+            // Hide processing overlay
+            resetProcessingOverlay();
+            document.getElementById('placeOrderBtn').disabled = false;
+            if (mobileBtn) mobileBtn.disabled = false;
+        }
     }
 }
 
@@ -2540,7 +2537,7 @@ async function placeOrder() {
 function downloadOrderData() {
     const cart = JSON.parse(localStorage.getItem('photoFramingCart') || '[]');
     if (cart.length === 0) {
-        alert('No order data available');
+        notifications.warning('No order data available');
         return;
     }
 
@@ -3005,7 +3002,7 @@ function initializeOTPVerification() {
         const phone = phoneInput.value.replace(/\D/g, '');
         
         if (phone.length !== 10) {
-            alert('Please enter a valid 10-digit phone number');
+            notifications.warning('Please enter a valid 10-digit phone number');
             return;
         }
         

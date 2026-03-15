@@ -23,7 +23,9 @@ class ShiprocketClient {
         // PRODUCTION MODE: Always use Netlify functions
         // Local proxy is optional and will be used as fallback only if explicitly enabled
         this.netlifyBaseURL = options.baseURL || '/.netlify/functions/shiprocket';
-        this.localProxyURL = 'http://localhost:3001';
+        
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        this.localProxyURL = isLocalhost ? 'http://localhost:3001' : '';
         this.useLocalProxy = false; // Disabled by default - set to true only for local development with proxy
         
         // For deployed sites (including when accessed via localhost on deployed URL)

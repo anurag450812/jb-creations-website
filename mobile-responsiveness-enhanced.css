@@ -272,6 +272,39 @@
     }
 }
 
+/* ===== IPHONE SE & SMALL MOBILE OPTIMIZATIONS ===== */
+@media (max-width: 375px) {
+    .landing-content {
+        padding: 0 8px 30px;
+    }
+    
+    h1 { font-size: 1.3rem !important; }
+    h2 { font-size: 1.1rem !important; }
+    h3 { font-size: 1rem !important; }
+    
+    .feature-card, 
+    .stat-card, 
+    .step-card {
+        padding: 0.8rem !important;
+    }
+    
+    /* Ensure buttons are easily tappable on small screens */
+    button, 
+    .btn, 
+    input[type="submit"],
+    .action-btn {
+        min-height: 44px;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+
+    /* Adjust grid gaps for very small screens */
+    .features-grid,
+    .stats-grid {
+        gap: 1rem !important;
+    }
+}
+
 /* ===== CRITICAL CSS LOADED INDICATOR ===== */
 .performance-optimized {
     --performance-ready: true;

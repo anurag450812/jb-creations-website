@@ -444,7 +444,7 @@ async function sendOtp(event) {
     }
     
     if (!termsChecked) {
-        alert('Please accept the terms and conditions to continue');
+        notifications.warning('Please accept the terms and conditions to continue');
         return;
     }
     
@@ -461,12 +461,9 @@ async function sendOtp(event) {
         // Show OTP step
         showOtpStep(phone);
         
-        showLoading(false);
         showSuccess('OTP sent successfully to +91' + phone);
         
     } catch (error) {
-        showLoading(false);
-        
         if (error.message.includes('not found') || error.message.includes('not registered')) {
             showError('loginPhoneError', 'This phone number is not registered. Please sign up first.');
             
@@ -484,6 +481,8 @@ async function sendOtp(event) {
         }
         
         console.error('OTP send error:', error);
+    } finally {
+        showLoading(false);
     }
 }
 
@@ -513,7 +512,7 @@ async function sendSignupOtp(event) {
     }
     
     if (!termsChecked) {
-        alert('Please accept the terms and conditions to continue');
+        notifications.warning('Please accept the terms and conditions to continue');
         return;
     }
     
@@ -534,12 +533,9 @@ async function sendSignupOtp(event) {
         // Show OTP step
         showSignupOtpStep(phone);
         
-        showLoading(false);
         showSuccess('OTP sent successfully to +91' + phone);
         
     } catch (error) {
-        showLoading(false);
-        
         if (error.message.includes('already exists')) {
             showError('signupPhoneError', 'An account with this mobile number already exists. Please login instead.');
         } else {
@@ -548,6 +544,8 @@ async function sendSignupOtp(event) {
         }
         
         console.error('OTP send error:', error);
+    } finally {
+        showLoading(false);
     }
 }
 
@@ -654,17 +652,16 @@ async function verifyOtp(event) {
             }
             
         } else {
-            showLoading(false);
             const errorMsg = result && result.message ? result.message : 'Invalid OTP. Please try again.';
             showError('otpError', errorMsg);
         }
         
     } catch (error) {
-        showLoading(false);
         const errorMsg = error.message || 'Failed to verify OTP. Please try again.';
         showError('otpError', errorMsg);
         console.error('OTP verification error:', error);
-    }
+    } finally {
+        showLoading(false
 }
 
 // Verify OTP for signup
@@ -699,6 +696,7 @@ async function verifySignupOtp(event) {
             
             showLoading(false);
             showSuccess('Account created successfully! Welcome to Xidlz!');
+            Success('Account created successfully! Welcome to Xidlz!');
             
             // Check if there's a specific redirect URL
             const redirectUrl = sessionStorage.getItem('auth_redirect');
@@ -717,13 +715,10 @@ async function verifySignupOtp(event) {
             }
             
         } else {
-            showLoading(false);
             showError('signupOtpError', 'Invalid OTP. Please try again.');
         }
         
     } catch (error) {
-        showLoading(false);
-        
         if (error.message.includes('already exists')) {
             showError('signupOtpError', 'An account with this phone number already exists. Please login instead.');
         } else {
@@ -732,8 +727,8 @@ async function verifySignupOtp(event) {
         }
         
         console.error('OTP verification error:', error);
-    }
-}
+    } finally {
+        showLoading(false
 
 // Resend OTP for login
 async function resendOtp() {
@@ -1187,7 +1182,7 @@ window.authUtils = {
             }
             
             // Show logout success message
-            alert('You have been successfully signed out.');
+            notifications.success('You have been successfully signed out.');
         } else {
             // On other pages, redirect to home
             window.location.href = 'index.html';

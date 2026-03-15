@@ -24,6 +24,57 @@ class Fast2SMSOTPClient {
     }
 
     /**
+     * Internal request method with resilience
+     */
+    async _request(endpoint, options = {}, retries = 3, backoff = 1000) {
+        if (!navigator.onLine) {
+            throw new Error('No internet connection. Please check your network settings.');
+        }
+
+        const url = `${this.apiBaseURL}${endpoint}`;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+        
+        const config = {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            },
+            signal: controller.signal
+        };
+
+        try {
+            const response = await fetch(url, config);
+            clearTimeout(timeoutId);
+
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                if (response.status >= 500 && retries > 0) {
+                    console.warn(`Server error ${response.status}. Retrying in ${backoff}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, backoff));
+                    return this._request(endpoint, options, retries - 1, backoff * 2);
+                }
+                throw new Error(data.message || `Request failed with status ${response.status}`);
+            }
+            
+            return data;
+        } catch (error) {
+            clearTimeout(timeoutId);
+            if (error.name === 'AbortError') {
+                throw new Error('Request timed out. Please try again.');
+            }
+            if (retries > 0 && (error.message.includes('Failed to fetch') || error.message.includes('NetworkError'))) {
+                console.warn(`Network error. Retrying in ${backoff}ms...`);
+                await new Promise(resolve => setTimeout(resolve, backoff));
+                return this._request(endpoint, options, retries - 1, backoff * 2);
+            }
+            throw error;
+        }
+    }
+
+    /**
      * Validate phone number
      * @param {string} phoneNumber - Phone number to validate
      * @returns {boolean} - True if valid
@@ -73,22 +124,13 @@ class Fast2SMSOTPClient {
 
             console.log('📱 Sending OTP to:', phoneNumber, 'Type:', type);
 
-            const response = await fetch(`${this.apiBaseURL}/send-otp`, {
+            const data = await this._request('/send-otp', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify({
                     phoneNumber: phoneNumber,
                     type: type
                 })
             });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to send OTP');
-            }
 
             // Store current phone, expiry, and OTP token for verification
             this.currentPhone = data.phone || phoneNumber;
@@ -144,23 +186,14 @@ class Fast2SMSOTPClient {
 
             console.log('🔍 Verifying OTP for:', phoneNumber);
 
-            const response = await fetch(`${this.apiBaseURL}/verify-otp`, {
+            const data = await this._request('/verify-otp', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify({
                     phoneNumber: phoneNumber,
                     otp: otp,
                     otpToken: tokenToUse
                 })
             });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'OTP verification failed');
-            }
 
             console.log('✅ OTP verified successfully');
             
@@ -191,21 +224,12 @@ class Fast2SMSOTPClient {
             console.log('🔄 Resending OTP to:', phoneNumber);
 
             // Use the send-otp endpoint for resending
-            const response = await fetch(`${this.apiBaseURL}/send-otp`, {
+            const data = await this._request('/send-otp', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify({
                     phoneNumber: phoneNumber
                 })
             });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to resend OTP');
-            }
 
             // Update expiry time
             this.otpExpiresAt = data.expiresAt;
@@ -250,11 +274,8 @@ class Fast2SMSOTPClient {
             console.log('📝 Registering user:', phone);
 
             // Use verify-otp endpoint which also creates/updates user
-            const response = await fetch(`${this.apiBaseURL}/verify-otp`, {
+            const data = await this._request('/verify-otp', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify({
                     phoneNumber: phone,
                     otp: otp,
@@ -263,12 +284,6 @@ class Fast2SMSOTPClient {
                     action: 'register'
                 })
             });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Registration failed');
-            }
 
             console.log('✅ Registration successful:', data);
 

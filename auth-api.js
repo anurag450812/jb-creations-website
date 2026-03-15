@@ -5,7 +5,9 @@
 
 class AuthAPI {
     constructor() {
-        this.baseURL = 'http://localhost:3001/api';
+        // Use environment-based URL
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        this.baseURL = isLocalhost ? 'http://localhost:3001/api' : '/api';
         this.token = localStorage.getItem('jb_auth_token') || null;
     }
 

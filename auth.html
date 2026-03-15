@@ -8,6 +8,9 @@
     <!-- Critical CSS - Inline for performance -->
     <link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="style.css"></noscript>
+
+    <link rel="preload" href="desktop-specific.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="desktop-specific.css"></noscript>
     
     <!-- Performance optimization files -->
     <link rel="preload" href="performance-optimizations.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -1157,6 +1160,7 @@
         </div>
     </div>
 
+    <script src="utils/notifications.js"></script>
     <script src="auth.js"></script>
     <script>
         function setProfileDropdownState(isOpen) {

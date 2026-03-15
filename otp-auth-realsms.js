@@ -12,7 +12,7 @@ class OTPAuthRealSMS {
         
         if (!this.otpClient) {
             console.error('❌ Fast2SMS OTP client NOT available!');
-            console.error('❌ Backend server must be running on http://localhost:3001');
+            console.error('❌ Backend server connection required');
         } else {
             console.log('✅✅✅ Fast2SMS OTP v3.0 - REAL SMS ONLY ✅✅✅');
             console.log('📱 All OTPs will be sent via SMS to user phones');

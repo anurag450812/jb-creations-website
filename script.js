@@ -264,7 +264,7 @@ let currentMobilePage = 'upload'; // 'upload', 'livePreview', 'roomPreview'
 
 // Navigate to specific mobile page
 function navigateToMobilePage(page) {
-    if (window.innerWidth > 600) return; // Desktop doesn't use this navigation
+    if (window.innerWidth > 768) return; // Desktop doesn't use this navigation
     
     const uploadHeroWrapper = document.getElementById('uploadHeroWrapper');
     const mainContainer = document.getElementById('mainCustomizeContainer') || document.querySelector('.container');
@@ -333,7 +333,7 @@ function navigateToMobilePage(page) {
 // Handle mobile back button - comprehensive navigation management
 window.addEventListener('popstate', function(event) {
     // Check if we're on mobile
-    if (window.innerWidth <= 600) {
+    if (window.innerWidth <= 768) {
         const mobileRoomPreviewPage = document.getElementById('mobileRoomPreviewPage');
         const previewSection = document.getElementById('previewSection');
         const mainContainer = document.getElementById('mainCustomizeContainer');
@@ -1026,17 +1026,17 @@ function initializeEventListeners() {
             // Check if we're on the right page
             if (typeof state === 'undefined' || !state) {
                 console.error('State object not found - might not be on customize page');
-                alert('Please go to the customize page to add items to cart.');
+                notifications.warning('Please go to the customize page to add items to cart.');
                 return;
             }
             
             if (!state.image) {
-                alert('Please upload an image first');
+                notifications.warning('Please upload an image first');
                 return;
             }
 
             if (!state.frameSize) {
-                alert('Please select a frame size');
+                notifications.warning('Please select a frame size');
                 return;
             }
 
@@ -1195,15 +1195,15 @@ function initializeEventListeners() {
                     
                     // Show user-friendly error
                     if (cartError.message && cartError.message.includes('storage is full')) {
-                        alert('Your cart is full! Please checkout or remove some items before adding more.');
+                        notifications.warning('Your cart is full! Please checkout or remove some items before adding more.');
                     } else {
-                        alert('Unable to add item to cart. Please try again.');
+                        notifications.error('Unable to add item to cart. Please try again.');
                     }
                 }
                 
             } catch (error) {
                 console.error('Error in add to cart process:', error);
-                alert('Error adding item to cart. Please try again.');
+                notifications.error('Error adding item to cart. Please try again.');
                 
                 // Reset button state
                 elements.addToCartBtn.disabled = false;
@@ -1412,7 +1412,7 @@ function initializeEventListeners() {
         document.body.classList.remove('has-upload');
         
         // On mobile, use the 3-page navigation system
-        if (window.innerWidth <= 600) {
+        if (window.innerWidth <= 768) {
             navigateToMobilePage('upload');
         } else {
             // Desktop: Reload the page to start fresh with image upload
@@ -1486,12 +1486,12 @@ function handleImageUpload(file) {
 
             // Show mobile customization section on mobile
             const mobileSection = document.getElementById('mobileCustomizationSection');
-            if (mobileSection && window.innerWidth <= 600) {
+            if (mobileSection && window.innerWidth <= 768) {
                 mobileSection.style.display = 'block';
             }
             
             // On mobile, use the 3-page navigation system
-            if (window.innerWidth <= 600) {
+            if (window.innerWidth <= 768) {
                 currentMobilePage = 'livePreview';
                 history.pushState({ mobilePage: 'livePreview' }, '', window.location.href);
             }
@@ -3179,7 +3179,7 @@ async function addToCart(item) {
             errorMessage = 'Error adding item to cart. Please try again.';
         }
             
-        alert(errorMessage);
+        notifications.error(errorMessage);
         return false;
     }
 }
@@ -3565,7 +3565,7 @@ function processRoomImageOverlay(roomImg, index, frameImg) {
             try {
                 // Set canvas size to match room image (limit max size for performance)
                 // OPTIMIZED: Reduced max size for faster processing on mobile
-                const maxSize = window.innerWidth <= 768 ? 800 : 1200;
+                const maxSize = window.innerWidth <= 375 ? 600 : (window.innerWidth <= 768 ? 800 : 1200);
                 let width = originalRoomImg.naturalWidth || originalRoomImg.width || 800;
                 let height = originalRoomImg.naturalHeight || originalRoomImg.height || 600;
                 
@@ -3581,7 +3581,7 @@ function processRoomImageOverlay(roomImg, index, frameImg) {
                 
                 // OPTIMIZED: Use medium quality for faster processing
                 ctx.imageSmoothingEnabled = true;
-                ctx.imageSmoothingQuality = window.innerWidth <= 768 ? 'medium' : 'high';
+                ctx.imageSmoothingQuality = window.innerWidth <= 375 ? 'low' : (window.innerWidth <= 768 ? 'medium' : 'high');
 
                 // Draw the ORIGINAL room background image (not the one with old frame overlay)
                 ctx.drawImage(originalRoomImg, 0, 0, canvas.width, canvas.height);
@@ -3726,11 +3726,11 @@ function processRoomImageOverlay(roomImg, index, frameImg) {
 
                 // Draw the frame (frameImg is already loaded, no need to wait)
                 ctx.imageSmoothingEnabled = true;
-                ctx.imageSmoothingQuality = window.innerWidth <= 768 ? 'medium' : 'high';
+                ctx.imageSmoothingQuality = window.innerWidth <= 375 ? 'low' : (window.innerWidth <= 768 ? 'medium' : 'high');
                 ctx.drawImage(frameImg, frameX, frameY, frameWidth, frameHeight);
 
                 // OPTIMIZED: Use lower JPEG quality on mobile for faster processing
-                const jpegQuality = window.innerWidth <= 768 ? 0.75 : 0.85;
+                const jpegQuality = window.innerWidth <= 375 ? 0.7 : (window.innerWidth <= 768 ? 0.75 : 0.85);
                 const compositeDataURL = canvas.toDataURL('image/jpeg', jpegQuality);
                 roomImg.src = compositeDataURL;
                 
@@ -4277,7 +4277,7 @@ function updateFrameSize() {
     const borderWidth = Math.round(breadth / borderDivisor);
     
     // Ensure minimum border width for visibility on small screens
-    const minBorderWidth = window.innerWidth <= 600 ? 6 : 8;
+    const minBorderWidth = window.innerWidth <= 375 ? 4 : (window.innerWidth <= 768 ? 6 : 8);
     const finalBorderWidth = Math.max(borderWidth, minBorderWidth);
     
     // Debug information for testing
@@ -4534,7 +4534,7 @@ function updateFrameTexture() {
                 break;
         }
         // You can implement your preferred way of showing the message
-        alert(message);
+        notifications.info(message);
     }
 
     function enableNextButton(step) {
@@ -5030,7 +5030,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log(`⚠️ Button clicked but conditions not met. Missing: ${reasons.join(', ')}`);
                 
                 // Enhanced alert with more helpful information
-                alert(`Update Room Previews Button\n\nTo use this button, you need to:\n\n${reasons.map(r => `• ${r.charAt(0).toUpperCase() + r.slice(1)}`).join('\n')}\n\nOnce you've completed these steps, the button will capture your current live preview (with all your customizations) and apply it to all room preview images.`);
+                notifications.info(`To use this button, you need to:\n\n${reasons.map(r => `• ${r.charAt(0).toUpperCase() + r.slice(1)}`).join('\n')}`, 'Update Room Previews');
             }
         };
         if (updateRoomPreviewsBtn) updateRoomPreviewsBtn.addEventListener('click', () => handleClick(updateRoomPreviewsBtn));
@@ -5038,14 +5038,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log('✅ Update Room Previews button event listener attached');
     } else {
-        console.error('❌ Update Room Previews button not found in DOM!');
+        // Buttons not found - likely on a page that doesn't use them (e.g., homepage)
+        // No error needed here as script.js is shared across pages
     }
     
     // Handle window resize to show/hide mobile section appropriately
     window.addEventListener('resize', () => {
         const mobileSection = document.getElementById('mobileCustomizationSection');
         if (mobileSection) {
-            if (window.innerWidth <= 600 && state.image) {
+            if (window.innerWidth <= 768 && state.image) {
                 mobileSection.style.display = 'block';
             } else {
                 mobileSection.style.display = 'none';
@@ -5415,12 +5416,18 @@ function syncMobileSlidersWithState() {
 (function() {
     let lastScrollTop = 0;
     let scrollTimeout;
-    const header = document.querySelector('.site-header');
+    let header = document.querySelector('.site-header');
     const scrollThreshold = 10; // Minimum scroll distance to trigger hide/show
     
     function handleScroll() {
+        // Try to find header if not already found (in case it was injected dynamically)
+        if (!header) {
+            header = document.querySelector('.site-header');
+            if (!header) return; // Still not found, exit safely
+        }
+
         // Only apply this behavior on mobile devices
-        if (window.innerWidth > 600) {
+        if (window.innerWidth > 768) {
             header.classList.remove('hidden');
             return;
         }
@@ -5464,7 +5471,9 @@ function syncMobileSlidersWithState() {
     
     // Handle window resize to reset header state
     window.addEventListener('resize', () => {
-        if (window.innerWidth > 600) {
+        if (!header) header = document.querySelector('.site-header');
+        
+        if (window.innerWidth > 768 && header) {
             header.classList.remove('hidden');
         }
     });
@@ -5535,7 +5544,7 @@ function updateRoomPreviewsClick() {
         if (!hasActiveRoomSlider) reasons.push('select a frame size');
         
         console.log(`⚠️ Button clicked but conditions not met. Missing: ${reasons.join(', ')}`);
-        alert(`Please ${reasons.join(' and ')} first to update room previews.`);
+        notifications.warning(`Please ${reasons.join(' and ')} first to update room previews.`);
     }
 }
 
@@ -5568,7 +5577,7 @@ function initMobileRoomPreview() {
     if (mobileSeeRoomPreviewBtn) {
         mobileSeeRoomPreviewBtn.addEventListener('click', async function() {
             if (!state.image || !state.frameSize) {
-                alert('Please upload an image and select a frame size first.');
+                notifications.warning('Please upload an image and select a frame size first.');
                 return;
             }
 
@@ -5713,7 +5722,7 @@ function initMobileRoomPreview() {
     if (mobileRoomAddToCartBtn) {
         mobileRoomAddToCartBtn.addEventListener('click', async function() {
             if (!state.image || !state.frameSize) {
-                alert('Please upload an image and select a frame size first.');
+                notifications.warning('Please upload an image and select a frame size first.');
                 return;
             }
             
@@ -5799,7 +5808,7 @@ function initMobileRoomPreview() {
                 
             } catch (error) {
                 console.error('Error adding to cart:', error);
-                alert('Failed to add to cart. Please try again.');
+                notifications.error('Failed to add to cart. Please try again.');
                 
                 // Reset button
                 const price = state.price || 349;

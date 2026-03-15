@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customize Your Frame - Xidlz</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="desktop-specific.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
@@ -47,7 +48,7 @@
             }
             
             body.customize-page {
-                padding-top: 52px !important;
+                padding-top: 56px !important;
             }
             
             .mainCustomizeContainer,
@@ -59,6 +60,18 @@
             #uploadSection.upload-section,
             .upload-section#uploadSection {
                 display: none !important;
+            }
+        }
+        
+        /* Desktop header height adjustment */
+        @media (min-width: 769px) {
+            body.customize-page {
+                padding-top: 0 !important;
+            }
+            
+            .mainCustomizeContainer,
+            #mainCustomizeContainer {
+                margin-top: 0 !important;
             }
         }
         
@@ -304,6 +317,50 @@
                 justify-content: center;
                 align-items: center;
                 scroll-snap-align: start;
+                text-align: center !important;
+            }
+            
+            /* Reset new desktop layout structure for mobile */
+            .upload-hero-layout {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                text-align: center !important;
+                gap: 0 !important;
+            }
+            
+            .upload-hero-copy {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                text-align: center !important;
+                width: 100% !important;
+                padding: 0 !important;
+            }
+
+            .desktop-upload-text,
+            .desktop-upload-title,
+            .desktop-upload-description,
+            .upload-badge-icon,
+            .upload-desktop-note {
+                display: none !important;
+            }
+
+            .mobile-upload-text,
+            .mobile-upload-title {
+                display: inline !important;
+            }
+
+            .mobile-upload-description {
+                display: block !important;
+            }
+            
+            .upload-hero-highlights {
+                display: none !important;
+            }
+            
+            .upload-highlight-card {
+                display: none !important;
             }
             
             .upload-hero-section h1 {
@@ -311,8 +368,8 @@
                 margin-bottom: 12px;
             }
             
-            .upload-hero-section > p {
-                display: none;
+            .upload-hero-copy > p {
+                display: none !important;
             }
             
             .upload-hero-badge {
@@ -323,12 +380,16 @@
 
             /* Restore previous upload box styling - NOT full width */
             .upload-box-wrapper {
-                padding: 20px;
-                background: rgba(255,255,255,0.95);
-                border-radius: 20px;
-                box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-                width: 90%;
-                max-width: 350px;
+                padding: 20px !important;
+                background: rgba(255,255,255,0.95) !important;
+                border-radius: 20px !important;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
+                width: 90% !important;
+                max-width: 350px !important;
+                margin: 0 auto !important;
+                display: flex !important;
+                flex-direction: column !important;
+                color: inherit !important;
             }
             
             /* Hide "Select Your Image" header on mobile */
@@ -345,7 +406,14 @@
             .upload-box-wrapper .image-container {
                 min-height: 200px !important;
             }
-
+            
+            .upload-box-wrapper .upload-overlay {
+                border: 2px dashed #82C0CC !important;
+                padding: 20px !important;
+                background: transparent !important;
+                box-shadow: none !important;
+            }
+            
             /* Full-screen instructions section */
             .upload-instructions {
                 min-height: calc(100vh - 56px);
@@ -464,26 +532,53 @@
     <!-- Upload Hero Section (Full Width - Shown Before Image Upload) -->
     <div class="upload-hero-wrapper" id="uploadHeroWrapper">
         <section class="upload-hero-section">
-            <div class="upload-hero-badge">
-                📸 Start Your Custom Frame
-            </div>
-            <h1>Upload Your Photo 🖼️</h1>
-            <p>Choose a high-quality image and we'll help you create the perfect custom frame for your space.</p>
-            
-            <div class="upload-box-wrapper">
-                <div class="upload-header">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <h2>Select Your Image</h2>
-                </div>
-                <div class="frame" id="heroFrame" data-size="13x19" data-orientation="portrait" style="background: #f8f6f4; border-radius: 12px; min-height: 250px;">
-                    <div class="image-container" id="heroImageContainer" style="min-height: 250px;">
-                        <input type="file" id="heroImageUpload" accept="image/*" class="hidden-upload">
-                        <div class="upload-overlay" id="heroUploadOverlay">
-                            <i class="fas fa-cloud-upload-alt" style="color: #16697A;"></i>
-                            <p style="color: #16697A;">Click here to upload your image</p>
-                            <span class="upload-hint" style="color: #489FB5;">or drag and drop</span>
+            <div class="upload-hero-layout">
+                <div class="upload-hero-copy">
+                    <div class="upload-hero-badge">
+                        <span class="upload-badge-icon">✦</span>
+                        <span class="desktop-upload-text">Start Your Custom Frame</span>
+                        <span class="mobile-upload-text">📸 Start Your Custom Frame</span>
+                    </div>
+                    <h1>
+                        <span class="desktop-upload-title">Turn one photo into a wall-ready statement piece.</span>
+                        <span class="mobile-upload-title">Upload Your Photo 🖼️</span>
+                    </h1>
+                    <p>
+                        <span class="desktop-upload-description">Upload a sharp image, preview the composition, and move straight into a cleaner frame customization flow built for desktop.</span>
+                        <span class="mobile-upload-description">Choose a high-quality image and we'll help you create the perfect custom frame for your space.</span>
+                    </p>
+                    <div class="upload-hero-highlights">
+                        <div class="upload-highlight-card">
+                            <strong>Studio-ready</strong>
+                            <span>Balanced cropping and clean framing flow.</span>
+                        </div>
+                        <div class="upload-highlight-card">
+                            <strong>Room-aware</strong>
+                            <span>Customize size, finish, and preview placement.</span>
+                        </div>
+                        <div class="upload-highlight-card">
+                            <strong>Fast start</strong>
+                            <span>Upload once and continue directly into styling.</span>
                         </div>
                     </div>
+                </div>
+
+                <div class="upload-box-wrapper">
+                    <div class="upload-header">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h2>Select Your Image</h2>
+                    </div>
+                    <div class="frame" id="heroFrame" data-size="13x19" data-orientation="portrait" style="background: #f8f6f4; border-radius: 12px; min-height: 250px;">
+                        <div class="image-container" id="heroImageContainer" style="min-height: 250px;">
+                            <input type="file" id="heroImageUpload" accept="image/*" class="hidden-upload">
+                            <div class="upload-overlay" id="heroUploadOverlay">
+                                <i class="fas fa-cloud-upload-alt" style="color: #16697A;"></i>
+                                <p style="color: #16697A;">Click here to upload your image</p>
+                                <span class="upload-hint" style="color: #489FB5;">or drag and drop</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="upload-desktop-note">Best results come from bright, high-resolution photos with a clear main subject.</p>
                 </div>
             </div>
         </section>

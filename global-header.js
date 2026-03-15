@@ -29,7 +29,7 @@ const GlobalWebsiteHeader = {
    These styles override any page-specific CSS conflicts
    ===================================================== */
 
-/* Global Header Container - Matches Homepage Header */
+/* Global Header Container - Enhanced Desktop Design */
 #globalSiteHeader {
     padding: 0 !important;
     top: 0 !important;
@@ -39,48 +39,88 @@ const GlobalWebsiteHeader = {
     background: #EDE7E3 !important;
     box-shadow: none !important;
     border: none !important;
+    border-bottom: none !important;
 }
 
 #globalSiteHeader .header-content {
-    max-width: 1200px !important;
+    max-width: 1400px !important;
     margin: 0 auto !important;
-    padding: 0 20px !important;
-    display: flex !important;
+    padding: 0 36px !important;
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr !important;
     align-items: center !important;
-    justify-content: space-between !important;
-    gap: 12px !important;
-    height: 56px !important;
+    gap: 14px !important;
+    height: 43px !important;
     background: #EDE7E3 !important;
     border: none !important;
     box-shadow: none !important;
 }
 
+/* Position header elements like mobile - Profile left, Brand center, Cart right */
+#globalSiteHeader .header-left {
+    justify-self: start !important;
+}
+
+#globalSiteHeader .header-brand {
+    justify-self: center !important;
+    grid-column: 2 !important;
+}
+
+#globalSiteHeader .header-right {
+    justify-self: end !important;
+}
+
+/* Desktop Navigation Links - HIDDEN on desktop to match mobile design */
+#globalSiteHeader .desktop-nav,
+#globalSiteHeader .desktop-nav-right {
+    display: none !important;
+}
+
+#globalSiteHeader .nav-link {
+    display: none !important;
+}
+
+/* CTA Button in Nav - Hidden */
+#globalSiteHeader .nav-cta {
+    display: none !important;
+}
+
 #globalSiteHeader .brand-name {
-    font-size: 2rem !important;
+    font-size: 1.32rem !important;
     font-weight: 800 !important;
-    letter-spacing: 2px !important;
+    letter-spacing: 1.8px !important;
     color: #16697A !important;
     text-decoration: none !important;
     margin: 0 !important;
     padding: 0 !important;
     position: relative !important;
     display: inline-block !important;
+    transition: all 0.25s ease !important;
+}
+
+#globalSiteHeader .brand-name:hover {
+    transform: scale(1.02) !important;
 }
 
 #globalSiteHeader .brand-name::after {
     content: '' !important;
     display: block !important;
-    width: 50% !important;
+    width: 60% !important;
     height: 3px !important;
-    background: #16697A !important;
+    background: linear-gradient(90deg, #16697A, #489FB5) !important;
     margin: 4px auto 0 !important;
     border-radius: 2px !important;
+    transition: width 0.25s ease !important;
+}
+
+#globalSiteHeader .brand-name:hover::after {
+    width: 80% !important;
 }
 
 #globalSiteHeader .header-right {
     display: flex !important;
     align-items: center !important;
-    gap: 8px !important;
+    gap: 10px !important;
     margin: 0 !important;
     padding: 0 !important;
 }
@@ -88,6 +128,7 @@ const GlobalWebsiteHeader = {
 #globalSiteHeader .header-left {
     display: flex !important;
     align-items: center !important;
+    gap: 14px !important;
     margin: 0 !important;
     padding: 0 !important;
 }
@@ -106,17 +147,17 @@ const GlobalWebsiteHeader = {
     -webkit-backdrop-filter: none !important;
     box-shadow: none !important;
     color: #16697A !important;
-    padding: 8px 12px !important;
-    border-radius: 8px !important;
+    padding: 4px 6px !important;
+    border-radius: 4px !important;
     cursor: pointer !important;
-    font-size: 1.1rem !important;
+    font-size: 0.55rem !important;
     transition: background 0.2s ease !important;
     position: relative !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 4px !important;
+    gap: 2px !important;
     min-width: auto !important;
     text-align: center !important;
 }
@@ -138,11 +179,11 @@ const GlobalWebsiteHeader = {
     width: 100% !important;
     margin: 0 !important;
     line-height: 1 !important;
-    font-size: 1.1rem !important;
+    font-size: 0.55rem !important;
 }
 
 #globalSiteHeader .profile-icon-btn .button-label {
-    font-size: 11px !important;
+    font-size: 5.5px !important;
     font-weight: 600 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.5px !important;
@@ -159,12 +200,12 @@ const GlobalWebsiteHeader = {
     top: 100% !important;
     left: 0 !important;
     right: auto !important;
-    background: rgba(255, 255, 255, 0.95) !important;
+    background: rgba(255, 255, 255, 0.98) !important;
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
-    border: 2px solid rgba(255, 255, 255, 0.3) !important;
-    border-radius: 15px !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid rgba(22, 105, 122, 0.15) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 40px rgba(22, 105, 122, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08) !important;
     width: 280px !important;
     min-width: 280px !important;
     max-width: 280px !important;
@@ -173,8 +214,8 @@ const GlobalWebsiteHeader = {
     visibility: hidden;
     transform: translateY(-10px);
     transition: all 0.3s ease !important;
-    margin-top: 10px !important;
-    padding: 8px 0 !important;
+    margin-top: 12px !important;
+    padding: 10px 0 !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
 }
@@ -293,9 +334,9 @@ const GlobalWebsiteHeader = {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     border: none !important;
-    border-radius: 8px !important;
+    border-radius: 5px !important;
     color: #16697A !important;
-    padding: 8px 12px !important;
+    padding: 5px 8px !important;
     cursor: pointer !important;
     transition: background 0.2s ease !important;
     position: relative !important;
@@ -303,12 +344,12 @@ const GlobalWebsiteHeader = {
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 4px !important;
+    gap: 3px !important;
     box-shadow: none !important;
     font-weight: 600 !important;
     min-width: auto !important;
     text-align: center !important;
-    font-size: 1.1rem !important;
+    font-size: 0.62rem !important;
 }
 
 #globalSiteHeader .cart-icon-btn:hover {
@@ -329,11 +370,11 @@ const GlobalWebsiteHeader = {
     width: 100% !important;
     margin: 0 !important;
     line-height: 1 !important;
-    font-size: 16px !important;
+    font-size: 11px !important;
 }
 
 #globalSiteHeader .cart-icon-btn .button-label {
-    font-size: 11px !important;
+    font-size: 8px !important;
     font-weight: 600 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.5px !important;
@@ -349,17 +390,17 @@ const GlobalWebsiteHeader = {
     color: white !important;
     border-radius: 50% !important;
     padding: 0 !important;
-    font-size: 10px !important;
+    font-size: 6px !important;
     font-weight: 700 !important;
-    min-width: 18px !important;
-    width: 18px !important;
-    height: 18px !important;
+    min-width: 11px !important;
+    width: 11px !important;
+    height: 11px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     position: absolute !important;
-    top: -8px !important;
-    right: -4px !important;
+    top: -5px !important;
+    right: -2px !important;
     z-index: 10 !important;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
 }
@@ -373,6 +414,7 @@ const GlobalWebsiteHeader = {
     #globalSiteHeader {
         background: #EDE7E3 !important;
         box-shadow: none !important;
+        border-bottom: none !important;
     }
 
     #globalSiteHeader .header-content {
@@ -383,6 +425,11 @@ const GlobalWebsiteHeader = {
 
     #globalSiteHeader .brand-name {
         font-size: 1.3rem !important;
+    }
+    
+    /* Hide desktop navigation on mobile */
+    #globalSiteHeader .desktop-nav {
+        display: none !important;
     }
 
     #globalSiteHeader .profile-icon-btn,
@@ -417,7 +464,7 @@ const GlobalWebsiteHeader = {
         display: none !important;
     }
     
-    /* CRITICAL: Fixed width for mobile dropdown */
+    /* CRITICAL: Fixed width for mobile dropdown - align left on mobile */
     #globalSiteHeader .profile-dropdown-menu {
         width: 260px !important;
         min-width: 260px !important;
@@ -443,6 +490,79 @@ const GlobalWebsiteHeader = {
     #globalSiteHeader .profile-dropdown-menu .dropdown-item {
         padding: 10px 16px !important;
         font-size: 13px !important;
+    }
+}
+
+/* Desktop-specific adjustments - Magnified mobile style */
+@media (min-width: 769px) {
+    /* Hide all navigation links - only show logo, profile, cart */
+    #globalSiteHeader .desktop-nav,
+    #globalSiteHeader .desktop-nav-right {
+        display: none !important;
+    }
+    
+    /* Larger header on desktop */
+    #globalSiteHeader .header-content {
+        height: 48px !important;
+        padding: 0 30px !important;
+    }
+    
+    /* Larger brand name on desktop */
+    #globalSiteHeader .brand-name {
+        font-size: 1.5rem !important;
+        letter-spacing: 2.4px !important;
+    }
+    
+    /* Larger icons on desktop */
+    #globalSiteHeader .profile-icon-btn,
+    #globalSiteHeader .cart-icon-btn {
+        padding: 8px 10px !important;
+        border-radius: 7px !important;
+    }
+    
+    #globalSiteHeader .profile-icon-btn i,
+    #globalSiteHeader .cart-icon-btn i {
+        font-size: 0.91rem !important;
+    }
+    
+    /* Show labels on desktop */
+    #globalSiteHeader .profile-icon-btn .button-label,
+    #globalSiteHeader .cart-icon-btn .button-label {
+        display: block !important;
+        font-size: 0.48rem !important;
+    }
+    
+    /* Cart badge larger on desktop */
+    #globalSiteHeader .cart-count {
+        min-width: 13px !important;
+        width: 13px !important;
+        height: 13px !important;
+        font-size: 7px !important;
+        top: -4px !important;
+        right: 0px !important;
+    }
+    
+    /* Dropdown aligns to the RIGHT of the profile icon on desktop */
+    #globalSiteHeader .profile-dropdown-menu {
+        left: 0 !important;
+        right: auto !important;
+    }
+}
+
+/* Large desktop screens - even bigger */
+@media (min-width: 1440px) {
+    #globalSiteHeader .header-content {
+        height: 52px !important;
+        padding: 0 36px !important;
+    }
+    
+    #globalSiteHeader .brand-name {
+        font-size: 1.68rem !important;
+    }
+    
+    #globalSiteHeader .profile-icon-btn i,
+    #globalSiteHeader .cart-icon-btn i {
+        font-size: 0.98rem !important;
     }
 }
 `;
@@ -477,6 +597,12 @@ const GlobalWebsiteHeader = {
      */
     getHeaderHTML() {
         const currentPage = this.getCurrentPageName();
+        
+        // Determine active page for navigation highlighting
+        const isHome = currentPage === 'index.html' || currentPage === '';
+        const isCustomize = currentPage === 'customize.html';
+        const isAbout = currentPage === 'about-us.html';
+        const isFaq = currentPage === 'faq.html';
         
         return `
     <!-- Header -->
@@ -547,9 +673,27 @@ const GlobalWebsiteHeader = {
                     </div>
                 </div>
             </div>
+            
+            <!-- Desktop Navigation -->
+            <nav class="desktop-nav" id="desktopNav">
+                <a href="index.html" class="nav-link ${isHome ? 'active' : ''}">Home</a>
+                <a href="about-us.html" class="nav-link ${isAbout ? 'active' : ''}">About</a>
+                <a href="faq.html" class="nav-link ${isFaq ? 'active' : ''}">FAQ</a>
+                <a href="customize.html" class="nav-link nav-cta ${isCustomize ? 'active' : ''}">
+                    <i class="fas fa-palette" style="margin-right: 6px;"></i>Create Now
+                </a>
+            </nav>
+            
             <div class="header-brand">
                 <a href="index.html" style="text-decoration: none; color: inherit;"><h1 class="brand-name">XIDLZ</h1></a>
             </div>
+            
+            <!-- Desktop Navigation (Right Side) -->
+            <nav class="desktop-nav desktop-nav-right" id="desktopNavRight">
+                <a href="my-orders.html" class="nav-link">Orders</a>
+                <a href="cart.html" class="nav-link">Cart</a>
+            </nav>
+            
             <div class="header-right">
                 <div class="header-cart">
                     <button class="cart-icon-btn" id="headerCartBtn" onclick="window.location.href='cart.html'">
@@ -726,11 +870,27 @@ const GlobalWebsiteHeader = {
     },
 
     /**
+     * Inject favicon if missing
+     */
+    injectFavicon() {
+        if (!document.querySelector('link[rel="icon"]') && !document.querySelector('link[rel="shortcut icon"]')) {
+            const link = document.createElement('link');
+            link.rel = 'icon';
+            link.href = 'image.png';
+            link.type = 'image/png';
+            document.head.appendChild(link);
+        }
+    },
+
+    /**
      * Initialize the header component
      */
     init() {
         // Inject scoped styles first to ensure proper styling
         this.injectStyles();
+        
+        // Inject favicon
+        this.injectFavicon();
         
         // Insert the header HTML
         const inserted = this.insertHeader();

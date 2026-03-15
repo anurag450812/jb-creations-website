@@ -45,17 +45,41 @@ class JBCreationsAPI {
         console.log('🚀 Xidlz API powered by Firebase initialized');
     }
 
+    // Helper for network resilience
+    async _retryOperation(operation, retries = 3, backoff = 1000) {
+        if (!navigator.onLine) {
+            throw new Error('No internet connection. Please check your network settings.');
+        }
+
+        try {
+            // Timeout wrapper (15s)
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Operation timed out')), 15000)
+            );
+            
+            return await Promise.race([operation(), timeoutPromise]);
+        } catch (error) {
+            // Retry on unavailable or timeout
+            if (retries > 0 && (error.code === 'unavailable' || error.message.includes('timed out'))) {
+                 console.warn(`Firebase operation failed. Retrying in ${backoff}ms...`);
+                 await new Promise(resolve => setTimeout(resolve, backoff));
+                 return this._retryOperation(operation, retries - 1, backoff * 2);
+            }
+            throw error;
+        }
+    }
+
     // Create customer record
     async createCustomer(customerData) {
         try {
-            const customerRef = await addDoc(collection(this.db, 'customers'), {
+            const customerRef = await this._retryOperation(() => addDoc(collection(this.db, 'customers'), {
                 name: customerData.name,
                 email: customerData.email,
                 phone: customerData.phone,
                 address: customerData.address,
                 createdAt: serverTimestamp(),
                 orderHistory: []
-            });
+            }));
             
             console.log('✅ Customer created with ID:', customerRef.id);
             return { success: true, customerId: customerRef.id };
@@ -75,19 +99,19 @@ class JBCreationsAPI {
             
             if (existingUser) {
                 // Update existing user
-                await updateDoc(doc(this.db, 'users', existingUser.docId), {
+                await this._retryOperation(() => updateDoc(doc(this.db, 'users', existingUser.docId), {
                     name: userData.name,
                     email: userData.email,
                     lastLogin: serverTimestamp(),
                     loginCount: (userData.loginCount || existingUser.loginCount || 0) + 1,
                     updatedAt: serverTimestamp()
-                });
+                }));
                 
                 console.log('✅ User updated successfully');
                 return { success: true, userId: existingUser.docId, isNew: false };
             } else {
                 // Create new user
-                const userRef = await addDoc(collection(this.db, 'users'), {
+                const userRef = await this._retryOperation(() => addDoc(collection(this.db, 'users'), {
                     id: userData.id,
                     name: userData.name,
                     email: userData.email || '',
@@ -97,7 +121,7 @@ class JBCreationsAPI {
                     loginCount: 1,
                     orderHistory: [],
                     createdAt: serverTimestamp()
-                });
+                }));
                 
                 console.log('✅ New user created with ID:', userRef.id);
                 return { success: true, userId: userRef.id, isNew: true };
@@ -116,7 +140,7 @@ class JBCreationsAPI {
                 where('phone', '==', phoneNumber)
             );
             
-            const querySnapshot = await getDocs(usersQuery);
+            const querySnapshot = await this._retryOperation(() => getDocs(usersQuery));
             
             if (querySnapshot.empty) {
                 return null;
@@ -141,7 +165,7 @@ class JBCreationsAPI {
                 orderBy('registrationDate', 'desc')
             );
             
-            const querySnapshot = await getDocs(usersQuery);
+            const querySnapshot = await this._retryOperation(() => getDocs(usersQuery));
             const users = [];
             
             querySnapshot.forEach((doc) => {
@@ -376,7 +400,7 @@ class JBCreationsAPI {
 
             // 3. Save to Firestore with new structure
             try {
-                const orderRef = await addDoc(collection(this.db, 'orders'), newOrderStructure);
+                const orderRef = await this._retryOperation(() => addDoc(collection(this.db, 'orders'), newOrderStructure));
                 console.log(`✅ Order saved to Firestore with new structure: ${orderRef.id} (Call ID: ${callId})`);
 
                 return { 

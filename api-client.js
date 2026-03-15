@@ -46,20 +46,38 @@ class APIClient {
     }
 
     // Generic request method
-    async request(endpoint, options = {}) {
+    async request(endpoint, options = {}, retries = 3, backoff = 1000) {
+        // Offline detection
+        if (!navigator.onLine) {
+            throw new Error('No internet connection. Please check your network settings.');
+        }
+
         const url = `${this.baseURL}${endpoint}`;
         
+        // Timeout setup (15 seconds)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
         const config = {
             headers: this.getAuthHeaders(),
-            ...options
+            ...options,
+            signal: controller.signal
         };
 
         try {
             console.log(`🌐 API Request: ${options.method || 'GET'} ${url}`);
             
             const response = await fetch(url, config);
+            clearTimeout(timeoutId);
             
             if (!response.ok) {
+                // Retry on server errors (5xx)
+                if (response.status >= 500 && retries > 0) {
+                    console.warn(`Server error ${response.status}. Retrying in ${backoff}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, backoff));
+                    return this.request(endpoint, options, retries - 1, backoff * 2);
+                }
+
                 const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
                 throw new Error(errorData.error || `HTTP ${response.status}`);
             }
@@ -69,6 +87,20 @@ class APIClient {
             return data;
             
         } catch (error) {
+            clearTimeout(timeoutId);
+            
+            // Handle timeout
+            if (error.name === 'AbortError') {
+                throw new Error('Request timed out. Please check your connection and try again.');
+            }
+
+            // Retry on network errors
+            if (retries > 0 && (error.message.includes('Failed to fetch') || error.message.includes('NetworkError'))) {
+                console.warn(`Network error. Retrying in ${backoff}ms...`);
+                await new Promise(resolve => setTimeout(resolve, backoff));
+                return this.request(endpoint, options, retries - 1, backoff * 2);
+            }
+
             console.error('❌ API Error:', error);
             throw error;
         }

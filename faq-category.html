@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FAQ - Xidlz</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="desktop-specific.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * {
@@ -768,6 +769,15 @@
             });
 
             document.getElementById('noResults').style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+    </script>
+    
+    <!-- Global Header for Desktop -->
+    <script src="global-header.js"></script>
+    <script>
+        // Initialize global header on desktop
+        if (window.innerWidth >= 769 && typeof GlobalWebsiteHeader !== 'undefined') {
+            GlobalWebsiteHeader.init();
         }
     </script>
 </body>

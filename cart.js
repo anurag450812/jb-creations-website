@@ -324,7 +324,7 @@ class CartManager {
             }
             
             if (newQuantity > 10) {
-                alert('Maximum quantity per item is 10');
+                notifications.warning('Maximum quantity per item is 10');
                 return;
             }
 
@@ -532,27 +532,13 @@ class CartManager {
     }
 
     showMessage(message, type) {
-        // Create and show a temporary message
-        const messageDiv = document.createElement('div');
-        messageDiv.style.cssText = `
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            padding: 15px 25px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
-            z-index: 10000;
-            animation: slideIn 0.3s ease;
-            ${type === 'success' ? 'background: #27ae60;' : 'background: #e74c3c;'}
-        `;
-        messageDiv.textContent = message;
-        
-        document.body.appendChild(messageDiv);
-        
-        setTimeout(() => {
-            messageDiv.remove();
-        }, 3000);
+        // Use centralized notification system
+        if (window.notifications) {
+            window.notifications.show(message, type);
+        } else {
+            // Fallback
+            alert(message);
+        }
     }
 
     updateHeader() {
@@ -585,7 +571,7 @@ async function viewProfile() {
             const user = await window.otpAuth.getCurrentUser();
             if (user) {
                 const registrationDate = user.registrationDate ? new Date(user.registrationDate).toLocaleDateString() : 'Unknown';
-                alert(`Profile for ${user.name || 'User'}\nPhone: ${user.phone || 'Unknown'}\nEmail: ${user.email || 'Not provided'}\nMember since: ${registrationDate}\nUser ID: ${user.id || 'N/A'}`);
+                notifications.info(`Profile for ${user.name || 'User'}<br>Phone: ${user.phone || 'Unknown'}<br>Email: ${user.email || 'Not provided'}<br>Member since: ${registrationDate}<br>User ID: ${user.id || 'N/A'}`, 'User Profile');
                 return;
             }
         }
@@ -601,23 +587,23 @@ async function viewProfile() {
                 if (userDataStr.startsWith('+91') || userDataStr.startsWith('+')) {
                     userData = { phone: userDataStr, name: 'User' };
                 } else {
-                    alert('Please sign in to view your profile.');
+                    notifications.warning('Please sign in to view your profile.');
                     return;
                 }
             }
             
             if (userData && userData.phone) {
                 const registrationDate = userData.registrationDate ? new Date(userData.registrationDate).toLocaleDateString() : 'Unknown';
-                alert(`Profile for ${userData.name || 'User'}\nPhone: ${userData.phone || 'Unknown'}\nEmail: ${userData.email || 'Not provided'}\nMember since: ${registrationDate}\nUser ID: ${userData.id || 'N/A'}`);
+                notifications.info(`Profile for ${userData.name || 'User'}<br>Phone: ${userData.phone || 'Unknown'}<br>Email: ${userData.email || 'Not provided'}<br>Member since: ${registrationDate}<br>User ID: ${userData.id || 'N/A'}`, 'User Profile');
                 return;
             }
         }
         
         // No user found
-        alert('Please sign in to view your profile.');
+        notifications.warning('Please sign in to view your profile.');
     } catch (error) {
         console.error('❌ Error viewing profile:', error);
-        alert('Error loading profile. Please try again.');
+        notifications.error('Error loading profile. Please try again.');
     }
 }
 
