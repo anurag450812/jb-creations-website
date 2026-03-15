@@ -215,6 +215,23 @@
                 padding: 6px 10px;
                 font-size: 1rem;
             }
+
+            /* Mobile header scroll animations */
+            .site-header {
+                position: fixed !important;
+                top: 0 !important;
+                transform: translateY(0);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .site-header.scroll-hide {
+                transform: translateY(-100%);
+            }
+
+            /* Remove spacer on mobile */
+            .header-spacer {
+                display: none !important;
+            }
         }
 
         /* ========================================
@@ -1391,6 +1408,43 @@
                     .catch(error => console.warn('⚠️ Service Worker registration failed:', error));
             });
         }
+    </script>
+
+    <!-- Mobile Header Scroll Hide/Show Animation -->
+    <script>
+        (function() {
+            // Only apply on mobile devices
+            if (window.innerWidth > 768) return;
+
+            const header = document.querySelector('.site-header');
+            if (!header) return;
+
+            let lastScrollTop = 0;
+            let ticking = false;
+
+            function updateHeaderVisibility() {
+                const currentScroll = window.scrollY || document.documentElement.scrollTop;
+
+                // Show header when scrolling up
+                if (currentScroll < lastScrollTop) {
+                    header.classList.remove('scroll-hide');
+                }
+                // Hide header when scrolling down (but keep visible in top 100px)
+                else if (currentScroll > lastScrollTop && currentScroll > 100) {
+                    header.classList.add('scroll-hide');
+                }
+
+                lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+                ticking = false;
+            }
+
+            window.addEventListener('scroll', function() {
+                if (!ticking) {
+                    window.requestAnimationFrame(updateHeaderVisibility);
+                    ticking = true;
+                }
+            }, { passive: true });
+        })();
     </script>
 </body>
 </html>
