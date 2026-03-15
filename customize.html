@@ -300,17 +300,18 @@
             /* Full-screen swipeable sections on mobile */
             .upload-hero-wrapper {
                 padding: 0 0 18px;
-                height: calc(100vh - 56px);
-                overflow: hidden;
-                scroll-snap-type: y proximity;
-                overflow-y: auto;
+                height: auto;
+                max-height: none;
+                overflow: visible;
+                scroll-snap-type: none;
+                overflow-y: visible;
                 background: linear-gradient(180deg, #f4ede8 0%, #fff8f2 34%, #eef7f8 100%);
             }
 
             .upload-hero-section {
-                min-height: calc(100vh - 56px);
+                min-height: auto;
                 height: auto;
-                padding: 24px 14px 34px;
+                padding: 24px 14px 24px;
                 margin: 0;
                 display: flex;
                 flex-direction: column;
@@ -561,23 +562,9 @@
                 grid-row: auto;
             }
 
-            /* Swipe hint indicator */
+            /* Swipe hint indicator - HIDDEN ON MOBILE */
             .upload-hero-section::after {
-                content: 'Swipe for next steps';
-                position: absolute;
-                bottom: 16px;
-                left: 50%;
-                transform: translateX(-50%);
-                font-size: 0.72rem;
-                color: rgba(255,255,255,0.9);
-                letter-spacing: 0.08em;
-                text-transform: uppercase;
-                padding: 8px 12px;
-                border-radius: 999px;
-                background: rgba(255, 255, 255, 0.12);
-                border: 1px solid rgba(255, 255, 255, 0.14);
-                backdrop-filter: blur(8px);
-                animation: bounce 2s infinite;
+                display: none !important;
             }
             
             @keyframes bounce {
