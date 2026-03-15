@@ -336,16 +336,16 @@
     .upload-box-wrapper {
         position: relative !important;
         z-index: 1 !important;
-        display: inline-grid !important;
+        display: inline-grid;
         flex-direction: column !important;
         justify-content: center !important;
         align-self: stretch !important;
         color: #70e7ff !important;
         background: rgba(255, 255, 255, 0.98) !important;
         border-radius: 30px !important;
-        padding: 0px 28px !important;
+        padding: 43px 28px 61px ;
         max-width: none !important;
-        margin: 0 !important;
+        margin: 30px 0px 15px ;
         box-shadow: 0 22px 45px rgba(10, 43, 51, 0.18) !important;
         border: 1px solid rgba(22, 105, 122, 0.08) !important;
     }
@@ -381,7 +381,12 @@
         min-height: 330px !important;
     }
 
-    #heroUploadOverlay,
+    #heroUploadOverlay {
+        box-shadow: rgba(235, 234, 234, 0.55) 0px 0px 0px 1px inset;
+        color: #185690;
+        text-align: left;
+    }
+
     .upload-box-wrapper .upload-overlay {
         border: 2px dashed rgba(72, 159, 181, 0.55) !important;
         border-radius: 18px !important;
