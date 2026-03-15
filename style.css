@@ -6046,20 +6046,36 @@ button i {
 
     .footer-quick-links {
         grid-area: quick;
+        text-align: center !important;
+        align-items: center !important;
+    }
+
+    .footer-quick-links h3 {
+        text-align: center !important;
+    }
+
+    .footer-quick-links h3::after {
+        left: 50% !important;
+        transform: translateX(-50%) !important;
     }
 
     .footer-quick-links .footer-links {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 0.75rem 1rem;
+        justify-items: center !important;
     }
 
     .footer-quick-links .footer-links li {
         margin-bottom: 0;
+        text-align: center !important;
     }
 
     .footer-quick-links .footer-links a {
         padding-left: 0;
+        justify-content: center !important;
+        display: flex !important;
+        align-items: center !important;
     }
 
     .footer-quick-links .footer-links a::before {
@@ -6132,10 +6148,20 @@ button i {
     .footer-quick-links .footer-links {
         grid-template-columns: 1fr;
         gap: 0.65rem;
+        justify-items: center !important;
     }
     
     .footer-quick-links .footer-links li {
         text-align: center;
+    }
+    
+    .footer-quick-links h3 {
+        text-align: center !important;
+    }
+    
+    .footer-quick-links h3::after {
+        left: 50% !important;
+        transform: translateX(-50%) !important;
     }
     
     .footer-quick-links .footer-links a {
