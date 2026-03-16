@@ -340,6 +340,10 @@
             }
 
             .terms-header {
+                display: none;
+            }
+
+            .terms-header {
                 height: 52px;
             }
 
@@ -403,6 +407,7 @@
     </style>
 </head>
 <body>
+    <div class="mobile-global-header-placeholder"></div>
     <!-- Header -->
     <header class="terms-header">
         <a href="index.html" class="back-btn">
@@ -771,5 +776,16 @@
 
     <!-- Scripts -->
     <script src="global-header.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.innerWidth <= 768 && typeof GlobalWebsiteHeader !== 'undefined') {
+                const placeholder = document.querySelector('.mobile-global-header-placeholder');
+                if (placeholder) {
+                    placeholder.id = 'global-header-container';
+                    GlobalWebsiteHeader.init();
+                }
+            }
+        });
+    </script>
 </body>
 </html>

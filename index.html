@@ -88,107 +88,10 @@
         }
 
         /* ========================================
-           GLOBAL HEADER STYLES - Enhanced Desktop Design
+           GLOBAL HEADER STYLES
+           Desktop header styling is centralized in global-header.js.
+           Only homepage mobile-specific behavior stays here.
         ======================================== */
-        .site-header {
-            padding: 0 !important;
-            top: 0;
-            position: fixed;
-            width: 100%;
-            z-index: 2000;
-            background: var(--off-white);
-            box-shadow: 0 2px 20px rgba(22, 105, 122, 0.08);
-            border-bottom: 1px solid rgba(22, 105, 122, 0.1);
-        }
-
-        #globalSiteHeader {
-            padding: 0px 0px 67px;
-            margin: 0px;
-            backdrop-filter: blur(0px);
-            border: 1px solid rgba(0, 0, 0, 1);
-            border-width: 0px;
-            justify-content: normal;
-            line-height: 26px;
-            border-radius: 23px;
-        }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0px 36px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 24px;
-            height: 64px;
-            background: var(--off-white);
-            border: none;
-            box-shadow: none;
-            line-height: 43px;
-        }
-
-        .brand-name {
-            font-size: 71px;
-            font-weight: 800;
-            letter-spacing: 29px;
-            color: var(--primary);
-            text-decoration: none;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-            line-height: 31px;
-            transition: all 0.25s ease;
-        }
-        
-        .brand-name:hover {
-            transform: scale(1.02);
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin: 0;
-            padding: 0;
-        }
-
-        .profile-icon-btn,
-        .cart-icon-btn {
-            background: transparent;
-            border: none;
-            padding: 8px 12px;
-            color: var(--primary);
-            font-size: 1.1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            border-radius: 8px;
-            transition: background 0.2s ease;
-            margin: 0;
-        }
-
-        .profile-icon-btn:hover,
-        .cart-icon-btn:hover {
-            background: rgba(22, 105, 122, 0.08);
-            color: var(--primary);
-        }
-
-        .profile-icon-btn i,
-        .cart-icon-btn i {
-            font-size: 1.1rem;
-        }
-
-        .fas.fa-shopping-cart {
-            line-height: 59px;
-        }
-
-        .button-label {
-            font-size: 0.7rem;
-            font-weight: 600;
-            display: none;
-        }
 
         @media (max-width: 768px) {
             .header-content {
@@ -1236,6 +1139,11 @@
 
         async function updateAuthUI() {
             try {
+                if (window.GlobalWebsiteHeader && document.getElementById('globalSiteHeader')) {
+                    GlobalWebsiteHeader.checkAndUpdateAuthState();
+                    return;
+                }
+
                 const user = await getCurrentAuthenticatedUser();
                 
                 const guestOptions = document.getElementById('guestOptions');

@@ -213,6 +213,37 @@ function isMobileViewport() {
 
 // When true (on mobile), prevent incidental scroll from shifting the image; unlock only during drag/zoom
 let mobilePositionLocked = false;
+let desktopRoomPreviewAutoUpdateTimeout = null;
+
+function shouldAutoRefreshDesktopRoomPreview() {
+    return window.innerWidth > 768 && !!state.image && !!(state.roomSlider && state.roomSlider.isActive);
+}
+
+function scheduleDesktopRoomPreviewRefresh(reason = '') {
+    if (desktopRoomPreviewAutoUpdateTimeout) {
+        clearTimeout(desktopRoomPreviewAutoUpdateTimeout);
+    }
+
+    if (!shouldAutoRefreshDesktopRoomPreview()) {
+        return;
+    }
+
+    desktopRoomPreviewAutoUpdateTimeout = setTimeout(() => {
+        desktopRoomPreviewAutoUpdateTimeout = null;
+
+        if (!shouldAutoRefreshDesktopRoomPreview()) {
+            return;
+        }
+
+        const updateButton = document.getElementById('updateRoomPreviews');
+        if (!updateButton || updateButton.disabled) {
+            return;
+        }
+
+        console.log(`🖼️ Auto-refreshing desktop room preview${reason ? ` after ${reason}` : ''}...`);
+        updateButton.click();
+    }, 250);
+}
 
 // Initialize application when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
@@ -808,11 +839,350 @@ function initializeDefaults() {
         defaultBorderBtn.classList.add('selected');
         console.log('Default border selection: No');
     }
+
+    const defaultTextureBtn = document.querySelector('.desktop-texture-btn[data-texture="smooth"]');
+    if (defaultTextureBtn) {
+        defaultTextureBtn.classList.add('selected');
+        console.log('Default texture selection: Smooth');
+    }
     
     // Update total price display
     if (elements.totalPrice) {
         elements.totalPrice.textContent = `₹${state.price}`;
     }
+
+    updateMobileSpecs();
+    updateRatingsDisplay();
+}
+
+function capitalizeOptionLabel(value, fallback = '') {
+    if (!value) {
+        return fallback;
+    }
+
+    return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function getPrimaryAddToCartMarkup() {
+    return '<i class="fas fa-shopping-cart"></i> Add to Cart';
+}
+
+function getDesktopAddToCartMarkup() {
+    return '<i class="fas fa-shopping-cart"></i><span>Add to Cart</span>';
+}
+
+function getDesktopBuyNowMarkup() {
+    return '<i class="fas fa-bolt"></i><span>Buy Now</span>';
+}
+
+function isCustomizationReadyForPurchase() {
+    return !!(state && state.image && state.frameSize);
+}
+
+function syncDesktopPurchaseBarFromPrimary() {
+    const primaryPrice = document.getElementById('totalPrice');
+    const primaryButton = document.getElementById('addToCart');
+    const desktopPrice = document.getElementById('desktopDetailsTotalPrice');
+    const desktopButton = document.getElementById('desktopDetailsAddToCart');
+    const desktopBuyNowButton = document.getElementById('desktopDetailsBuyNow');
+
+    if (desktopPrice) {
+        desktopPrice.innerHTML = primaryPrice ? primaryPrice.innerHTML : `₹${state.price || 349}`;
+    }
+
+    if (desktopButton) {
+        desktopButton.disabled = primaryButton ? primaryButton.disabled : !(state.image && state.frameSize);
+        desktopButton.innerHTML = primaryButton ? primaryButton.innerHTML : getDesktopAddToCartMarkup();
+        desktopButton.style.background = primaryButton && primaryButton.style.background ? primaryButton.style.background : '';
+    }
+
+    if (desktopBuyNowButton) {
+        desktopBuyNowButton.disabled = primaryButton ? primaryButton.disabled : !isCustomizationReadyForPurchase();
+    }
+}
+
+function resetCustomizePurchaseButtons() {
+    const primaryButton = document.getElementById('addToCart');
+    const desktopButton = document.getElementById('desktopDetailsAddToCart');
+    const desktopBuyNowButton = document.getElementById('desktopDetailsBuyNow');
+    const purchaseReady = isCustomizationReadyForPurchase();
+
+    if (primaryButton) {
+        primaryButton.disabled = !purchaseReady;
+        primaryButton.innerHTML = getPrimaryAddToCartMarkup();
+        primaryButton.style.background = '';
+    }
+
+    if (desktopButton) {
+        desktopButton.disabled = !purchaseReady;
+        desktopButton.innerHTML = getDesktopAddToCartMarkup();
+        desktopButton.style.background = '';
+    }
+
+    if (desktopBuyNowButton) {
+        desktopBuyNowButton.disabled = !purchaseReady;
+        desktopBuyNowButton.innerHTML = getDesktopBuyNowMarkup();
+    }
+
+    syncDesktopPurchaseBarFromPrimary();
+}
+
+async function createCartItemFromCurrentState() {
+    // Calculate MRP based on frame size
+    let mrp = 0;
+    if (state.frameSize && state.frameSize.size === '13x19') {
+        mrp = 999;
+    } else if (state.frameSize && (state.frameSize.size === '13x10' || state.frameSize.size === '10x13')) {
+        mrp = 799;
+    } else {
+        mrp = (state.price || 349) * 2;
+    }
+
+    const cartItem = {
+        id: Date.now(),
+        originalImage: state.originalImage || state.image,
+        frameSize: state.frameSize,
+        frameColor: state.frameColor || '#8B4513',
+        frameTexture: state.frameTexture || 'wood',
+        whiteBorder: state.whiteBorder || false,
+        borderThickness: state.borderThickness || 15,
+        adjustments: { ...state.adjustments },
+        zoom: state.zoom || 1,
+        position: { ...state.position },
+        price: state.price || 349,
+        mrp: mrp,
+        orderDate: new Date().toISOString(),
+        timestamp: new Date().toISOString()
+    };
+
+    console.log('Attempting to capture images...');
+    console.log('Current state:', {
+        hasImage: !!state.image,
+        hasOriginalImage: !!state.originalImage,
+        hasFrameSize: !!state.frameSize,
+        imageLength: state.image ? state.image.length : 0
+    });
+
+    try {
+        console.log('');
+        console.log('%c═══ STARTING IMAGE CAPTURE PROMISE.ALL ═══', 'color: #ff00ff; font-size: 16px; font-weight: bold;');
+        console.log('Calling 4 capture functions in parallel...');
+
+        const [printImageData, previewImageData, adminCroppedImage, highQualityPrintImage] = await Promise.all([
+            getCanvasImageData().catch(err => {
+                console.warn('Print image capture failed:', err);
+                return null;
+            }),
+            captureFramePreview().catch(err => {
+                console.warn('Preview image capture failed:', err);
+                return null;
+            }),
+            captureFramedImage().catch(err => {
+                console.warn('Admin cropped image capture failed:', err);
+                return null;
+            }),
+            captureHighQualityPrintImage().catch(err => {
+                console.error('❌❌❌ High-quality print image capture FAILED:', err);
+                console.error('❌❌❌ Error stack:', err.stack);
+                return null;
+            })
+        ]);
+
+        console.log('%c═══ IMAGE CAPTURE PROMISE.ALL COMPLETE ═══', 'color: #ff00ff; font-size: 16px; font-weight: bold;');
+        console.log('Image capture results:', {
+            printImageCaptured: !!printImageData,
+            previewImageCaptured: !!previewImageData,
+            adminCroppedImageCaptured: !!adminCroppedImage,
+            highQualityPrintImageCaptured: !!highQualityPrintImage,
+            printImageSize: printImageData ? printImageData.length : 0,
+            previewImageSize: previewImageData ? previewImageData.length : 0,
+            adminCroppedImageSize: adminCroppedImage ? adminCroppedImage.length : 0,
+            highQualityPrintImageSize: highQualityPrintImage ? highQualityPrintImage.length : 0
+        });
+
+        if (printImageData) {
+            cartItem.printImage = printImageData;
+            console.log('✅ Print image captured successfully');
+        } else {
+            console.warn('⚠️ Print image not captured, using original image as fallback');
+            cartItem.printImage = state.originalImage || state.image;
+        }
+
+        if (previewImageData) {
+            cartItem.previewImage = previewImageData;
+            cartItem.displayImage = previewImageData;
+            console.log('✅ Preview image captured successfully');
+        } else {
+            console.warn('⚠️ Preview image not captured, using original image as fallback');
+            cartItem.previewImage = state.originalImage || state.image;
+            cartItem.displayImage = state.originalImage || state.image;
+        }
+
+        if (highQualityPrintImage) {
+            const sizeKB = Math.round(highQualityPrintImage.length / 1024);
+            cartItem.highQualityPrintImage = highQualityPrintImage;
+            cartItem.adminCroppedImage = highQualityPrintImage;
+            console.log('✅ HIGH-QUALITY print image captured from original!');
+            console.log('📊 High-quality image size:', sizeKB, 'KB');
+
+            if (sizeKB < 50) {
+                console.error('❌ WARNING: High-quality image is suspiciously small! Expected >50KB, got', sizeKB, 'KB');
+                console.error('❌ This indicates the capture function may have failed or used wrong source');
+            }
+        } else if (adminCroppedImage) {
+            cartItem.adminCroppedImage = adminCroppedImage;
+            console.log('✅ Standard cropped image captured for admin panel');
+        } else {
+            console.warn('⚠️ No cropped image captured, will use fallback');
+        }
+
+    } catch (imageError) {
+        console.warn('Image capture failed, using original image as fallback:', imageError);
+        cartItem.printImage = state.originalImage || state.image;
+        cartItem.previewImage = state.originalImage || state.image;
+        cartItem.displayImage = state.originalImage || state.image;
+        cartItem.adminCroppedImage = state.originalImage || state.image;
+    }
+
+    return cartItem;
+}
+
+async function processCustomizePurchase(options = {}) {
+    const {
+        triggerButton = document.getElementById('addToCart'),
+        mode = 'cart'
+    } = options;
+
+    const primaryButton = document.getElementById('addToCart');
+    const desktopButton = document.getElementById('desktopDetailsAddToCart');
+    const desktopBuyNowButton = document.getElementById('desktopDetailsBuyNow');
+    const allButtons = [primaryButton, desktopButton, desktopBuyNowButton].filter(Boolean);
+
+    if (!state) {
+        console.error('State object not found - might not be on customize page');
+        notifications.warning('Please go to the customize page to add items to cart.');
+        return false;
+    }
+
+    if (!state.image) {
+        notifications.warning('Please upload an image first');
+        return false;
+    }
+
+    if (!state.frameSize) {
+        notifications.warning('Please select a frame size');
+        return false;
+    }
+
+    const isBuyNow = mode === 'buyNow';
+
+    allButtons.forEach(button => {
+        button.disabled = true;
+    });
+
+    if (primaryButton) {
+        primaryButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+    }
+
+    if (desktopButton) {
+        desktopButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Adding...</span>';
+    }
+
+    if (desktopBuyNowButton) {
+        desktopBuyNowButton.innerHTML = isBuyNow
+            ? '<i class="fas fa-spinner fa-spin"></i><span>Redirecting...</span>'
+            : getDesktopBuyNowMarkup();
+    }
+
+    try {
+        const cartItem = await createCartItemFromCurrentState();
+        console.log('Adding item to cart:', cartItem);
+
+        const success = await addToCart(cartItem);
+
+        if (!success) {
+            resetCustomizePurchaseButtons();
+            return false;
+        }
+
+        if (isBuyNow) {
+            if (desktopBuyNowButton) {
+                desktopBuyNowButton.innerHTML = '<i class="fas fa-check"></i><span>Opening Checkout...</span>';
+            }
+            window.location.href = 'checkout.html';
+            return true;
+        }
+
+        if (primaryButton) {
+            primaryButton.innerHTML = '<i class="fas fa-check"></i> Added!';
+            primaryButton.style.background = '#27ae60';
+        }
+
+        if (desktopButton) {
+            desktopButton.innerHTML = '<i class="fas fa-check"></i><span>Added!</span>';
+            desktopButton.style.background = '#27ae60';
+        }
+
+        setTimeout(() => {
+            resetCustomizePurchaseButtons();
+        }, 2000);
+
+        return true;
+    } catch (error) {
+        console.error('Error in add to cart process:', error);
+        notifications.error('Error adding item to cart. Please try again.');
+        resetCustomizePurchaseButtons();
+        return false;
+    }
+}
+
+function setupDesktopPurchaseBar() {
+    const primaryPrice = document.getElementById('totalPrice');
+    const primaryButton = document.getElementById('addToCart');
+    const desktopButton = document.getElementById('desktopDetailsAddToCart');
+    const desktopBuyNowButton = document.getElementById('desktopDetailsBuyNow');
+
+    if (!desktopButton || desktopButton.dataset.syncInitialized === 'true') {
+        syncDesktopPurchaseBarFromPrimary();
+        return;
+    }
+
+    desktopButton.dataset.syncInitialized = 'true';
+    desktopButton.addEventListener('click', async () => {
+        await processCustomizePurchase({
+            triggerButton: desktopButton,
+            mode: 'cart'
+        });
+    });
+
+    if (desktopBuyNowButton) {
+        desktopBuyNowButton.addEventListener('click', async () => {
+            await processCustomizePurchase({
+                triggerButton: desktopBuyNowButton,
+                mode: 'buyNow'
+            });
+        });
+    }
+
+    [primaryPrice, primaryButton].forEach(sourceElement => {
+        if (!sourceElement) {
+            return;
+        }
+
+        const observer = new MutationObserver(() => {
+            syncDesktopPurchaseBarFromPrimary();
+        });
+
+        observer.observe(sourceElement, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            characterData: true,
+            attributeFilter: ['style', 'disabled', 'class']
+        });
+    });
+
+    syncDesktopPurchaseBarFromPrimary();
 }
 
 // Function to initialize all event listeners
@@ -936,6 +1306,9 @@ function initializeEventListeners() {
             if (typeof updateMobileTotalPrice === 'function') {
                 updateMobileTotalPrice();
             }
+
+            updateMobileSpecs();
+            syncDesktopPurchaseBarFromPrimary();
             
             // Removed auto-scroll on mobile to prevent page from jumping to top/center
             
@@ -1022,193 +1395,10 @@ function initializeEventListeners() {
         console.log('Add to Cart button found, adding event listener');
         elements.addToCartBtn.addEventListener('click', async () => {
             console.log('Add to Cart button clicked!');
-            
-            // Check if we're on the right page
-            if (typeof state === 'undefined' || !state) {
-                console.error('State object not found - might not be on customize page');
-                notifications.warning('Please go to the customize page to add items to cart.');
-                return;
-            }
-            
-            if (!state.image) {
-                notifications.warning('Please upload an image first');
-                return;
-            }
-
-            if (!state.frameSize) {
-                notifications.warning('Please select a frame size');
-                return;
-            }
-
-            try {
-                // Show loading state
-                elements.addToCartBtn.disabled = true;
-                elements.addToCartBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
-                
-                // Calculate MRP based on frame size
-                let mrp = 0;
-                if (state.frameSize && state.frameSize.size === '13x19') {
-                    mrp = 999;
-                } else if (state.frameSize && (state.frameSize.size === '13x10' || state.frameSize.size === '10x13')) {
-                    mrp = 799;
-                } else {
-                    // Default MRP - roughly 2x the price
-                    mrp = (state.price || 349) * 2;
-                }
-                
-                // Prepare cart item with basic data first
-                const cartItem = {
-                    id: Date.now(),
-                    originalImage: state.originalImage || state.image, // Use original uploaded image
-                    frameSize: state.frameSize,
-                    frameColor: state.frameColor || '#8B4513',
-                    frameTexture: state.frameTexture || 'wood',
-                    whiteBorder: state.whiteBorder || false,
-                    borderThickness: state.borderThickness || 15,
-                    adjustments: { ...state.adjustments },
-                    zoom: state.zoom || 1,
-                    position: { ...state.position },
-                    price: state.price || 349,
-                    mrp: mrp, // Add MRP to cart item
-                    orderDate: new Date().toISOString(),
-                    timestamp: new Date().toISOString()
-                };
-
-                // Try to capture images, but don't fail if it doesn't work
-                console.log('Attempting to capture images...');
-                console.log('Current state:', {
-                    hasImage: !!state.image,
-                    hasOriginalImage: !!state.originalImage,
-                    hasFrameSize: !!state.frameSize,
-                    imageLength: state.image ? state.image.length : 0
-                });
-                
-                try {
-                    console.log('');
-                    console.log('%c═══ STARTING IMAGE CAPTURE PROMISE.ALL ═══', 'color: #ff00ff; font-size: 16px; font-weight: bold;');
-                    console.log('Calling 4 capture functions in parallel...');
-                    
-                    const [printImageData, previewImageData, adminCroppedImage, highQualityPrintImage] = await Promise.all([
-                        getCanvasImageData().catch(err => {
-                            console.warn('Print image capture failed:', err);
-                            return null;
-                        }),
-                        captureFramePreview().catch(err => {
-                            console.warn('Preview image capture failed:', err);
-                            return null;
-                        }),
-                        captureFramedImage().catch(err => {
-                            console.warn('Admin cropped image capture failed:', err);
-                            return null;
-                        }),
-                        captureHighQualityPrintImage().catch(err => {
-                            console.error('❌❌❌ High-quality print image capture FAILED:', err);
-                            console.error('❌❌❌ Error stack:', err.stack);
-                            return null;
-                        })
-                    ]);
-                    
-                    console.log('%c═══ IMAGE CAPTURE PROMISE.ALL COMPLETE ═══', 'color: #ff00ff; font-size: 16px; font-weight: bold;');
-                    console.log('Image capture results:', {
-                        printImageCaptured: !!printImageData,
-                        previewImageCaptured: !!previewImageData,
-                        adminCroppedImageCaptured: !!adminCroppedImage,
-                        highQualityPrintImageCaptured: !!highQualityPrintImage,
-                        printImageSize: printImageData ? printImageData.length : 0,
-                        previewImageSize: previewImageData ? previewImageData.length : 0,
-                        adminCroppedImageSize: adminCroppedImage ? adminCroppedImage.length : 0,
-                        highQualityPrintImageSize: highQualityPrintImage ? highQualityPrintImage.length : 0
-                    });
-                    
-                    // Add captured images if available
-                    if (printImageData) {
-                        cartItem.printImage = printImageData;
-                        console.log('✅ Print image captured successfully');
-                    } else {
-                        console.warn('⚠️ Print image not captured, using original image as fallback');
-                        cartItem.printImage = state.originalImage || state.image;
-                    }
-                    
-                    if (previewImageData) {
-                        cartItem.previewImage = previewImageData;
-                        cartItem.displayImage = previewImageData;
-                        console.log('✅ Preview image captured successfully');
-                    } else {
-                        console.warn('⚠️ Preview image not captured, using original image as fallback');
-                        cartItem.previewImage = state.originalImage || state.image;
-                        cartItem.displayImage = state.originalImage || state.image;
-                    }
-
-                    // Add high-quality cropped image for admin panel (prefer the new high-quality version)
-                    if (highQualityPrintImage) {
-                        const sizeKB = Math.round(highQualityPrintImage.length / 1024);
-                        cartItem.highQualityPrintImage = highQualityPrintImage;
-                        cartItem.adminCroppedImage = highQualityPrintImage; // Use high-quality as admin cropped image
-                        console.log('✅ HIGH-QUALITY print image captured from original!');
-                        console.log('📊 High-quality image size:', sizeKB, 'KB');
-                        
-                        // WARN if image seems too small (should be at least 50KB for a 4000px image)
-                        if (sizeKB < 50) {
-                            console.error('❌ WARNING: High-quality image is suspiciously small! Expected >50KB, got', sizeKB, 'KB');
-                            console.error('❌ This indicates the capture function may have failed or used wrong source');
-                        }
-                    } else if (adminCroppedImage) {
-                        cartItem.adminCroppedImage = adminCroppedImage;
-                        console.log('✅ Standard cropped image captured for admin panel');
-                    } else {
-                        console.warn('⚠️ No cropped image captured, will use fallback');
-                    }
-                    
-                } catch (imageError) {
-                    console.warn('Image capture failed, using original image as fallback:', imageError);
-                    cartItem.printImage = state.originalImage || state.image;
-                    cartItem.previewImage = state.originalImage || state.image;
-                    cartItem.displayImage = state.originalImage || state.image;
-                    cartItem.adminCroppedImage = state.originalImage || state.image;
-                }
-
-                console.log('Adding item to cart:', cartItem);
-                
-                // Call addToCart and handle the response
-                try {
-                    const success = await addToCart(cartItem);
-                    
-                    if (success) {
-                        // Show success feedback
-                        elements.addToCartBtn.innerHTML = '<i class="fas fa-check"></i> Added!';
-                        elements.addToCartBtn.style.background = '#27ae60';
-                        
-                        setTimeout(() => {
-                            elements.addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
-                            elements.addToCartBtn.style.background = '';
-                            elements.addToCartBtn.disabled = false;
-                        }, 2000);
-                    } else {
-                        // Reset button state on failure
-                        elements.addToCartBtn.disabled = false;
-                        elements.addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
-                    }
-                } catch (cartError) {
-                    console.error('Error adding to cart:', cartError);
-                    elements.addToCartBtn.disabled = false;
-                    elements.addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
-                    
-                    // Show user-friendly error
-                    if (cartError.message && cartError.message.includes('storage is full')) {
-                        notifications.warning('Your cart is full! Please checkout or remove some items before adding more.');
-                    } else {
-                        notifications.error('Unable to add item to cart. Please try again.');
-                    }
-                }
-                
-            } catch (error) {
-                console.error('Error in add to cart process:', error);
-                notifications.error('Error adding item to cart. Please try again.');
-                
-                // Reset button state
-                elements.addToCartBtn.disabled = false;
-                elements.addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
-            }
+            await processCustomizePurchase({
+                triggerButton: elements.addToCartBtn,
+                mode: 'cart'
+            });
         });
     } else {
         console.warn('Add to Cart button not found - might not be on customize page');
@@ -1217,6 +1407,10 @@ function initializeEventListeners() {
     // Cart modal functionality
     if (elements.headerCartBtn) {
         elements.headerCartBtn.addEventListener('click', () => {
+            if (window.innerWidth > 768 && state.image) {
+                sessionStorage.setItem('returnToDesktopLivePreview', 'true');
+                saveStateForCartReturn();
+            }
             window.location.href = 'cart.html';
         });
     }
@@ -1244,8 +1438,8 @@ function initializeEventListeners() {
             updateImageTransform();
             setTimeout(() => elements.previewImage.classList.remove('smooth-transition'), 200);
             if (isMobileViewport()) mobilePositionLocked = true;
-            
-            // No auto room overlay; user triggers manually
+
+            scheduleDesktopRoomPreviewRefresh('zoom in');
         });
     }
     if (elements.zoomOut) {
@@ -1270,8 +1464,8 @@ function initializeEventListeners() {
             updateImageTransform();
             setTimeout(() => elements.previewImage.classList.remove('smooth-transition'), 200);
             if (isMobileViewport()) mobilePositionLocked = true;
-            
-            // No auto room overlay; user triggers manually
+
+            scheduleDesktopRoomPreviewRefresh('zoom out');
         });
     }
     if (elements.precisionZoomIn) {
@@ -1285,8 +1479,8 @@ function initializeEventListeners() {
             updateImageTransform();
             setTimeout(() => elements.previewImage.classList.remove('smooth-transition'), 150);
             if (isMobileViewport()) mobilePositionLocked = true;
-            
-            // No auto room overlay; user triggers manually
+
+            scheduleDesktopRoomPreviewRefresh('precision zoom in');
         });
     }
     if (elements.precisionZoomOut) {
@@ -1306,8 +1500,8 @@ function initializeEventListeners() {
             elements.previewImage.classList.add('smooth-transition');
             updateImageTransform();
             setTimeout(() => elements.previewImage.classList.remove('smooth-transition'), 150);
-            
-            // No auto room overlay; user triggers manually
+
+            scheduleDesktopRoomPreviewRefresh('precision zoom out');
         });
     }
 
@@ -1331,7 +1525,7 @@ function initializeEventListeners() {
     }
 
     // Desktop card navigation functionality
-    const desktopCards = document.querySelectorAll('.desktop-card');
+    const desktopCards = Array.from(document.querySelectorAll('.desktop-card')).filter(card => card.dataset.type !== 'texture');
     const prevCardBtn = document.getElementById('prevCardBtn');
     const nextCardBtn = document.getElementById('nextCardBtn');
     const cardIndicators = document.querySelectorAll('.card-dot');
@@ -1771,9 +1965,8 @@ function updateImageFilters() {
         contrast(${contrast}%)
         saturate(${vibrance}%)
     `;
-    
-    // Room preview overlays will only update when "Update Room Previews" button is clicked
-    // Removed automatic overlay update for filter changes to give users control
+
+    scheduleDesktopRoomPreviewRefresh('image adjustment');
 }
 
 // Update frame aspect ratio based on selected size
@@ -1904,10 +2097,9 @@ function initializeDragAndZoom() {
 
         // Update transform to reflect new zoom
         updateImageTransform();
-    if (isMobileViewport()) mobilePositionLocked = true;
-        
-        // Auto-update room previews when mouse wheel zoom changes (simulation)
-        // No auto room overlay; user triggers manually
+        if (isMobileViewport()) mobilePositionLocked = true;
+
+        scheduleDesktopRoomPreviewRefresh('mouse wheel zoom');
     }
 
     // Mouse down handler with improved responsiveness
@@ -2004,8 +2196,8 @@ function initializeDragAndZoom() {
             // Re-lock after finishing interaction
             mobilePositionLocked = true;
         }
-        
-        // No auto room overlay after drag; user triggers manually
+
+        scheduleDesktopRoomPreviewRefresh('image move');
     }
 
     // Snap to boundaries with smooth animation
@@ -2793,6 +2985,10 @@ function updateCartCount() {
 }
 
 function openCartModal() {
+    if (window.innerWidth > 768 && state.image) {
+        sessionStorage.setItem('returnToDesktopLivePreview', 'true');
+        saveStateForCartReturn();
+    }
     window.location.href = 'cart.html';
 }
 
@@ -3906,6 +4102,8 @@ function initializeRoomSlider(frameSize, orientation) {
     
     // Enhanced touch/swipe support with better gesture detection
     addTouchSupport(slider);
+
+    scheduleDesktopRoomPreviewRefresh('room slider initialization');
 }
 
 function showDefaultRoomPreview() {
@@ -4371,6 +4569,8 @@ function updateFrameSize() {
     framePreview.style.setProperty('aspect-ratio', aspectRatio, 'important');
     framePreview.setAttribute('data-size', state.frameSize.size);
     framePreview.setAttribute('data-orientation', state.frameSize.orientation);
+
+    scheduleDesktopRoomPreviewRefresh('frame size change');
 }
 
 // Function to update frame color
@@ -4384,6 +4584,9 @@ function updateFrameColor() {
     // Update room preview overlays if room slider is active
     // Room preview overlays will only update when "Update Room Previews" button is clicked
     // Removed automatic overlay update for frame color changes to give users control
+
+    updateMobileSpecs();
+    scheduleDesktopRoomPreviewRefresh('frame color change');
 }
 
 // Function to update white border inside frame
@@ -4412,6 +4615,9 @@ function updateWhiteBorder() {
     });
     
     console.log('White border updated:', state.whiteBorder ? 'Yes' : 'No', '| Thickness:', state.borderThickness + 'px');
+
+    updateMobileSpecs();
+    scheduleDesktopRoomPreviewRefresh('border toggle');
 }
 
 // Function to update border thickness
@@ -4434,6 +4640,9 @@ function updateBorderThickness(thickness) {
     });
     
     console.log('Border thickness updated:', state.borderThickness + 'px');
+
+    updateMobileSpecs();
+    scheduleDesktopRoomPreviewRefresh('border thickness change');
 }
 
 // Function to update frame texture (sets data attribute for CSS styling)
@@ -4444,6 +4653,9 @@ function updateFrameTexture() {
     });
     
     console.log('Frame texture updated:', state.frameTexture);
+
+    updateMobileSpecs();
+    scheduleDesktopRoomPreviewRefresh('texture change');
 }
 
 // Function to initialize mobile customization features
@@ -4889,6 +5101,7 @@ window.handleZoomInClick = function() {
     elements.previewImage.classList.add('smooth-transition');
     updateImageTransform();
     setTimeout(() => elements.previewImage.classList.remove('smooth-transition'), 200);
+    scheduleDesktopRoomPreviewRefresh('zoom in');
 };
 
 window.handleZoomOutClick = function() {
@@ -4906,6 +5119,7 @@ window.handleZoomOutClick = function() {
     elements.previewImage.classList.add('smooth-transition');
     updateImageTransform();
     setTimeout(() => elements.previewImage.classList.remove('smooth-transition'), 200);
+    scheduleDesktopRoomPreviewRefresh('zoom out');
 };
 
 window.handlePrecisionZoomInClick = function() {
@@ -4916,6 +5130,7 @@ window.handlePrecisionZoomInClick = function() {
     elements.previewImage.classList.add('smooth-transition');
     updateImageTransform();
     setTimeout(() => elements.previewImage.classList.remove('smooth-transition'), 150);
+    scheduleDesktopRoomPreviewRefresh('precision zoom in');
 };
 
 window.handlePrecisionZoomOutClick = function() {
@@ -4933,6 +5148,7 @@ window.handlePrecisionZoomOutClick = function() {
     elements.previewImage.classList.add('smooth-transition');
     updateImageTransform();
     setTimeout(() => elements.previewImage.classList.remove('smooth-transition'), 150);
+    scheduleDesktopRoomPreviewRefresh('precision zoom out');
 };
 
 // Mobile Customization Bar Functionality
@@ -5887,36 +6103,72 @@ function updateMobileSpecs() {
     const mobileListingTexture = document.getElementById('mobileListingTexture');
     const mobileListingBorder = document.getElementById('mobileListingBorder');
     const mobileListingPrice = document.getElementById('mobileListingPrice');
+    const desktopListingSize = document.getElementById('desktopListingSize');
+    const desktopListingColor = document.getElementById('desktopListingColor');
+    const desktopListingFrame = document.getElementById('desktopListingFrame');
+    const desktopListingTexture = document.getElementById('desktopListingTexture');
+    const desktopListingBorder = document.getElementById('desktopListingBorder');
+    const desktopListingPrice = document.getElementById('desktopListingPrice');
+    const desktopDetailsAddToCartBtn = document.getElementById('desktopDetailsAddToCart');
     const mobileListingCartCount = document.getElementById('mobileListingCartCount');
     const mobileRoomAddToCartBtn = document.getElementById('mobileRoomAddToCart');
+    const hasImageAndSize = !!(state.image && state.frameSize);
+    const colorText = capitalizeOptionLabel(state.frameColor, 'Black');
+    const textureText = capitalizeOptionLabel(state.frameTexture, 'Smooth');
     
     // Update size
-    if (state.frameSize && mobileListingSize) {
+    if (state.frameSize) {
         const sizeText = `${state.frameSize.size}\" ${state.frameSize.orientation.charAt(0).toUpperCase() + state.frameSize.orientation.slice(1)}`;
-        mobileListingSize.textContent = sizeText;
+        if (mobileListingSize) {
+            mobileListingSize.textContent = sizeText;
+        }
+        if (desktopListingSize) {
+            desktopListingSize.textContent = sizeText;
+        }
     }
     
     // Update color
-    if (state.frameColor && mobileListingColor) {
-        const colorText = state.frameColor.charAt(0).toUpperCase() + state.frameColor.slice(1);
-        mobileListingColor.textContent = colorText;
+    if (state.frameColor) {
+        if (mobileListingColor) {
+            mobileListingColor.textContent = colorText;
+        }
+        if (desktopListingColor) {
+            desktopListingColor.textContent = colorText;
+        }
+        if (desktopListingFrame) {
+            desktopListingFrame.textContent = `Premium ${colorText} Wall Frame`;
+        }
     }
     
     // Update texture
-    if (state.frameTexture && mobileListingTexture) {
-        const textureText = state.frameTexture.charAt(0).toUpperCase() + state.frameTexture.slice(1);
-        mobileListingTexture.textContent = textureText;
+    if (state.frameTexture) {
+        if (mobileListingTexture) {
+            mobileListingTexture.textContent = textureText;
+        }
+        if (desktopListingTexture) {
+            desktopListingTexture.textContent = textureText;
+        }
     }
     
     // Update white border
     if (mobileListingBorder) {
         mobileListingBorder.textContent = state.whiteBorder ? 'Yes' : 'No';
     }
+    if (desktopListingBorder) {
+        desktopListingBorder.textContent = state.whiteBorder ? 'Yes' : 'No';
+    }
     
     // Update price
     const price = state.price || 349;
     if (mobileListingPrice) {
         mobileListingPrice.textContent = `₹${price}`;
+    }
+    if (desktopListingPrice) {
+        desktopListingPrice.textContent = `₹${price}`;
+    }
+
+    if (desktopDetailsAddToCartBtn) {
+        desktopDetailsAddToCartBtn.disabled = !hasImageAndSize;
     }
     
     // Update cart count badge
@@ -5932,9 +6184,11 @@ function updateMobileSpecs() {
     }
     
     // Enable add to cart button if image exists
-    if (mobileRoomAddToCartBtn && state.image && state.frameSize) {
-        mobileRoomAddToCartBtn.disabled = false;
+    if (mobileRoomAddToCartBtn) {
+        mobileRoomAddToCartBtn.disabled = !hasImageAndSize;
     }
+
+    syncDesktopPurchaseBarFromPrimary();
 }
 
 // ===========================
@@ -6003,8 +6257,127 @@ function restoreStateFromCartReturn() {
     return false;
 }
 
+function restoreDesktopLivePreviewFromCart() {
+    const stateRestored = restoreStateFromCartReturn();
+
+    sessionStorage.removeItem('returnToDesktopLivePreview');
+    sessionStorage.removeItem('customizeStateForReturn');
+
+    if (!(stateRestored && state.image && state.frameSize) || window.innerWidth <= 768) {
+        return false;
+    }
+
+    console.log('🖥️ Returning to desktop live preview from cart with restored state');
+
+    const uploadHeroWrapper = document.getElementById('uploadHeroWrapper');
+    const mainContainer = document.getElementById('mainCustomizeContainer');
+    const previewSection = document.getElementById('previewSection');
+    const uploadSection = document.getElementById('uploadSection');
+    const previewImage = document.getElementById('previewImage');
+    const imageContainer = document.getElementById('imageContainer');
+    const primaryAddToCartBtn = document.getElementById('addToCart');
+
+    if (uploadHeroWrapper) uploadHeroWrapper.style.display = 'none';
+    if (mainContainer) mainContainer.style.display = 'grid';
+    if (uploadSection) uploadSection.classList.add('hidden');
+    if (previewSection) previewSection.classList.remove('hidden');
+    if (imageContainer) imageContainer.classList.add('has-image');
+    if (primaryAddToCartBtn) primaryAddToCartBtn.disabled = false;
+
+    document.body.classList.add('has-upload');
+
+    const sizeSelector = `.desktop-size-btn[data-size="${state.frameSize.size}"][data-orientation="${state.frameSize.orientation}"]`;
+    document.querySelectorAll('.desktop-size-btn').forEach(btn => btn.classList.remove('selected'));
+    document.querySelectorAll('.desktop-color-btn').forEach(btn => btn.classList.remove('selected'));
+    document.querySelectorAll('.desktop-border-btn').forEach(btn => btn.classList.remove('selected'));
+    document.querySelectorAll('.desktop-texture-btn').forEach(btn => btn.classList.remove('selected'));
+
+    const selectedSizeBtn = document.querySelector(sizeSelector);
+    if (selectedSizeBtn) selectedSizeBtn.classList.add('selected');
+
+    const selectedColorBtn = document.querySelector(`.desktop-color-btn[data-color="${state.frameColor}"]`);
+    if (selectedColorBtn) selectedColorBtn.classList.add('selected');
+
+    const selectedBorderBtn = document.querySelector(`.desktop-border-btn[data-border="${state.whiteBorder ? 'yes' : 'no'}"]`);
+    if (selectedBorderBtn) selectedBorderBtn.classList.add('selected');
+
+    const selectedTextureBtn = document.querySelector(`.desktop-texture-btn[data-texture="${state.frameTexture}"]`);
+    if (selectedTextureBtn) selectedTextureBtn.classList.add('selected');
+
+    const borderSlider = document.getElementById('desktopBorderThickness');
+    const borderValue = document.getElementById('desktopBorderThicknessValue');
+    if (borderSlider) borderSlider.value = state.borderThickness;
+    if (borderValue) borderValue.textContent = `${state.borderThickness}px`;
+
+    ['brightness', 'contrast', 'highlights', 'shadows', 'vibrance'].forEach((key) => {
+        const slider = document.getElementById(key);
+        if (slider && state.adjustments && state.adjustments[key] !== undefined) {
+            slider.value = state.adjustments[key];
+        }
+    });
+
+    const finishRestore = () => {
+        if (elements.previewImage) {
+            elements.previewImage.style.cursor = 'grab';
+        }
+
+        updateFrameSize();
+        updateFrameColor();
+        updateFrameTexture();
+        updateWhiteBorder();
+        updateBorderThickness(state.borderThickness || 15);
+        updateImageFilters();
+        initializeRoomSlider(state.frameSize.size, state.frameSize.orientation);
+        updateMobileSpecs();
+        updateRatingsDisplay();
+        initializeDragAndZoom();
+        updateImageTransform();
+
+        if (window.updateRoomPreviewButtonState) {
+            setTimeout(() => window.updateRoomPreviewButtonState(), 100);
+        }
+
+        if (previewSection) {
+            setTimeout(() => {
+                previewSection.scrollIntoView({ behavior: 'auto', block: 'start' });
+            }, 100);
+        }
+    };
+
+    if (previewImage && state.image) {
+        let restoreHandled = false;
+
+        previewImage.onload = () => {
+            if (restoreHandled) {
+                return;
+            }
+            restoreHandled = true;
+            finishRestore();
+            previewImage.onload = null;
+        };
+
+        previewImage.onerror = () => {
+            previewImage.onerror = null;
+            previewImage.onload = null;
+        };
+
+        // Force a fresh assignment so cached images still rebuild the preview correctly.
+        previewImage.src = '';
+        previewImage.src = state.image;
+
+        if (previewImage.complete && previewImage.naturalWidth > 0) {
+            previewImage.onload();
+        }
+    } else {
+        finishRestore();
+    }
+
+    return true;
+}
+
 function checkReturnToRoomPreview() {
     const returnToRoomPreview = sessionStorage.getItem('returnToRoomPreview');
+    const returnToDesktopLivePreview = sessionStorage.getItem('returnToDesktopLivePreview');
     
     if (returnToRoomPreview === 'true' && window.innerWidth <= 768) {
         // Clear the flag
@@ -6051,6 +6424,10 @@ function checkReturnToRoomPreview() {
         } else {
             console.log('📱 Could not restore room preview - state not available');
         }
+    }
+
+    if (returnToDesktopLivePreview === 'true' && window.innerWidth > 768) {
+        restoreDesktopLivePreviewFromCart();
     }
 }
 
@@ -6396,31 +6773,33 @@ function updateRatingsDisplay() {
     const sizeKey = getSizeKeyFromState();
     const ratingData = getCurrentRatingsForSize(sizeKey);
     
-    const totalRatingsEl = document.getElementById('totalRatingsCount');
-    const totalReviewsEl = document.getElementById('totalReviewsCount');
-    const bigRatingNumber = document.querySelector('.big-rating-number');
-    const ratingCountDisplay = document.getElementById('ratingCountDisplay');
-    
-    if (totalRatingsEl) {
-        totalRatingsEl.textContent = ratingData.totalRatings.toLocaleString('en-IN');
-    }
-    if (totalReviewsEl) {
-        totalReviewsEl.textContent = ratingData.totalReviews;
-    }
-    
-    // Update the big rating number in reviews section
-    if (bigRatingNumber) {
-        bigRatingNumber.textContent = ratingData.avgRating.toFixed(1);
-    }
-    
-    // Update the rating text display (e.g., "4.5 (500 ratings)")
-    if (ratingCountDisplay) {
-        const ratingsSpan = ratingCountDisplay.querySelector('#totalRatingsCount');
-        if (ratingsSpan) {
-            // Update just the rating number text before the span
-            ratingCountDisplay.innerHTML = `${ratingData.avgRating.toFixed(1)} (<span id="totalRatingsCount">${ratingData.totalRatings.toLocaleString('en-IN')}</span> ratings) ⭐`;
+    const ratingCountDisplays = [
+        {
+            element: document.getElementById('ratingCountDisplay'),
+            totalRatingsId: 'totalRatingsCount'
+        },
+        {
+            element: document.getElementById('desktopRatingCountDisplay'),
+            totalRatingsId: 'desktopTotalRatingsCount'
         }
-    }
+    ];
+
+    document.querySelectorAll('.big-rating-number').forEach(bigRatingNumber => {
+        bigRatingNumber.textContent = ratingData.avgRating.toFixed(1);
+    });
+
+    ['totalReviewsCount', 'desktopTotalReviewsCount'].forEach(elementId => {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = ratingData.totalReviews;
+        }
+    });
+
+    ratingCountDisplays.forEach(({ element, totalRatingsId }) => {
+        if (element) {
+            element.innerHTML = `${ratingData.avgRating.toFixed(1)} (<span id="${totalRatingsId}">${ratingData.totalRatings.toLocaleString('en-IN')}</span> ratings) ⭐`;
+        }
+    });
     
     // Update star displays based on rating
     updateStarDisplay(ratingData.avgRating);
@@ -6449,20 +6828,25 @@ function updateStarDisplay(rating) {
     }
     
     // Update all star displays
-    const ratingStarsDisplay = document.getElementById('ratingStarsDisplay');
-    const bigRatingStars = document.querySelector('.big-rating-stars');
-    
-    if (ratingStarsDisplay) {
-        ratingStarsDisplay.innerHTML = starsHTML;
-    }
-    if (bigRatingStars) {
-        bigRatingStars.innerHTML = starsHTML;
-    }
+    document.querySelectorAll('#ratingStarsDisplay, #desktopRatingStarsDisplay, .big-rating-stars').forEach(starContainer => {
+        starContainer.innerHTML = starsHTML;
+    });
 }
 
 // Scroll to reviews section when clicking on ratings
-function scrollToReviews() {
-    const reviewsSection = document.getElementById('customerReviewsSection');
+function scrollToReviews(target = 'auto') {
+    let reviewsSection = null;
+
+    if (target === 'desktop') {
+        reviewsSection = document.getElementById('desktopCustomerReviewsSection');
+    } else if (target === 'mobile') {
+        reviewsSection = document.getElementById('customerReviewsSection');
+    } else if (window.innerWidth > 768) {
+        reviewsSection = document.getElementById('desktopCustomerReviewsSection') || document.getElementById('customerReviewsSection');
+    } else {
+        reviewsSection = document.getElementById('customerReviewsSection') || document.getElementById('desktopCustomerReviewsSection');
+    }
+
     if (reviewsSection) {
         reviewsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -6477,43 +6861,78 @@ function getReviewsForCurrentSize() {
 // Load reviews into the reviews list
 let currentReviewsLoaded = 0;
 const reviewsPerLoad = 10;
+let currentReviewsSizeKey = null;
+let shuffledReviewsCache = [];
+
+function getReviewRenderTargets() {
+    return [
+        {
+            list: document.getElementById('reviewsList'),
+            button: document.getElementById('loadMoreReviewsBtn')
+        },
+        {
+            list: document.getElementById('desktopReviewsList'),
+            button: document.getElementById('desktopLoadMoreReviewsBtn')
+        }
+    ].filter(target => target.list || target.button);
+}
+
+function getShuffledReviewsForCurrentSize(reset = false) {
+    const sizeKey = getSizeKeyFromState();
+
+    if (reset || currentReviewsSizeKey !== sizeKey || !shuffledReviewsCache.length) {
+        currentReviewsSizeKey = sizeKey;
+        currentReviewsLoaded = 0;
+        shuffledReviewsCache = [...getReviewsForCurrentSize()].sort(() => Math.random() - 0.5);
+    }
+
+    return shuffledReviewsCache;
+}
 
 function loadReviews(reset = false) {
     console.log('📚 loadReviews() called, reset:', reset);
+    const reviewTargets = getReviewRenderTargets();
     
     if (reset) {
-        currentReviewsLoaded = 0;
-        const reviewsList = document.getElementById('reviewsList');
-        if (reviewsList) reviewsList.innerHTML = '';
+        reviewTargets.forEach(({ list }) => {
+            if (list) {
+                list.innerHTML = '';
+            }
+        });
     }
     
-    const reviewsList = document.getElementById('reviewsList');
-    if (!reviewsList) {
+    if (!reviewTargets.length) {
         console.log('❌ reviewsList element not found!');
         return;
     }
     
     // Get size-specific reviews and shuffle
-    const sizeReviews = getReviewsForCurrentSize();
+    const sizeReviews = getShuffledReviewsForCurrentSize(reset);
     console.log('📝 Got', sizeReviews.length, 'reviews for current size');
     
-    const shuffledReviews = [...sizeReviews].sort(() => Math.random() - 0.5);
-    const reviewsToShow = shuffledReviews.slice(currentReviewsLoaded, currentReviewsLoaded + reviewsPerLoad);
+    const reviewsToShow = sizeReviews.slice(currentReviewsLoaded, currentReviewsLoaded + reviewsPerLoad);
     console.log('📝 Showing', reviewsToShow.length, 'reviews');
     
-    reviewsToShow.forEach(review => {
-        const reviewCard = createReviewCard(review);
-        reviewsList.appendChild(reviewCard);
+    reviewTargets.forEach(({ list }) => {
+        if (!list) {
+            return;
+        }
+
+        reviewsToShow.forEach(review => {
+            const reviewCard = createReviewCard(review);
+            list.appendChild(reviewCard);
+        });
     });
     
     currentReviewsLoaded += reviewsToShow.length;
     console.log('✅ Loaded', currentReviewsLoaded, 'reviews total');
     
     // Hide load more button if all reviews shown
-    const loadMoreBtn = document.getElementById('loadMoreReviewsBtn');
-    if (loadMoreBtn) {
-        loadMoreBtn.style.display = currentReviewsLoaded >= sizeReviews.length ? 'none' : 'block';
-    }
+    reviewTargets.forEach(({ button }) => {
+        if (button) {
+            button.style.display = currentReviewsLoaded >= sizeReviews.length ? 'none' : 'block';
+        }
+    });
 }
 
 function loadMoreReviews() {
@@ -6617,6 +7036,8 @@ function onSizeChangeForReviews() {
 document.addEventListener('DOMContentLoaded', function() {
     // Initial load of reviews (they'll be shown when room preview opens)
     setTimeout(initializeReviews, 1000);
+    setupDesktopPurchaseBar();
+    updateMobileSpecs();
     
     // Listen for size button clicks to update ratings and reviews
     document.querySelectorAll('.mobile-size-btn, [data-size]').forEach(btn => {
@@ -6628,6 +7049,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const sizeBtn = e.target.closest('.mobile-size-btn, [data-size]');
         if (sizeBtn) {
             onSizeChangeForReviews();
+        }
+    });
+
+    document.addEventListener('input', function(e) {
+        if (e.target.closest('#desktopBorderThickness, .mobile-border-thickness-slider')) {
+            updateMobileSpecs();
         }
     });
 });

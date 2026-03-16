@@ -509,6 +509,11 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
+            .otp-auth-container {
+                min-height: calc(100svh - 52px);
+                padding-top: calc(72px + env(safe-area-inset-top));
+            }
+
             .auth-card {
                 max-width: 420px;
                 margin: 10px auto;
@@ -650,6 +655,7 @@
     </style>
 </head>
 <body>
+    <div class="mobile-global-header-placeholder"></div>
     <div class="otp-auth-container">
         <div class="auth-card">
             <!-- Tabs -->
@@ -863,6 +869,7 @@
     
     <!-- Fast2SMS OTP System (Production - Netlify Functions) -->
     <script src="fast2sms-client-production.js?v=5.0.1208"></script>
+    <script src="global-header.js"></script>
     
     <!-- Initialize Fast2SMS OTP Client IMMEDIATELY after loading -->
     <script>
@@ -880,6 +887,16 @@
     <script src="firebase-client-new.js?v=5.0.1208"></script>
     <script src="otp-auth-realsms.js?v=5.0.1208"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.innerWidth <= 768 && typeof GlobalWebsiteHeader !== 'undefined') {
+                const placeholder = document.querySelector('.mobile-global-header-placeholder');
+                if (placeholder) {
+                    placeholder.id = 'global-header-container';
+                    GlobalWebsiteHeader.init();
+                }
+            }
+        });
+
         // Enhanced OTP Authentication with Tabbed Interface
         class TabbedOTPAuth {
             constructor() {

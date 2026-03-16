@@ -124,9 +124,16 @@
             .section{ padding: 16px; }
             .sticky-actions .bar{ grid-template-columns: 1fr 1fr; }
         }
+
+        @media (max-width: 768px) {
+            body {
+                padding-top: 52px;
+            }
+        }
     </style>
 </head>
 <body>
+    <div class="mobile-global-header-placeholder"></div>
     <div class="page">
         <section class="success-hero card">
             <div class="icon"><i class="fas fa-check"></i></div>
@@ -185,7 +192,18 @@
         </div>
     </div>
 
+    <script src="global-header.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.innerWidth <= 768 && typeof GlobalWebsiteHeader !== 'undefined') {
+                const placeholder = document.querySelector('.mobile-global-header-placeholder');
+                if (placeholder) {
+                    placeholder.id = 'global-header-container';
+                    GlobalWebsiteHeader.init();
+                }
+            }
+        });
+
         // Get order details from URL parameters or sessionStorage
         function getOrderDetails() {
             const urlParams = new URLSearchParams(window.location.search);

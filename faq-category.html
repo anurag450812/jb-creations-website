@@ -274,6 +274,10 @@
 
         /* Responsive */
         @media (max-width: 600px) {
+            .faq-header {
+                display: none;
+            }
+
             .category-header h1 {
                 font-size: 1.5rem;
             }
@@ -297,6 +301,7 @@
     </style>
 </head>
 <body>
+    <div class="mobile-global-header-placeholder"></div>
     <!-- Header -->
     <header class="faq-header">
         <a href="faq.html" class="back-btn">
@@ -772,13 +777,18 @@
         }
     </script>
     
-    <!-- Global Header for Desktop -->
+    <!-- Global Header -->
     <script src="global-header.js"></script>
     <script>
-        // Initialize global header on desktop
-        if (window.innerWidth >= 769 && typeof GlobalWebsiteHeader !== 'undefined') {
-            GlobalWebsiteHeader.init();
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.innerWidth <= 768 && typeof GlobalWebsiteHeader !== 'undefined') {
+                const placeholder = document.querySelector('.mobile-global-header-placeholder');
+                if (placeholder) {
+                    placeholder.id = 'global-header-container';
+                    GlobalWebsiteHeader.init();
+                }
+            }
+        });
     </script>
 </body>
 </html>

@@ -17,6 +17,7 @@ const GlobalWebsiteHeader = {
         defaultRedirect: 'index.html',
         stylesId: 'global-header-styles'
     },
+    isInitialized: false,
 
     /**
      * Get the scoped CSS styles for the header component
@@ -32,6 +33,7 @@ const GlobalWebsiteHeader = {
 /* Global Header Container - Enhanced Desktop Design */
 #globalSiteHeader {
     padding: 0 !important;
+    margin: 0 !important;
     top: 0 !important;
     position: fixed !important;
     width: 100% !important;
@@ -51,6 +53,7 @@ const GlobalWebsiteHeader = {
     align-items: center !important;
     gap: 14px !important;
     height: 43px !important;
+    line-height: 1 !important;
     background: #EDE7E3 !important;
     border: none !important;
     box-shadow: none !important;
@@ -137,6 +140,7 @@ const GlobalWebsiteHeader = {
 #globalSiteHeader .profile-dropdown {
     position: relative !important;
     display: inline-block !important;
+    line-height: 1 !important;
 }
 
 /* Profile Icon Button - Strictly scoped styling */
@@ -159,7 +163,10 @@ const GlobalWebsiteHeader = {
     justify-content: center !important;
     gap: 2px !important;
     min-width: auto !important;
+    min-height: auto !important;
     text-align: center !important;
+    line-height: 1 !important;
+    margin: 0 !important;
 }
 
 #globalSiteHeader .profile-icon-btn:hover {
@@ -218,14 +225,24 @@ const GlobalWebsiteHeader = {
     padding: 10px 0 !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
+    pointer-events: none !important;
 }
 
-/* Dropdown Open State */
-#globalSiteHeader .profile-dropdown:hover .profile-dropdown-menu,
+/* Dropdown Open State - Click triggered (default for all sizes) */
 #globalSiteHeader .profile-dropdown.open .profile-dropdown-menu {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
+}
+
+/* Mobile: Allow hover to show dropdown as fallback for touch devices */
+@media (max-width: 768px) {
+    #globalSiteHeader .profile-dropdown:hover .profile-dropdown-menu {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
 }
 
 /* Dropdown Items - Strictly scoped styling */
@@ -348,8 +365,11 @@ const GlobalWebsiteHeader = {
     box-shadow: none !important;
     font-weight: 600 !important;
     min-width: auto !important;
+    min-height: auto !important;
     text-align: center !important;
     font-size: 0.62rem !important;
+    line-height: 1 !important;
+    margin: 0 !important;
 }
 
 #globalSiteHeader .cart-icon-btn:hover {
@@ -466,9 +486,17 @@ const GlobalWebsiteHeader = {
     
     /* CRITICAL: Fixed width for mobile dropdown - align left on mobile */
     #globalSiteHeader .profile-dropdown-menu {
+        background: rgba(255, 255, 255, 0.98) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(22, 105, 122, 0.15) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 10px 40px rgba(22, 105, 122, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08) !important;
         width: 260px !important;
         min-width: 260px !important;
         max-width: 260px !important;
+        margin-top: 12px !important;
+        padding: 10px 0 !important;
         left: 0 !important;
         right: auto !important;
     }
@@ -485,6 +513,7 @@ const GlobalWebsiteHeader = {
         width: 240px !important;
         min-width: 240px !important;
         max-width: 240px !important;
+        margin-top: 10px !important;
     }
     
     #globalSiteHeader .profile-dropdown-menu .dropdown-item {
@@ -505,6 +534,7 @@ const GlobalWebsiteHeader = {
     #globalSiteHeader .header-content {
         height: 48px !important;
         padding: 0 30px !important;
+        gap: 12px !important;
     }
     
     /* Larger brand name on desktop */
@@ -516,7 +546,7 @@ const GlobalWebsiteHeader = {
     /* Larger icons on desktop */
     #globalSiteHeader .profile-icon-btn,
     #globalSiteHeader .cart-icon-btn {
-        padding: 8px 10px !important;
+        padding: 7px 9px !important;
         border-radius: 7px !important;
     }
     
@@ -714,35 +744,55 @@ const GlobalWebsiteHeader = {
         const dropdownContainer = document.getElementById('profileDropdown');
         const dropdownMenu = document.getElementById('profileDropdownMenu');
         const profileBtn = document.getElementById('profileBtn');
+        const headerElement = document.getElementById('globalSiteHeader');
 
-        if (!dropdownContainer || !dropdownMenu || !profileBtn) {
+        if (!dropdownContainer || !dropdownMenu || !profileBtn || !headerElement) {
             console.warn('GlobalWebsiteHeader: Dropdown elements not found');
             return;
         }
 
-        // Toggle dropdown on click
-        profileBtn.addEventListener('click', (e) => {
+        if (headerElement.dataset.dropdownBehaviorInitialized === 'true') {
+            return;
+        }
+
+        headerElement.dataset.dropdownBehaviorInitialized = 'true';
+
+        const closeDropdown = () => {
+            this.setProfileDropdownState(false);
+        };
+
+        const toggleDropdown = () => {
+            this.toggleProfileDropdown();
+        };
+
+        // Delegate clicks from the header so button content updates on host pages cannot break desktop toggling.
+        headerElement.addEventListener('click', (e) => {
+            const button = e.target.closest('#profileBtn');
+            if (!button) {
+                return;
+            }
+
+            if (e.__globalHeaderHandled) {
+                return;
+            }
+
+            e.__globalHeaderHandled = true;
+            e.preventDefault();
             e.stopPropagation();
-            const isOpen = dropdownContainer.classList.toggle('open');
-            profileBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-            dropdownMenu.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+            toggleDropdown();
         });
 
         // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
             if (!dropdownContainer.contains(e.target)) {
-                dropdownContainer.classList.remove('open');
-                profileBtn.setAttribute('aria-expanded', 'false');
-                dropdownMenu.setAttribute('aria-hidden', 'true');
+                closeDropdown();
             }
         });
 
         // Close dropdown when pressing Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && dropdownContainer.classList.contains('open')) {
-                dropdownContainer.classList.remove('open');
-                profileBtn.setAttribute('aria-expanded', 'false');
-                dropdownMenu.setAttribute('aria-hidden', 'true');
+                closeDropdown();
                 profileBtn.focus();
             }
         });
@@ -750,11 +800,11 @@ const GlobalWebsiteHeader = {
         // Close dropdown when clicking on items with data-close-dropdown attribute
         dropdownMenu.querySelectorAll('[data-close-dropdown="true"]').forEach(item => {
             item.addEventListener('click', () => {
-                dropdownContainer.classList.remove('open');
-                profileBtn.setAttribute('aria-expanded', 'false');
-                dropdownMenu.setAttribute('aria-hidden', 'true');
+                closeDropdown();
             });
         });
+
+        this.setProfileDropdownState(false);
     },
 
     /**
@@ -796,8 +846,13 @@ const GlobalWebsiteHeader = {
         }
 
         dropdownContainer.classList.toggle('open', isOpen);
+        dropdownMenu.dataset.state = isOpen ? 'open' : 'closed';
         profileBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         dropdownMenu.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+        dropdownMenu.style.opacity = isOpen ? '1' : '0';
+        dropdownMenu.style.visibility = isOpen ? 'visible' : 'hidden';
+        dropdownMenu.style.transform = isOpen ? 'translateY(0)' : 'translateY(-10px)';
+        dropdownMenu.style.pointerEvents = isOpen ? 'auto' : 'none';
     },
 
     /**
@@ -858,13 +913,17 @@ const GlobalWebsiteHeader = {
             return false;
         }
 
-        // Create a container for the header
-        const headerContainer = document.createElement('div');
-        headerContainer.id = this.config.headerContainerId;
+        // Reuse an existing placeholder when present so pages render one shared header consistently.
+        const headerContainer = document.getElementById(this.config.headerContainerId) || document.createElement('div');
+        if (!headerContainer.id) {
+            headerContainer.id = this.config.headerContainerId;
+        }
         headerContainer.innerHTML = this.getHeaderHTML();
 
-        // Insert at the very beginning of body
-        body.insertBefore(headerContainer, body.firstChild);
+        // Insert at the very beginning of body if the placeholder does not already exist there.
+        if (!headerContainer.parentNode) {
+            body.insertBefore(headerContainer, body.firstChild);
+        }
 
         return true;
     },
@@ -886,6 +945,12 @@ const GlobalWebsiteHeader = {
      * Initialize the header component
      */
     init() {
+        if (this.isInitialized && document.getElementById('globalSiteHeader')) {
+            this.updateCartCount();
+            this.checkAndUpdateAuthState();
+            return this;
+        }
+
         // Inject scoped styles first to ensure proper styling
         this.injectStyles();
         
@@ -928,6 +993,8 @@ const GlobalWebsiteHeader = {
 
             console.log('GlobalWebsiteHeader: Initialized successfully');
         }
+
+        this.isInitialized = true;
 
         return this;
     },
@@ -1020,6 +1087,22 @@ if (typeof aboutUs === 'undefined') {
         // Navigate to About Us page
         window.location.href = 'about-us.html';
     };
+}
+
+if (!window.__globalWebsiteHeaderAutoInitAttached) {
+    window.__globalWebsiteHeaderAutoInitAttached = true;
+
+    const autoInitGlobalWebsiteHeader = function() {
+        if (window.GlobalWebsiteHeader && document.getElementById(GlobalWebsiteHeader.config.headerContainerId)) {
+            window.GlobalWebsiteHeader.init();
+        }
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', autoInitGlobalWebsiteHeader);
+    } else {
+        autoInitGlobalWebsiteHeader();
+    }
 }
 
 // Export for module systems
