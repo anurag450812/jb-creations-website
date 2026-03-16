@@ -108,7 +108,6 @@
         }
         
         /* Hide texture option completely on mobile */
-        .desktop-card[data-type="texture"],
         .mobile-texture-grid,
         .bar-tab[data-target="texture"],
         .drawer[data-drawer="texture"] {
@@ -296,7 +295,274 @@
             transform: rotate(-90deg);
         }
 
+        /* Desktop-only details section mirroring the mobile listing cards */
+        .desktop-room-preview-details {
+            grid-column: 2 / 4;
+            margin-top: 1.25rem;
+            width: 100%;
+        }
+
+        .desktop-room-preview-shell {
+            background:
+                radial-gradient(circle at top right, rgba(255, 255, 255, 0.75) 0%, transparent 28%),
+                linear-gradient(180deg, #fff8f2 0%, #f5fbfc 52%, #eef6f7 100%);
+            border-radius: 28px;
+            padding: 1.75rem 2rem;
+            border: 1px solid rgba(22, 105, 122, 0.12);
+            box-shadow: 0 16px 40px rgba(22, 105, 122, 0.12);
+        }
+
+        .desktop-room-preview-shell .product-info-section {
+            margin: 0;
+            padding: 0;
+        }
+
+        .desktop-room-preview-intro {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(22, 105, 122, 0.1);
+        }
+
+        .desktop-room-preview-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .desktop-room-preview-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            align-self: flex-start;
+            padding: 0.45rem 0.85rem;
+            border-radius: 999px;
+            background: rgba(255, 166, 43, 0.14);
+            color: #9a5f00;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+
+        .desktop-room-preview-copy p {
+            margin: 0;
+            color: #5a7a82;
+            max-width: 60ch;
+        }
+
+        .desktop-listing-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        .desktop-listing-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .desktop-listing-column .product-price-section {
+            margin-bottom: 0;
+        }
+
+        .desktop-listing-column .customer-reviews-section {
+            margin-bottom: 0;
+        }
+
+        .desktop-details-purchase-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+            padding: 1rem 1.1rem;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(22, 105, 122, 0.08) 0%, rgba(130, 192, 204, 0.16) 100%);
+            border: 1px solid rgba(22, 105, 122, 0.12);
+        }
+
+        .desktop-details-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.85rem;
+            flex-wrap: wrap;
+        }
+
+        .desktop-details-total {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .desktop-details-total-label {
+            color: #5a7a82;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .desktop-details-total-value {
+            color: #16697A;
+            font-size: 1.45rem;
+            font-weight: 800;
+            line-height: 1.1;
+        }
+
+        .desktop-details-add-to-cart {
+            min-width: 220px;
+            border: none;
+            border-radius: 14px;
+            padding: 0.95rem 1.2rem;
+            background: linear-gradient(135deg, #FFA62B 0%, #ff8c00 100%);
+            color: white;
+            font-size: 0.98rem;
+            font-weight: 700;
+            box-shadow: 0 8px 18px rgba(255, 166, 43, 0.24);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+        }
+
+        .desktop-details-add-to-cart:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 22px rgba(255, 166, 43, 0.3);
+        }
+
+        .desktop-details-add-to-cart:disabled {
+            opacity: 0.6;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .desktop-details-buy-now {
+            min-width: 220px;
+            border: 1px solid rgba(22, 105, 122, 0.14);
+            border-radius: 14px;
+            padding: 0.95rem 1.2rem;
+            background: linear-gradient(135deg, #16697A 0%, #0f5564 100%);
+            color: white;
+            font-size: 0.98rem;
+            font-weight: 700;
+            box-shadow: 0 8px 18px rgba(22, 105, 122, 0.24);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+        }
+
+        .desktop-details-buy-now:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 22px rgba(22, 105, 122, 0.3);
+        }
+
+        .desktop-details-buy-now:disabled {
+            opacity: 0.6;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        @media (min-width: 769px) {
+            .customize-page #mainCustomizeContainer {
+                align-items: start;
+            }
+
+            .customize-page .left-section {
+                position: sticky;
+                top: 24px;
+                align-self: start;
+                height: fit-content;
+                z-index: 10;
+            }
+
+            .customize-page .preview-section {
+                position: static !important;
+                top: auto !important;
+                margin-bottom: 0;
+            }
+
+            .customize-page .middle-section,
+            .customize-page .right-section {
+                align-self: start;
+            }
+
+            .customize-page .right-section {
+                position: static;
+                max-height: none;
+                overflow: visible;
+                padding-right: 0;
+            }
+
+            .customize-page .room-preview-section {
+                position: static !important;
+                top: auto !important;
+                margin-bottom: 1.1rem;
+            }
+
+            .customize-page .total-price-bar {
+                position: sticky;
+                bottom: 24px;
+                z-index: 25;
+                width: min(100%, 640px);
+                margin: 1.25rem auto 0;
+                padding: 1rem 1.5rem;
+            }
+
+            .customize-page .bottom-bar-content {
+                max-width: none;
+                width: 100%;
+            }
+
+            .customize-page .price-and-cart {
+                width: 100%;
+                justify-content: space-between;
+                gap: 1rem;
+            }
+
+            .customize-page .floating-cart-btn {
+                min-width: 245px;
+                justify-content: center;
+                padding: 0.95rem 1.8rem;
+            }
+
+            .desktop-details-purchase-bar {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .desktop-room-preview-details {
+                grid-column: auto;
+                margin-top: 1rem;
+            }
+
+            .desktop-listing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .desktop-details-purchase-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .desktop-details-actions {
+                width: 100%;
+                justify-content: stretch;
+            }
+
+            .desktop-details-add-to-cart,
+            .desktop-details-buy-now {
+                width: 100%;
+                min-width: 0;
+            }
+        }
+
         @media (max-width: 768px) {
+            .desktop-room-preview-details {
+                display: none !important;
+            }
+
             /* Full-screen swipeable sections on mobile */
             .upload-hero-wrapper {
                 padding: 0 0 18px;
@@ -878,36 +1144,8 @@
                 <!-- Desktop Compact Customization Cards -->
                 <div class="desktop-customization-cards">
                     <div class="cards-container" id="cardsContainer">
-                        <!-- Border Card -->
-                        <div class="desktop-card active" data-type="border">
-                            <div class="desktop-card-header">
-                                <i class="fas fa-border-style"></i>
-                                <span>Border</span>
-                            </div>
-                            <div class="desktop-card-content">
-                                <div class="desktop-border-grid">
-                                    <button class="desktop-border-btn" data-border="no">
-                                        <i class="fas fa-times-circle"></i>
-                                        <span>No</span>
-                                    </button>
-                                    <button class="desktop-border-btn" data-border="yes">
-                                        <i class="fas fa-check-circle"></i>
-                                        <span>Yes</span>
-                                    </button>
-                                </div>
-                                <div class="border-thickness-container" id="desktopBorderThicknessContainer">
-                                    <label class="border-thickness-label">Border Thickness</label>
-                                    <div class="border-thickness-slider-wrapper">
-                                        <input type="range" id="desktopBorderThickness" class="border-thickness-slider" min="0" max="30" value="15">
-                                        <span class="border-thickness-value" id="desktopBorderThicknessValue">15px</span>
-                                    </div>
-                                </div>
-                                <p class="border-description">Add a white border inside the frame around your photo</p>
-                            </div>
-                        </div>
-
                         <!-- Size Card -->
-                        <div class="desktop-card" data-type="size">
+                        <div class="desktop-card active" data-type="size">
                             <div class="desktop-card-header">
                                 <i class="fas fa-ruler-combined"></i>
                                 <span>Size</span>
@@ -950,6 +1188,34 @@
                             </div>
                         </div>
 
+                        <!-- Border Card -->
+                        <div class="desktop-card" data-type="border">
+                            <div class="desktop-card-header">
+                                <i class="fas fa-border-style"></i>
+                                <span>Border</span>
+                            </div>
+                            <div class="desktop-card-content">
+                                <div class="desktop-border-grid">
+                                    <button class="desktop-border-btn" data-border="no">
+                                        <i class="fas fa-times-circle"></i>
+                                        <span>No</span>
+                                    </button>
+                                    <button class="desktop-border-btn" data-border="yes">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Yes</span>
+                                    </button>
+                                </div>
+                                <div class="border-thickness-container" id="desktopBorderThicknessContainer">
+                                    <label class="border-thickness-label">Border Thickness</label>
+                                    <div class="border-thickness-slider-wrapper">
+                                        <input type="range" id="desktopBorderThickness" class="border-thickness-slider" min="0" max="30" value="15">
+                                        <span class="border-thickness-value" id="desktopBorderThicknessValue">15px</span>
+                                    </div>
+                                </div>
+                                <p class="border-description">Add a white border inside the frame around your photo</p>
+                            </div>
+                        </div>
+
                         <!-- Color Card -->
                         <div class="desktop-card" data-type="color">
                             <div class="desktop-card-header">
@@ -965,26 +1231,6 @@
                                     <button class="desktop-color-btn" data-color="white">
                                         <div class="color-preview white-preview"></div>
                                         <span>White</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Texture Card -->
-                        <div class="desktop-card" data-type="texture">
-                            <div class="desktop-card-header">
-                                <i class="fas fa-layer-group"></i>
-                                <span>Texture</span>
-                            </div>
-                            <div class="desktop-card-content">
-                                <div class="desktop-texture-grid">
-                                    <button class="desktop-texture-btn" data-texture="smooth">
-                                        <i class="fas fa-grip-lines"></i>
-                                        <span>Smooth</span>
-                                    </button>
-                                    <button class="desktop-texture-btn" data-texture="rough">
-                                        <i class="fas fa-grip-lines-vertical"></i>
-                                        <span>Rough</span>
                                     </button>
                                 </div>
                             </div>
@@ -1127,8 +1373,199 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="desktop-room-preview-details" id="desktopRoomPreviewDetails">
+            <div class="desktop-room-preview-shell">
+                <div class="product-info-section">
+                    <div class="desktop-room-preview-intro">
+                        <div class="desktop-room-preview-copy">
+                            <span class="desktop-room-preview-kicker">
+                                <i class="fas fa-heart"></i>
+                                Cute room preview details
+                            </span>
+                            <div class="product-header">
+                                <h2 class="product-title">🖼️ Customized Photo Frame</h2>
+                                <div class="product-rating" onclick="scrollToReviews('desktop')" style="cursor: pointer;">
+                                    <span class="rating-stars" id="desktopRatingStarsDisplay">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                    </span>
+                                    <span class="rating-text" id="desktopRatingCountDisplay">4.5 (<span id="desktopTotalRatingsCount">500</span> ratings) ⭐</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="product-price-section">
+                            <div class="price-container">
+                                <span class="current-price" id="desktopListingPrice">₹499</span>
+                                <span class="original-price">₹999</span>
+                                <span class="discount-badge">50% off</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="desktop-details-purchase-bar">
+                        <div class="desktop-details-total">
+                            <span class="desktop-details-total-label">Total</span>
+                            <span class="desktop-details-total-value" id="desktopDetailsTotalPrice">₹0</span>
+                        </div>
+                        <div class="desktop-details-actions">
+                            <button id="desktopDetailsAddToCart" class="desktop-details-add-to-cart" disabled>
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Add to Cart</span>
+                            </button>
+                            <button id="desktopDetailsBuyNow" class="desktop-details-buy-now" disabled>
+                                <i class="fas fa-bolt"></i>
+                                <span>Buy Now</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="desktop-listing-grid">
+                        <div class="desktop-listing-column">
+                            <div class="product-specs-section">
+                                <h3 class="section-title">Your Selections</h3>
+                                <div class="specs-list">
+                                    <div class="spec-row">
+                                        <span class="spec-key">Size</span>
+                                        <span class="spec-value" id="desktopListingSize">13×19" Portrait</span>
+                                    </div>
+                                    <div class="spec-row">
+                                        <span class="spec-key">Frame Color</span>
+                                        <span class="spec-value" id="desktopListingColor">Black</span>
+                                    </div>
+                                    <div class="spec-row">
+                                        <span class="spec-key">Frame</span>
+                                        <span class="spec-value" id="desktopListingFrame">Premium Wall Frame</span>
+                                    </div>
+                                    <div class="spec-row">
+                                        <span class="spec-key">Frame Texture</span>
+                                        <span class="spec-value" id="desktopListingTexture">Smooth</span>
+                                    </div>
+                                    <div class="spec-row">
+                                        <span class="spec-key">White Border</span>
+                                        <span class="spec-value" id="desktopListingBorder">No</span>
+                                    </div>
+                                    <div class="spec-row">
+                                        <span class="spec-key">Quality</span>
+                                        <span class="spec-value">Premium HD Print</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="product-features-section">
+                                <h3 class="section-title">✨ Key Features</h3>
+                                <ul class="features-list">
+                                    <li><i class="fas fa-check-circle"></i> High-quality photo printing</li>
+                                    <li><i class="fas fa-check-circle"></i> Premium frame material</li>
+                                    <li><i class="fas fa-check-circle"></i> Easy wall mounting</li>
+                                    <li><i class="fas fa-check-circle"></i> Scratch resistant</li>
+                                    <li><i class="fas fa-check-circle"></i> Safe & secure packaging</li>
+                                    <li><i class="fas fa-check-circle"></i> Perfect for gifting</li>
+                                </ul>
+                            </div>
+
+                            <div class="delivery-info-section">
+                                <h3 class="section-title">🚚 Delivery & Returns</h3>
+                                <div class="delivery-item">
+                                    <i class="fas fa-truck"></i>
+                                    <div class="delivery-text">
+                                        <span class="delivery-label">📦 Free Delivery</span>
+                                        <span class="delivery-desc" id="desktopEstimatedDeliveryDate">Estimated delivery in 5-7 business days</span>
+                                    </div>
+                                </div>
+                                <div class="delivery-item">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <div class="delivery-text">
+                                        <span class="delivery-label">🛡️ Damage Protection</span>
+                                        <span class="delivery-desc">Free replacement if damaged during transit due to courier mishandling</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="desktop-listing-column">
+                            <div class="policy-info-section">
+                                <h3 class="section-title">📋 Cancellation & Refund Policy</h3>
+                                <div class="policy-card">
+                                    <div class="policy-item">
+                                        <span class="policy-icon">⏰</span>
+                                        <div class="policy-content">
+                                            <span class="policy-label">24-Hour Cancellation Window</span>
+                                            <span class="policy-desc">Cancel within 24 hours of placing order for full refund. After 24 hours or once sent to production, cancellation is case-by-case.</span>
+                                        </div>
+                                    </div>
+                                    <div class="policy-item">
+                                        <span class="policy-icon">🎨</span>
+                                        <div class="policy-content">
+                                            <span class="policy-label">Customized Product Policy</span>
+                                            <span class="policy-desc">Since these are personalized items made just for you, returns/exchanges only apply for damaged, defective, or incorrectly printed products.</span>
+                                        </div>
+                                    </div>
+                                    <div class="policy-item">
+                                        <span class="policy-icon">📸</span>
+                                        <div class="policy-content">
+                                            <span class="policy-label">7-Day Return Window</span>
+                                            <span class="policy-desc">Return requests must be submitted within 24 hours of receiving the product with order ID, photos & reason. Products must be in original packaging.</span>
+                                        </div>
+                                    </div>
+                                    <div class="policy-item">
+                                        <span class="policy-icon">💰</span>
+                                        <div class="policy-content">
+                                            <span class="policy-label">Refund Process</span>
+                                            <span class="policy-desc">Refunds processed within 7-10 business days after approval. Refund only for products completely different from order, damaged, defective or with printing issues.</span>
+                                        </div>
+                                    </div>
+                                    <div class="policy-item">
+                                        <span class="policy-icon">👀</span>
+                                        <div class="policy-content">
+                                            <span class="policy-label">Preview Before You Buy</span>
+                                            <span class="policy-desc">Please verify all details (spelling, alignment, picture placement) in the preview before confirming. You're responsible for reviewing your order.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <a href="terms-and-conditions.html" class="view-full-policy-link">📄 View Full Terms & Conditions</a>
+                            </div>
+
+                            <div class="customer-reviews-section" id="desktopCustomerReviewsSection">
+                                <h3 class="section-title">⭐ Customer Reviews</h3>
+                                <div class="reviews-summary">
+                                    <div class="reviews-rating-big">
+                                        <span class="big-rating-number" id="desktopBigRatingNumber">4.5</span>
+                                        <div class="big-rating-stars" id="desktopBigRatingStars">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star-half-alt"></i>
+                                        </div>
+                                        <span class="total-reviews-text"><span id="desktopTotalReviewsCount">68</span> Reviews</span>
+                                    </div>
+                                    <div class="rating-bars">
+                                        <div class="rating-bar-row"><span>5 ⭐</span><div class="rating-bar"><div class="rating-fill" style="width: 65%;"></div></div><span>65%</span></div>
+                                        <div class="rating-bar-row"><span>4 ⭐</span><div class="rating-bar"><div class="rating-fill" style="width: 22%;"></div></div><span>22%</span></div>
+                                        <div class="rating-bar-row"><span>3 ⭐</span><div class="rating-bar"><div class="rating-fill" style="width: 8%;"></div></div><span>8%</span></div>
+                                        <div class="rating-bar-row"><span>2 ⭐</span><div class="rating-bar"><div class="rating-fill" style="width: 3%;"></div></div><span>3%</span></div>
+                                        <div class="rating-bar-row"><span>1 ⭐</span><div class="rating-bar"><div class="rating-fill" style="width: 2%;"></div></div><span>2%</span></div>
+                                    </div>
+                                </div>
+
+                                <div class="reviews-list" id="desktopReviewsList">
+                                    <!-- Reviews will be dynamically loaded here -->
+                                </div>
+
+                                <button class="load-more-reviews-btn" id="desktopLoadMoreReviewsBtn" onclick="loadMoreReviews()">Show More Reviews 👇</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
         
         <!-- Mobile Room Preview Page - Flipkart Style Listing (Hidden by default, shown when user clicks See Room Preview) -->
         <div id="mobileRoomPreviewPage" class="mobile-room-preview-page" style="display: none;">
@@ -1448,7 +1885,6 @@
                 </div>
             </div>
         </template>
-    </div>
 
     <!-- Firebase Backend Integration (Backup) -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>

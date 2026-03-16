@@ -2,6 +2,7 @@
 class CartManager {
     constructor() {
         this.cart = this.loadCart();
+        this.pendingConfirmAction = null;
         // New coupon system with order-based coupons
         this.availableCoupons = [
             { 
@@ -122,9 +123,12 @@ class CartManager {
         const clearCartBtn = document.getElementById('clearCartBtn');
         if (clearCartBtn) {
             clearCartBtn.addEventListener('click', () => {
-                if (confirm('Are you sure you want to clear your cart?')) {
-                    this.clearCart();
-                }
+                this.openConfirmModal({
+                    title: 'Clear your cart?',
+                    message: 'This will remove every item from your cart.',
+                    confirmText: 'Clear Cart',
+                    onConfirm: () => this.clearCart()
+                });
             });
         }
 
@@ -161,6 +165,36 @@ class CartManager {
                 this.removeCoupon();
             });
         }
+
+        const cartConfirmModalOverlay = document.getElementById('cartConfirmModalOverlay');
+        if (cartConfirmModalOverlay) {
+            cartConfirmModalOverlay.addEventListener('click', (e) => {
+                if (e.target === cartConfirmModalOverlay) {
+                    this.closeConfirmModal();
+                }
+            });
+        }
+
+        const cartConfirmCancelBtn = document.getElementById('cartConfirmCancelBtn');
+        if (cartConfirmCancelBtn) {
+            cartConfirmCancelBtn.addEventListener('click', () => {
+                this.closeConfirmModal();
+            });
+        }
+
+        const cartConfirmActionBtn = document.getElementById('cartConfirmActionBtn');
+        if (cartConfirmActionBtn) {
+            cartConfirmActionBtn.addEventListener('click', () => {
+                this.confirmModalAction();
+            });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeCouponModal();
+                this.closeConfirmModal();
+            }
+        });
 
         // Header functionality
         this.setupHeaderFunctionality();
@@ -336,11 +370,16 @@ class CartManager {
 
     removeItem(index) {
         if (index >= 0 && index < this.cart.length) {
-            if (confirm('Remove this item from your cart?')) {
+            this.openConfirmModal({
+                title: 'Remove this item?',
+                message: 'This item will be removed from your cart.',
+                confirmText: 'Remove Item',
+                onConfirm: () => {
                 this.cart.splice(index, 1);
                 this.saveCart();
                 this.renderCart();
-            }
+                }
+            });
         }
     }
 
@@ -452,6 +491,48 @@ class CartManager {
 
     closeCouponModal() {
         document.getElementById('couponModalOverlay').classList.remove('active');
+    }
+
+    openConfirmModal({ title, message, confirmText, onConfirm }) {
+        const overlay = document.getElementById('cartConfirmModalOverlay');
+        const titleEl = document.getElementById('cartConfirmModalTitle');
+        const messageEl = document.getElementById('cartConfirmModalMessage');
+        const actionBtn = document.getElementById('cartConfirmActionBtn');
+
+        if (!overlay || !titleEl || !messageEl || !actionBtn) {
+            if (typeof onConfirm === 'function' && confirm(message || 'Are you sure?')) {
+                onConfirm();
+            }
+            return;
+        }
+
+        titleEl.textContent = title || 'Confirm action';
+        messageEl.textContent = message || 'Are you sure you want to continue?';
+        actionBtn.textContent = confirmText || 'Confirm';
+        this.pendingConfirmAction = typeof onConfirm === 'function' ? onConfirm : null;
+        overlay.classList.add('active');
+        overlay.setAttribute('aria-hidden', 'false');
+    }
+
+    closeConfirmModal() {
+        const overlay = document.getElementById('cartConfirmModalOverlay');
+        if (!overlay) {
+            this.pendingConfirmAction = null;
+            return;
+        }
+
+        overlay.classList.remove('active');
+        overlay.setAttribute('aria-hidden', 'true');
+        this.pendingConfirmAction = null;
+    }
+
+    confirmModalAction() {
+        const pendingAction = this.pendingConfirmAction;
+        this.closeConfirmModal();
+
+        if (typeof pendingAction === 'function') {
+            pendingAction();
+        }
     }
 
     applyCoupon(couponId) {

@@ -1172,6 +1172,104 @@
             background: #2d3436;
         }
 
+            /* Cart Confirmation Modal */
+            .cart-confirm-modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.58);
+                display: none;
+                justify-content: center;
+                align-items: center;
+                z-index: 10010;
+                padding: 20px;
+                backdrop-filter: blur(4px);
+            }
+
+            .cart-confirm-modal-overlay.active {
+                display: flex;
+            }
+
+            .cart-confirm-modal {
+                width: min(100%, 380px);
+                background: #fff;
+                border-radius: 18px;
+                box-shadow: 0 18px 45px rgba(0, 0, 0, 0.25);
+                overflow: hidden;
+                animation: modalSlideIn 0.25s ease;
+            }
+
+            .cart-confirm-modal-header {
+                background: linear-gradient(135deg, #16697A 0%, #489FB5 100%);
+                color: #fff;
+                padding: 18px 20px 16px;
+            }
+
+            .cart-confirm-modal-header h3 {
+                margin: 0;
+                font-size: 1.1rem;
+                font-weight: 700;
+            }
+
+            .cart-confirm-modal-body {
+                padding: 20px;
+                color: #345;
+                font-size: 0.98rem;
+                line-height: 1.6;
+            }
+
+            .cart-confirm-modal-footer {
+                display: flex;
+                gap: 12px;
+                justify-content: flex-end;
+                padding: 0 20px 20px;
+            }
+
+            .cart-confirm-btn {
+                border: none;
+                border-radius: 10px;
+                padding: 12px 18px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                min-width: 112px;
+            }
+
+            .cart-confirm-btn.cancel {
+                background: #edf1f2;
+                color: #355;
+            }
+
+            .cart-confirm-btn.cancel:hover {
+                background: #dfe7e8;
+            }
+
+            .cart-confirm-btn.confirm {
+                background: #dc3545;
+                color: #fff;
+            }
+
+            .cart-confirm-btn.confirm:hover {
+                background: #bf2d3c;
+                transform: translateY(-1px);
+            }
+
+            @media (max-width: 480px) {
+                .cart-confirm-modal-overlay {
+                    padding: 16px;
+                }
+
+                .cart-confirm-modal-footer {
+                    flex-direction: column-reverse;
+                }
+
+                .cart-confirm-btn {
+                    width: 100%;
+                }
+            }
+
         /* Coupon Applied Celebration Animation */
         .coupon-celebration-overlay {
             position: fixed;
@@ -1523,6 +1621,21 @@
             </div>
             <div class="coupon-modal-footer">
                 <button class="close-coupon-modal" id="closeCouponModal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="cart-confirm-modal-overlay" id="cartConfirmModalOverlay" aria-hidden="true">
+        <div class="cart-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="cartConfirmModalTitle">
+            <div class="cart-confirm-modal-header">
+                <h3 id="cartConfirmModalTitle">Confirm action</h3>
+            </div>
+            <div class="cart-confirm-modal-body" id="cartConfirmModalMessage">
+                Are you sure you want to continue?
+            </div>
+            <div class="cart-confirm-modal-footer">
+                <button class="cart-confirm-btn cancel" id="cartConfirmCancelBtn" type="button">Cancel</button>
+                <button class="cart-confirm-btn confirm" id="cartConfirmActionBtn" type="button">Confirm</button>
             </div>
         </div>
     </div>
