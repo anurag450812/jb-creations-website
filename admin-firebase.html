@@ -1034,6 +1034,57 @@
             padding: 1.5rem;
         }
 
+        .review-editor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .review-editor-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+
+        .review-editor-field label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .review-editor-field input,
+        .review-editor-field select,
+        .review-editor-field textarea {
+            width: 100%;
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-md);
+            padding: 0.8rem 0.9rem;
+            font: inherit;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .review-editor-field textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .review-editor-flags {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .review-editor-flags label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
         .order-details {
             display: grid;
             gap: 1rem;
@@ -3732,6 +3783,12 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="#" class="nav-link" data-view="reviews">
+                                <i class="nav-icon fas fa-star-half-alt"></i>
+                                Reviews
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="#" class="nav-link" data-view="support">
                                 <i class="nav-icon fas fa-comments"></i>
                                 Support Chats
@@ -3805,6 +3862,10 @@
                 <a href="#" class="mobile-nav-item" data-view="customers">
                     <i class="fas fa-users"></i>
                     <span>Customers</span>
+                </a>
+                <a href="#" class="mobile-nav-item" data-view="reviews">
+                    <i class="fas fa-star-half-alt"></i>
+                    <span>Reviews</span>
                 </a>
                 <a href="#" class="mobile-nav-item" data-view="support">
                     <i class="fas fa-comments"></i>
@@ -4245,6 +4306,79 @@
                 </div>
 
                 <!-- Support Chats View - WhatsApp-like Interface -->
+                <div id="reviews-view" class="view" style="display: none;">
+                    <div class="card" style="margin-bottom: 1.5rem;">
+                        <div class="card-header" style="display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                            <div>
+                                <h3 class="card-title"><i class="fas fa-star-half-alt" style="margin-right: 0.5rem; color: var(--warning);"></i>Review Control Center</h3>
+                                <p style="color: var(--text-muted); margin-top: 0.35rem; font-size: 0.92rem;">Approve customer reviews, manage visibility, and control the automated review engine.</p>
+                            </div>
+                            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+                                <label style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-weight: 500;">
+                                    <input type="checkbox" id="auto-reviews-toggle" onchange="toggleAutoReviews(this.checked)">
+                                    Auto reviews enabled
+                                </label>
+                                <button class="btn btn-secondary btn-sm" onclick="runDailyReviewIncrementNow()">
+                                    <i class="fas fa-bolt"></i> Run Today Now
+                                </button>
+                                <button class="btn btn-primary btn-sm" onclick="openAdminReviewCreator()">
+                                    <i class="fas fa-plus"></i> Add Review
+                                </button>
+                                <button class="btn btn-secondary btn-sm" onclick="loadReviewsAdmin()">
+                                    <i class="fas fa-refresh"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="reviews-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header" style="display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                            <h3 class="card-title">All Reviews</h3>
+                            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+                                <select class="filter-select" id="reviews-status-filter" onchange="renderAdminReviewsTable()">
+                                    <option value="all">All Statuses</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="rejected">Rejected</option>
+                                </select>
+                                <select class="filter-select" id="reviews-source-filter" onchange="renderAdminReviewsTable()">
+                                    <option value="all">All Sources</option>
+                                    <option value="user">User</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="auto">Auto</option>
+                                </select>
+                                <input type="text" class="search-input" id="reviews-search" placeholder="Search name, text, order..." style="min-width: 250px;" oninput="renderAdminReviewsTable()">
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Variant</th>
+                                            <th>Rating</th>
+                                            <th>Source</th>
+                                            <th>Status</th>
+                                            <th>Review</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-reviews-table-body">
+                                        <tr>
+                                            <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">Load the Reviews view to fetch data.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="support-view" class="view" style="display: none;">
                     <!-- Chat Container - WhatsApp Style -->
                     <div class="whatsapp-chat-container">
@@ -4603,11 +4737,90 @@
         </div>
     </div>
 
+    <div id="review-editor-modal" class="modal">
+        <div class="modal-content" style="width: 760px; max-width: 96vw;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="review-editor-title">Add Review</h3>
+                <button class="modal-close" onclick="closeReviewEditorModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="review-editor-grid">
+                    <div class="review-editor-field">
+                        <label for="review-editor-name">Reviewer Name</label>
+                        <input id="review-editor-name" type="text" placeholder="Happy Customer">
+                    </div>
+                    <div class="review-editor-field">
+                        <label for="review-editor-size">Variant</label>
+                        <select id="review-editor-size">
+                            <option value="13x19-portrait">13x19 Portrait</option>
+                            <option value="13x19-landscape">13x19 Landscape</option>
+                            <option value="13x10-portrait">13x10 Portrait</option>
+                            <option value="13x10-landscape">13x10 Landscape</option>
+                        </select>
+                    </div>
+                    <div class="review-editor-field">
+                        <label for="review-editor-rating">Rating</label>
+                        <select id="review-editor-rating">
+                            <option value="5">5 Stars</option>
+                            <option value="4">4 Stars</option>
+                            <option value="3">3 Stars</option>
+                            <option value="2">2 Stars</option>
+                            <option value="1">1 Star</option>
+                        </select>
+                    </div>
+                    <div class="review-editor-field">
+                        <label for="review-editor-status">Status</label>
+                        <select id="review-editor-status">
+                            <option value="approved">Approved</option>
+                            <option value="pending">Pending</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+                    <div class="review-editor-field">
+                        <label for="review-editor-source">Source</label>
+                        <select id="review-editor-source">
+                            <option value="admin">Admin</option>
+                            <option value="user">User</option>
+                            <option value="auto">Auto</option>
+                        </select>
+                    </div>
+                    <div class="review-editor-field">
+                        <label for="review-editor-order">Order Number</label>
+                        <input id="review-editor-order" type="text" placeholder="Optional order number">
+                    </div>
+                </div>
+
+                <div class="review-editor-field">
+                    <label for="review-editor-text">Review Text</label>
+                    <textarea id="review-editor-text" placeholder="Describe the customer experience..."></textarea>
+                </div>
+
+                <div class="review-editor-flags">
+                    <label><input id="review-editor-verified" type="checkbox" checked> Verified</label>
+                    <label><input id="review-editor-pinned" type="checkbox"> Pinned</label>
+                    <label><input id="review-editor-hidden" type="checkbox"> Hidden</label>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+                    <button class="btn btn-secondary" onclick="closeReviewEditorModal()">Cancel</button>
+                    <button class="btn btn-primary" id="review-editor-save-btn" onclick="saveReviewEditorModal()">
+                        <i class="fas fa-save"></i> Save Review
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Global variables
         let orders = [];
         let filteredOrders = [];
         let customers = [];
+        let adminReviews = [];
+        let reviewSettings = null;
+        let reviewEditorState = { mode: 'create', reviewId: null };
         let stats = {};
         
         // Pagination variables
@@ -4725,6 +4938,7 @@
                 'orders': 'Orders',
                 'shiprocket': 'Shiprocket',
                 'customers': 'Customers',
+                'reviews': 'Reviews',
                 'support': 'Support Chats',
                 'analytics': 'Analytics',
                 'products': 'Products',
@@ -4739,6 +4953,7 @@
                 'orders': 'Manage orders and download images',
                 'shiprocket': 'Manage shipments, AWB, labels and tracking',
                 'customers': 'View and manage customers',
+                'reviews': 'Moderate customer reviews and control automation',
                 'support': 'Chat with customers and provide support',
                 'analytics': 'Business insights and analytics',
                 'products': 'Manage your product catalog',
@@ -4760,6 +4975,9 @@
                     break;
                 case 'customers':
                     loadCustomers();
+                    break;
+                case 'reviews':
+                    loadReviewsAdmin();
                     break;
                 case 'analytics':
                     loadAnalytics();
@@ -5209,12 +5427,22 @@
                             </span>
                         </td>
                         <td style="font-weight: 600;">₹${amount}</td>
-                        <td>${workflowBadge}</td>
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 0.35rem; align-items: flex-start;">
+                                ${workflowBadge}
+                                <span class="badge badge-info" style="text-transform: capitalize;">${order.status || 'pending'}</span>
+                            </div>
+                        </td>
                         <td>
                             <div class="action-buttons" style="display: flex; gap: 0.5rem;">
                                 <button class="action-icon-btn btn-view" onclick="viewOrder('${order.orderNumber}')" title="View Order">
                                     <i class="fas fa-eye"></i>
                                 </button>
+                                ${order.status !== 'delivered' ? `
+                                    <button class="action-icon-btn" onclick="updateOrderStatusInline('${order.orderNumber}', 'delivered')" title="Mark Delivered" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                                        <i class="fas fa-box-open"></i>
+                                    </button>
+                                ` : ''}
                                 ${currentWorkflowFilter === 'new' ? `
                                     <button class="action-icon-btn btn-download" onclick="downloadOrderImages('${order.orderNumber}')" title="Download Images">
                                         <i class="fas fa-download"></i>
@@ -6858,6 +7086,28 @@
                             <span class="detail-value">${order.deliveryMethod === 'express' ? 'Express (2-3 days)' : 'Standard (5-7 days)'}</span>
                         </div>
                     </div>
+
+                    <div style="margin-top: 18px; padding: 16px; border: 1px solid var(--border-light); border-radius: var(--radius-md); background: var(--bg-tertiary);">
+                        <div style="display: flex; justify-content: space-between; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                            <div>
+                                <div style="font-weight: 600; color: var(--text-primary);">Manual Order Status</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">Use this to test delivered-order review flows without waiting for courier updates.</div>
+                            </div>
+                            <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                                <select id="modal-order-status-${order.orderNumber}" class="filter-select">
+                                    <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
+                                    <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                                    <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                                    <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Completed</option>
+                                    <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                                </select>
+                                <button class="btn btn-primary btn-sm" onclick="saveOrderStatusFromModal('${order.orderNumber}')">
+                                    <i class="fas fa-save"></i> Save Status
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     
                     ${order.customer.address ? `
                         <div class="detail-row" style="margin-top: 15px;">
@@ -7814,6 +8064,428 @@
             updateTabCounts();
             applyTabFilter();
             clearAllOrdersSelection();
+        }
+
+        async function updateOrderStatusInline(orderNumber, newStatus, options = {}) {
+            const order = orders.find(o => o.orderNumber === orderNumber);
+            if (!order) {
+                showShippingToast('Order not found', 'error');
+                return;
+            }
+
+            if (!options.skipConfirm) {
+                const confirmed = confirm(`Change order #${orderNumber} status to ${newStatus}?`);
+                if (!confirmed) {
+                    return;
+                }
+            }
+
+            try {
+                if (!window.jbAPI || typeof window.jbAPI.updateOrder !== 'function') {
+                    throw new Error('Firebase API not available');
+                }
+
+                const result = await window.jbAPI.updateOrder(order.orderId || order.id, {
+                    status: newStatus
+                });
+
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to update order status');
+                }
+
+                order.status = newStatus;
+                showShippingToast(`Order #${orderNumber} marked ${newStatus}`, 'success');
+                updateTabCounts();
+                updateOrderWorkflowCounts();
+                applyOrdersWorkflowFilter();
+
+                if (options.refreshModal) {
+                    showOrderModal(order);
+                }
+            } catch (error) {
+                console.error('Error updating order status:', error);
+                showShippingToast('Failed to update order status: ' + error.message, 'error');
+            }
+        }
+
+        function saveOrderStatusFromModal(orderNumber) {
+            const select = document.getElementById(`modal-order-status-${orderNumber}`);
+            if (!select) {
+                return;
+            }
+            void updateOrderStatusInline(orderNumber, select.value, { skipConfirm: true, refreshModal: true });
+        }
+
+        function formatAdminReviewDate(dateInput) {
+            if (!dateInput) {
+                return 'N/A';
+            }
+
+            let date = dateInput;
+            if (dateInput.toDate) {
+                date = dateInput.toDate();
+            } else if (dateInput.seconds) {
+                date = new Date(dateInput.seconds * 1000);
+            } else {
+                date = new Date(dateInput);
+            }
+
+            if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+                return 'N/A';
+            }
+
+            return date.toLocaleString('en-IN', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function getVariantLabel(sizeKey) {
+            if (!sizeKey) {
+                return 'Unknown';
+            }
+            return sizeKey.replace('13x', '13 x ').replace('-', ' / ').replace(/portrait/i, 'Portrait').replace(/landscape/i, 'Landscape');
+        }
+
+        function getReviewSourceBadge(source) {
+            const sourceMap = {
+                user: { color: 'var(--info)', label: 'User' },
+                admin: { color: 'var(--success)', label: 'Admin' },
+                auto: { color: 'var(--warning)', label: 'Auto' }
+            };
+            const config = sourceMap[source] || { color: 'var(--gray-500)', label: source || 'Unknown' };
+            return `<span class="badge" style="background: ${config.color}; color: white;">${config.label}</span>`;
+        }
+
+        function getReviewStatusBadge(status) {
+            const statusMap = {
+                approved: 'badge-success',
+                pending: 'badge-warning',
+                rejected: 'badge-danger'
+            };
+            return `<span class="badge ${statusMap[status] || 'badge-info'}" style="text-transform: capitalize;">${status || 'pending'}</span>`;
+        }
+
+        function escapeAdminReviewHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function renderReviewStatsCards() {
+            const grid = document.getElementById('reviews-stats-grid');
+            if (!grid) {
+                return;
+            }
+
+            const stats = reviewSettings?.stats || {};
+            const entries = Object.entries(stats);
+
+            grid.innerHTML = entries.map(([sizeKey, stat]) => `
+                <div style="padding: 1rem; border: 1px solid var(--border-light); border-radius: var(--radius-md); background: var(--bg-primary);">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem;">${getVariantLabel(sizeKey)}</div>
+                    <div style="font-size: 1.35rem; font-weight: 700; color: var(--text-primary);">${Number(stat.avgRating || 0).toFixed(1)} <span style="font-size: 0.9rem; color: var(--warning);">★</span></div>
+                    <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.35rem;">${Number(stat.totalRatings || 0).toLocaleString('en-IN')} ratings</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">${Number(stat.totalReviews || 0).toLocaleString('en-IN')} reviews</div>
+                </div>
+            `).join('');
+        }
+
+        function renderAdminReviewsTable() {
+            const tableBody = document.getElementById('admin-reviews-table-body');
+            if (!tableBody) {
+                return;
+            }
+
+            const statusFilter = document.getElementById('reviews-status-filter')?.value || 'all';
+            const sourceFilter = document.getElementById('reviews-source-filter')?.value || 'all';
+            const searchValue = (document.getElementById('reviews-search')?.value || '').trim().toLowerCase();
+
+            const filtered = adminReviews.filter(review => {
+                const matchesStatus = statusFilter === 'all' || (review.status || 'pending') === statusFilter;
+                const matchesSource = sourceFilter === 'all' || (review.source || 'user') === sourceFilter;
+                const haystack = [review.name, review.text, review.orderNumber, review.sizeKey].join(' ').toLowerCase();
+                const matchesSearch = !searchValue || haystack.includes(searchValue);
+                return matchesStatus && matchesSource && matchesSearch;
+            });
+
+            if (!filtered.length) {
+                tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">No reviews match the current filters.</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = filtered.map(review => `
+                <tr>
+                    <td>
+                        <div style="font-weight: 600;">${review.name || 'Anonymous'}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">${review.orderNumber || 'No order linked'}</div>
+                    </td>
+                    <td>${getVariantLabel(review.sizeKey)}</td>
+                    <td>${'★'.repeat(Math.max(1, Number(review.rating) || 0))}<span style="color: var(--text-muted);">${'☆'.repeat(Math.max(0, 5 - (Number(review.rating) || 0)))}</span></td>
+                    <td>${getReviewSourceBadge(review.source)}</td>
+                    <td>
+                        ${getReviewStatusBadge(review.status)}
+                        <div style="display: flex; gap: 0.35rem; margin-top: 0.35rem; flex-wrap: wrap;">
+                            ${review.pinned ? '<span class="badge badge-info">Pinned</span>' : ''}
+                            ${review.verified ? '<span class="badge badge-success">Verified</span>' : ''}
+                            ${review.hidden ? '<span class="badge badge-danger">Hidden</span>' : ''}
+                        </div>
+                    </td>
+                    <td style="max-width: 320px;">
+                        <div style="white-space: normal; color: var(--text-secondary);">${escapeAdminReviewHtml(review.text || '')}</div>
+                    </td>
+                    <td>${formatAdminReviewDate(review.publishedAt || review.submittedAt || review.createdAt)}</td>
+                    <td>
+                        <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                            ${review.status !== 'approved' ? `<button class="btn btn-primary btn-sm" onclick="setReviewStatus('${review.id}', 'approved')">Approve</button>` : ''}
+                            ${review.status !== 'rejected' ? `<button class="btn btn-secondary btn-sm" onclick="setReviewStatus('${review.id}', 'rejected')">Reject</button>` : ''}
+                            <button class="btn btn-secondary btn-sm" onclick="editAdminReview('${review.id}')">Edit</button>
+                            <button class="btn btn-secondary btn-sm" onclick="toggleReviewFlag('${review.id}', 'hidden', ${!review.hidden})">${review.hidden ? 'Show' : 'Hide'}</button>
+                            <button class="btn btn-secondary btn-sm" onclick="toggleReviewFlag('${review.id}', 'verified', ${!review.verified})">${review.verified ? 'Unverify' : 'Verify'}</button>
+                            <button class="btn btn-secondary btn-sm" onclick="toggleReviewFlag('${review.id}', 'pinned', ${!review.pinned})">${review.pinned ? 'Unpin' : 'Pin'}</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteAdminReview('${review.id}')">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadReviewsAdmin() {
+            const tableBody = document.getElementById('admin-reviews-table-body');
+            if (tableBody) {
+                tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading reviews...</td></tr>';
+            }
+
+            try {
+                if (!window.jbAPI) {
+                    throw new Error('Firebase API not available');
+                }
+
+                const [reviewsResult, settingsResult] = await Promise.all([
+                    window.jbAPI.getAllReviews(),
+                    window.jbAPI.getReviewSettings()
+                ]);
+
+                adminReviews = reviewsResult.success ? reviewsResult.reviews : [];
+                reviewSettings = settingsResult.success ? settingsResult.settings : null;
+
+                const toggle = document.getElementById('auto-reviews-toggle');
+                if (toggle) {
+                    toggle.checked = reviewSettings?.autoReviewsEnabled !== false;
+                }
+
+                renderReviewStatsCards();
+                renderAdminReviewsTable();
+            } catch (error) {
+                console.error('Error loading admin reviews:', error);
+                if (tableBody) {
+                    tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--danger); padding: 2rem;">${error.message}</td></tr>`;
+                }
+            }
+        }
+
+        async function setReviewStatus(reviewId, status) {
+            try {
+                const updatePayload = { status };
+                if (status === 'approved') {
+                    updatePayload.hidden = false;
+                    updatePayload.publishedAt = new Date().toISOString();
+                }
+
+                const result = await window.jbAPI.updateReview(reviewId, updatePayload);
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to update review');
+                }
+
+                adminReviews = adminReviews.map(review => review.id === reviewId ? {
+                    ...review,
+                    ...updatePayload
+                } : review);
+                showShippingToast(`Review ${status}`, 'success');
+                renderAdminReviewsTable();
+            } catch (error) {
+                console.error('Error updating review status:', error);
+                showShippingToast('Failed to update review: ' + error.message, 'error');
+            }
+        }
+
+        async function toggleReviewFlag(reviewId, field, value) {
+            try {
+                const result = await window.jbAPI.updateReview(reviewId, { [field]: value });
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to update review');
+                }
+
+                adminReviews = adminReviews.map(review => review.id === reviewId ? {
+                    ...review,
+                    [field]: value
+                } : review);
+                renderAdminReviewsTable();
+            } catch (error) {
+                console.error('Error toggling review flag:', error);
+                showShippingToast('Failed to update review: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteAdminReview(reviewId) {
+            const confirmed = confirm('Delete this review permanently?');
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const result = await window.jbAPI.deleteReview(reviewId);
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to delete review');
+                }
+
+                adminReviews = adminReviews.filter(review => review.id !== reviewId);
+                renderAdminReviewsTable();
+                showShippingToast('Review deleted', 'success');
+            } catch (error) {
+                console.error('Error deleting review:', error);
+                showShippingToast('Failed to delete review: ' + error.message, 'error');
+            }
+        }
+
+        function populateReviewEditorForm(review = null) {
+            document.getElementById('review-editor-name').value = review?.name || '';
+            document.getElementById('review-editor-size').value = review?.sizeKey || '13x19-portrait';
+            document.getElementById('review-editor-rating').value = String(review?.rating || 5);
+            document.getElementById('review-editor-status').value = review?.status || 'approved';
+            document.getElementById('review-editor-source').value = review?.source || 'admin';
+            document.getElementById('review-editor-order').value = review?.orderNumber || '';
+            document.getElementById('review-editor-text').value = review?.text || '';
+            document.getElementById('review-editor-verified').checked = review?.verified !== false;
+            document.getElementById('review-editor-pinned').checked = !!review?.pinned;
+            document.getElementById('review-editor-hidden').checked = !!review?.hidden;
+        }
+
+        function openReviewEditorModal(mode, review = null) {
+            reviewEditorState = {
+                mode,
+                reviewId: review?.id || null
+            };
+
+            document.getElementById('review-editor-title').textContent = mode === 'edit' ? 'Edit Review' : 'Add Review';
+            document.getElementById('review-editor-save-btn').innerHTML = mode === 'edit'
+                ? '<i class="fas fa-save"></i> Update Review'
+                : '<i class="fas fa-plus"></i> Create Review';
+            populateReviewEditorForm(review);
+            document.getElementById('review-editor-modal').classList.add('show');
+        }
+
+        function closeReviewEditorModal() {
+            document.getElementById('review-editor-modal').classList.remove('show');
+            reviewEditorState = { mode: 'create', reviewId: null };
+        }
+
+        function getReviewEditorPayload() {
+            return {
+                name: document.getElementById('review-editor-name').value.trim() || 'Anonymous',
+                sizeKey: document.getElementById('review-editor-size').value,
+                rating: Math.max(1, Math.min(5, Number(document.getElementById('review-editor-rating').value) || 5)),
+                status: document.getElementById('review-editor-status').value,
+                source: document.getElementById('review-editor-source').value,
+                orderNumber: document.getElementById('review-editor-order').value.trim() || null,
+                text: document.getElementById('review-editor-text').value.trim(),
+                verified: document.getElementById('review-editor-verified').checked,
+                pinned: document.getElementById('review-editor-pinned').checked,
+                hidden: document.getElementById('review-editor-hidden').checked
+            };
+        }
+
+        async function saveReviewEditorModal() {
+            const payload = getReviewEditorPayload();
+            if (!payload.text || payload.text.length < 10) {
+                showShippingToast('Review text must be at least 10 characters', 'error');
+                return;
+            }
+
+            const mode = reviewEditorState.mode;
+
+            const saveButton = document.getElementById('review-editor-save-btn');
+            const originalButtonHtml = saveButton.innerHTML;
+            saveButton.disabled = true;
+            saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            try {
+                if (reviewEditorState.mode === 'edit' && reviewEditorState.reviewId) {
+                    const result = await window.jbAPI.updateReview(reviewEditorState.reviewId, payload);
+                    if (!result.success) {
+                        throw new Error(result.error || 'Failed to update review');
+                    }
+                } else {
+                    const result = await window.jbAPI.createAdminReview(payload);
+                    if (!result.success) {
+                        throw new Error(result.error || 'Failed to create review');
+                    }
+                }
+
+                closeReviewEditorModal();
+                await loadReviewsAdmin();
+                showShippingToast(mode === 'edit' ? 'Review updated' : 'Admin review added', 'success');
+            } catch (error) {
+                console.error('Error saving review modal:', error);
+                showShippingToast('Failed to save review: ' + error.message, 'error');
+            } finally {
+                saveButton.disabled = false;
+                saveButton.innerHTML = originalButtonHtml;
+            }
+        }
+
+        async function editAdminReview(reviewId) {
+            const review = adminReviews.find(item => item.id === reviewId);
+            if (!review) {
+                return;
+            }
+            openReviewEditorModal('edit', review);
+        }
+
+        function openAdminReviewCreator() {
+            openReviewEditorModal('create');
+        }
+
+        async function toggleAutoReviews(enabled) {
+            try {
+                const result = await window.jbAPI.updateReviewSettings({ autoReviewsEnabled: enabled });
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to update setting');
+                }
+
+                reviewSettings = reviewSettings || { stats: {} };
+                reviewSettings.autoReviewsEnabled = enabled;
+                showShippingToast(`Auto reviews ${enabled ? 'enabled' : 'disabled'}`, 'success');
+            } catch (error) {
+                console.error('Error updating auto review toggle:', error);
+                showShippingToast('Failed to update auto reviews: ' + error.message, 'error');
+                const toggle = document.getElementById('auto-reviews-toggle');
+                if (toggle) {
+                    toggle.checked = !enabled;
+                }
+            }
+        }
+
+        async function runDailyReviewIncrementNow() {
+            try {
+                showShippingToast('Running daily review increment...', 'info');
+                const result = await window.jbAPI.tryRunDailyReviewIncrement();
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to run increment');
+                }
+
+                await loadReviewsAdmin();
+                showShippingToast('Daily review increment finished', 'success');
+            } catch (error) {
+                console.error('Error running daily review increment:', error);
+                showShippingToast('Failed to run daily increment: ' + error.message, 'error');
+            }
         }
 
         function closeOrderModal() {
@@ -9352,6 +10024,11 @@
             const modal = document.getElementById('order-modal');
             if (e.target === modal) {
                 closeOrderModal();
+            }
+
+            const reviewEditorModal = document.getElementById('review-editor-modal');
+            if (e.target === reviewEditorModal) {
+                closeReviewEditorModal();
             }
             
             // Close confirmation modal when clicking outside

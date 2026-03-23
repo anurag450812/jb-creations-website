@@ -17,6 +17,191 @@ const firebaseConfig = {
 // Initialize Firebase when DOM is loaded
 let app, db;
 
+const REVIEW_VARIANTS = [
+    '13x19-portrait',
+    '13x19-landscape',
+    '13x10-portrait',
+    '13x10-landscape'
+];
+
+const DEFAULT_REVIEW_STATS = {
+    '13x19-portrait': { totalRatings: 587, totalReviews: 11, avgRating: 4.6, lastIncrementDate: null },
+    '13x19-landscape': { totalRatings: 456, totalReviews: 9, avgRating: 4.5, lastIncrementDate: null },
+    '13x10-portrait': { totalRatings: 398, totalReviews: 8, avgRating: 4.4, lastIncrementDate: null },
+    '13x10-landscape': { totalRatings: 321, totalReviews: 6, avgRating: 4.1, lastIncrementDate: null }
+};
+
+const REVIEW_POOL_NAMES = [
+    'Aarav Mehta', 'Aditi Sharma', 'Akash Yadav', 'Akriti Jain', 'Ananya Gupta', 'Ankit Verma', 'Arjun Saini', 'Ayushi Bansal',
+    'Bhavna Singh', 'Chetan Kumar', 'Deepika Nair', 'Divya Arora', 'Gaurav Bhatia', 'Harshita Rao', 'Ishaan Kapoor', 'Jatin Malhotra',
+    'Kajal Mishra', 'Karan Sood', 'Khushi Agarwal', 'Lakshya Seth', 'Mahima Joshi', 'Manav Arora', 'Megha Tiwari', 'Mohit Saini',
+    'Muskan Patel', 'Naina Thakur', 'Neha Rathi', 'Nikhil Chauhan', 'Pallavi Das', 'Parth Singhal', 'Pooja Khatri', 'Pranav Khanna',
+    'Priya Sharma', 'Rahul Verma', 'Rashi Jain', 'Ritika Malhotra', 'Rohit Dubey', 'Sakshi Mehra', 'Sameer Bedi', 'Sana Khan',
+    'Shivani Tyagi', 'Shubham Rawat', 'Sneha Kulkarni', 'Sonal Chawla', 'Tanmay Saxena', 'Tanya Bhat', 'Varun Bansal', 'Yashika Goyal'
+];
+
+const REVIEW_OPENERS = [
+    'Frame dekhte hi mood ban gaya.',
+    'Honestly expected normal quality but this surprised me.',
+    'Delivery ke baad same day wall pe laga diya.',
+    'Photo print itna clean aayega socha nahi tha.',
+    'Packaging dekh ke hi laga brand serious hai.',
+    'Gift ke liye order kiya tha and result solid nikla.',
+    'First time order kiya tha and experience smooth raha.',
+    'Room ka pura vibe change ho gaya after this frame.'
+];
+
+const REVIEW_QUALITY_LINES = [
+    'wood finish classy lag rahi hai',
+    'glass clean tha and print sharp tha',
+    'corners proper packed the so kuch damage nahi hua',
+    'frame bilkul premium feel de raha hai',
+    'colors photo se dull nahi huye',
+    'mounting simple thi aur fitting strong lagi',
+    'photo crop bhi decent tha',
+    'size bilkul room ke hisab se sahi laga'
+];
+
+const REVIEW_CLOSERS = [
+    'overall paisa vasool.',
+    'definitely firse order karunga.',
+    'guests bhi pooch rahe the kahan se liya.',
+    'agar gift dena hai toh safe option hai.',
+    'small typo bhi nahi tha, clean finish.',
+    'team ne achha kaam kiya.',
+    'ab dusri wall ke liye bhi order soch raha hoon.',
+    'recommend karunga without doubt.'
+];
+
+const REVIEW_VARIANT_LINES = {
+    '13x19-portrait': [
+        'portrait photo bahut elegant lag rahi hai',
+        'vertical layout family photo ke liye perfect hai',
+        'hallway wall pe bahut clean dikhta hai',
+        'single portrait ke liye yeh size standout karta hai'
+    ],
+    '13x19-landscape': [
+        'couple photo landscape me bahut balanced lag rahi hai',
+        'bed ke upar horizontal frame mast lag raha hai',
+        'travel photo ka wide look preserve raha',
+        'landscape crop natural laga, forced nahi'
+    ],
+    '13x10-portrait': [
+        'compact wall ke liye yeh size best nikla',
+        'study table ke side me neat lag raha hai',
+        'portrait shot small room me overpower nahi karta',
+        'budget friendly hote hue bhi premium feel diya'
+    ],
+    '13x10-landscape': [
+        'small horizontal setup ke liye perfect choice hai',
+        'desk area me cute aur clean lagta hai',
+        'landscape memory collage ke saath achha blend hua',
+        'niche space me bhi proper noticeable hai'
+    ]
+};
+
+function normalizeReviewDate(dateValue) {
+    if (!dateValue) return null;
+    if (typeof dateValue.toDate === 'function') {
+        return dateValue.toDate();
+    }
+    if (dateValue.seconds) {
+        return new Date(dateValue.seconds * 1000);
+    }
+    return new Date(dateValue);
+}
+
+function getReviewDateKey(dateValue) {
+    const date = dateValue ? new Date(dateValue) : new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function clampRating(value) {
+    return Math.max(1, Math.min(5, Number(value) || 5));
+}
+
+function getDefaultReviewSettings() {
+    return {
+        autoReviewsEnabled: true,
+        stats: JSON.parse(JSON.stringify(DEFAULT_REVIEW_STATS)),
+        usedAutoReviewKeys: []
+    };
+}
+
+function createGeneratedReviewPool() {
+    const pool = [];
+    REVIEW_VARIANTS.forEach((sizeKey, variantIndex) => {
+        for (let i = 0; i < 600; i++) {
+            const name = REVIEW_POOL_NAMES[(i + (variantIndex * 7)) % REVIEW_POOL_NAMES.length];
+            const opener = REVIEW_OPENERS[i % REVIEW_OPENERS.length];
+            const quality = REVIEW_QUALITY_LINES[(i * 3 + variantIndex) % REVIEW_QUALITY_LINES.length];
+            const variantLine = REVIEW_VARIANT_LINES[sizeKey][i % REVIEW_VARIANT_LINES[sizeKey].length];
+            const closer = REVIEW_CLOSERS[(i * 5 + variantIndex) % REVIEW_CLOSERS.length];
+            const ratingRoll = i % 20;
+            let rating = 5;
+            if (ratingRoll >= 12 && ratingRoll < 17) {
+                rating = 4;
+            } else if (ratingRoll >= 17 && ratingRoll < 19) {
+                rating = 3;
+            } else if (ratingRoll === 19) {
+                rating = 2;
+            }
+
+            pool.push({
+                poolKey: `${sizeKey}-${i + 1}`,
+                sizeKey,
+                name,
+                rating,
+                text: `${opener} ${variantLine}, ${quality}, ${closer}`
+            });
+        }
+    });
+    return pool;
+}
+
+const GENERATED_REVIEW_POOL = createGeneratedReviewPool();
+
+function pickAutoReviewCandidate(sizeKey, usedKeys) {
+    const available = GENERATED_REVIEW_POOL.filter(review => review.sizeKey === sizeKey && !usedKeys.includes(review.poolKey));
+    const pool = available.length ? available : GENERATED_REVIEW_POOL.filter(review => review.sizeKey === sizeKey);
+    if (!pool.length) {
+        return null;
+    }
+    return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function buildRatingRollup(previousStats, reviewRating, ratingsIncrement) {
+    const previousTotalRatings = Number(previousStats.totalRatings) || 0;
+    const previousAverage = Number(previousStats.avgRating) || 0;
+    const previousRatingSum = previousTotalRatings * previousAverage;
+    const safeIncrement = Math.max(1, Number(ratingsIncrement) || 1);
+    const additionalRatings = [];
+
+    additionalRatings.push(clampRating(reviewRating));
+    while (additionalRatings.length < safeIncrement) {
+        const roll = Math.random();
+        if (roll < 0.62) {
+            additionalRatings.push(5);
+        } else if (roll < 0.87) {
+            additionalRatings.push(4);
+        } else if (roll < 0.96) {
+            additionalRatings.push(3);
+        } else {
+            additionalRatings.push(2);
+        }
+    }
+
+    const newRatingSum = previousRatingSum + additionalRatings.reduce((sum, value) => sum + value, 0);
+    const totalRatings = previousTotalRatings + safeIncrement;
+    return {
+        totalRatings,
+        avgRating: totalRatings > 0 ? Math.round((newRatingSum / totalRatings) * 10) / 10 : 0
+    };
+}
+
 function initializeFirebase() {
     try {
         if (typeof firebase === 'undefined') {
@@ -325,6 +510,352 @@ class JBCreationsAPI {
         } catch (error) {
             console.error('❌ Error updating order:', error);
             return { success: false, error: error.message };
+        }
+    }
+
+    async ensureReviewSettings() {
+        try {
+            const settingsRef = this.db.collection('siteConfig').doc('reviewSettings');
+            const snapshot = await settingsRef.get();
+
+            if (!snapshot.exists) {
+                const defaults = getDefaultReviewSettings();
+                await settingsRef.set({
+                    ...defaults,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                return defaults;
+            }
+
+            const data = snapshot.data() || {};
+            const defaults = getDefaultReviewSettings();
+            const mergedSettings = {
+                autoReviewsEnabled: data.autoReviewsEnabled !== false,
+                stats: { ...defaults.stats, ...(data.stats || {}) },
+                usedAutoReviewKeys: Array.isArray(data.usedAutoReviewKeys) ? data.usedAutoReviewKeys : []
+            };
+
+            const needsRepair = !data.stats || !Array.isArray(data.usedAutoReviewKeys) || typeof data.autoReviewsEnabled !== 'boolean';
+            if (needsRepair) {
+                await settingsRef.set({
+                    ...mergedSettings,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            }
+
+            return mergedSettings;
+        } catch (error) {
+            console.error('❌ Error ensuring review settings:', error);
+            return getDefaultReviewSettings();
+        }
+    }
+
+    async getReviewSettings() {
+        try {
+            const settings = await this.ensureReviewSettings();
+            return { success: true, settings };
+        } catch (error) {
+            console.error('❌ Error getting review settings:', error);
+            return { success: false, error: error.message, settings: getDefaultReviewSettings() };
+        }
+    }
+
+    async updateReviewSettings(updateData) {
+        try {
+            await this.ensureReviewSettings();
+            await this.db.collection('siteConfig').doc('reviewSettings').set({
+                ...updateData,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            return { success: true };
+        } catch (error) {
+            console.error('❌ Error updating review settings:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    async getApprovedReviewsBySize(sizeKey, limitCount = 50) {
+        try {
+            const snapshot = await this.db.collection('reviews')
+                .where('sizeKey', '==', sizeKey)
+                .where('status', '==', 'approved')
+                .limit(limitCount)
+                .get();
+
+            const reviews = [];
+            snapshot.forEach(doc => {
+                const data = doc.data() || {};
+                if (data.hidden) {
+                    return;
+                }
+                const publishedDate = normalizeReviewDate(data.publishedAt || data.submittedAt || data.createdAt);
+                reviews.push({
+                    id: doc.id,
+                    ...data,
+                    submittedAt: data.submittedAt || null,
+                    publishedAt: data.publishedAt || null,
+                    publishedDate,
+                    daysAgo: publishedDate ? Math.max(0, Math.floor((Date.now() - publishedDate.getTime()) / 86400000)) : null
+                });
+            });
+
+            reviews.sort((left, right) => {
+                if (!!left.pinned !== !!right.pinned) {
+                    return left.pinned ? -1 : 1;
+                }
+                const leftTime = left.publishedDate ? left.publishedDate.getTime() : 0;
+                const rightTime = right.publishedDate ? right.publishedDate.getTime() : 0;
+                return rightTime - leftTime;
+            });
+
+            return { success: true, reviews };
+        } catch (error) {
+            console.error('❌ Error getting approved reviews:', error);
+            return { success: false, error: error.message, reviews: [] };
+        }
+    }
+
+    async getAllReviews() {
+        try {
+            const snapshot = await this.db.collection('reviews').get();
+            const reviews = [];
+            snapshot.forEach(doc => {
+                const data = doc.data() || {};
+                reviews.push({
+                    id: doc.id,
+                    ...data,
+                    submittedDate: normalizeReviewDate(data.submittedAt || data.createdAt),
+                    publishedDate: normalizeReviewDate(data.publishedAt || data.submittedAt || data.createdAt)
+                });
+            });
+
+            reviews.sort((left, right) => {
+                const leftTime = left.submittedDate ? left.submittedDate.getTime() : 0;
+                const rightTime = right.submittedDate ? right.submittedDate.getTime() : 0;
+                return rightTime - leftTime;
+            });
+
+            return { success: true, reviews };
+        } catch (error) {
+            console.error('❌ Error getting all reviews:', error);
+            return { success: false, error: error.message, reviews: [] };
+        }
+    }
+
+    async hasReviewForOrder(orderNumber) {
+        try {
+            if (!orderNumber) {
+                return { success: true, hasReview: false };
+            }
+
+            const snapshot = await this.db.collection('reviews')
+                .where('orderNumber', '==', orderNumber)
+                .limit(1)
+                .get();
+
+            return { success: true, hasReview: !snapshot.empty };
+        } catch (error) {
+            console.error('❌ Error checking review for order:', error);
+            return { success: false, error: error.message, hasReview: false };
+        }
+    }
+
+    async getReviewForOrder(orderNumber) {
+        try {
+            if (!orderNumber) {
+                return { success: true, review: null };
+            }
+
+            const snapshot = await this.db.collection('reviews')
+                .where('orderNumber', '==', orderNumber)
+                .limit(1)
+                .get();
+
+            if (snapshot.empty) {
+                return { success: true, review: null };
+            }
+
+            const doc = snapshot.docs[0];
+            return {
+                success: true,
+                review: {
+                    id: doc.id,
+                    ...doc.data()
+                }
+            };
+        } catch (error) {
+            console.error('❌ Error getting review for order:', error);
+            return { success: false, error: error.message, review: null };
+        }
+    }
+
+    async submitUserReview(reviewData) {
+        try {
+            const payload = {
+                name: (reviewData.name || 'Anonymous').trim(),
+                rating: clampRating(reviewData.rating),
+                text: (reviewData.text || '').trim(),
+                sizeKey: reviewData.sizeKey,
+                orderNumber: reviewData.orderNumber || null,
+                source: 'user',
+                status: 'pending',
+                verified: false,
+                pinned: false,
+                hidden: false,
+                submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                publishedAt: null,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            const reviewRef = await this.db.collection('reviews').add(payload);
+            return { success: true, reviewId: reviewRef.id };
+        } catch (error) {
+            console.error('❌ Error submitting user review:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    async createAdminReview(reviewData) {
+        try {
+            const publishDate = reviewData.publishedAt || new Date().toISOString();
+            const payload = {
+                name: (reviewData.name || 'Anonymous').trim(),
+                rating: clampRating(reviewData.rating),
+                text: (reviewData.text || '').trim(),
+                sizeKey: reviewData.sizeKey,
+                orderNumber: reviewData.orderNumber || null,
+                source: reviewData.source || 'admin',
+                status: reviewData.status || 'approved',
+                verified: reviewData.verified !== false,
+                pinned: !!reviewData.pinned,
+                hidden: !!reviewData.hidden,
+                submittedAt: firebase.firestore.Timestamp.fromDate(new Date(publishDate)),
+                publishedAt: firebase.firestore.Timestamp.fromDate(new Date(publishDate)),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            const reviewRef = await this.db.collection('reviews').add(payload);
+            return { success: true, reviewId: reviewRef.id };
+        } catch (error) {
+            console.error('❌ Error creating admin review:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    async updateReview(reviewId, updateData) {
+        try {
+            const payload = {
+                ...updateData,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            if (updateData.status === 'approved' && !updateData.publishedAt) {
+                payload.publishedAt = firebase.firestore.FieldValue.serverTimestamp();
+            }
+
+            await this.db.collection('reviews').doc(reviewId).set(payload, { merge: true });
+            return { success: true };
+        } catch (error) {
+            console.error('❌ Error updating review:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    async deleteReview(reviewId) {
+        try {
+            await this.db.collection('reviews').doc(reviewId).delete();
+            return { success: true };
+        } catch (error) {
+            console.error('❌ Error deleting review:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    async tryRunDailyReviewIncrement(sizeKey = null) {
+        try {
+            const targetVariants = sizeKey ? [sizeKey] : REVIEW_VARIANTS;
+            const results = [];
+
+            await this.ensureReviewSettings();
+
+            for (const variant of targetVariants) {
+                const incrementResult = await this.db.runTransaction(async transaction => {
+                    const settingsRef = this.db.collection('siteConfig').doc('reviewSettings');
+                    const settingsSnap = await transaction.get(settingsRef);
+                    const defaults = getDefaultReviewSettings();
+                    const settings = settingsSnap.exists ? settingsSnap.data() || {} : defaults;
+                    const autoReviewsEnabled = settings.autoReviewsEnabled !== false;
+                    if (!autoReviewsEnabled) {
+                        return { skipped: true, reason: 'disabled', sizeKey: variant };
+                    }
+
+                    const stats = { ...defaults.stats, ...(settings.stats || {}) };
+                    const variantStats = { ...defaults.stats[variant], ...(stats[variant] || {}) };
+                    const todayKey = getReviewDateKey();
+                    if (variantStats.lastIncrementDate === todayKey) {
+                        return { skipped: true, reason: 'already-run', sizeKey: variant };
+                    }
+
+                    const usedKeys = Array.isArray(settings.usedAutoReviewKeys) ? settings.usedAutoReviewKeys.slice() : [];
+                    const selectedReview = pickAutoReviewCandidate(variant, usedKeys);
+                    if (!selectedReview) {
+                        return { skipped: true, reason: 'no-pool-review', sizeKey: variant };
+                    }
+
+                    const ratingsIncrement = Math.floor(Math.random() * 10) + 1;
+                    const rollup = buildRatingRollup(variantStats, selectedReview.rating, ratingsIncrement);
+                    stats[variant] = {
+                        totalRatings: rollup.totalRatings,
+                        totalReviews: (Number(variantStats.totalReviews) || 0) + 1,
+                        avgRating: rollup.avgRating,
+                        lastIncrementDate: todayKey
+                    };
+
+                    const reviewRef = this.db.collection('reviews').doc();
+                    transaction.set(reviewRef, {
+                        name: selectedReview.name,
+                        rating: selectedReview.rating,
+                        text: selectedReview.text,
+                        sizeKey: variant,
+                        orderNumber: null,
+                        source: 'auto',
+                        status: 'approved',
+                        verified: true,
+                        pinned: false,
+                        hidden: false,
+                        poolKey: selectedReview.poolKey,
+                        submittedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+                        publishedAt: firebase.firestore.Timestamp.fromDate(new Date()),
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    transaction.set(settingsRef, {
+                        autoReviewsEnabled,
+                        stats,
+                        usedAutoReviewKeys: [...usedKeys, selectedReview.poolKey],
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+
+                    return {
+                        skipped: false,
+                        sizeKey: variant,
+                        ratingsIncrement,
+                        reviewId: reviewRef.id,
+                        stats: stats[variant]
+                    };
+                });
+
+                results.push(incrementResult);
+            }
+
+            return { success: true, results };
+        } catch (error) {
+            console.error('❌ Error running daily review increment:', error);
+            return { success: false, error: error.message, results: [] };
         }
     }
 

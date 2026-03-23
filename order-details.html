@@ -916,6 +916,7 @@
     <script>
         let currentUser = null;
         let orderData = null;
+        let orderReviewState = { loaded: false, review: null };
 
         document.addEventListener('DOMContentLoaded', async function() {
             // Get order ID from URL
@@ -1187,6 +1188,8 @@
                     </div>
                 </div>
             `;
+
+            void refreshReviewSection();
         }
 
         function renderTimeline(status) {
@@ -1527,33 +1530,60 @@
         }
 
         // ==================== REVIEW FUNCTIONS ====================
-        
-        // Storage key for submitted reviews (to track which orders have been reviewed)
-        const SUBMITTED_REVIEWS_KEY = 'jb_submitted_order_reviews';
-        
-        // Check if order has already been reviewed
-        function hasOrderBeenReviewed(orderNumber) {
-            try {
-                const submitted = localStorage.getItem(SUBMITTED_REVIEWS_KEY);
-                const reviews = submitted ? JSON.parse(submitted) : [];
-                return reviews.includes(orderNumber);
-            } catch (e) {
-                return false;
+
+        function waitForOrderApi(timeoutMs = 5000) {
+            if (window.jbAPI) {
+                return Promise.resolve(window.jbAPI);
             }
+
+            return new Promise(resolve => {
+                let resolved = false;
+                const timeout = setTimeout(() => {
+                    if (!resolved) {
+                        resolved = true;
+                        resolve(window.jbAPI || null);
+                    }
+                }, timeoutMs);
+
+                window.addEventListener('firebaseReady', function handleReady() {
+                    if (resolved) {
+                        return;
+                    }
+                    resolved = true;
+                    clearTimeout(timeout);
+                    window.removeEventListener('firebaseReady', handleReady);
+                    resolve(window.jbAPI || null);
+                });
+            });
         }
-        
-        // Mark order as reviewed
-        function markOrderAsReviewed(orderNumber) {
-            try {
-                const submitted = localStorage.getItem(SUBMITTED_REVIEWS_KEY);
-                const reviews = submitted ? JSON.parse(submitted) : [];
-                if (!reviews.includes(orderNumber)) {
-                    reviews.push(orderNumber);
-                    localStorage.setItem(SUBMITTED_REVIEWS_KEY, JSON.stringify(reviews));
-                }
-            } catch (e) {
-                console.error('Error marking order as reviewed:', e);
+
+        async function refreshReviewSection() {
+            if (!orderData) {
+                return;
             }
+
+            const reviewSection = document.getElementById('reviewSection');
+            if (!reviewSection) {
+                return;
+            }
+
+            orderReviewState = { loaded: false, review: null };
+            reviewSection.innerHTML = renderReviewSection(orderData);
+
+            const api = await waitForOrderApi();
+            if (api && typeof api.getReviewForOrder === 'function') {
+                const orderNumber = orderData.orderNumber || orderData.orderId || '';
+                const result = await api.getReviewForOrder(orderNumber);
+                if (result.success) {
+                    orderReviewState = { loaded: true, review: result.review };
+                } else {
+                    orderReviewState = { loaded: true, review: null };
+                }
+            } else {
+                orderReviewState = { loaded: true, review: null };
+            }
+
+            reviewSection.innerHTML = renderReviewSection(orderData);
         }
         
         // Render the review section (button or "reviewed" badge)
@@ -1571,16 +1601,29 @@
                 `;
             }
             
-            // Check if already reviewed
-            if (hasOrderBeenReviewed(orderNumber)) {
+            if (!orderReviewState.loaded) {
+                return `
+                    <div style="text-align: center; color: #6c757d; padding: 10px;">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Checking review status...
+                    </div>
+                `;
+            }
+
+            if (orderReviewState.review) {
+                const reviewStatus = (orderReviewState.review.status || 'pending').toLowerCase();
+                const subtitle = reviewStatus === 'approved'
+                    ? 'Your review is now visible on the website.'
+                    : 'Your review has been received and is waiting for admin approval.';
+
                 return `
                     <div style="text-align: center; padding: 10px;">
                         <span class="review-submitted-badge">
                             <i class="fas fa-check-circle"></i>
-                            Thanks for your review!
+                            ${reviewStatus === 'approved' ? 'Thanks for your review!' : 'Review Submitted'}
                         </span>
                         <p style="margin-top: 10px; color: #6c757d; font-size: 13px;">
-                            Your review helps other customers make informed decisions.
+                            ${subtitle}
                         </p>
                     </div>
                 `;
@@ -1666,7 +1709,7 @@
         }
         
         // Submit review
-        function submitReview() {
+        async function submitReview() {
             const name = document.getElementById('reviewerName').value.trim();
             const text = document.getElementById('reviewText').value.trim();
             
@@ -1707,45 +1750,57 @@
                 text: text
             };
             
-            // Submit to the global review system (defined in script.js)
             try {
-                // Add to localStorage-based review storage
                 const sizeKey = getSizeKeyFromOrder(firstItem);
-                
-                const USER_REVIEWS_KEY = 'jb_user_reviews';
-                let userReviews = {};
-                try {
-                    const stored = localStorage.getItem(USER_REVIEWS_KEY);
-                    userReviews = stored ? JSON.parse(stored) : {};
-                } catch (e) {}
-                
-                if (!userReviews[sizeKey]) {
-                    userReviews[sizeKey] = [];
+                const api = await waitForOrderApi();
+                if (!api || typeof api.submitUserReview !== 'function') {
+                    throw new Error('Review service is not available right now');
                 }
-                
-                userReviews[sizeKey].unshift({
+
+                const existingReviewResult = typeof api.getReviewForOrder === 'function'
+                    ? await api.getReviewForOrder(orderNumber)
+                    : { success: true, review: null };
+
+                if (existingReviewResult.success && existingReviewResult.review) {
+                    orderReviewState = { loaded: true, review: existingReviewResult.review };
+                    closeReviewModal();
+                    const reviewSection = document.getElementById('reviewSection');
+                    if (reviewSection) {
+                        reviewSection.innerHTML = renderReviewSection(orderData);
+                    }
+                    return;
+                }
+
+                const submitResult = await api.submitUserReview({
                     name: reviewData.name,
                     rating: reviewData.rating,
                     text: reviewData.text,
-                    verified: true,
-                    isUserReview: true,
-                    submittedAt: new Date().toISOString(),
+                    sizeKey: sizeKey,
                     orderNumber: orderNumber
                 });
-                
-                localStorage.setItem(USER_REVIEWS_KEY, JSON.stringify(userReviews));
-                
-                // Mark order as reviewed
-                markOrderAsReviewed(orderNumber);
+
+                if (!submitResult.success) {
+                    throw new Error(submitResult.error || 'Review submission failed');
+                }
+
+                orderReviewState = {
+                    loaded: true,
+                    review: {
+                        status: 'pending',
+                        name: reviewData.name,
+                        rating: reviewData.rating,
+                        text: reviewData.text,
+                        orderNumber: orderNumber
+                    }
+                };
                 
                 // Show success
-                submitBtn.innerHTML = '<i class="fas fa-check"></i> Review Submitted!';
+                submitBtn.innerHTML = '<i class="fas fa-check"></i> Sent for Approval';
                 submitBtn.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
                 
                 setTimeout(() => {
                     closeReviewModal();
                     
-                    // Update the review section
                     const reviewSection = document.getElementById('reviewSection');
                     if (reviewSection) {
                         reviewSection.innerHTML = renderReviewSection(orderData);
@@ -1761,7 +1816,7 @@
                 console.error('Error submitting review:', error);
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Review';
-                alert('Error submitting review. Please try again.');
+                alert(error.message || 'Error submitting review. Please try again.');
             }
         }
         

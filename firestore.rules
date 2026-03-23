@@ -1,0 +1,111 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    function isReviewStatus(status) {
+      return status in ['pending', 'approved', 'rejected'];
+    }
+
+    function isReviewSource(source) {
+      return source in ['user', 'admin', 'auto'];
+    }
+
+    function hasReviewKeysOnly() {
+      return request.resource.data.keys().hasOnly([
+        'name',
+        'rating',
+        'text',
+        'sizeKey',
+        'orderNumber',
+        'source',
+        'status',
+        'verified',
+        'pinned',
+        'hidden',
+        'poolKey',
+        'submittedAt',
+        'publishedAt',
+        'createdAt',
+        'updatedAt'
+      ]);
+    }
+
+    function isAllowedVariant(sizeKey) {
+      return sizeKey in [
+        '13x19-portrait',
+        '13x19-landscape',
+        '13x10-portrait',
+        '13x10-landscape'
+      ];
+    }
+
+    function isValidPublicReviewCreate() {
+      return hasReviewKeysOnly()
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 80
+        && request.resource.data.text is string
+        && request.resource.data.text.size() >= 10
+        && request.resource.data.text.size() <= 1500
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && request.resource.data.sizeKey is string
+        && isAllowedVariant(request.resource.data.sizeKey)
+        && request.resource.data.source == 'user'
+        && request.resource.data.status == 'pending'
+        && request.resource.data.verified == false
+        && request.resource.data.pinned == false
+        && request.resource.data.hidden == false;
+    }
+
+    // Review content is public.
+    match /reviews/{reviewId} {
+      allow read: if true;
+
+      // Public website submissions may only create pending user reviews.
+      allow create: if isValidPublicReviewCreate();
+
+      // Admin moderation / auto-review publishing requires backend-project auth.
+      // The current site still uses unauthenticated Firestore for admin writes,
+      // so deploying these stricter write rules requires a follow-up auth refactor.
+      allow update, delete: if isAdmin();
+    }
+
+    match /siteConfig/reviewSettings {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Current app architecture still performs unauthenticated client-side reads/writes
+    // for orders, users, customers and support chat documents.
+    // Keep these collections unchanged here until backend auth is added, otherwise the
+    // existing checkout, admin dashboard and support flows will stop working.
+    match /orders/{orderId} {
+      allow read, write: if true;
+    }
+
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+
+    match /customers/{customerId} {
+      allow read, write: if true;
+    }
+
+    match /supportChats/{chatId} {
+      allow read, write: if true;
+
+      match /messages/{messageId} {
+        allow read, write: if true;
+      }
+    }
+  }
+}

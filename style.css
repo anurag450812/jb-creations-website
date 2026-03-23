@@ -1617,6 +1617,49 @@ input[type="range"]::-webkit-slider-thumb:hover {
     border: 1px solid rgba(130, 192, 204, 0.2);
 }
 
+/* Desktop Border Color Container */
+.border-color-container {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(130, 192, 204, 0.08), rgba(130, 192, 204, 0.15));
+    border-radius: 12px;
+    border: 1px solid rgba(130, 192, 204, 0.2);
+}
+
+.border-color-btn {
+    background: #ffffff;
+    border: 2px solid #e9ecef;
+    border-radius: 15px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+    min-height: 90px;
+}
+
+.border-color-btn:hover {
+    border-color: var(--accent-color);
+    background: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.border-color-btn.selected {
+    border-color: var(--highlight-color);
+    background: #fff5f5;
+    box-shadow: 0 4px 15px rgba(255, 166, 43, 0.15);
+}
+
+.border-color-btn span {
+    font-weight: 700;
+    color: var(--text-color);
+    font-size: 0.95rem;
+}
+
 .border-thickness-label {
     display: block;
     font-size: 0.9rem;
@@ -2749,7 +2792,7 @@ button i {
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     /* Remove raindrop effect completely on customization page (mobile) */
     .customize-page .rain-glass,
     .customize-page .raindrop,
@@ -3008,7 +3051,7 @@ button i {
     /* Hide old mobile cards when using the new bottom bar */
     .customize-page #mobileCustomizationSection { display: none; }
 }
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .size-options, .color-options, .texture-options {
         grid-template-columns: 1fr;
     }
@@ -3021,9 +3064,23 @@ button i {
     .zoom-controls {
         gap: 0.5rem !important; /* Larger gap for easier touch targeting */
         padding: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
         /* Ensure buttons are above any other elements */
         position: relative;
         z-index: 999;
+    }
+
+    .control-buttons {
+        transform: none !important;
+    }
+
+    .mobile-change-image-btn {
+        position: static !important;
+        top: auto !important;
+        left: auto !important;
+        margin-left: 0.25rem;
+        flex: 0 0 auto;
     }
 
     .zoom-controls button {
@@ -3095,6 +3152,124 @@ button i {
     /* Adjust texture patterns for smaller screens */
     .frame[data-texture="rough"]::after {
         background-size: 6px 6px;
+    }
+}
+
+@media (min-width: 601px) and (max-width: 768px) {
+    .customize-page .mobile-bottom-bar {
+        padding: 10px 12px calc(14px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .customize-page .bar-tabs {
+        gap: 8px;
+    }
+
+    .customize-page .bar-tab {
+        padding: 10px 6px;
+        font-size: 11px;
+        border-radius: 12px;
+    }
+
+    .customize-page .bar-tab i {
+        font-size: 16px;
+    }
+
+    .customize-page .mobile-dropup {
+        max-height: min(62vh, 560px);
+        border-top-left-radius: 18px;
+        border-top-right-radius: 18px;
+    }
+
+    .customize-page .dropup-content {
+        max-width: 720px;
+        padding: 16px 18px 20px;
+    }
+
+    .customize-page .mobile-size-grid,
+    .customize-page .mobile-color-grid,
+    .customize-page .mobile-border-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        overflow: visible;
+        padding: 4px 0;
+    }
+
+    .customize-page .mobile-size-btn,
+    .customize-page .mobile-color-btn,
+    .customize-page .mobile-border-btn {
+        width: 100%;
+        min-width: 0;
+        min-height: 96px;
+        border-radius: 14px;
+        padding: 12px 14px;
+    }
+
+    .customize-page .mobile-size-btn {
+        gap: 8px;
+    }
+
+    .customize-page .mobile-size-btn i,
+    .customize-page .mobile-border-btn i {
+        font-size: 1.15rem;
+        margin-bottom: 2px;
+    }
+
+    .customize-page .mobile-color-btn span,
+    .customize-page .mobile-border-btn span,
+    .customize-page .mobile-size-btn .size-text {
+        font-size: 0.82rem;
+    }
+
+    .customize-page .mobile-size-btn .orientation,
+    .customize-page .mobile-size-btn .price {
+        font-size: 0.72rem;
+    }
+
+    .customize-page .mobile-adjustments-container {
+        gap: 10px;
+    }
+
+    .customize-page .mobile-adjust-buttons-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        overflow: visible;
+        padding: 6px 0;
+    }
+
+    .customize-page .mobile-adjust-option-btn {
+        min-width: 0;
+        width: 100%;
+        min-height: 72px;
+        border-radius: 12px;
+        padding: 10px 8px;
+    }
+
+    .customize-page .mobile-adjust-option-btn .adjust-emoji {
+        font-size: 20px;
+    }
+
+    .customize-page .mobile-adjust-option-btn span:last-child {
+        font-size: 9px;
+        letter-spacing: 0.3px;
+    }
+
+    .customize-page .mobile-adjust-slider-container {
+        padding: 14px 12px;
+    }
+
+    .customize-page .mobile-adjust-slider-label {
+        min-width: 86px;
+        font-size: 13px;
+    }
+
+    .customize-page .mobile-border-thickness-container {
+        margin-top: 12px;
+    }
+
+    .customize-page .mobile-border-thickness-slider-wrapper {
+        gap: 14px;
     }
 }
 
@@ -4195,6 +4370,59 @@ button i {
     .mobile-border-thickness-container.show {
         display: block;
         animation: slideDown 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    
+    .border-color-container,
+    .mobile-border-color-container {
+        margin-top: 16px;
+        padding: 10px 12px;
+        background: linear-gradient(135deg, rgba(130, 192, 204, 0.08), rgba(130, 192, 204, 0.15));
+        border-radius: 12px;
+        border: 1px solid rgba(130, 192, 204, 0.2);
+        display: none;
+    }
+    
+    .border-color-container.show,
+    .mobile-border-color-container.show {
+        display: block;
+        animation: slideDown 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    
+    .mobile-border-color-container {
+        display: none;
+        flex-direction: row;
+        gap: 8px;
+        justify-content: center;
+    }
+    
+    .mobile-border-color-container.show {
+        display: flex;
+    }
+    
+    .mobile-border-color-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 8px 16px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 60px;
+    }
+    
+    .mobile-border-color-btn.active {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+        transform: scale(1.05);
+    }
+    
+    .mobile-border-color-btn span {
+        font-size: 0.7rem;
+        font-weight: 500;
+        margin-top: 4px;
     }
     
     @keyframes slideDown {
@@ -6189,12 +6417,12 @@ button i {
 }
 
 /* Hide mobile-only UI on larger screens */
-@media (min-width: 601px) {
+@media (min-width: 769px) {
     .customize-page .mobile-bottom-bar,
     .customize-page .mobile-dropup { display: none !important; }
 }
 /* Mobile: slim down room nav controls */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .room-navigation-bar {
         padding: 0.5rem 0.9rem !important;
         margin-top: 0.8rem !important;
