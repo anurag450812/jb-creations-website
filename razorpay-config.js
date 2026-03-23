@@ -4,9 +4,8 @@
  */
 
 const razorpayConfig = {
-    // Test API Keys (Using Razorpay's official test key)
+    // Public Razorpay key only. Secret keys must never be shipped to the browser.
     keyId: 'rzp_test_1DP5mmOlF5G5ag',
-    keySecret: 'PnsYn4R9hTfnRiBeq21Ld3sB',
     
     // Test mode settings
     testMode: false,

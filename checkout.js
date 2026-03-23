@@ -280,6 +280,104 @@ setTimeout(() => {
     }
 }, 1000);
 
+function canUseLocalUploadFallback() {
+    const hostname = window.location.hostname;
+    const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1';
+    return window.location.protocol === 'http:' && isLocalHost;
+}
+
+function resolveApiBaseUrl() {
+    const hostname = window.location.hostname;
+    const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1';
+
+    if (window.otpClient && window.otpClient.apiBaseURL) {
+        return window.otpClient.apiBaseURL.replace(/\/$/, '');
+    }
+
+    if (isLocalHost) {
+        return 'https://jbcreationss.netlify.app/.netlify/functions';
+    }
+
+    return `${window.location.origin}/api`;
+}
+
+function getApiUrl(path) {
+    const apiBaseUrl = resolveApiBaseUrl();
+    if (apiBaseUrl.endsWith('/.netlify/functions')) {
+        return `${apiBaseUrl}/${path}`;
+    }
+
+    return `${apiBaseUrl}/${path}`;
+}
+
+async function parseApiResponse(response) {
+    const responseText = await response.text();
+    if (!responseText) {
+        return {};
+    }
+
+    try {
+        return JSON.parse(responseText);
+    } catch (error) {
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+
+        throw new Error('Server returned an invalid response');
+    }
+}
+
+async function createRazorpayOrder(amountInRupees, orderData) {
+    const response = await fetch(getApiUrl('razorpay-create-order'), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            amount: Math.round(Number(amountInRupees) * 100),
+            currency: 'INR',
+            receipt: orderData.orderNumber,
+            notes: {
+                orderNumber: orderData.orderNumber,
+                itemCount: String(orderData.items?.length || 0),
+                customerPhone: orderData.customer?.phone || ''
+            }
+        })
+    });
+
+    if (response.status === 404) {
+        throw new Error('Razorpay order endpoint is not deployed yet. Deploy the Netlify functions or run the site with netlify dev for local checkout testing.');
+    }
+
+    if (response.status === 405) {
+        throw new Error('Razorpay order endpoint is not available on the current server. Use netlify dev instead of a static http-server for local checkout testing.');
+    }
+
+    const result = await parseApiResponse(response);
+    if (!response.ok || !result.success || !result.orderId || !result.keyId) {
+        throw new Error(result.message || 'Unable to initialize Razorpay order');
+    }
+
+    return result;
+}
+
+async function verifyRazorpayPayment(paymentPayload) {
+    const response = await fetch(getApiUrl('razorpay-verify-payment'), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(paymentPayload)
+    });
+
+    const result = await parseApiResponse(response);
+    if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Payment verification failed');
+    }
+
+    return result;
+}
+
 // Enhanced Cloudinary Upload with Direct Upload Support
 async function uploadOrderImagesToCloudinaryEnhanced(orderData) {
     console.log('═══════════════════════════════════════════════════════════════');
@@ -340,6 +438,12 @@ async function uploadOrderImagesToCloudinaryEnhanced(orderData) {
         console.log('📋 Direct upload not available, using server-based upload...');
     }
     
+    // Only use the localhost upload proxy during local HTTP development.
+    if (!canUseLocalUploadFallback()) {
+        console.warn('⚠️ Skipping localhost Cloudinary fallback on non-local or HTTPS page');
+        return null;
+    }
+
     // Fallback to existing server-based upload
     const fallbackResult = await uploadOrderImagesToCloudinary(orderData);
     
@@ -2673,6 +2777,11 @@ function saveGuestOrderHistory(orderData) {
 async function uploadOrderImagesToCloudinary(orderData) {
     try {
         console.log('🖼️ Starting image uploads to Cloudinary...');
+
+        if (!canUseLocalUploadFallback()) {
+            console.warn('⚠️ Local Cloudinary upload endpoint disabled for this environment');
+            return null;
+        }
         
         // Generate order number in yearmonthdatetimeseconds+phone format
         const generateOrderNumber = (customerPhone = '') => {
@@ -2882,57 +2991,69 @@ function processSimplePayment(amount, orderData, user) {
             return cleaned.length === 10 ? cleaned : '9999999999';
         }
 
-        // Direct Razorpay options (exactly like the working test)
-        const options = {
-            "key": "rzp_test_1DP5mmOlF5G5ag", // Working test key
-            "amount": (amount * 100).toString(), // Convert to paise
-            "currency": "INR",
-            "name": "Xidlz",
-            "description": `Photo Frame Order - ${orderData.items.length} item(s)`,
-            "handler": function (response) {
-                console.log('✅ Simple payment success:', response.razorpay_payment_id);
-                resolve({
-                    success: true,
-                    paymentId: response.razorpay_payment_id,
-                    orderId: orderData.orderNumber,
-                    amount: amount,
-                    razorpay_payment_id: response.razorpay_payment_id,
-                    razorpay_order_id: response.razorpay_order_id,
-                    razorpay_signature: response.razorpay_signature
+        (async () => {
+            try {
+                const razorpayOrder = await createRazorpayOrder(amount, orderData);
+
+                const options = {
+                    key: razorpayOrder.keyId,
+                    amount: String(razorpayOrder.amount),
+                    currency: razorpayOrder.currency || 'INR',
+                    name: 'Xidlz',
+                    description: `Photo Frame Order - ${orderData.items.length} item(s)`,
+                    order_id: razorpayOrder.orderId,
+                    handler: async function (response) {
+                        try {
+                            await verifyRazorpayPayment(response);
+                            console.log('✅ Simple payment success:', response.razorpay_payment_id);
+                            resolve({
+                                success: true,
+                                paymentId: response.razorpay_payment_id,
+                                orderId: orderData.orderNumber,
+                                amount: amount,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_signature: response.razorpay_signature
+                            });
+                        } catch (verificationError) {
+                            console.error('❌ Razorpay verification failed:', verificationError);
+                            reject(verificationError);
+                        }
+                    },
+                    prefill: {
+                        name: user?.name || orderData.customer?.name || 'Customer',
+                        email: user?.email || orderData.customer?.email || 'customer@example.com',
+                        contact: cleanPhone(user?.phone || orderData.customer?.phone || '')
+                    },
+                    notes: {
+                        orderNumber: orderData.orderNumber
+                    },
+                    theme: {
+                        color: '#16697A'
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            console.log('⚠️ Payment cancelled by user');
+                            reject(new Error('Payment was cancelled by user'));
+                        }
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+
+                rzp.on('payment.failed', function (response) {
+                    console.error('❌ Simple payment failed:', response.error);
+                    reject(new Error(response.error.description || 'Payment failed'));
                 });
-            },
-            "prefill": {
-                "name": user?.name || orderData.customer?.name || 'Customer',
-                "email": user?.email || orderData.customer?.email || 'customer@example.com',
-                "contact": cleanPhone(user?.phone || orderData.customer?.phone || '')
-            },
-            "theme": {
-                "color": "#16697A"
-            },
-            "modal": {
-                "ondismiss": function(){
-                    console.log('⚠️ Payment cancelled by user');
-                    reject(new Error('Payment was cancelled by user'));
-                }
+
+                console.log('🔄 Opening simple payment modal...');
+                rzp.open();
+                console.log('✅ Simple payment modal opened');
+            } catch (error) {
+                console.error('❌ Error in simple payment:', error);
+                reject(new Error(error.message || ('Failed to open payment modal: ' + error.message)));
             }
-        };
-
-        try {
-            const rzp = new Razorpay(options);
-            
-            rzp.on('payment.failed', function (response) {
-                console.error('❌ Simple payment failed:', response.error);
-                reject(new Error(response.error.description || 'Payment failed'));
-            });
-
-            console.log('🔄 Opening simple payment modal...');
-            rzp.open();
-            console.log('✅ Simple payment modal opened');
-            
-        } catch (error) {
-            console.error('❌ Error in simple payment:', error);
-            reject(new Error('Failed to open payment modal: ' + error.message));
-        }
+        })();
     });
 }
 

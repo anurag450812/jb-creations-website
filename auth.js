@@ -661,7 +661,8 @@ async function verifyOtp(event) {
         showError('otpError', errorMsg);
         console.error('OTP verification error:', error);
     } finally {
-        showLoading(false
+        showLoading(false);
+    }
 }
 
 // Verify OTP for signup
