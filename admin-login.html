@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login — JB Creations</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Firebase Auth SDK only — no Firestore needed on this page -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #e0e7ff;
+            --danger: #ef4444;
+            --success: #10b981;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --bg-page: #f8fafc;
+            --bg-card: #ffffff;
+            --shadow-card: 0 4px 24px -2px rgba(99,102,241,0.10), 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-page);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        /* Brand header */
+        .brand {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .brand-logo {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+        }
+        .brand-logo i {
+            color: white;
+            font-size: 22px;
+        }
+        .brand h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+        .brand p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Card */
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px 28px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        .card-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        /* Form fields */
+        .field {
+            margin-bottom: 16px;
+        }
+        .field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        .field-prefix {
+            display: flex;
+            align-items: center;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: border-color 0.15s;
+        }
+        .field-prefix:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+        }
+        .prefix-label {
+            padding: 0 12px;
+            font-size: 14px;
+            color: var(--text-muted);
+            background: #f8fafc;
+            border-right: 1.5px solid var(--border);
+            height: 42px;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        input[type="tel"],
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text-primary);
+            background: white;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .field-prefix input {
+            border: none;
+            border-radius: 0;
+            flex: 1;
+        }
+        .field-prefix input:focus { box-shadow: none; }
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+        }
+        input::placeholder { color: var(--text-muted); }
+
+        /* OTP input — big digits */
+        #otp-input {
+            letter-spacing: 6px;
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 11px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: opacity 0.15s, background 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 2px 8px rgba(99,102,241,0.25);
+        }
+        .btn-primary:not(:disabled):hover { opacity: 0.9; }
+        .btn-secondary {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+        }
+        .btn-secondary:not(:disabled):hover { background: #c7d2fe; }
+
+        .btn-row {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Error & info messages */
+        .msg {
+            font-size: 12.5px;
+            border-radius: 7px;
+            padding: 9px 12px;
+            margin-top: 12px;
+            display: none;
+            line-height: 1.5;
+        }
+        .msg.visible { display: block; }
+        .msg-error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        .msg-info {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+        .msg-success {
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+
+        /* Timer */
+        .otp-timer {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 10px;
+        }
+        .otp-timer.expired { color: var(--danger); }
+
+        /* Back / link */
+        .back-link {
+            display: block;
+            text-align: center;
+            font-size: 13px;
+            color: var(--primary);
+            text-decoration: none;
+            margin-top: 14px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: inherit;
+            width: 100%;
+        }
+        .back-link:hover { text-decoration: underline; }
+
+        /* Password requirements hint */
+        .pwd-hint {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            margin-top: 5px;
+            line-height: 1.5;
+        }
+
+        /* State visibility */
+        .state { display: none; }
+        .state.active { display: block; }
+
+        /* Loading spinner inside button */
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: none;
+        }
+        .spinner.visible { display: inline-block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Masked phone display */
+        .phone-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            font-size: 13px;
+            font-weight: 500;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-wrapper">
+
+    <!-- Brand -->
+    <div class="brand">
+        <div class="brand-logo"><i class="fas fa-shield-halved"></i></div>
+        <h1>JB Creations</h1>
+        <p>Admin Panel — Secure Login</p>
+    </div>
+
+    <div class="card">
+
+        <!-- State A: Phone Number Entry -->
+        <div id="state-phone" class="state active">
+            <div class="card-title">Sign In</div>
+            <div class="card-subtitle">Enter your registered admin phone number to continue.</div>
+
+            <div class="field">
+                <label for="phone-input">Phone Number</label>
+                <div class="field-prefix">
+                    <span class="prefix-label"><i class="fas fa-mobile-alt" style="margin-right:5px"></i>+91</span>
+                    <input type="tel" id="phone-input" placeholder="10-digit mobile number" maxlength="10" autocomplete="tel">
+                </div>
+            </div>
+
+            <div id="phone-error" class="msg msg-error"></div>
+
+            <div class="btn-row">
+                <button class="btn btn-primary" id="send-otp-btn" onclick="sendOTP()">
+                    <span class="spinner" id="send-otp-spinner"></span>
+                    <i class="fas fa-sms" id="send-otp-icon"></i>
+                    Send OTP
+                </button>
+                <button class="btn btn-secondary" onclick="showState('password')">
+                    <i class="fas fa-lock"></i>
+                    Sign In with Password
+                </button>
+            </div>
+        </div>
+
+        <!-- State B: OTP Verification -->
+        <div id="state-otp" class="state">
+            <div class="card-title">Enter OTP</div>
+            <div class="card-subtitle">We've sent a 6-digit code to your phone.</div>
+
+            <div id="masked-phone-badge" class="phone-badge">
+                <i class="fas fa-mobile-alt"></i>
+                <span id="masked-phone-text">+91 XXXXXXXX</span>
+            </div>
+
+            <div class="field">
+                <label for="otp-input">One-Time Password</label>
+                <input type="text" id="otp-input" placeholder="– – – – – –" maxlength="6" autocomplete="one-time-code" inputmode="numeric">
+            </div>
+
+            <div class="otp-timer" id="otp-timer-text"></div>
+            <div id="otp-error" class="msg msg-error"></div>
+
+            <div class="btn-row">
+                <button class="btn btn-primary" id="verify-otp-btn" onclick="verifyOTP()">
+                    <span class="spinner" id="verify-otp-spinner"></span>
+                    <i class="fas fa-check" id="verify-otp-icon"></i>
+                    Verify OTP
+                </button>
+            </div>
+            <button class="back-link" onclick="goBackToPhone()">
+                <i class="fas fa-arrow-left"></i> Back / Resend OTP
+            </button>
+        </div>
+
+        <!-- State C: Password Login -->
+        <div id="state-password" class="state">
+            <div class="card-title">Sign In with Password</div>
+            <div class="card-subtitle">Enter your phone number and your saved admin password.</div>
+
+            <div class="field">
+                <label for="pass-phone-input">Phone Number</label>
+                <div class="field-prefix">
+                    <span class="prefix-label"><i class="fas fa-mobile-alt" style="margin-right:5px"></i>+91</span>
+                    <input type="tel" id="pass-phone-input" placeholder="10-digit mobile number" maxlength="10" autocomplete="tel">
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="password-input">Password</label>
+                <input type="password" id="password-input" placeholder="Your admin password" autocomplete="current-password">
+            </div>
+
+            <div id="pass-error" class="msg msg-error"></div>
+
+            <div class="btn-row">
+                <button class="btn btn-primary" id="login-pass-btn" onclick="loginWithPassword()">
+                    <span class="spinner" id="login-pass-spinner"></span>
+                    <i class="fas fa-sign-in-alt" id="login-pass-icon"></i>
+                    Sign In
+                </button>
+            </div>
+            <button class="back-link" onclick="showState('phone')">
+                <i class="fas fa-arrow-left"></i> Use OTP instead
+            </button>
+        </div>
+
+        <!-- State D: First-Time Password Setup -->
+        <div id="state-set-password" class="state">
+            <div class="card-title">Set Your Password</div>
+            <div class="card-subtitle">
+                OTP verified! Create a password for quick sign-in next time. 
+                You can always reset it using OTP.
+            </div>
+
+            <div class="field">
+                <label for="new-password-input">New Password</label>
+                <input type="password" id="new-password-input" placeholder="Min. 8 chars, letters + numbers" autocomplete="new-password">
+                <div class="pwd-hint">Must be at least 8 characters and contain at least one letter and one number.</div>
+            </div>
+
+            <div class="field">
+                <label for="confirm-password-input">Confirm Password</label>
+                <input type="password" id="confirm-password-input" placeholder="Re-enter your password" autocomplete="new-password">
+            </div>
+
+            <div id="setpass-error" class="msg msg-error"></div>
+
+            <div class="btn-row">
+                <button class="btn btn-primary" id="set-pass-btn" onclick="setPassword()">
+                    <span class="spinner" id="set-pass-spinner"></span>
+                    <i class="fas fa-lock" id="set-pass-icon"></i>
+                    Set Password &amp; Open Dashboard
+                </button>
+            </div>
+        </div>
+
+    </div><!-- /card -->
+</div><!-- /login-wrapper -->
+
+<script>
+    // ── Firebase initialisation ────────────────────────────────────────────────
+    var firebaseConfig = {
+        apiKey: "AIzaSyC0j3MFVGeOMCKZnot8DmoXYkBYKlPjHsT",
+        authDomain: "jb-creations-backend.firebaseapp.com",
+        projectId: "jb-creations-backend",
+        storageBucket: "jb-creations-backend.firebasestorage.app",
+        messagingSenderId: "774184516486",
+        appId: "1:774128154860:web:c22384c401bd6838ab4d2f"
+    };
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+
+    // Session persistence — auth state lives only as long as this browser tab is open
+    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION).catch(function(e) {
+        console.warn('setPersistence failed:', e);
+    });
+
+    // If already signed in as admin, skip the login page
+    firebase.auth().onAuthStateChanged(async function(user) {
+        if (user) {
+            try {
+                var result = await user.getIdTokenResult(true);
+                if (result.claims.admin) {
+                    window.location.replace('admin-firebase.html');
+                    return;
+                }
+            } catch (e) {
+                // If token check fails, fall through to the login form
+            }
+        }
+        // Not signed in (or not admin) — show the phone-entry state
+        showState('phone');
+    });
+
+    // ── State variables ────────────────────────────────────────────────────────
+    var currentOtpToken  = null;
+    var currentPhone     = null;   // raw value from the input (10 digits without country code)
+    var currentSetupToken = null;
+    var countdownInterval = null;
+
+    // ── UI helpers ─────────────────────────────────────────────────────────────
+    function showState(id) {
+        document.querySelectorAll('.state').forEach(function(el) {
+            el.classList.remove('active');
+        });
+        var el = document.getElementById('state-' + id);
+        if (el) el.classList.add('active');
+    }
+
+    function showMsg(id, text, type) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = text;
+        el.className = 'msg msg-' + (type || 'error') + ' visible';
+    }
+
+    function clearMsg(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = '';
+        el.classList.remove('visible');
+    }
+
+    function setLoading(btnId, spinnerId, iconId, loading) {
+        var btn = document.getElementById(btnId);
+        var spinner = document.getElementById(spinnerId);
+        var icon = document.getElementById(iconId);
+        if (btn) btn.disabled = loading;
+        if (spinner) spinner.classList.toggle('visible', loading);
+        if (icon) icon.style.display = loading ? 'none' : '';
+    }
+
+    function maskPhone(raw) {
+        var cleaned = raw.replace(/\D/g, '').slice(-10);
+        return '+91 ' + cleaned.substring(0, 2) + 'XXXXXX' + cleaned.substring(8);
+    }
+
+    function startCountdown(seconds) {
+        clearInterval(countdownInterval);
+        var timerEl = document.getElementById('otp-timer-text');
+        var verifyBtn = document.getElementById('verify-otp-btn');
+        var remaining = seconds;
+
+        function tick() {
+            remaining--;
+            if (remaining <= 0) {
+                clearInterval(countdownInterval);
+                if (timerEl) {
+                    timerEl.textContent = 'OTP has expired. Please go back and request a new one.';
+                    timerEl.classList.add('expired');
+                }
+                if (verifyBtn) verifyBtn.disabled = true;
+            } else {
+                if (timerEl) timerEl.textContent = 'OTP expires in ' + remaining + 's';
+            }
+        }
+        if (timerEl) timerEl.textContent = 'OTP expires in ' + seconds + 's';
+        countdownInterval = setInterval(tick, 1000);
+    }
+
+    function goBackToPhone() {
+        clearInterval(countdownInterval);
+        clearMsg('otp-error');
+        document.getElementById('otp-input').value = '';
+        // Re-enable verify button in case it was disabled by expiry
+        var verifyBtn = document.getElementById('verify-otp-btn');
+        if (verifyBtn) verifyBtn.disabled = false;
+        var timerEl = document.getElementById('otp-timer-text');
+        if (timerEl) { timerEl.textContent = ''; timerEl.classList.remove('expired'); }
+        showState('phone');
+    }
+
+    // ── State A: Phone → Send OTP ──────────────────────────────────────────────
+    async function sendOTP() {
+        clearMsg('phone-error');
+        var phone = document.getElementById('phone-input').value.trim();
+
+        if (!phone || phone.length < 10) {
+            showMsg('phone-error', 'Please enter your 10-digit mobile number.');
+            return;
+        }
+
+        setLoading('send-otp-btn', 'send-otp-spinner', 'send-otp-icon', true);
+
+        try {
+            var res = await fetch('/.netlify/functions/admin-send-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phoneNumber: phone })
+            });
+            var data = await res.json();
+
+            if (data.success) {
+                currentOtpToken = data.otpToken;
+                currentPhone    = phone;
+
+                document.getElementById('masked-phone-text').textContent = maskPhone(phone);
+                document.getElementById('otp-input').value = '';
+                document.getElementById('verify-otp-btn').disabled = false;
+                var timerEl = document.getElementById('otp-timer-text');
+                if (timerEl) timerEl.classList.remove('expired');
+
+                showState('otp');
+                startCountdown(data.expiresIn || 300);
+            } else {
+                showMsg('phone-error', data.message || 'Failed to send OTP. Please try again.');
+            }
+        } catch (e) {
+            showMsg('phone-error', 'Network error. Please check your connection and try again.');
+        }
+
+        setLoading('send-otp-btn', 'send-otp-spinner', 'send-otp-icon', false);
+    }
+
+    // Allow Enter key on phone input
+    document.getElementById('phone-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') sendOTP();
+    });
+
+    // ── State B: OTP → Verify ─────────────────────────────────────────────────
+    async function verifyOTP() {
+        clearMsg('otp-error');
+        var otp = document.getElementById('otp-input').value.trim();
+
+        if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
+            showMsg('otp-error', 'Please enter the 6-digit OTP from your SMS.');
+            return;
+        }
+
+        setLoading('verify-otp-btn', 'verify-otp-spinner', 'verify-otp-icon', true);
+
+        try {
+            var res = await fetch('/.netlify/functions/admin-verify-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phoneNumber: currentPhone, otp: otp, otpToken: currentOtpToken })
+            });
+            var data = await res.json();
+
+            if (data.success) {
+                clearInterval(countdownInterval);
+                currentSetupToken = data.setupToken;
+
+                // Sign into Firebase Auth using the custom token issued by the backend
+                await firebase.auth().signInWithCustomToken(data.customToken);
+
+                if (!data.hasPassword) {
+                    // First-time login — show password creation form
+                    showState('set-password');
+                } else {
+                    // Password already set — go straight to the dashboard
+                    window.location.replace('admin-firebase.html');
+                }
+            } else {
+                showMsg('otp-error', data.message || 'Incorrect OTP. Please try again.');
+            }
+        } catch (e) {
+            showMsg('otp-error', 'Network error. Please try again.');
+        }
+
+        setLoading('verify-otp-btn', 'verify-otp-spinner', 'verify-otp-icon', false);
+    }
+
+    document.getElementById('otp-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') verifyOTP();
+    });
+
+    // ── State C: Password Login ────────────────────────────────────────────────
+    async function loginWithPassword() {
+        clearMsg('pass-error');
+        var phone    = document.getElementById('pass-phone-input').value.trim();
+        var password = document.getElementById('password-input').value;
+
+        if (!phone || !password) {
+            showMsg('pass-error', 'Please enter both your phone number and password.');
+            return;
+        }
+
+        setLoading('login-pass-btn', 'login-pass-spinner', 'login-pass-icon', true);
+
+        try {
+            var res = await fetch('/.netlify/functions/admin-login-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phoneNumber: phone, password: password })
+            });
+            var data = await res.json();
+
+            if (data.success) {
+                await firebase.auth().signInWithCustomToken(data.customToken);
+                window.location.replace('admin-firebase.html');
+            } else {
+                var errMsg = data.message || 'Login failed.';
+                if (data.otpOnly) {
+                    errMsg += ' Click "Use OTP instead" below to sign in via OTP.';
+                }
+                showMsg('pass-error', errMsg);
+            }
+        } catch (e) {
+            showMsg('pass-error', 'Network error. Please try again.');
+        }
+
+        setLoading('login-pass-btn', 'login-pass-spinner', 'login-pass-icon', false);
+    }
+
+    document.getElementById('password-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') loginWithPassword();
+    });
+
+    // ── State D: Set Password (first-time) ────────────────────────────────────
+    async function setPassword() {
+        clearMsg('setpass-error');
+        var password = document.getElementById('new-password-input').value;
+        var confirm  = document.getElementById('confirm-password-input').value;
+
+        if (password.length < 8) {
+            showMsg('setpass-error', 'Password must be at least 8 characters long.');
+            return;
+        }
+        if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+            showMsg('setpass-error', 'Password must contain at least one letter and one number.');
+            return;
+        }
+        if (password !== confirm) {
+            showMsg('setpass-error', 'Passwords do not match. Please re-enter.');
+            return;
+        }
+
+        setLoading('set-pass-btn', 'set-pass-spinner', 'set-pass-icon', true);
+
+        try {
+            var res = await fetch('/.netlify/functions/admin-set-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ setupToken: currentSetupToken, password: password })
+            });
+            var data = await res.json();
+
+            if (data.success) {
+                window.location.replace('admin-firebase.html');
+            } else {
+                showMsg('setpass-error', data.message || 'Failed to set password. Please try again.');
+            }
+        } catch (e) {
+            showMsg('setpass-error', 'Network error. Please try again.');
+        }
+
+        setLoading('set-pass-btn', 'set-pass-spinner', 'set-pass-icon', false);
+    }
+</script>
+
+</body>
+</html>

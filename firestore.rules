@@ -71,17 +71,21 @@ service cloud.firestore {
       allow read: if true;
 
       // Public website submissions may only create pending user reviews.
-      allow create: if isValidPublicReviewCreate();
+      // Admin can also create reviews (e.g. auto-reviews from the dashboard).
+      allow create: if isValidPublicReviewCreate() || isAdmin();
 
-      // Admin moderation / auto-review publishing requires backend-project auth.
-      // The current site still uses unauthenticated Firestore for admin writes,
-      // so deploying these stricter write rules requires a follow-up auth refactor.
       allow update, delete: if isAdmin();
     }
 
     match /siteConfig/reviewSettings {
       allow read: if true;
       allow write: if isAdmin();
+    }
+
+    // Admin credentials and config — completely blocked from browser access.
+    // Only the Firebase Admin SDK (Netlify server functions) can read or write here.
+    match /adminConfig/{document=**} {
+      allow read, write: if false;
     }
 
     // Current app architecture still performs unauthenticated client-side reads/writes

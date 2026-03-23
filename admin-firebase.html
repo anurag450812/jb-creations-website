@@ -9,19 +9,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
-        // Admin Panel Protection
-        (function() {
-            const isAuthenticated = sessionStorage.getItem('adminAuthenticated');
-            if (isAuthenticated !== 'true') {
-                const password = prompt("Please enter the admin password:");
-                if (password === '200274') {
-                    sessionStorage.setItem('adminAuthenticated', 'true');
-                } else {
-                    alert("Incorrect password. Access denied.");
-                    window.location.href = 'index.html'; // Redirect to home or login page
-                }
-            }
-        })();
+        // Admin Auth Guard — hide the page immediately.
+        // It will be revealed only after Firebase confirms the admin token.
+        document.documentElement.style.visibility = 'hidden';
     </script>
     <style>
         * {
@@ -3903,6 +3893,10 @@
                     <button class="btn btn-primary" onclick="exportData()">
                         <i class="fas fa-download"></i>
                         Export Data
+                    </button>
+                    <button class="btn btn-secondary" onclick="adminLogout()" style="margin-left:8px" title="Sign out of admin panel">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
                     </button>
                 </div>
             </header>
@@ -10059,6 +10053,7 @@
     <!-- Firebase Integration - Use same approach as other pages -->
     <!-- Firebase v9 SDK - Compatibility Mode -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
     
@@ -10536,5 +10531,53 @@
     
     <!-- Include Shiprocket client for shipping integration -->
     <script src="shiprocket-client.js"></script>
+
+    <!-- ==================== ADMIN AUTH GUARD ==================== -->
+    <script>
+        // Listen for firebase-client-new.js to finish initialising Firebase.
+        // At that point, firebase.auth() is available and we can verify the session.
+        window.addEventListener('firebaseReady', function() {
+            firebase.auth().onAuthStateChanged(async function(user) {
+                if (!user) {
+                    // No authenticated user — redirect to login
+                    window.location.replace('admin-login.html');
+                    return;
+                }
+                try {
+                    // Force-refresh the token to ensure the admin claim is present
+                    var result = await user.getIdTokenResult(true);
+                    if (!result.claims.admin) {
+                        // Authenticated, but not an admin — sign out and redirect
+                        await firebase.auth().signOut();
+                        window.location.replace('admin-login.html');
+                        return;
+                    }
+                } catch (e) {
+                    window.location.replace('admin-login.html');
+                    return;
+                }
+                // Auth confirmed — reveal the page
+                document.documentElement.style.visibility = '';
+            });
+        });
+
+        // Safety fallback: if firebaseReady never fires (e.g. network issue),
+        // redirect after 8 seconds rather than leaving a blank page forever.
+        setTimeout(function() {
+            if (document.documentElement.style.visibility === 'hidden') {
+                window.location.replace('admin-login.html');
+            }
+        }, 8000);
+
+        // Logout — called by the Logout button in the header
+        function adminLogout() {
+            firebase.auth().signOut().then(function() {
+                window.location.replace('admin-login.html');
+            }).catch(function() {
+                window.location.replace('admin-login.html');
+            });
+        }
+    </script>
+    <!-- ==================== END ADMIN AUTH GUARD ==================== -->
 </body>
 </html>
