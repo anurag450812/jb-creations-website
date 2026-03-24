@@ -676,23 +676,29 @@ document.addEventListener('DOMContentLoaded', function() {
 function initMobileDrawer() {
     const toggleBtn = document.getElementById('mobileItemsToggle');
     const drawer = document.getElementById('mobileOrderDrawer');
-    const closeBtn = document.getElementById('mobileDrawerClose');
     const backdrop = document.getElementById('mobileDrawerBackdrop');
     const totalBox = document.getElementById('mobileTotalBox');
     const swipeHandle = document.getElementById('mobileDrawerSwipeHandle');
+    let drawerHistoryActive = false;
     
-    if (!toggleBtn || !drawer || !closeBtn || !backdrop) return;
+    if (!toggleBtn || !drawer || !backdrop) return;
 
-    const openDrawer = () => {
+    const openDrawer = ({ fromHistory = false } = {}) => {
         drawer.classList.add('open');
         backdrop.classList.add('open');
         drawer.setAttribute('aria-hidden', 'false');
         backdrop.setAttribute('aria-hidden', 'false');
         toggleBtn.setAttribute('aria-expanded', 'true');
         if (totalBox) totalBox.classList.add('drawer-open');
+
+        if (!fromHistory && !drawerHistoryActive) {
+            const nextState = Object.assign({}, history.state || {}, { checkoutMobileDrawerOpen: true });
+            history.pushState(nextState, '', window.location.href);
+            drawerHistoryActive = true;
+        }
     };
     
-    const closeDrawer = () => {
+    const closeDrawer = ({ syncHistory = true } = {}) => {
         drawer.classList.remove('open');
         drawer.classList.remove('dragging');
         backdrop.classList.remove('open');
@@ -701,6 +707,11 @@ function initMobileDrawer() {
         toggleBtn.setAttribute('aria-expanded', 'false');
         drawer.style.transform = '';
         if (totalBox) totalBox.classList.remove('drawer-open');
+
+        if (syncHistory && drawerHistoryActive) {
+            drawerHistoryActive = false;
+            history.back();
+        }
     };
 
     toggleBtn.addEventListener('click', () => {
@@ -725,8 +736,14 @@ function initMobileDrawer() {
         });
     }
     
-    closeBtn.addEventListener('click', closeDrawer);
     backdrop.addEventListener('click', closeDrawer);
+
+    window.addEventListener('popstate', () => {
+        if (drawer.classList.contains('open')) {
+            drawerHistoryActive = false;
+            closeDrawer({ syncHistory: false });
+        }
+    });
 
     // Close on Escape
     document.addEventListener('keydown', (e) => {
@@ -1500,6 +1517,53 @@ function updateOrderSummary() {
                 <div class="order-item-qty">Qty: ${item.quantity || 1}</div>
             </div>
         `;
+
+        const mobileItemHTML = `
+            <div class="cart-item-image">
+                ${imageSource ? 
+                    `<img src="${imageSource}" alt="Frame Preview" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-image\\'></i>'">` : 
+                    '<i class="fas fa-image"></i>'
+                }
+            </div>
+            <div class="cart-item-details">
+                <h4 class="cart-item-title">Custom Photo Frame</h4>
+                <div class="cart-item-specs">
+                    <div class="cart-item-spec">
+                        <i class="fas fa-ruler-combined"></i>
+                        ${item.frameSize ? `${item.frameSize.size}` : 'N/A'}
+                    </div>
+                    <div class="cart-item-spec">
+                        <i class="fas fa-palette"></i>
+                        ${item.frameColor || 'Default'}
+                    </div>
+                    <div class="cart-item-spec">
+                        <i class="fas fa-image"></i>
+                        ${item.frameSize ? (item.frameSize.orientation || 'Landscape') : 'N/A'}
+                    </div>
+                    <div class="cart-item-spec">
+                        <i class="fas fa-border-style"></i>
+                        Border: ${item.whiteBorder ? 'Yes (' + (item.borderThickness || 15) + 'px)' : 'No'}
+                    </div>
+                </div>
+            </div>
+            <div class="cart-item-actions">
+                <div class="cart-item-price">
+                    ${item.mrp && item.mrp > item.price ? 
+                        `<span style="text-decoration: line-through; color: #999; font-size: 0.75em; margin-right: 6px;">₹${item.mrp}</span>` : 
+                        ''}
+                    <span>₹${item.price || 349}</span>
+                    ${item.mrp && item.mrp > item.price ? 
+                        `<span style="color: #28a745; font-size: 0.7em; margin-left: 4px;">${Math.round(((item.mrp - item.price) / item.mrp) * 100)}% OFF</span>` : 
+                        ''}
+                </div>
+                <div class="cart-item-controls">
+                    <div class="quantity-control checkout-static-quantity" aria-label="Quantity ${item.quantity || 1}">
+                        <span class="quantity-display">${item.quantity || 1}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
         if (summaryContainer) {
             const itemElement = document.createElement('div');
             itemElement.className = 'order-item';
@@ -1508,8 +1572,8 @@ function updateOrderSummary() {
         }
         if (mobileListContainer) {
             const mobileItem = document.createElement('div');
-            mobileItem.className = 'order-item';
-            mobileItem.innerHTML = itemHTML;
+            mobileItem.className = 'cart-item checkout-mobile-cart-item';
+            mobileItem.innerHTML = mobileItemHTML;
             mobileListContainer.appendChild(mobileItem);
         }
     });
@@ -3429,14 +3493,6 @@ document.addEventListener('DOMContentLoaded', function() {
         .place-order-btn.place-order-disabled,
         .mobile-place-order-btn.place-order-disabled {
             position: relative;
-        }
-        
-        .place-order-btn.place-order-disabled::after,
-        .mobile-place-order-btn.place-order-disabled::after {
-            content: '🔒';
-            position: absolute;
-            right: 15px;
-            font-size: 16px;
         }
         
         /* Form error toast */

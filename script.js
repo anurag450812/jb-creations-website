@@ -11,6 +11,64 @@
 // VERSION CHECK - Update this to force cache refresh
 const SCRIPT_VERSION = '5.5-INDEXEDDB';
 
+// Debug logging configuration with auto-timeout and scope isolation
+const DEBUG_LOGS_CONFIG = (() => {
+    let enabled = false;
+    let enabledAt = null;
+    const TIMEOUT_DURATION = 3600000; // 1 hour auto-timeout
+    
+    try {
+        // Check URL or localStorage for debug flag
+        const flagFromUrl = window.location.search.includes('debugLogs=true');
+        const flagFromStorage = localStorage.getItem('jbDebugLogs') === 'true';
+        enabled = flagFromUrl || flagFromStorage;
+        
+        if (enabled) {
+            enabledAt = Date.now();
+            // Warn when debug mode is active
+            console.warn('⚠️ DEBUG LOGGING ACTIVE - This script\'s console.log is ENABLED. Auto-disables in 1 hour.');
+            
+            // Set timeout to auto-disable
+            setTimeout(() => {
+                console.warn('⚠️ DEBUG LOGGING AUTO-DISABLED after 1 hour timeout.');
+                enabled = false;
+            }, TIMEOUT_DURATION);
+        }
+    } catch (error) {
+        enabled = false;
+    }
+    
+    return {
+        get isEnabled() { return enabled; },
+        set isEnabled(val) { enabled = val; },
+        getEnabledDuration() { 
+            return enabled && enabledAt ? (Date.now() - enabledAt) / 1000 : 0; 
+        }
+    };
+})();
+
+// Store original console methods before any modifications
+const originalConsoleLog = console.log;
+const originalConsoleError = console.error;
+const originalConsoleWarn = console.warn;
+
+// Create isolated logging function for this script only
+// This prevents affecting other scripts loaded after this one
+const scriptLog = DEBUG_LOGS_CONFIG.isEnabled ? originalConsoleLog : (() => {});
+const scriptError = DEBUG_LOGS_CONFIG.isEnabled ? originalConsoleError : (() => {});
+const scriptWarn = DEBUG_LOGS_CONFIG.isEnabled ? originalConsoleWarn : (() => {});
+
+// Replace console methods with optimized gate (zero overhead when disabled - no function call)
+if (!DEBUG_LOGS_CONFIG.isEnabled) {
+    // Completely replace with empty arrow functions - mathematically zero overhead
+    console.log = () => {};
+    console.debug = () => {};
+} else {
+    // Keep original behavior when enabled
+    console.log = originalConsoleLog;
+    console.debug = originalConsoleLog;
+}
+
 // State management
 console.log('');
 console.log('%c╔═══════════════════════════════════════════════════════════════════════════╗', 'color: #00ff00; font-size: 16px; font-weight: bold;');
@@ -27,9 +85,9 @@ const state = {
     },
     frameColor: 'black',
     frameTexture: 'smooth',
-    whiteBorder: false, // White border option: false = No, true = Yes
+    whiteBorder: false, // Inner border option: false = No, true = Yes (automatic contrasting color)
     borderThickness: 15, // Border thickness in pixels (5-40)
-    borderColor: 'white', // Border color: 'white' or 'black'
+    borderColor: 'white', // Automatic contrasting border color derived from frameColor
     price: 349,
     adjustments: {
         brightness: 100,
@@ -505,15 +563,6 @@ function initMobileBottomBar() {
                         thicknessContainer.classList.remove('show');
                     }
                 }
-                // Show/hide border color picker
-                const mobileColorContainer = drawers.border.querySelector('.mobile-border-color-container');
-                if (mobileColorContainer) {
-                    if (state.whiteBorder) {
-                        mobileColorContainer.classList.add('show');
-                    } else {
-                        mobileColorContainer.classList.remove('show');
-                    }
-                }
             }
             // Also update desktop buttons if present
             document.querySelectorAll('.desktop-border-btn').forEach(btn => {
@@ -531,34 +580,10 @@ function initMobileBottomBar() {
                     desktopThicknessContainer.classList.remove('show');
                 }
             }
-            // Show/hide desktop border color picker
-            const desktopColorContainer = document.getElementById('desktopBorderColorContainer');
-            if (desktopColorContainer) {
-                if (state.whiteBorder) {
-                    desktopColorContainer.classList.add('show');
-                } else {
-                    desktopColorContainer.classList.remove('show');
-                }
-            }
             // Trigger room preview update button state
             if (window.updateRoomPreviewButtonState) {
                 setTimeout(() => window.updateRoomPreviewButtonState(), 50);
             }
-        }
-
-        // Mobile Border Color Buttons
-        const borderColorBtn = e.target.closest('.mobile-border-color-btn');
-        if (borderColorBtn) {
-            state.borderColor = borderColorBtn.dataset.borderColor;
-            updateWhiteBorder();
-            if (drawers.border) {
-                drawers.border.querySelectorAll('.mobile-border-color-btn').forEach(btn => btn.classList.remove('active'));
-                borderColorBtn.classList.add('active');
-            }
-            // Sync desktop color buttons
-            document.querySelectorAll('.border-color-btn').forEach(btn => {
-                btn.classList.toggle('selected', btn.dataset.borderColor === state.borderColor);
-            });
         }
         
         // Mobile Adjust Option Buttons (brightness, contrast, vibrance, highlights, shadows)
@@ -1390,7 +1415,7 @@ function initializeEventListeners() {
         });
     });
 
-    // Frame White Border Selection
+    // Frame Inner Border Selection
     document.querySelectorAll('.desktop-border-btn').forEach(button => {
         button.addEventListener('click', () => {
             document.querySelectorAll('.desktop-border-btn').forEach(btn => btn.classList.remove('selected'));
@@ -1407,36 +1432,11 @@ function initializeEventListeners() {
                     thicknessContainer.classList.remove('show');
                 }
             }
-            // Show/hide desktop border color picker
-            const colorContainer = document.getElementById('desktopBorderColorContainer');
-            if (colorContainer) {
-                if (state.whiteBorder) {
-                    colorContainer.classList.add('show');
-                } else {
-                    colorContainer.classList.remove('show');
-                }
-            }
             
             // No auto-update; let user press Update button for room previews
             if (window.updateRoomPreviewButtonState) {
                 setTimeout(() => window.updateRoomPreviewButtonState(), 50);
             }
-        });
-    });
-
-    // Border Color Selection (desktop)
-    document.querySelectorAll('.border-color-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            document.querySelectorAll('.border-color-btn').forEach(btn => btn.classList.remove('selected'));
-            button.classList.add('selected');
-            state.borderColor = button.dataset.borderColor;
-            // Sync mobile color buttons
-            if (window.drawers && drawers.border) {
-                drawers.border.querySelectorAll('.mobile-border-color-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.borderColor === state.borderColor);
-                });
-            }
-            updateWhiteBorder();
         });
     });
     
@@ -2597,23 +2597,15 @@ function captureHighQualityPrintImage() {
                     // Reset filter
                     ctx.filter = 'none';
                     
-                    // Draw white border inside frame if enabled (for high-quality print)
+                    // Draw automatic inner border inside frame if enabled (for high-quality print)
                     if (state.whiteBorder) {
-                        // Use state.borderThickness for the white border width
+                        // Use state.borderThickness for the inner border width
                         // Scale it from preview pixels to canvas resolution
                         const whiteBorderWidth = state.borderThickness * canvasScaleX;
+
+                        drawAutomaticInnerBorder(ctx, 0, 0, canvas.width, canvas.height, whiteBorderWidth);
                         
-                        ctx.fillStyle = '#ffffff';
-                        // Top border
-                        ctx.fillRect(0, 0, canvas.width, whiteBorderWidth);
-                        // Bottom border
-                        ctx.fillRect(0, canvas.height - whiteBorderWidth, canvas.width, whiteBorderWidth);
-                        // Left border
-                        ctx.fillRect(0, 0, whiteBorderWidth, canvas.height);
-                        // Right border
-                        ctx.fillRect(canvas.width - whiteBorderWidth, 0, whiteBorderWidth, canvas.height);
-                        
-                        console.log('🖼️ White border added to high-quality image with width:', whiteBorderWidth, '(thickness:', state.borderThickness + 'px)');
+                        console.log('🖼️ Automatic inner border added to high-quality image with width:', whiteBorderWidth, '(thickness:', state.borderThickness + 'px)');
                     }
                     
                     // Convert to high-quality JPEG
@@ -2762,23 +2754,15 @@ function captureFramedImage() {
                     // Reset filter for any additional operations
                     ctx.filter = 'none';
                     
-                    // Draw white border inside frame if enabled (for admin panel download)
+                    // Draw automatic inner border inside frame if enabled (for admin panel download)
                     if (state.whiteBorder) {
-                        // Use state.borderThickness for the white border width
+                        // Use state.borderThickness for the inner border width
                         // Scale it from preview pixels to canvas resolution
                         const whiteBorderWidth = state.borderThickness * scaleX;
+
+                        drawAutomaticInnerBorder(ctx, 0, 0, canvas.width, canvas.height, whiteBorderWidth);
                         
-                        ctx.fillStyle = '#ffffff';
-                        // Top border
-                        ctx.fillRect(0, 0, canvas.width, whiteBorderWidth);
-                        // Bottom border
-                        ctx.fillRect(0, canvas.height - whiteBorderWidth, canvas.width, whiteBorderWidth);
-                        // Left border
-                        ctx.fillRect(0, 0, whiteBorderWidth, canvas.height);
-                        // Right border
-                        ctx.fillRect(canvas.width - whiteBorderWidth, 0, whiteBorderWidth, canvas.height);
-                        
-                        console.log('White border added to admin image with width:', whiteBorderWidth, '(thickness:', state.borderThickness + 'px)');
+                        console.log('Automatic inner border added to admin image with width:', whiteBorderWidth, '(thickness:', state.borderThickness + 'px)');
                     }
                     
                     // Convert to data URL with optimized quality
@@ -2940,20 +2924,12 @@ function captureFramePreviewForDisplay() {
                     
                     ctx.restore();
                     
-                    // Draw white border inside frame if enabled
+                    // Draw automatic inner border inside frame if enabled
                     if (state.whiteBorder) {
                         // Use same border width ratio as the frame border
                         const whiteBorderWidth = borderWidth;
-                        
-                        ctx.fillStyle = '#ffffff';
-                        // Top border
-                        ctx.fillRect(imageAreaX, imageAreaY, imageAreaWidth, whiteBorderWidth);
-                        // Bottom border
-                        ctx.fillRect(imageAreaX, imageAreaY + imageAreaHeight - whiteBorderWidth, imageAreaWidth, whiteBorderWidth);
-                        // Left border
-                        ctx.fillRect(imageAreaX, imageAreaY, whiteBorderWidth, imageAreaHeight);
-                        // Right border
-                        ctx.fillRect(imageAreaX + imageAreaWidth - whiteBorderWidth, imageAreaY, whiteBorderWidth, imageAreaHeight);
+
+                        drawAutomaticInnerBorder(ctx, imageAreaX, imageAreaY, imageAreaWidth, imageAreaHeight, whiteBorderWidth);
                     }
                     
                     // Convert to data URL
@@ -3628,30 +3604,22 @@ function captureFramePreview() {
                     
                     ctx.restore();
 
-                    // Draw white border inside frame if enabled
+                    // Draw automatic inner border inside frame if enabled
                     if (state.whiteBorder) {
                         // Use state.borderThickness directly since this captures at preview resolution
                         const whiteBorderWidth = state.borderThickness;
                         
-                        console.log('White border calculation:', {
+                        console.log('Automatic inner border calculation:', {
                             borderThickness: state.borderThickness,
                             whiteBorderWidth,
                             containerWidth,
                             containerHeight
                         });
                         
-                        // Draw solid white border rectangles inside the image container
-                        ctx.fillStyle = '#ffffff';
-                        // Top border
-                        ctx.fillRect(containerX, containerY, containerWidth, whiteBorderWidth);
-                        // Bottom border
-                        ctx.fillRect(containerX, containerY + containerHeight - whiteBorderWidth, containerWidth, whiteBorderWidth);
-                        // Left border
-                        ctx.fillRect(containerX, containerY, whiteBorderWidth, containerHeight);
-                        // Right border
-                        ctx.fillRect(containerX + containerWidth - whiteBorderWidth, containerY, whiteBorderWidth, containerHeight);
+                        // Draw solid automatic inner border rectangles inside the image container
+                        drawAutomaticInnerBorder(ctx, containerX, containerY, containerWidth, containerHeight, whiteBorderWidth);
                         
-                        console.log('White border drawn with width:', whiteBorderWidth, '(thickness:', state.borderThickness + 'px)');
+                        console.log('Automatic inner border drawn with width:', whiteBorderWidth, '(thickness:', state.borderThickness + 'px)');
                     }
 
                     // Convert to data URL
@@ -4632,13 +4600,41 @@ function updateFrameSize() {
     scheduleDesktopRoomPreviewRefresh('frame size change');
 }
 
+function getAutomaticBorderColor() {
+    return state.frameColor === 'white' ? 'black' : 'white';
+}
+
+function getAutomaticBorderHexColor() {
+    return getAutomaticBorderColor() === 'black' ? '#000000' : '#ffffff';
+}
+
+function drawAutomaticInnerBorder(ctx, x, y, width, height, borderWidth) {
+    if (!ctx || !borderWidth || borderWidth <= 0) {
+        return;
+    }
+
+    ctx.fillStyle = getAutomaticBorderHexColor();
+    ctx.fillRect(x, y, width, borderWidth);
+    ctx.fillRect(x, y + height - borderWidth, width, borderWidth);
+    ctx.fillRect(x, y, borderWidth, height);
+    ctx.fillRect(x + width - borderWidth, y, borderWidth, height);
+}
+
 // Function to update frame color
 function updateFrameColor() {
+    state.borderColor = getAutomaticBorderColor();
+
     const frameElements = document.querySelectorAll('.frame');
     frameElements.forEach(frame => {
         // Update the frame's background color (this creates the frame border effect)
         frame.style.backgroundColor = state.frameColor;
     });
+
+    if (state.whiteBorder) {
+        document.querySelectorAll('.white-border-overlay').forEach(overlay => {
+            overlay.style.borderColor = getAutomaticBorderHexColor();
+        });
+    }
     
     // Update room preview overlays if room slider is active
     // Room preview overlays will only update when "Update Room Previews" button is clicked
@@ -4648,11 +4644,13 @@ function updateFrameColor() {
     scheduleDesktopRoomPreviewRefresh('frame color change');
 }
 
-// Function to update white border inside frame
+// Function to update automatic inner border inside frame
 function updateWhiteBorder() {
+    state.borderColor = getAutomaticBorderColor();
+
     const imageContainers = document.querySelectorAll('.preview-section .frame .image-container');
     imageContainers.forEach(container => {
-        // Find or create the white border overlay element
+        // Find or create the automatic inner border overlay element
         let borderOverlay = container.querySelector('.white-border-overlay');
         
         if (state.whiteBorder) {
@@ -4664,7 +4662,7 @@ function updateWhiteBorder() {
             }
             // Apply the border width directly as inline style
             borderOverlay.style.borderWidth = state.borderThickness + 'px';
-            borderOverlay.style.borderColor = state.borderColor === 'black' ? '#000000' : '#ffffff';
+            borderOverlay.style.borderColor = getAutomaticBorderHexColor();
             borderOverlay.style.display = 'block';
         } else {
             // Hide or remove the overlay
@@ -4674,7 +4672,7 @@ function updateWhiteBorder() {
         }
     });
     
-    console.log('White border updated:', state.whiteBorder ? 'Yes' : 'No', '| Thickness:', state.borderThickness + 'px');
+    console.log('Automatic inner border updated:', state.whiteBorder ? 'Yes' : 'No', '| Thickness:', state.borderThickness + 'px');
 
     updateMobileSpecs();
     scheduleDesktopRoomPreviewRefresh('border toggle');
@@ -4684,9 +4682,10 @@ function updateWhiteBorder() {
 function updateBorderThickness(thickness) {
     state.borderThickness = parseInt(thickness, 10);
     
-    // Apply to all white border overlay elements directly
+    // Apply to all automatic inner border overlay elements directly
     document.querySelectorAll('.white-border-overlay').forEach(overlay => {
         overlay.style.borderWidth = state.borderThickness + 'px';
+        overlay.style.borderColor = getAutomaticBorderHexColor();
     });
     
     // Update all thickness value displays - including cloned ones in drawers
@@ -5555,7 +5554,7 @@ function initializeMobileCustomization() {
                         frameSize: state.frameSize,
                         frameColor: state.frameColor || '#8B4513',
                         frameTexture: state.frameTexture || 'wood',
-                        // White border settings
+                        // Automatic inner border settings
                         whiteBorder: state.whiteBorder || false,
                         borderThickness: state.borderThickness || 15,
                         // Image adjustments applied
@@ -6210,7 +6209,7 @@ function updateMobileSpecs() {
         }
     }
     
-    // Update white border
+    // Update automatic inner border
     if (mobileListingBorder) {
         mobileListingBorder.textContent = state.whiteBorder ? 'Yes' : 'No';
     }
