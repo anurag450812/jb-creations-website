@@ -5,14 +5,17 @@
  */
 
 // Firebase configuration - Your actual project details
-const firebaseConfig = {
-    apiKey: "AIzaSyC0j3MFVGeOMCKZnot8DmoXYkBYKlPjHsT",
+const fallbackFirebaseConfig = {
+    apiKey: "AIzaSyCQjSWFvoEQHCKZnot8DmcXYk8YKlPiHsI",
     authDomain: "jb-creations-backend.firebaseapp.com",
     projectId: "jb-creations-backend",
     storageBucket: "jb-creations-backend.firebasestorage.app",
-    messagingSenderId: "774184516486",
-    appId: "1:774128154860:web:c22384c401bd6838ab4d2f"
+    messagingSenderId: "774712815486",
+    appId: "1:774712815486:web:c22384c401bd6838ab4d2f"
 };
+
+let firebaseConfig = { ...fallbackFirebaseConfig };
+let firebaseConfigLoadPromise = null;
 
 // Initialize Firebase when DOM is loaded
 let app, db;
@@ -30,6 +33,85 @@ const DEFAULT_REVIEW_STATS = {
     '13x10-portrait': { totalRatings: 398, totalReviews: 8, avgRating: 4.4, lastIncrementDate: null },
     '13x10-landscape': { totalRatings: 321, totalReviews: 6, avgRating: 4.1, lastIncrementDate: null }
 };
+
+const DEFAULT_STOREFRONT_SIZE_PRICING = {
+    '13x19-portrait': { size: '13x19', orientation: 'portrait', label: '13x19 Portrait', price: 499, mrp: 999 },
+    '13x19-landscape': { size: '13x19', orientation: 'landscape', label: '13x19 Landscape', price: 499, mrp: 999 },
+    '13x10-portrait': { size: '13x10', orientation: 'portrait', label: '13x10 Portrait', price: 349, mrp: 799 },
+    '13x10-landscape': { size: '13x10', orientation: 'landscape', label: '13x10 Landscape', price: 349, mrp: 799 }
+};
+
+const DEFAULT_STOREFRONT_COUPONS = [
+    {
+        id: 'SAVE100',
+        discount: 100,
+        minOrder: 500,
+        description: '₹100 OFF on orders above ₹500',
+        emoji: '🎁',
+        accentColor: '#16697A',
+        active: true
+    },
+    {
+        id: 'SAVE250',
+        discount: 250,
+        minOrder: 1000,
+        description: '₹250 OFF on orders above ₹1000',
+        emoji: '🎉',
+        accentColor: '#489FB5',
+        active: true
+    },
+    {
+        id: 'SAVE300',
+        discount: 300,
+        minOrder: 1500,
+        description: '₹300 OFF on orders above ₹1500',
+        emoji: '💎',
+        accentColor: '#FFA62B',
+        active: true
+    }
+];
+
+function getDefaultStorefrontSettings() {
+    return {
+        sizePricing: JSON.parse(JSON.stringify(DEFAULT_STOREFRONT_SIZE_PRICING)),
+        coupons: JSON.parse(JSON.stringify(DEFAULT_STOREFRONT_COUPONS))
+    };
+}
+
+function normalizeStorefrontSettings(data = {}) {
+    const defaults = getDefaultStorefrontSettings();
+    const normalizedSizePricing = {};
+
+    Object.keys(defaults.sizePricing).forEach(key => {
+        normalizedSizePricing[key] = {
+            ...defaults.sizePricing[key],
+            ...((data.sizePricing && data.sizePricing[key]) || {})
+        };
+
+        normalizedSizePricing[key].price = Number(normalizedSizePricing[key].price) || defaults.sizePricing[key].price;
+        normalizedSizePricing[key].mrp = Number(normalizedSizePricing[key].mrp) || defaults.sizePricing[key].mrp;
+    });
+
+    const normalizedCoupons = Array.isArray(data.coupons) && data.coupons.length
+        ? data.coupons.map((coupon, index) => {
+            const fallback = defaults.coupons[index % defaults.coupons.length] || defaults.coupons[0];
+            return {
+                id: String(coupon.id || fallback.id).trim().toUpperCase(),
+                discount: Number(coupon.discount) || fallback.discount,
+                minOrder: Number(coupon.minOrder) || fallback.minOrder,
+                description: String(coupon.description || fallback.description).trim(),
+                emoji: String(coupon.emoji || fallback.emoji).trim() || fallback.emoji,
+                accentColor: String(coupon.accentColor || fallback.accentColor).trim() || fallback.accentColor,
+                active: coupon.active !== false
+            };
+        })
+        : defaults.coupons;
+
+    return {
+        sizePricing: normalizedSizePricing,
+        coupons: normalizedCoupons
+    };
+}
 
 const REVIEW_POOL_NAMES = [
     'Aarav Mehta', 'Aditi Sharma', 'Akash Yadav', 'Akriti Jain', 'Ananya Gupta', 'Ankit Verma', 'Arjun Saini', 'Ayushi Bansal',
@@ -202,15 +284,55 @@ function buildRatingRollup(previousStats, reviewRating, ratingsIncrement) {
     };
 }
 
-function initializeFirebase() {
+function mergeFirebaseConfig(nextConfig) {
+    if (!nextConfig || !nextConfig.apiKey) {
+        return firebaseConfig;
+    }
+
+    firebaseConfig = { ...firebaseConfig, ...nextConfig };
+    window.__JB_FIREBASE_DYNAMIC_CONFIG__ = { ...firebaseConfig };
+    return firebaseConfig;
+}
+
+async function loadRuntimeFirebaseConfig() {
+    if (window.__JB_FIREBASE_DYNAMIC_CONFIG__) {
+        return mergeFirebaseConfig(window.__JB_FIREBASE_DYNAMIC_CONFIG__);
+    }
+
+    if (!firebaseConfigLoadPromise) {
+        firebaseConfigLoadPromise = fetch('/.netlify/functions/firebase-web-config')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Firebase web config endpoint unavailable');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data && data.success && data.config) {
+                    return mergeFirebaseConfig(data.config);
+                }
+                return firebaseConfig;
+            })
+            .catch(error => {
+                console.warn('Runtime Firebase config unavailable:', error);
+                return firebaseConfig;
+            });
+    }
+
+    return firebaseConfigLoadPromise;
+}
+
+async function initializeFirebase() {
     try {
         if (typeof firebase === 'undefined') {
             console.error('❌ Firebase SDK not loaded');
             return false;
         }
+
+        await loadRuntimeFirebaseConfig();
         
         // Initialize Firebase
-        app = firebase.initializeApp(firebaseConfig);
+        app = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
         db = firebase.firestore();
         
         console.log('🔥 Firebase initialized successfully');
@@ -225,9 +347,7 @@ function initializeFirebase() {
 class JBCreationsAPI {
     constructor() {
         if (!db) {
-            if (!initializeFirebase()) {
-                throw new Error('Firebase initialization failed');
-            }
+            throw new Error('Firebase initialization has not completed yet');
         }
         this.db = db;
         console.log('🚀 Xidlz API powered by Firebase initialized');
@@ -571,6 +691,71 @@ class JBCreationsAPI {
             return { success: true };
         } catch (error) {
             console.error('❌ Error updating review settings:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    async ensureStorefrontSettings() {
+        try {
+            const settingsRef = this.db.collection('siteConfig').doc('storefrontSettings');
+            const snapshot = await settingsRef.get();
+
+            if (!snapshot.exists) {
+                const defaults = getDefaultStorefrontSettings();
+                await settingsRef.set({
+                    ...defaults,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                return defaults;
+            }
+
+            const mergedSettings = normalizeStorefrontSettings(snapshot.data() || {});
+            const data = snapshot.data() || {};
+            const needsRepair = !data.sizePricing || !Array.isArray(data.coupons);
+
+            if (needsRepair) {
+                await settingsRef.set({
+                    ...mergedSettings,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            }
+
+            return mergedSettings;
+        } catch (error) {
+            console.error('❌ Error ensuring storefront settings:', error);
+            return getDefaultStorefrontSettings();
+        }
+    }
+
+    async getStorefrontSettings() {
+        try {
+            const settings = await this.ensureStorefrontSettings();
+            return { success: true, settings };
+        } catch (error) {
+            console.error('❌ Error getting storefront settings:', error);
+            return { success: false, error: error.message, settings: getDefaultStorefrontSettings() };
+        }
+    }
+
+    async updateStorefrontSettings(updateData) {
+        try {
+            const currentSettings = await this.ensureStorefrontSettings();
+            const nextSettings = normalizeStorefrontSettings({
+                ...currentSettings,
+                ...updateData,
+                sizePricing: updateData.sizePricing || currentSettings.sizePricing,
+                coupons: updateData.coupons || currentSettings.coupons
+            });
+
+            await this.db.collection('siteConfig').doc('storefrontSettings').set({
+                ...nextSettings,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+
+            return { success: true, settings: nextSettings };
+        } catch (error) {
+            console.error('❌ Error updating storefront settings:', error);
             return { success: false, error: error.message };
         }
     }
@@ -1384,9 +1569,13 @@ class JBCreationsAPI {
 let jbAPI = null;
 
 // Initialize API when Firebase is ready
-function initializeJBAPI() {
+async function initializeJBAPI() {
     try {
         if (!jbAPI) {
+            const initialized = await initializeFirebase();
+            if (!initialized) {
+                return null;
+            }
             jbAPI = new JBCreationsAPI();
         }
         return jbAPI;
@@ -1399,9 +1588,9 @@ function initializeJBAPI() {
 // Wait for Firebase to be loaded, then initialize
 document.addEventListener('DOMContentLoaded', function() {
     // Wait a bit for Firebase to load
-    setTimeout(() => {
+    setTimeout(async () => {
         try {
-            jbAPI = initializeJBAPI();
+            jbAPI = await initializeJBAPI();
             if (jbAPI) {
                 console.log('🚀 Xidlz Firebase integration loaded successfully!');
                 

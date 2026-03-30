@@ -5,12 +5,12 @@
 
 // Firebase configuration - Your actual project details
 const firebaseConfig = {
-    apiKey: "AIzaSyC0j3MFVGeOMCKZnot8DmoXYkBYKlPjHsT",
+    apiKey: "AIzaSyCQjSWFvoEQHCKZnot8DmcXYk8YKlPiHsI",
     authDomain: "jb-creations-backend.firebaseapp.com",
     projectId: "jb-creations-backend",
     storageBucket: "jb-creations-backend.firebasestorage.app",
-    messagingSenderId: "774184516486",
-    appId: "1:774128154860:web:c22384c401bd6838ab4d2f"
+    messagingSenderId: "774712815486",
+    appId: "1:774712815486:web:c22384c401bd6838ab4d2f"
 };
 
 // Firebase modules will be loaded from CDN scripts in HTML

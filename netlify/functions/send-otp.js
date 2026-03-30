@@ -4,7 +4,7 @@
  */
 
 const axios = require('axios');
-const jwt = require('jsonwebtoken');
+const { createSignedToken } = require('./utils/token-utils');
 
 // Configuration
 const FAST2SMS_API_KEY = process.env.FAST2SMS_API_KEY;
@@ -121,8 +121,8 @@ exports.handler = async (event, context) => {
         const otp = generateOTP();
         const expiresAt = Date.now() + (OTP_EXPIRY_MINUTES * 60 * 1000);
 
-        // Create JWT token containing OTP info (for verification)
-        const otpToken = jwt.sign(
+        // Create signed token containing OTP info (for verification)
+        const otpToken = createSignedToken(
             { 
                 phone: formattedPhone,
                 otp: otp,

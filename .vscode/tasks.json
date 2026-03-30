@@ -52,6 +52,21 @@
 			"args": [],
 			"isBackground": true,
 			"group": "build"
+		},
+		{
+			"label": "Run local admin testing (temp mirror)",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoLogo",
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				".\\scripts\\start-local-admin.ps1"
+			],
+			"isBackground": true,
+			"group": "build"
 		}
 	]
 }

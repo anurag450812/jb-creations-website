@@ -1,15 +1,15 @@
 /**
  * Netlify Function: Admin — Set Password
- * Called after first-time OTP verification to store a bcrypt-hashed password.
+ * Called after first-time OTP verification to store a one-way hashed password.
  * Requires a valid setupToken issued by admin-verify-otp (proves OTP was verified).
  * Password rules: minimum 8 characters, must contain at least one letter and one digit.
  */
 
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const { resolveServiceAccountConfig } = require('./utils/firebase-admin-config');
+const { verifySignedToken } = require('./utils/token-utils');
+const { hashPassword } = require('./utils/password-utils');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'jb-creations-secret-key-change-in-production';
-const SALT_ROUNDS = 12;
 
 // Firebase Admin SDK — lazy-initialized, cached across warm invocations
 let adminApp = null;
@@ -18,11 +18,11 @@ let adminDb = null;
 async function initFirebaseAdmin() {
     if (adminDb) return adminDb;
 
-    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT;
-    if (!serviceAccountJson) throw new Error('FIREBASE_SERVICE_ACCOUNT environment variable is not set.');
-
     const admin = require('firebase-admin');
-    const serviceAccount = JSON.parse(serviceAccountJson);
+    const { serviceAccount } = resolveServiceAccountConfig();
+    if (!serviceAccount) {
+        throw new Error('Firebase Admin credentials are not configured. Set FIREBASE_SERVICE_ACCOUNT or add firebase-service-account.json in the project root.');
+    }
 
     if (!admin.apps.length) {
         adminApp = admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
@@ -76,7 +76,7 @@ exports.handler = async (event) => {
         // Verify the setupToken to confirm OTP was verified
         let setupData;
         try {
-            setupData = jwt.verify(setupToken, JWT_SECRET);
+            setupData = verifySignedToken(setupToken, JWT_SECRET);
         } catch (e) {
             return {
                 statusCode: 401,
@@ -96,8 +96,8 @@ exports.handler = async (event) => {
         const formattedPhone = setupData.phone;
         const phoneKey = '+91' + formattedPhone;
 
-        // Hash the password (bcrypt — one-way, cannot be reversed)
-        const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+        // Hash the password using a local-friendly one-way scheme.
+        const passwordHash = await hashPassword(password);
 
         const db = await initFirebaseAdmin();
 

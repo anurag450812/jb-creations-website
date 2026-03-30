@@ -433,6 +433,10 @@
             z-index: 1;
         }
 
+        .order-item-image img.white-frame-thumbnail {
+            filter: drop-shadow(0 1px 2px rgba(22, 105, 122, 0.22)) drop-shadow(0 7px 16px rgba(22, 105, 122, 0.18));
+        }
+
         .order-item-image i {
             font-size: 2.5rem;
             color: var(--accent-color);
@@ -511,6 +515,466 @@
             padding: 6px 12px;
             border-radius: 8px;
             font-weight: 600;
+        }
+
+        .promo-code-section {
+            display: none !important;
+        }
+
+        .desktop-summary-remake {
+            display: none;
+        }
+
+        .desktop-summary-remake__empty {
+            padding: 28px 24px;
+            border-radius: 24px;
+            text-align: center;
+            color: rgba(22, 105, 122, 0.8);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(243, 249, 250, 0.96) 100%);
+            border: 1px solid rgba(72, 159, 181, 0.14);
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        @media (min-width: 769px) {
+            #summarySection.checkout-section {
+                display: none !important;
+            }
+
+            .desktop-summary-remake {
+                display: grid;
+                grid-template-rows: auto auto auto;
+                gap: 18px;
+                align-self: start;
+                position: sticky;
+                top: 104px;
+                padding: 26px;
+                border-radius: 32px;
+                background:
+                    radial-gradient(circle at top left, rgba(255, 255, 255, 0.98) 0%, transparent 30%),
+                    radial-gradient(circle at bottom right, rgba(255, 166, 43, 0.12) 0%, transparent 24%),
+                    linear-gradient(145deg, #fffdf8 0%, #f5fbfc 55%, #edf7f5 100%);
+                border: 1px solid rgba(72, 159, 181, 0.12);
+                box-shadow: 0 24px 54px rgba(22, 105, 122, 0.14);
+                overflow: hidden;
+                isolation: isolate;
+            }
+
+            .desktop-summary-remake::before,
+            .desktop-summary-remake::after {
+                content: '';
+                position: absolute;
+                border-radius: 999px;
+                pointer-events: none;
+                z-index: -1;
+            }
+
+            .desktop-summary-remake::before {
+                width: 260px;
+                height: 260px;
+                top: -120px;
+                right: -90px;
+                background: rgba(72, 159, 181, 0.08);
+            }
+
+            .desktop-summary-remake::after {
+                width: 220px;
+                height: 220px;
+                bottom: -120px;
+                left: -100px;
+                background: rgba(255, 166, 43, 0.1);
+            }
+
+            .desktop-summary-remake__hero {
+                display: grid;
+                gap: 14px;
+                color: var(--text-color);
+            }
+
+            .desktop-summary-remake__eyebrow {
+                margin: 0;
+                font-size: 0.76rem;
+                font-weight: 700;
+                letter-spacing: 0.18em;
+                text-transform: uppercase;
+                color: rgba(22, 105, 122, 0.58);
+            }
+
+            .desktop-summary-remake__header {
+                display: flex;
+                justify-content: space-between;
+                gap: 18px;
+                align-items: flex-start;
+            }
+
+            .desktop-summary-remake__header h2 {
+                margin: 0;
+                font-size: 2rem;
+                line-height: 1.05;
+                letter-spacing: -0.04em;
+                color: #174954;
+            }
+
+            .desktop-summary-remake__header p {
+                margin: 10px 0 0;
+                font-size: 0.96rem;
+                line-height: 1.65;
+                color: rgba(22, 105, 122, 0.72);
+            }
+
+            .desktop-summary-remake__badge {
+                flex-shrink: 0;
+                padding: 10px 14px;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.72);
+                border: 1px solid rgba(72, 159, 181, 0.16);
+                backdrop-filter: blur(12px);
+                font-size: 0.84rem;
+                font-weight: 700;
+                color: #16697a;
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 8px 18px rgba(22, 105, 122, 0.08);
+            }
+
+            .desktop-summary-remake__pills {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .desktop-summary-remake__pills span {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 14px;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.8);
+                border: 1px solid rgba(72, 159, 181, 0.16);
+                font-size: 0.76rem;
+                font-weight: 600;
+                color: #2f6470;
+            }
+
+            .desktop-summary-remake__pills span::before {
+                content: '';
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: #ffd089;
+                box-shadow: 0 0 0 4px rgba(255, 208, 137, 0.16);
+            }
+
+            .desktop-summary-remake__items-shell {
+                padding: 16px;
+                border-radius: 28px;
+                background: rgba(255, 255, 255, 0.58);
+                border: 1px solid rgba(72, 159, 181, 0.12);
+                backdrop-filter: blur(14px);
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+            }
+
+            .desktop-summary-remake__items {
+                display: grid;
+                gap: 14px;
+            }
+
+            .desktop-summary-remake .order-item {
+                position: relative;
+                display: grid;
+                grid-template-columns: 104px minmax(0, 1fr) auto;
+                align-items: center;
+                column-gap: 18px;
+                row-gap: 12px;
+                padding: 18px;
+                margin: 0;
+                border: none;
+                border-radius: 26px;
+                background: linear-gradient(180deg, #ffffff 0%, #fbfefd 100%);
+                box-shadow: 0 12px 28px rgba(22, 105, 122, 0.1);
+                overflow: hidden;
+                transition: transform 0.25s ease, box-shadow 0.25s ease;
+            }
+
+            .desktop-summary-remake .order-item::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background: #ffa62b;
+                box-shadow: 0 0 0 10px rgba(255, 166, 43, 0.15);
+            }
+
+            .desktop-summary-remake .order-item:hover {
+                transform: translateY(-4px) rotate(-0.2deg);
+                box-shadow: 0 18px 38px rgba(22, 105, 122, 0.14);
+                background: linear-gradient(180deg, #ffffff 0%, #f8fcfb 100%);
+            }
+
+            .desktop-summary-remake .order-item-image {
+                grid-column: 1;
+                grid-row: 1 / span 2;
+                width: 104px;
+                height: 104px;
+                margin-right: 0;
+                padding: 10px;
+                border-radius: 22px;
+                background: linear-gradient(145deg, #ffffff 0%, #f2f9fa 100%);
+                border: none;
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 10px 20px rgba(22, 105, 122, 0.09);
+                transition: transform 0.25s ease, box-shadow 0.25s ease;
+            }
+
+            .desktop-summary-remake .order-item-image::before {
+                display: none;
+            }
+
+            .desktop-summary-remake .order-item:hover .order-item-image {
+                transform: scale(1.04);
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 14px 24px rgba(22, 105, 122, 0.14);
+            }
+
+            .desktop-summary-remake .order-item-details {
+                grid-column: 2;
+                grid-row: 1;
+                min-width: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .desktop-summary-remake .order-item-title {
+                margin: 0;
+                font-size: 1.12rem;
+                line-height: 1.35;
+                letter-spacing: -0.02em;
+                color: #183138;
+            }
+
+            .desktop-summary-remake .order-item-specs {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin: 0;
+            }
+
+            .desktop-summary-remake .order-item-spec {
+                min-width: 0;
+                padding: 8px 12px;
+                border-radius: 999px;
+                background: #edf6f7;
+                border: none;
+                color: #35606b;
+                font-size: 0.76rem;
+                font-weight: 700;
+                line-height: 1.25;
+                letter-spacing: 0.02em;
+                justify-content: center;
+            }
+
+            .desktop-summary-remake .order-item-spec i {
+                color: #489fb5;
+            }
+
+            .desktop-summary-remake .order-item-actions {
+                grid-column: 3;
+                grid-row: 1 / span 2;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: flex-end;
+                gap: 12px;
+                margin-left: 0;
+                padding-top: 0;
+                border-top: none;
+            }
+
+            .desktop-summary-remake .order-item-price {
+                display: inline-flex;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 6px;
+                padding: 14px 16px;
+                border-radius: 18px;
+                background: linear-gradient(180deg, #eef8fa 0%, #e2f2f5 100%);
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 10px 18px rgba(72, 159, 181, 0.12);
+                color: #16697a;
+                font-size: 1.12rem;
+            }
+
+            .desktop-summary-remake .order-item-price span:first-child {
+                color: rgba(22, 105, 122, 0.46) !important;
+            }
+
+            .desktop-summary-remake .order-item-price span:last-child {
+                color: #2f8f58 !important;
+                font-weight: 700;
+            }
+
+            .desktop-summary-remake .order-item-qty {
+                padding: 8px 14px;
+                border-radius: 999px;
+                background: #ffa62b;
+                border: none;
+                color: #5d3900;
+                font-size: 0.78rem;
+                font-weight: 800;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+            }
+
+            .desktop-summary-remake__totals {
+                padding: 22px;
+                border-radius: 28px;
+                background: linear-gradient(180deg, rgba(255, 250, 244, 0.98) 0%, rgba(255, 255, 255, 0.98) 100%);
+                box-shadow: 0 14px 28px rgba(22, 105, 122, 0.1);
+                color: #183138;
+                border: 1px solid rgba(255, 166, 43, 0.12);
+            }
+
+            .desktop-summary-remake__totals-grid {
+                display: grid;
+                gap: 10px;
+            }
+
+            .desktop-total-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 18px;
+                padding: 10px 0;
+                font-size: 0.95rem;
+                color: #496b74;
+                border-bottom: 1px solid rgba(22, 105, 122, 0.08);
+            }
+
+            .desktop-total-row strong {
+                font-size: 1rem;
+                font-weight: 800;
+                color: #183138;
+            }
+
+            .desktop-total-row--discount strong {
+                color: #198754;
+            }
+
+            .desktop-total-row--grand {
+                margin-top: 8px;
+                padding: 16px 18px;
+                border: none;
+                border-radius: 20px;
+                background: linear-gradient(135deg, #eef8fa 0%, #e6f3f1 100%);
+                color: rgba(22, 105, 122, 0.76);
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            }
+
+            .desktop-total-row--grand strong {
+                font-size: 1.28rem;
+                color: #16697a;
+            }
+
+            .desktop-place-order-btn {
+                width: 100%;
+                margin-top: 18px;
+                padding: 18px 22px;
+                border: none;
+                border-radius: 20px;
+                background: linear-gradient(135deg, #ffa62b 0%, #ffc76f 100%);
+                color: #17343b;
+                font-size: 0.95rem;
+                font-weight: 800;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                cursor: pointer;
+                transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+                box-shadow: 0 18px 34px rgba(255, 166, 43, 0.28);
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+            }
+
+            .desktop-place-order-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 22px 38px rgba(255, 166, 43, 0.34);
+                filter: saturate(1.03);
+            }
+
+            .desktop-place-order-btn.place-order-disabled,
+            .desktop-place-order-btn:disabled {
+                box-shadow: none;
+                filter: grayscale(0.08);
+            }
+
+            .desktop-place-order-btn .place-order-lock {
+                background: rgba(255, 255, 255, 0.42);
+                border-color: rgba(23, 52, 59, 0.08);
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+            }
+
+            .desktop-summary-remake__note {
+                margin-top: 16px;
+                display: grid;
+                gap: 8px;
+                font-size: 0.86rem;
+                color: #55727b;
+            }
+
+            .desktop-summary-remake__note p {
+                margin: 0;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .desktop-summary-remake__note i {
+                color: #16697a;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1180px) {
+            .desktop-summary-remake {
+                padding: 20px;
+                top: 94px;
+                border-radius: 26px;
+            }
+
+            .desktop-summary-remake__header {
+                flex-direction: column;
+            }
+
+            .desktop-summary-remake__header h2 {
+                font-size: 1.7rem;
+            }
+
+            .desktop-summary-remake .order-item {
+                grid-template-columns: 92px minmax(0, 1fr);
+                padding: 16px;
+            }
+
+            .desktop-summary-remake .order-item-image {
+                grid-row: 1;
+                width: 92px;
+                height: 92px;
+            }
+
+            .desktop-summary-remake .order-item-specs {
+                gap: 6px;
+            }
+
+            .desktop-summary-remake .order-item-actions {
+                grid-column: 1 / -1;
+                grid-row: 2;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .desktop-summary-remake .order-item-price {
+                max-width: 100%;
+                font-size: 1rem;
+            }
         }
 
         .total-section {
@@ -1833,6 +2297,10 @@
             z-index: 1;
         }
 
+        #mobileOrderList .cart-item-image img.white-frame-thumbnail {
+            filter: drop-shadow(0 1px 2px rgba(22, 105, 122, 0.22)) drop-shadow(0 7px 16px rgba(22, 105, 122, 0.18));
+        }
+
         #mobileOrderList .cart-item-image i {
             font-size: 2.5rem;
             color: var(--accent-color);
@@ -2244,6 +2712,63 @@
                 </div>
             </div>
         </div>
+
+    <aside class="desktop-summary-remake" id="desktopSummaryRemake" aria-labelledby="desktopSummaryTitle">
+            <div class="desktop-summary-remake__hero">
+                <p class="desktop-summary-remake__eyebrow">Checkout Atelier</p>
+                <div class="desktop-summary-remake__header">
+                    <div>
+                        <h2 id="desktopSummaryTitle">Frames staged for your final review</h2>
+                        <p>Every piece in this order is printed, hand-finished and packed with protective layering before it leaves the studio.</p>
+                    </div>
+                    <div class="desktop-summary-remake__badge" id="desktopOrderCount">0 items</div>
+                </div>
+                <div class="desktop-summary-remake__pills">
+                    <span>Hand-finished assembly</span>
+                    <span>Protective wrap included</span>
+                    <span>Tracked dispatch updates</span>
+                </div>
+            </div>
+
+            <div class="desktop-summary-remake__items-shell">
+                <div class="desktop-summary-remake__items" id="desktopOrderSummary">
+                    <div class="desktop-summary-remake__empty">Your selected frames will appear here.</div>
+                </div>
+            </div>
+
+            <div class="desktop-summary-remake__totals">
+                <div class="desktop-summary-remake__totals-grid">
+                    <div class="desktop-total-row">
+                        <span>Subtotal</span>
+                        <strong id="desktopSubtotal">₹0</strong>
+                    </div>
+                    <div class="desktop-total-row">
+                        <span>Delivery</span>
+                        <strong id="desktopDeliveryCharge">₹50</strong>
+                    </div>
+                    <div class="desktop-total-row desktop-total-row--discount" id="desktopDiscountRow" style="display: none;">
+                        <span>Discount</span>
+                        <strong id="desktopDiscountAmount">-₹0</strong>
+                    </div>
+                    <div class="desktop-total-row desktop-total-row--grand">
+                        <span>Total payable</span>
+                        <strong id="desktopFinalTotal">₹0</strong>
+                    </div>
+                </div>
+
+                <button type="button" class="desktop-place-order-btn" id="desktopPlaceOrderBtn" onclick="placeOrder()">
+                    <span class="place-order-lock" aria-hidden="true">
+                        <i class="fas fa-lock"></i>
+                    </span>
+                    <span class="place-order-label">Complete secure order</span>
+                </button>
+
+                <div class="desktop-summary-remake__note">
+                    <p><i class="fas fa-box-open"></i>Orders are reviewed within 24 hours before production starts.</p>
+                    <p><i class="fas fa-headset"></i>Need help before paying? Reach support on the contact options below.</p>
+                </div>
+            </div>
+    </aside>
 
     <!-- Order Summary Section -->
     <div class="checkout-section" id="summarySection">
@@ -2759,6 +3284,124 @@
     <!-- Cache-busted checkout script to ensure latest version loads -->
     <script src="utils/notifications.js"></script>
     <script src="checkout.js?v=9.5-razorpay-server"></script>
+    <script>
+        (function() {
+            function mirrorDesktopButtonState(sourceButton, desktopButton) {
+                if (!sourceButton || !desktopButton) {
+                    return;
+                }
+
+                const looksDisabled = sourceButton.disabled || sourceButton.classList.contains('place-order-disabled');
+
+                desktopButton.disabled = sourceButton.disabled;
+                desktopButton.classList.toggle('place-order-disabled', sourceButton.classList.contains('place-order-disabled'));
+                desktopButton.style.opacity = sourceButton.style.opacity || '';
+                desktopButton.style.background = sourceButton.style.background || '';
+                desktopButton.style.cursor = sourceButton.style.cursor || '';
+                desktopButton.title = sourceButton.title || '';
+                desktopButton.setAttribute('aria-disabled', looksDisabled ? 'true' : 'false');
+            }
+
+            function syncDesktopCheckoutSummary() {
+                const sourceItems = document.getElementById('orderSummary');
+                const sourceCount = document.getElementById('orderCount');
+                const sourceSubtotal = document.getElementById('subtotal');
+                const sourceDelivery = document.getElementById('deliveryCharge');
+                const sourceFinal = document.getElementById('finalTotal');
+                const sourceDiscountRow = document.getElementById('discountRow');
+                const sourceDiscountAmount = document.getElementById('discountAmount');
+                const sourceButton = document.getElementById('placeOrderBtn');
+
+                const desktopItems = document.getElementById('desktopOrderSummary');
+                const desktopCount = document.getElementById('desktopOrderCount');
+                const desktopSubtotal = document.getElementById('desktopSubtotal');
+                const desktopDelivery = document.getElementById('desktopDeliveryCharge');
+                const desktopFinal = document.getElementById('desktopFinalTotal');
+                const desktopDiscountRow = document.getElementById('desktopDiscountRow');
+                const desktopDiscountAmount = document.getElementById('desktopDiscountAmount');
+                const desktopButton = document.getElementById('desktopPlaceOrderBtn');
+
+                if (!sourceItems || !desktopItems) {
+                    return;
+                }
+
+                const sourceMarkup = sourceItems.innerHTML.trim();
+                desktopItems.innerHTML = sourceMarkup || '<div class="desktop-summary-remake__empty">Your selected frames will appear here.</div>';
+
+                if (sourceCount && desktopCount) {
+                    desktopCount.textContent = sourceCount.textContent;
+                }
+
+                if (sourceSubtotal && desktopSubtotal) {
+                    desktopSubtotal.textContent = sourceSubtotal.textContent;
+                }
+
+                if (sourceDelivery && desktopDelivery) {
+                    desktopDelivery.textContent = sourceDelivery.textContent;
+                }
+
+                if (sourceFinal && desktopFinal) {
+                    desktopFinal.textContent = sourceFinal.textContent;
+                }
+
+                if (sourceDiscountRow && desktopDiscountRow) {
+                    const discountVisible = sourceDiscountRow.style.display !== 'none';
+                    desktopDiscountRow.style.display = discountVisible ? 'flex' : 'none';
+                }
+
+                if (sourceDiscountAmount && desktopDiscountAmount) {
+                    desktopDiscountAmount.textContent = sourceDiscountAmount.textContent;
+                }
+
+                mirrorDesktopButtonState(sourceButton, desktopButton);
+            }
+
+            function initDesktopCheckoutSummary() {
+                const desktopRoot = document.getElementById('desktopSummaryRemake');
+                if (!desktopRoot || desktopRoot.dataset.syncReady === 'true') {
+                    return;
+                }
+
+                desktopRoot.dataset.syncReady = 'true';
+
+                const observer = new MutationObserver(syncDesktopCheckoutSummary);
+                const config = {
+                    childList: true,
+                    subtree: true,
+                    characterData: true,
+                    attributes: true,
+                    attributeFilter: ['style', 'class', 'disabled', 'title']
+                };
+
+                [
+                    'orderSummary',
+                    'orderCount',
+                    'subtotal',
+                    'deliveryCharge',
+                    'finalTotal',
+                    'discountRow',
+                    'discountAmount',
+                    'placeOrderBtn'
+                ].forEach((id) => {
+                    const node = document.getElementById(id);
+                    if (node) {
+                        observer.observe(node, config);
+                    }
+                });
+
+                syncDesktopCheckoutSummary();
+                window.addEventListener('load', syncDesktopCheckoutSummary);
+                setTimeout(syncDesktopCheckoutSummary, 250);
+                setTimeout(syncDesktopCheckoutSummary, 1000);
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initDesktopCheckoutSummary);
+            } else {
+                initDesktopCheckoutSummary();
+            }
+        })();
+    </script>
     
     <!-- Support Chat Widget -->
     <script src="support-chat.js?v=1.1"></script>

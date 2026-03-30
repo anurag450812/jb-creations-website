@@ -691,7 +691,7 @@ const GlobalWebsiteHeader = {
                             </div>
                             
                             <!-- Common options for all users -->
-                            <a href="#" class="dropdown-item" onclick="contactUs()">
+                            <a href="#" class="dropdown-item" data-close-dropdown="true" onclick="return openFullscreenSupportChat(event)">
                                 <i class="fas fa-envelope"></i>
                                 Contact Us
                             </a>
@@ -1079,6 +1079,36 @@ if (typeof contactUs === 'undefined') {
                 window.location.href = 'mailto:jbcreationssss@gmail.com?subject=Support%20Request';
             }
         }
+    };
+}
+
+if (typeof openFullscreenSupportChat === 'undefined') {
+    window.openFullscreenSupportChat = function(event) {
+        if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault();
+        }
+
+        if (window.GlobalWebsiteHeader && typeof window.GlobalWebsiteHeader.setProfileDropdownState === 'function') {
+            window.GlobalWebsiteHeader.setProfileDropdownState(false);
+        }
+
+        if (window.supportChat && window.supportChat.openChat) {
+            window.supportChat.openChat({ fullscreen: true });
+            return false;
+        }
+
+        if (typeof SupportChat !== 'undefined') {
+            window.supportChat = new SupportChat({ forceInit: true, hideFloatingButton: true });
+            setTimeout(() => {
+                if (window.supportChat && window.supportChat.openChat) {
+                    window.supportChat.openChat({ fullscreen: true });
+                }
+            }, 300);
+            return false;
+        }
+
+        window.location.href = 'mailto:jbcreationssss@gmail.com?subject=Support%20Request';
+        return false;
     };
 }
 

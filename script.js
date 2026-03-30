@@ -88,7 +88,7 @@ const state = {
     whiteBorder: false, // Inner border option: false = No, true = Yes (automatic contrasting color)
     borderThickness: 15, // Border thickness in pixels (5-40)
     borderColor: 'white', // Automatic contrasting border color derived from frameColor
-    price: 349,
+    price: 499,
     adjustments: {
         brightness: 100,
         contrast: 100,
@@ -104,6 +104,128 @@ const state = {
         frameSize: null
     }
 };
+
+const DEFAULT_STOREFRONT_SIZE_PRICING = {
+    '13x19-portrait': { size: '13x19', orientation: 'portrait', label: '13x19 Portrait', price: 499, mrp: 999 },
+    '13x19-landscape': { size: '13x19', orientation: 'landscape', label: '13x19 Landscape', price: 499, mrp: 999 },
+    '13x10-portrait': { size: '13x10', orientation: 'portrait', label: '13x10 Portrait', price: 349, mrp: 799 },
+    '13x10-landscape': { size: '13x10', orientation: 'landscape', label: '13x10 Landscape', price: 349, mrp: 799 }
+};
+
+let storefrontSizePricing = JSON.parse(JSON.stringify(DEFAULT_STOREFRONT_SIZE_PRICING));
+
+function cloneDefaultStorefrontPricing() {
+    return JSON.parse(JSON.stringify(DEFAULT_STOREFRONT_SIZE_PRICING));
+}
+
+function getStorefrontVariantKey(size, orientation = 'portrait') {
+    return `${String(size || '13x19').toLowerCase()}-${String(orientation || 'portrait').toLowerCase()}`;
+}
+
+function normalizeStorefrontPricing(pricing = {}) {
+    const normalized = cloneDefaultStorefrontPricing();
+
+    Object.keys(normalized).forEach(key => {
+        const base = normalized[key];
+        const incoming = pricing[key] || {};
+        const price = Number(incoming.price);
+        const mrp = Number(incoming.mrp);
+
+        normalized[key] = {
+            ...base,
+            ...incoming,
+            price: Number.isFinite(price) && price > 0 ? price : base.price,
+            mrp: Number.isFinite(mrp) && mrp >= (Number.isFinite(price) && price > 0 ? price : base.price) ? mrp : base.mrp
+        };
+    });
+
+    return normalized;
+}
+
+function getFramePricing(size, orientation) {
+    const key = getStorefrontVariantKey(size, orientation);
+    const fallback = DEFAULT_STOREFRONT_SIZE_PRICING[key] || DEFAULT_STOREFRONT_SIZE_PRICING['13x19-portrait'];
+    const pricing = storefrontSizePricing[key] || fallback;
+
+    return {
+        ...fallback,
+        ...pricing,
+        price: Number(pricing.price) || fallback.price,
+        mrp: Number(pricing.mrp) >= (Number(pricing.price) || fallback.price) ? Number(pricing.mrp) : fallback.mrp
+    };
+}
+
+function buildPrimaryPriceMarkup(price, mrp) {
+    const normalizedPrice = Number(price) || 0;
+    const normalizedMrp = Number(mrp) || 0;
+
+    if (normalizedMrp > normalizedPrice && normalizedPrice > 0) {
+        const discount = Math.round(((normalizedMrp - normalizedPrice) / normalizedMrp) * 100);
+        return `
+            <span style="text-decoration: line-through; color: #999; font-size: 0.8em; margin-right: 5px;">₹${normalizedMrp}</span>
+            ₹${normalizedPrice}
+            <span style="color: #28a745; font-size: 0.8em; margin-left: 5px;">(${discount}% OFF)</span>
+        `;
+    }
+
+    return `₹${normalizedPrice}`;
+}
+
+function updatePrimaryPriceDisplay(price, mrp) {
+    const totalPriceElement = document.getElementById('totalPrice');
+    if (totalPriceElement) {
+        totalPriceElement.innerHTML = buildPrimaryPriceMarkup(price, mrp);
+    }
+}
+
+function syncSizeButtonPricesFromStorefront() {
+    document.querySelectorAll('.size-options button, .desktop-size-btn, .mobile-size-btn').forEach(button => {
+        const pricing = getFramePricing(button.dataset.size, button.dataset.orientation);
+        button.dataset.price = String(pricing.price);
+
+        const priceLabel = button.querySelector('.price');
+        if (priceLabel) {
+            priceLabel.textContent = `₹${pricing.price}`;
+        }
+    });
+}
+
+function applySelectedFramePricing(size = state.frameSize?.size, orientation = state.frameSize?.orientation) {
+    const pricing = getFramePricing(size, orientation);
+
+    if (!state.frameSize) {
+        state.frameSize = { size: size || '13x19', orientation: orientation || 'portrait' };
+    }
+
+    state.frameSize.price = pricing.price;
+    state.frameSize.mrp = pricing.mrp;
+    state.price = pricing.price;
+
+    updatePrimaryPriceDisplay(pricing.price, pricing.mrp);
+
+    if (typeof updateMobileTotalPrice === 'function') {
+        updateMobileTotalPrice();
+    }
+
+    syncDesktopPurchaseBarFromPrimary();
+    return pricing;
+}
+
+async function loadStorefrontPricingSettings() {
+    const api = await waitForReviewApi();
+    if (!api || typeof api.getStorefrontSettings !== 'function') {
+        return null;
+    }
+
+    const result = await api.getStorefrontSettings();
+    if (result.success && result.settings && result.settings.sizePricing) {
+        storefrontSizePricing = normalizeStorefrontPricing(result.settings.sizePricing);
+        syncSizeButtonPricesFromStorefront();
+        applySelectedFramePricing();
+    }
+
+    return result;
+}
 
 // DOM Elements - will be initialized in DOMContentLoaded
 let elements = {};
@@ -328,6 +450,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize default selections
     initializeDefaults();
+
+    // Load admin-managed pricing and refresh all size labels after Firebase is ready
+    loadStorefrontPricingSettings();
     
     // Initialize cart count
     updateCartCount();
@@ -906,9 +1031,7 @@ function initializeDefaults() {
     }
     
     // Update total price display
-    if (elements.totalPrice) {
-        elements.totalPrice.textContent = `₹${state.price}`;
-    }
+    applySelectedFramePricing(state.frameSize.size, state.frameSize.orientation);
 
     updateMobileSpecs();
     updateRatingsDisplay();
@@ -987,15 +1110,9 @@ function resetCustomizePurchaseButtons() {
 }
 
 async function createCartItemFromCurrentState() {
-    // Calculate MRP based on frame size
-    let mrp = 0;
-    if (state.frameSize && state.frameSize.size === '13x19') {
-        mrp = 999;
-    } else if (state.frameSize && (state.frameSize.size === '13x10' || state.frameSize.size === '10x13')) {
-        mrp = 799;
-    } else {
-        mrp = (state.price || 349) * 2;
-    }
+    const pricing = getFramePricing(state.frameSize?.size, state.frameSize?.orientation);
+    const price = Number(state.price) || pricing.price;
+    const mrp = Number(state.frameSize?.mrp) || pricing.mrp || (price * 2);
 
     const cartItem = {
         id: Date.now(),
@@ -1008,7 +1125,7 @@ async function createCartItemFromCurrentState() {
         adjustments: { ...state.adjustments },
         zoom: state.zoom || 1,
         position: { ...state.position },
-        price: state.price || 349,
+        price,
         mrp: mrp,
         orderDate: new Date().toISOString(),
         timestamp: new Date().toISOString()
@@ -1336,35 +1453,7 @@ function initializeEventListeners() {
             // Update frame aspect ratio and styling
             updateFrameSize();
             
-            // Update price
-            const price = parseInt(button.dataset.price) || 349;
-            state.price = price;
-            
-            // Update price display with MRP and Discount
-            const totalPriceElement = document.getElementById('totalPrice');
-            if (totalPriceElement) {
-                let mrp = 0;
-                if (state.frameSize.size === '13x19') {
-                    mrp = 999;
-                } else if (state.frameSize.size === '13x10' || state.frameSize.size === '10x13') {
-                    mrp = 799;
-                }
-                
-                if (mrp > 0) {
-                    const discount = Math.round(((mrp - price) / mrp) * 100);
-                    totalPriceElement.innerHTML = `
-                        <span style="text-decoration: line-through; color: #999; font-size: 0.8em; margin-right: 5px;">₹${mrp}</span>
-                        ₹${price}
-                        <span style="color: #28a745; font-size: 0.8em; margin-left: 5px;">(${discount}% OFF)</span>
-                    `;
-                } else {
-                    totalPriceElement.textContent = '₹' + price;
-                }
-            }
-            // Also update mobile total price if present
-            if (typeof updateMobileTotalPrice === 'function') {
-                updateMobileTotalPrice();
-            }
+            applySelectedFramePricing(button.dataset.size, button.dataset.orientation);
 
             updateMobileSpecs();
             syncDesktopPurchaseBarFromPrimary();
@@ -1585,12 +1674,80 @@ function initializeEventListeners() {
 
     // Desktop card navigation functionality
     const desktopCards = Array.from(document.querySelectorAll('.desktop-card')).filter(card => card.dataset.type !== 'texture');
+    const cardsContainer = document.getElementById('cardsContainer');
     const prevCardBtn = document.getElementById('prevCardBtn');
     const nextCardBtn = document.getElementById('nextCardBtn');
     const cardIndicators = document.querySelectorAll('.card-dot');
     
-    if (desktopCards.length && prevCardBtn && nextCardBtn && cardIndicators.length) {
+    if (desktopCards.length && cardsContainer && prevCardBtn && nextCardBtn && cardIndicators.length) {
         let currentCard = 0;
+        let desktopCardHeightFrame = null;
+
+        function syncDesktopCardHeight() {
+            if (window.innerWidth <= 768) {
+                cardsContainer.style.minHeight = '';
+                return;
+            }
+
+            const thicknessContainer = document.getElementById('desktopBorderThicknessContainer');
+            const thicknessWasShown = Boolean(thicknessContainer && thicknessContainer.classList.contains('show'));
+
+            if (thicknessContainer) {
+                thicknessContainer.classList.add('show');
+            }
+
+            let tallestCardHeight = 0;
+
+            desktopCards.forEach(card => {
+                const previousStyles = {
+                    display: card.style.display,
+                    position: card.style.position,
+                    visibility: card.style.visibility,
+                    pointerEvents: card.style.pointerEvents,
+                    top: card.style.top,
+                    left: card.style.left,
+                    right: card.style.right,
+                    width: card.style.width
+                };
+
+                card.style.display = 'block';
+                card.style.position = 'absolute';
+                card.style.visibility = 'hidden';
+                card.style.pointerEvents = 'none';
+                card.style.top = '0';
+                card.style.left = '0';
+                card.style.right = '0';
+                card.style.width = 'auto';
+
+                tallestCardHeight = Math.max(tallestCardHeight, card.offsetHeight);
+
+                card.style.display = previousStyles.display;
+                card.style.position = previousStyles.position;
+                card.style.visibility = previousStyles.visibility;
+                card.style.pointerEvents = previousStyles.pointerEvents;
+                card.style.top = previousStyles.top;
+                card.style.left = previousStyles.left;
+                card.style.right = previousStyles.right;
+                card.style.width = previousStyles.width;
+            });
+
+            if (thicknessContainer && !thicknessWasShown) {
+                thicknessContainer.classList.remove('show');
+            }
+
+            cardsContainer.style.minHeight = tallestCardHeight ? `${tallestCardHeight}px` : '';
+        }
+
+        function scheduleDesktopCardHeightSync() {
+            if (desktopCardHeightFrame !== null) {
+                cancelAnimationFrame(desktopCardHeightFrame);
+            }
+
+            desktopCardHeightFrame = requestAnimationFrame(() => {
+                desktopCardHeightFrame = null;
+                syncDesktopCardHeight();
+            });
+        }
         
         function showCard(index) {
             // Hide all cards
@@ -1599,6 +1756,8 @@ function initializeEventListeners() {
             if (desktopCards[index]) {
                 desktopCards[index].style.display = 'block';
             }
+
+            scheduleDesktopCardHeightSync();
             
             // Update indicators
             cardIndicators.forEach((indicator, i) => {
@@ -1635,6 +1794,8 @@ function initializeEventListeners() {
         
         // Initialize - show first card
         showCard(0);
+        scheduleDesktopCardHeightSync();
+        window.addEventListener('resize', scheduleDesktopCardHeightSync);
     }
 
     // Initialize default frame size selection
@@ -4333,30 +4494,7 @@ document.addEventListener('DOMContentLoaded', function() {
             orientation: 'portrait'
         };
         
-        // Set the default price
-        state.price = parseInt(defaultSizeButton.dataset.price) || 349;
-        
-        // Update price display with MRP and Discount
-        const totalPriceElement = document.getElementById('totalPrice');
-        if (totalPriceElement) {
-            let mrp = 0;
-            if (state.frameSize.size === '13x19') {
-                mrp = 999;
-            } else if (state.frameSize.size === '13x10' || state.frameSize.size === '10x13') {
-                mrp = 799;
-            }
-            
-            if (mrp > 0) {
-                const discount = Math.round(((mrp - state.price) / mrp) * 100);
-                totalPriceElement.innerHTML = `
-                    <span style="text-decoration: line-through; color: #999; font-size: 0.8em; margin-right: 5px;">₹${mrp}</span>
-                    ₹${state.price}
-                    <span style="color: #28a745; font-size: 0.8em; margin-left: 5px;">(${discount}% OFF)</span>
-                `;
-            } else {
-                totalPriceElement.textContent = '₹' + state.price;
-            }
-        }
+        applySelectedFramePricing(state.frameSize.size, state.frameSize.orientation);
         
         // Initialize room slider with default frame size
         initializeRoomSlider('13x19', 'portrait');
@@ -4827,10 +4965,9 @@ function updateFrameTexture() {
             state.frameSize = {
                 size: button.dataset.size,
                 orientation: button.dataset.orientation,
-                price: parseInt(button.dataset.price)
+                price: getFramePricing(button.dataset.size, button.dataset.orientation).price
             };
-            state.price = state.frameSize.price;
-            elements.totalPrice.textContent = `₹${state.price}`;
+            applySelectedFramePricing(button.dataset.size, button.dataset.orientation);
 
             // Update frame aspect ratio
             updateFrameSize();
@@ -5351,9 +5488,7 @@ function initializeMobileCustomization() {
             // Initialize room preview slider for the selected frame size
             initializeRoomSlider(button.dataset.size, button.dataset.orientation);
             
-            // Update price
-            state.price = parseInt(button.dataset.price);
-            updateMobileTotalPrice();
+            applySelectedFramePricing(button.dataset.size, button.dataset.orientation);
             
             // Update frame size
             updateFrameSize();

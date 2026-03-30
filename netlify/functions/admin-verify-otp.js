@@ -5,7 +5,8 @@
  * On successful OTP verification, any existing failed-password lockout is cleared.
  */
 
-const jwt = require('jsonwebtoken');
+const { resolveServiceAccountConfig } = require('./utils/firebase-admin-config');
+const { createSignedToken, verifySignedToken } = require('./utils/token-utils');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'jb-creations-secret-key-change-in-production';
 
@@ -17,13 +18,11 @@ let adminDb = null;
 async function initFirebaseAdmin() {
     if (adminApp) return { auth: adminAuth, db: adminDb };
 
-    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT;
-    if (!serviceAccountJson) {
-        throw new Error('FIREBASE_SERVICE_ACCOUNT environment variable is not set.');
-    }
-
     const admin = require('firebase-admin');
-    const serviceAccount = JSON.parse(serviceAccountJson);
+    const { serviceAccount } = resolveServiceAccountConfig();
+    if (!serviceAccount) {
+        throw new Error('Firebase Admin credentials are not configured. Set FIREBASE_SERVICE_ACCOUNT or add firebase-service-account.json in the project root.');
+    }
 
     if (!admin.apps.length) {
         adminApp = admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
@@ -73,10 +72,10 @@ exports.handler = async (event) => {
             return { statusCode: 400, headers, body: JSON.stringify({ success: false, message: e.message }) };
         }
 
-        // Verify the JWT that was issued by admin-send-otp
+        // Verify the token that was issued by admin-send-otp
         let otpData;
         try {
-            otpData = jwt.verify(otpToken, JWT_SECRET);
+            otpData = verifySignedToken(otpToken, JWT_SECRET);
         } catch (e) {
             return {
                 statusCode: 400,
@@ -120,7 +119,7 @@ exports.handler = async (event) => {
         const customToken = await auth.createCustomToken(uid, { admin: true });
 
         // Short-lived setup token anchored to this verified phone (for password setup)
-        const setupToken = jwt.sign(
+        const setupToken = createSignedToken(
             { phone: formattedPhone, purpose: 'admin_setup' },
             JWT_SECRET,
             { expiresIn: '15m' }

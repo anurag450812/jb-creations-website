@@ -1463,6 +1463,9 @@ function updateOrderSummary() {
     orderData.items.forEach((item, index) => {
         // Prioritize previewImage (framed version) for checkout display, then fallback to thumbnail
         const imageSource = item.previewImage || item.thumbnailImage || item.displayImage || item.printImage;
+        const whiteFrameClass = typeof item.frameColor === 'string' && item.frameColor.toLowerCase() === 'white'
+            ? ' white-frame-thumbnail'
+            : '';
         
         console.log(`Item ${index + 1} image sources:`, {
             previewImage: item.previewImage ? 'Available (FRAMED)' : 'Not available',
@@ -1479,7 +1482,7 @@ function updateOrderSummary() {
         const itemHTML = `
             <div class="order-item-image">
                 ${imageSource ? 
-                    `<img src="${imageSource}" alt="Framed Photo" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-image\\'></i>'">` : 
+                    `<img src="${imageSource}" alt="Framed Photo" class="${whiteFrameClass.trim()}" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-image\\'></i>'">` : 
                     '<i class="fas fa-image"></i>'
                 }
             </div>
@@ -1521,7 +1524,7 @@ function updateOrderSummary() {
         const mobileItemHTML = `
             <div class="cart-item-image">
                 ${imageSource ? 
-                    `<img src="${imageSource}" alt="Frame Preview" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-image\\'></i>'">` : 
+                    `<img src="${imageSource}" alt="Frame Preview" class="${whiteFrameClass.trim()}" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-image\\'></i>'">` : 
                     '<i class="fas fa-image"></i>'
                 }
             </div>

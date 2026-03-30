@@ -14,7 +14,7 @@
             margin: 0 auto;
             padding: 20px;
             padding-top: 100px; /* Space for fixed header */
-            background-color: var(--background-color);
+            background-color: transparent;
         }
         
         /* Fix mobile header positioning */
@@ -36,31 +36,36 @@
             
             /* Colorful orders-section styling for mobile */
             .orders-section {
-                background: linear-gradient(135deg, #f0f9fb 0%, #e8f4f6 100%) !important;
-                border: 1px solid rgba(22, 105, 122, 0.15) !important;
-                box-shadow: 0 4px 15px rgba(22, 105, 122, 0.08) !important;
-                border-radius: 16px !important;
+                background: rgba(255, 255, 255, 0.42) !important;
+                border: 1px solid rgba(255, 255, 255, 0.38) !important;
+                box-shadow: 0 14px 34px rgba(22, 105, 122, 0.1) !important;
+                border-radius: 24px !important;
+                backdrop-filter: blur(16px) !important;
+                -webkit-backdrop-filter: blur(16px) !important;
             }
             
             /* Style each order card like colorful cards */
             .order-card {
-                background: rgba(255, 255, 255, 0.85) !important;
-                border-radius: 12px !important;
-                border: 1px solid rgba(22, 105, 122, 0.1) !important;
+                background: linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, rgba(252, 254, 254, 0.68) 100%) !important;
+                border-radius: 20px !important;
+                border: 1px solid rgba(255, 255, 255, 0.42) !important;
                 margin: 12px !important;
+                backdrop-filter: blur(16px) !important;
+                -webkit-backdrop-filter: blur(16px) !important;
                 transition: transform 0.2s ease, box-shadow 0.2s ease !important;
             }
             
             .order-card:hover {
-                transform: translateX(4px) !important;
-                box-shadow: 0 4px 15px rgba(22, 105, 122, 0.15) !important;
+                transform: translateX(4px) translateY(-1px) !important;
+                box-shadow: 0 12px 28px rgba(22, 105, 122, 0.14) !important;
             }
             
             /* Colorful page-header for mobile */
             .page-header {
-                background: linear-gradient(135deg, #fff9f0 0%, #fff5e6 100%) !important;
-                border: 1px solid rgba(255, 166, 43, 0.2) !important;
-                box-shadow: 0 4px 15px rgba(255, 166, 43, 0.1) !important;
+                background: linear-gradient(180deg, rgba(255, 255, 255, 0.52) 0%, rgba(255, 250, 244, 0.44) 100%) !important;
+                border: 1px solid rgba(255, 255, 255, 0.42) !important;
+                box-shadow: 0 16px 32px rgba(22, 105, 122, 0.1) !important;
+                border-radius: 24px !important;
             }
         }
         
@@ -73,16 +78,16 @@
         }
 
         .page-header {
-            background: rgba(72, 159, 181, 0.3);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(248, 252, 252, 0.38) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             color: var(--primary-color);
-            padding: 24px;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(22, 105, 122, 0.15);
+            padding: 24px 26px;
+            border-radius: 28px;
+            box-shadow: 0 18px 38px rgba(22, 105, 122, 0.1);
             margin-bottom: 20px;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.42);
         }
 
         .page-header h1 {
@@ -98,52 +103,71 @@
         }
 
         .user-info {
-            background: #EDE7E3;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(248, 252, 252, 0.5) 100%);
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 22px;
             margin-bottom: 30px;
-            border: 1px solid rgba(22, 105, 122, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.42);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             display: none;
         }
 
         .orders-section {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(22, 105, 122, 0.1);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.48) 0%, rgba(246, 251, 252, 0.42) 100%);
+            border-radius: 28px;
+            box-shadow: 0 22px 48px rgba(22, 105, 122, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.44);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
             overflow: hidden;
         }
 
         .section-header {
-            background: #16697A;
-            color: white;
-            padding: 20px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.2) 100%);
+            color: #16697A;
+            padding: 22px 24px 18px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid rgba(72, 159, 181, 0.16);
         }
 
         .section-header h2 {
             margin: 0;
             font-size: 1.25rem;
+            color: #16697A;
+        }
+
+        #ordersContainer {
+            padding: 16px 0 10px;
         }
 
         /* Order Card Styles - Flipkart Style */
         .order-card {
-            border-bottom: 1px solid #e9ecef;
-            padding: 16px 20px;
-            transition: background 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.42);
+            padding: 18px 20px;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
             cursor: pointer;
             display: flex;
             gap: 16px;
             align-items: flex-start;
+            margin: 0 16px 16px;
+            border-radius: 24px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.76) 0%, rgba(251, 253, 253, 0.62) 100%);
+            box-shadow: 0 14px 30px rgba(22, 105, 122, 0.08);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
         }
 
         .order-card:hover {
-            background: #f8f9fa;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.86) 0%, rgba(252, 254, 254, 0.76) 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 20px 38px rgba(22, 105, 122, 0.12);
         }
 
         .order-card:last-child {
-            border-bottom: none;
+            margin-bottom: 16px;
         }
         
         /* Order thumbnail - left side */
@@ -156,13 +180,23 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 0;
+            padding: 0;
+            border: none;
+            box-shadow: none;
         }
         
         .order-card .order-thumbnail img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            border-radius: 0;
+            box-shadow: 0 6px 14px rgba(22, 105, 122, 0.14);
+        }
+
+        .order-card .order-thumbnail img.white-frame-thumbnail {
+            filter: drop-shadow(0 1px 2px rgba(22, 105, 122, 0.22)) drop-shadow(0 7px 16px rgba(22, 105, 122, 0.18));
+            box-shadow: 0 3px 10px rgba(22, 105, 122, 0.18);
         }
         
         .order-card .order-thumbnail .item-badge {
@@ -173,7 +207,7 @@
             color: white;
             font-size: 10px;
             padding: 2px 6px;
-            border-radius: 10px;
+            border-radius: 999px;
         }
         
         /* Order details - right side */
@@ -187,8 +221,8 @@
         
         .order-card .order-title {
             font-size: 14px;
-            font-weight: 600;
-            color: #333;
+            font-weight: 700;
+            color: #183138;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -199,7 +233,7 @@
             flex-wrap: wrap;
             gap: 8px;
             font-size: 12px;
-            color: #666;
+            color: rgba(22, 105, 122, 0.72);
         }
         
         .order-card .order-price-row {
@@ -212,12 +246,16 @@
             font-size: 14px;
             font-weight: 700;
             color: #16697A;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(72, 159, 181, 0.08);
+            border: 1px solid rgba(72, 159, 181, 0.1);
         }
         
         .order-card .mobile-date {
             display: inline;
             font-size: 11px;
-            color: #999;
+            color: rgba(22, 105, 122, 0.56);
         }
         
         .order-card .order-status-row {
@@ -242,13 +280,13 @@
         
         .order-card .status-text {
             font-size: 13px;
-            font-weight: 500;
-            color: #333;
+            font-weight: 600;
+            color: #183138;
         }
         
         .order-card .status-subtext {
             font-size: 11px;
-            color: #999;
+            color: rgba(22, 105, 122, 0.58);
         }
         
         /* Desktop-only and mobile-only visibility */
@@ -319,10 +357,12 @@
 
         .order-status {
             padding: 4px 12px;
-            border-radius: 20px;
+            border-radius: 999px;
             font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            backdrop-filter: blur(10px);
         }
 
         .status-pending { background: rgba(255, 166, 43, 0.15); color: #e67e00; }
@@ -361,6 +401,11 @@
             object-fit: contain;
             display: block;
             background: #f8f9fa;
+        }
+
+        .order-item-thumbnail .thumbnail-image.white-frame-thumbnail,
+        .item-image .item-thumbnail.white-frame-thumbnail {
+            filter: drop-shadow(0 1px 2px rgba(22, 105, 122, 0.22)) drop-shadow(0 7px 16px rgba(22, 105, 122, 0.18));
         }
 
         /* Frame Preview Container - legacy support */
@@ -495,11 +540,11 @@
         }
 
         .view-order-btn {
-            padding: 8px 16px;
-            background: #16697A;
+            padding: 10px 18px;
+            background: rgba(22, 105, 122, 0.92);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 999px;
             cursor: pointer;
             font-size: 13px;
             font-weight: 500;
@@ -507,10 +552,12 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            box-shadow: 0 12px 22px rgba(22, 105, 122, 0.16);
         }
 
         .view-order-btn:hover {
             background: #489FB5;
+            transform: translateY(-1px);
         }
 
         /* Order Detail Modal */
@@ -520,12 +567,14 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(12, 27, 31, 0.34);
             z-index: 9999;
             display: none;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
 
         .order-modal-overlay.active {
@@ -533,18 +582,21 @@
         }
 
         .order-modal {
-            background: white;
-            border-radius: 16px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(246, 251, 252, 0.86) 100%);
+            border-radius: 28px;
             max-width: 700px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
             overflow-x: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 28px 72px rgba(9, 34, 40, 0.24);
+            border: 1px solid rgba(255, 255, 255, 0.42);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
         .modal-header {
-            background: linear-gradient(135deg, #16697A 0%, #489FB5 100%);
+            background: linear-gradient(135deg, rgba(22, 105, 122, 0.94) 0%, rgba(72, 159, 181, 0.84) 100%);
             color: white;
             padding: 20px 24px;
             display: flex;
@@ -553,7 +605,8 @@
             position: sticky;
             top: 0;
             z-index: 10;
-            border-radius: 16px 16px 0 0;
+            border-radius: 28px 28px 0 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.18);
         }
 
         .modal-header h2 {
@@ -573,8 +626,10 @@
         .order-timeline {
             margin-bottom: 24px;
             padding: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.58);
+            border-radius: 22px;
+            border: 1px solid rgba(72, 159, 181, 0.1);
+            box-shadow: 0 12px 24px rgba(22, 105, 122, 0.06);
         }
 
         .timeline-header {
@@ -587,7 +642,7 @@
         .timeline-header h3 {
             margin: 0;
             font-size: 1rem;
-            color: #333;
+            color: #183138;
         }
 
         .timeline-steps {
@@ -603,7 +658,7 @@
             left: 20px;
             right: 20px;
             height: 3px;
-            background: #dee2e6;
+            background: rgba(72, 159, 181, 0.18);
             z-index: 1;
         }
 
@@ -639,7 +694,7 @@
 
         .step-label {
             font-size: 11px;
-            color: #6c757d;
+            color: rgba(22, 105, 122, 0.64);
             text-align: center;
             max-width: 60px;
         }
@@ -656,19 +711,21 @@
 
         .section-title {
             font-size: 1rem;
-            color: #333;
+            color: #183138;
             margin-bottom: 16px;
             padding-bottom: 8px;
-            border-bottom: 2px solid #e9ecef;
+            border-bottom: 1px solid rgba(72, 159, 181, 0.18);
         }
 
         .order-item-detail {
             display: flex;
             gap: 16px;
             padding: 16px;
-            background: #f8f9fa;
-            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.62);
+            border-radius: 22px;
             margin-bottom: 12px;
+            border: 1px solid rgba(72, 159, 181, 0.1);
+            box-shadow: 0 10px 20px rgba(22, 105, 122, 0.06);
         }
 
         .item-image {
@@ -676,11 +733,12 @@
             min-width: 80px;
             max-width: 120px;
             height: 100px;
-            border-radius: 8px;
+            border-radius: 18px;
             overflow: hidden;
             flex-shrink: 0;
-            background: #f1f3f4;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(72, 159, 181, 0.1);
+            box-shadow: 0 8px 18px rgba(22, 105, 122, 0.08);
         }
 
         .item-image .item-thumbnail {
@@ -775,7 +833,7 @@
         .item-name {
             font-size: 15px;
             font-weight: 600;
-            color: #333;
+            color: #183138;
         }
 
         .item-specs {
@@ -786,10 +844,11 @@
 
         .spec-tag {
             font-size: 12px;
-            padding: 3px 8px;
-            background: #e9ecef;
-            border-radius: 4px;
-            color: #495057;
+            padding: 5px 10px;
+            background: rgba(72, 159, 181, 0.1);
+            border-radius: 999px;
+            color: #43656f;
+            border: 1px solid rgba(72, 159, 181, 0.12);
         }
 
         .item-price {
@@ -808,9 +867,11 @@
         }
 
         .info-card {
-            background: #f8f9fa;
+            background: rgba(255, 255, 255, 0.58);
             padding: 16px;
-            border-radius: 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(72, 159, 181, 0.1);
+            box-shadow: 0 10px 22px rgba(22, 105, 122, 0.06);
         }
 
         .info-card h4 {
@@ -829,10 +890,11 @@
 
         /* Tracking Section */
         .tracking-section {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.62) 0%, rgba(245, 250, 250, 0.52) 100%);
             padding: 20px;
-            border-radius: 12px;
+            border-radius: 22px;
             text-align: center;
+            border: 1px solid rgba(72, 159, 181, 0.12);
         }
 
         .tracking-section h4 {
@@ -843,12 +905,12 @@
         .tracking-number {
             font-family: monospace;
             font-size: 18px;
-            background: white;
+            background: rgba(255, 255, 255, 0.76);
             padding: 10px 20px;
-            border-radius: 8px;
+            border-radius: 14px;
             display: inline-block;
             margin-bottom: 12px;
-            border: 2px dashed #16697A;
+            border: 2px dashed rgba(22, 105, 122, 0.42);
             color: #16697A;
             font-weight: 600;
         }
@@ -860,10 +922,11 @@
             padding: 10px 20px;
             background: #16697A;
             color: white;
-            border-radius: 8px;
+            border-radius: 999px;
             text-decoration: none;
             font-weight: 500;
             transition: background 0.3s;
+            box-shadow: 0 12px 22px rgba(22, 105, 122, 0.16);
         }
 
         .tracking-link:hover {
@@ -881,21 +944,22 @@
             gap: 12px;
             justify-content: flex-end;
             padding-top: 20px;
-            border-top: 1px solid #e9ecef;
+            border-top: 1px solid rgba(72, 159, 181, 0.14);
             flex-wrap: wrap;
         }
 
         .action-btn {
-            padding: 10px 20px;
+            padding: 11px 20px;
             border: none;
-            border-radius: 8px;
+            border-radius: 999px;
             cursor: pointer;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.3s;
             display: flex;
             align-items: center;
             gap: 8px;
+            box-shadow: 0 10px 20px rgba(22, 105, 122, 0.08);
         }
 
         .btn-primary {
@@ -917,7 +981,7 @@
         }
 
         .btn-outline {
-            background: white;
+            background: rgba(255, 255, 255, 0.82);
             color: #16697A;
             border: 2px solid #16697A;
         }
@@ -932,6 +996,13 @@
             text-align: center;
             padding: 60px 20px;
             color: rgba(22, 105, 122, 0.7);
+            margin: 0 16px 16px;
+            background: rgba(255, 255, 255, 0.56);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.42);
+            box-shadow: 0 16px 30px rgba(22, 105, 122, 0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
         }
 
         .empty-state i {
@@ -954,6 +1025,13 @@
         .loading-state {
             text-align: center;
             padding: 60px 20px;
+            margin: 0 16px 16px;
+            background: rgba(255, 255, 255, 0.56);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.42);
+            box-shadow: 0 16px 30px rgba(22, 105, 122, 0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
         }
 
         .loading-state i {
@@ -966,6 +1044,13 @@
         .error-state {
             text-align: center;
             padding: 60px 20px;
+            margin: 0 16px 16px;
+            background: rgba(255, 255, 255, 0.56);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.42);
+            box-shadow: 0 16px 30px rgba(22, 105, 122, 0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
         }
 
         .error-state i {
@@ -1023,11 +1108,11 @@
 
             .order-modal {
                 max-height: 100vh;
-                border-radius: 0;
+                border-radius: 24px 24px 0 0;
             }
 
             .modal-header {
-                border-radius: 0;
+                border-radius: 24px 24px 0 0;
             }
 
             .timeline-steps {
@@ -1064,6 +1149,30 @@
 
         @media (min-width: 769px) {
             .orders-container .back-link { display: none !important; }
+
+            .orders-container {
+                max-width: 1180px;
+                margin: 40px 42.5px 0;
+                padding-left: 24px;
+                padding-right: 24px;
+            }
+
+            .orders-section {
+                border-radius: 32px;
+            }
+
+            .section-header {
+                padding: 24px 28px 18px;
+            }
+
+            #ordersContainer {
+                padding: 18px 0 12px;
+            }
+
+            .order-card {
+                margin: 0 18px 18px;
+                border-radius: 26px;
+            }
         }
     </style>
     <!-- Global Header Component -->
@@ -1450,12 +1559,14 @@
         // Render order item thumbnail - uses the cart thumbnail stored in Firebase
         function renderOrderThumbnail(order, itemIndex, isLastVisible = false, remainingCount = 0) {
             const thumbnailUrl = getOrderThumbnail(order, itemIndex);
+            const frameColorClass = getFrameColorClass(order.items?.[itemIndex]?.frameColor);
+            const whiteFrameClass = frameColorClass === 'frame-white' ? ' white-frame-thumbnail' : '';
             
             if (thumbnailUrl) {
                 return `
                     <div class="order-item-thumbnail">
                         <img src="${thumbnailUrl}" alt="Order Item ${itemIndex + 1}" 
-                             class="thumbnail-image"
+                             class="thumbnail-image${whiteFrameClass}"
                              onerror="this.parentElement.innerHTML='<div class=\\'order-item-placeholder\\'><i class=\\'fas fa-image\\'></i></div>'">
                         ${isLastVisible && remainingCount > 0 ? `<span class="item-count">+${remainingCount}</span>` : ''}
                     </div>
@@ -1480,6 +1591,8 @@
             const firstItem = order.items ? order.items[0] : null;
             const frameSize = firstItem?.frameSize?.size || firstItem?.frameSize || 'Photo Frame';
             const frameColor = firstItem?.frameColor || 'Classic';
+            const frameColorClass = getFrameColorClass(frameColor);
+            const whiteFrameClass = frameColorClass === 'frame-white' ? ' white-frame-thumbnail' : '';
             const deliveryMethod = order.deliveryMethod || 'standard';
             const thumbnailUrl = getOrderThumbnail(order, 0);
             
@@ -1505,7 +1618,7 @@
                 <div class="order-card" onclick="openOrderModal(${index})">
                     <div class="order-thumbnail">
                         ${thumbnailUrl ? 
-                            `<img src="${thumbnailUrl}" alt="Order Item" onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;color:#adb5bd;font-size:24px;\\'><i class=\\'fas fa-image\\'></i></div>'">` :
+                            `<img src="${thumbnailUrl}" alt="Order Item" class="${whiteFrameClass.trim()}" onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;color:#adb5bd;font-size:24px;\\'><i class=\\'fas fa-image\\'></i></div>'">` :
                             `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#adb5bd;font-size:24px;"><i class="fas fa-image"></i></div>`
                         }
                         ${itemCount > 1 ? `<span class="item-badge">+${itemCount - 1}</span>` : ''}
@@ -1668,6 +1781,8 @@
             return items.map((item, index) => {
                 // Use cart thumbnail from Firebase (same image user saw in cart)
                 const thumbnailUrl = getOrderThumbnail(order, index);
+                const frameColorClass = getFrameColorClass(item.frameColor);
+                const whiteFrameClass = frameColorClass === 'frame-white' ? ' white-frame-thumbnail' : '';
                 const specs = [];
                 
                 if (item.frameSize) {
@@ -1683,7 +1798,7 @@
                     <div class="order-item-detail">
                         <div class="item-image">
                             ${thumbnailUrl 
-                                ? `<img src="${thumbnailUrl}" alt="Frame ${index + 1}" class="item-thumbnail" 
+                                ? `<img src="${thumbnailUrl}" alt="Frame ${index + 1}" class="item-thumbnail${whiteFrameClass}" 
                                         onerror="this.parentElement.innerHTML='<div class=\\'item-image-placeholder\\'><i class=\\'fas fa-image\\'></i></div>'">`
                                 : `<div class="item-image-placeholder"><i class="fas fa-image"></i></div>`
                             }

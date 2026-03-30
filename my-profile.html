@@ -250,41 +250,217 @@
     <style>
         /* Desktop-only: make Profile Quick Actions match mobile glass style */
         @media (min-width: 769px) {
-            /* Hide back link on desktop */
+            body {
+                background: #EDE7E3;
+            }
+
             .profile-container .back-link { display: none !important; }
 
+            .profile-container {
+                max-width: 1280px;
+                margin: 61px 50px 0;
+                padding: 0;
+                display: grid;
+                grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.85fr);
+                gap: 24px;
+                align-items: start;
+            }
+
+            .profile-card {
+                margin-bottom: 0;
+                border-radius: 28px;
+                border: 1px solid rgba(72,159,181,0.12);
+                background: rgba(255,255,255,0.82);
+                box-shadow: 0 24px 54px rgba(22,105,122,0.12);
+                backdrop-filter: blur(14px);
+            }
+
+            .profile-top {
+                gap: 22px;
+                padding: 26px 28px;
+                background: linear-gradient(145deg, rgba(72,159,181,0.12), rgba(255,255,255,0.78) 62%, rgba(255,166,43,0.14));
+                border-bottom: 1px solid rgba(72,159,181,0.12);
+            }
+
+            .avatar {
+                width: 88px;
+                height: 88px;
+                border-radius: 28px;
+                font-size: 36px;
+                box-shadow: 0 16px 32px rgba(72,159,181,0.22);
+            }
+
+            .user-main {
+                display: grid;
+                gap: 6px;
+            }
+
+            .user-name {
+                font-size: clamp(1.9rem, 2.5vw, 2.35rem);
+                line-height: 1.02;
+                letter-spacing: -0.05em;
+                color: #183138;
+            }
+
+            .user-phone {
+                font-size: 1rem;
+                color: #3f7c89;
+            }
+
+            .edit-actions {
+                gap: 12px;
+            }
+
+            .btn-icon {
+                padding: 11px 15px;
+                border-radius: 999px;
+                background: rgba(255,255,255,0.92);
+                border: 1px solid rgba(72,159,181,0.16);
+                box-shadow: 0 10px 22px rgba(22,105,122,0.08);
+            }
+
+            .btn-icon:hover {
+                transform: translateY(-2px);
+            }
+
+            .profile-details {
+                padding: 24px 28px 28px;
+                gap: 16px;
+            }
+
+            .detail-item {
+                padding: 18px 18px 16px;
+                border-radius: 22px;
+                background: linear-gradient(180deg, #ffffff 0%, #fbfdfd 100%);
+                border: 1px solid rgba(72,159,181,0.1);
+                box-shadow: 0 14px 30px rgba(22,105,122,0.07);
+            }
+
+            .detail-item:nth-child(2n) {
+                background: linear-gradient(180deg, #fffaf4 0%, #ffffff 100%);
+            }
+
+            .detail-label {
+                font-size: 11px;
+                letter-spacing: 0.16em;
+                color: rgba(22,105,122,0.6);
+            }
+
+            .detail-value {
+                margin-top: 8px;
+                font-size: 1.02rem;
+                color: #183138;
+            }
+
             .quick-actions-section {
-                background: linear-gradient(145deg, rgba(255,255,255,0.35), rgba(255,255,255,0.18));
-                border: 2px solid rgba(255,255,255,0.4);
-                box-shadow: 0 12px 40px rgba(130,192,204,0.25), inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -1px 0 rgba(0,0,0,0.06);
+                margin-bottom: 0;
+                position: sticky;
+                top: 104px;
+                border-radius: 28px;
+                background: linear-gradient(160deg, rgba(255,255,255,0.92) 0%, rgba(244,251,252,0.96) 58%, rgba(255,248,239,0.94) 100%);
+                border: 1px solid rgba(72,159,181,0.12);
+                box-shadow: 0 24px 48px rgba(22,105,122,0.12);
                 backdrop-filter: blur(14px);
                 -webkit-backdrop-filter: blur(14px);
             }
+
             .quick-actions-section .section-header {
                 background: transparent;
                 color: var(--primary-color);
-                padding: 12px 14px;
-                font-size: 0.95rem;
-                border-bottom: 1px solid rgba(72,159,181,0.25);
+                padding: 22px 22px 12px;
+                font-size: 1rem;
+                border-bottom: none;
             }
-            .quick-actions-section .section-body { padding: 14px; }
+
+            .quick-actions-section .section-body {
+                padding: 0 22px 22px;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
 
             .quick-actions-section .quick-card {
-                background: linear-gradient(145deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1));
-                border: 2px solid rgba(255,255,255,0.35);
-                box-shadow: 0 8px 28px rgba(22,105,122,0.12);
-                backdrop-filter: blur(12px);
-                -webkit-backdrop-filter: blur(12px);
-                padding: 12px;
-                flex-direction: column;
+                background: linear-gradient(180deg, #ffffff 0%, #fbfefd 100%);
+                border: 1px solid rgba(72,159,181,0.1);
+                box-shadow: 0 14px 30px rgba(22,105,122,0.08);
+                padding: 16px;
+                flex-direction: row;
                 align-items: center;
-                text-align: center;
-                gap: 8px;
+                text-align: left;
+                gap: 14px;
+                border-radius: 20px;
             }
-            .quick-actions-section .quick-card:hover { transform: translateY(-1px); }
-            .quick-actions-section .quick-icon { width: 36px; height: 36px; border-radius: 10px; }
-            .quick-actions-section .quick-title { font-size: 0.95rem; }
-            .quick-actions-section .quick-sub { display: none; }
+
+            .quick-actions-section .quick-card:nth-child(2) {
+                background: linear-gradient(180deg, #fffaf3 0%, #ffffff 100%);
+            }
+
+            .quick-actions-section .quick-card:nth-child(3) {
+                background: linear-gradient(180deg, #f5fbfc 0%, #ffffff 100%);
+            }
+
+            .quick-actions-section .quick-card:hover {
+                transform: translateY(-3px) translateX(4px);
+                box-shadow: 0 18px 34px rgba(22,105,122,0.12);
+            }
+
+            .quick-actions-section .quick-icon {
+                width: 50px;
+                height: 50px;
+                border-radius: 16px;
+                flex-shrink: 0;
+                box-shadow: 0 12px 24px rgba(72,159,181,0.22);
+            }
+
+            .quick-actions-section .quick-card:nth-child(1) .quick-icon {
+                background: linear-gradient(135deg, #16697A 0%, #489FB5 100%);
+            }
+
+            .quick-actions-section .quick-card:nth-child(2) .quick-icon {
+                background: linear-gradient(135deg, #FFA62B 0%, #FFD089 100%);
+                color: #5d3900;
+            }
+
+            .quick-actions-section .quick-card:nth-child(3) .quick-icon {
+                background: linear-gradient(135deg, #82C0CC 0%, #a7d9e0 100%);
+                color: #124f5d;
+            }
+
+            .quick-actions-section .quick-title {
+                font-size: 1rem;
+            }
+
+            .quick-actions-section .quick-sub {
+                display: block;
+                margin-top: 4px;
+                font-size: 0.82rem;
+                color: rgba(22,105,122,0.68);
+            }
+
+            .empty-state {
+                grid-column: 1 / -1;
+                border-radius: 24px;
+                background: rgba(255,255,255,0.82);
+                border: 1px solid rgba(72,159,181,0.12);
+                box-shadow: 0 18px 38px rgba(22,105,122,0.1);
+            }
+
+            .modal {
+                border-radius: 24px;
+                box-shadow: 0 24px 64px rgba(9,34,40,0.24);
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1120px) {
+            .profile-container {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-actions-section {
+                position: static;
+            }
         }
     </style>
     <!-- Global Header Component -->
@@ -339,14 +515,7 @@
                         <div class="quick-icon"><i class="fas fa-box"></i></div>
                         <div>
                             <div class="quick-title">My Orders</div>
-                            <div class="quick-sub">View and track orders</div>
-                        </div>
-                    </a>
-                    <a class="quick-card" href="track-order.html">
-                        <div class="quick-icon"><i class="fas fa-truck"></i></div>
-                        <div>
-                            <div class="quick-title">Track Order</div>
-                            <div class="quick-sub">Track with order ID</div>
+                            <div class="quick-sub">Review your recent orders</div>
                         </div>
                     </a>
                     <a class="quick-card" href="customize.html">
@@ -411,6 +580,7 @@
     <script src="fast2sms-client.js?v=3.0"></script>
     <script src="otp-auth-realsms.js?v=3.0"></script>
     <script src="auth.js?v=3.0"></script>
+    <script src="support-chat.js?v=1.0"></script>
     <script>
         function setProfileDropdownState(isOpen) {
             const dropdownContainer = document.getElementById('profileDropdown');

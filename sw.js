@@ -69,6 +69,11 @@ self.addEventListener('fetch', (event) => {
     const { request } = event;
     const url = new URL(request.url);
 
+    // Let the browser handle non-GET requests. Cache API does not support POST/PUT/etc.
+    if (request.method !== 'GET') {
+        return;
+    }
+
     // Skip cross-origin requests
     if (url.origin !== location.origin) {
         // But cache external images if they match our patterns

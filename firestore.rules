@@ -77,7 +77,7 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
-    match /siteConfig/reviewSettings {
+    match /siteConfig/{configId} {
       allow read: if true;
       allow write: if isAdmin();
     }

@@ -6,7 +6,7 @@
  */
 
 const axios = require('axios');
-const jwt = require('jsonwebtoken');
+const { createSignedToken } = require('./utils/token-utils');
 
 const FAST2SMS_API_KEY = process.env.FAST2SMS_API_KEY;
 const FAST2SMS_TEMPLATE_ID = process.env.FAST2SMS_TEMPLATE_ID;
@@ -33,6 +33,18 @@ function formatPhoneNumber(phone) {
 
 function generateOTP() {
     return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+function getRequestHost(event) {
+    const headers = event.headers || {};
+    return String(headers['x-forwarded-host'] || headers.host || '').toLowerCase();
+}
+
+function isLocalAdminDevelopment(event) {
+    const host = getRequestHost(event);
+    return process.env.NETLIFY_DEV === 'true'
+        || host.startsWith('localhost:')
+        || host.startsWith('127.0.0.1:');
 }
 
 async function sendOTPViaSMS(phone, otp) {
@@ -69,6 +81,7 @@ exports.handler = async (event) => {
 
     try {
         const { phoneNumber } = JSON.parse(event.body || '{}');
+        const isLocalDevelopment = isLocalAdminDevelopment(event);
 
         if (!phoneNumber) {
             return { statusCode: 400, headers, body: JSON.stringify({ success: false, message: 'Phone number is required.' }) };
@@ -94,45 +107,53 @@ exports.handler = async (event) => {
             return { statusCode: 403, headers, body: JSON.stringify({ success: false, message: 'Access denied. This number is not authorized for admin access.' }) };
         }
 
-        // Rate limiting: 60-second cooldown per phone
+        // Rate limiting: 60-second cooldown per phone outside local dev
         const rateLimitKey = 'admin_otp_' + formattedPhone;
-        const lastSent = rateLimitStore.get(rateLimitKey);
-        if (lastSent && Date.now() - lastSent < 60000) {
-            const remaining = Math.ceil((60000 - (Date.now() - lastSent)) / 1000);
-            return {
-                statusCode: 429,
-                headers,
-                body: JSON.stringify({
-                    success: false,
-                    message: `Please wait ${remaining} second${remaining === 1 ? '' : 's'} before requesting another OTP.`,
-                    remainingTime: remaining
-                })
-            };
+        if (!isLocalDevelopment) {
+            const lastSent = rateLimitStore.get(rateLimitKey);
+            if (lastSent && Date.now() - lastSent < 60000) {
+                const remaining = Math.ceil((60000 - (Date.now() - lastSent)) / 1000);
+                return {
+                    statusCode: 429,
+                    headers,
+                    body: JSON.stringify({
+                        success: false,
+                        message: `Please wait ${remaining} second${remaining === 1 ? '' : 's'} before requesting another OTP.`,
+                        remainingTime: remaining
+                    })
+                };
+            }
         }
 
         const otp = generateOTP();
         const expiresAt = Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000;
 
-        // Sign OTP into a JWT so no server-side storage is needed
-        const otpToken = jwt.sign(
+        // Sign OTP into a token so no server-side storage is needed
+        const otpToken = createSignedToken(
             { phone: formattedPhone, otp, expiresAt },
             JWT_SECRET,
             { expiresIn: OTP_EXPIRY_MINUTES * 60 }
         );
 
-        // Demo mode if Fast2SMS is not configured
-        if (!FAST2SMS_API_KEY || FAST2SMS_API_KEY === 'YOUR_FAST2SMS_API_KEY') {
-            console.warn('⚠️ Fast2SMS not configured — admin OTP demo mode. OTP:', otp);
-            rateLimitStore.set(rateLimitKey, Date.now());
+        // Localhost testing should not depend on the external SMS provider.
+        if (isLocalDevelopment || !FAST2SMS_API_KEY || FAST2SMS_API_KEY === 'YOUR_FAST2SMS_API_KEY') {
+            console.warn('⚠️ Admin OTP local/demo mode active. OTP:', otp);
+            if (!isLocalDevelopment) {
+                rateLimitStore.set(rateLimitKey, Date.now());
+            }
             return {
                 statusCode: 200,
                 headers,
                 body: JSON.stringify({
                     success: true,
-                    message: 'OTP sent successfully (demo mode — check server logs).',
+                    message: isLocalDevelopment
+                        ? 'Local test OTP generated. Use the code shown in the admin login page.'
+                        : 'OTP sent successfully (demo mode — check server logs).',
                     otpToken,
                     expiresIn: OTP_EXPIRY_MINUTES * 60,
-                    demo: true
+                    demo: true,
+                    debugOtp: isLocalDevelopment ? otp : undefined,
+                    localDebug: isLocalDevelopment
                 })
             };
         }

@@ -5,8 +5,8 @@
  * only OTP login is accepted until the admin logs in via OTP (which resets the lockout).
  */
 
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const { resolveServiceAccountConfig } = require('./utils/firebase-admin-config');
+const { verifyPassword } = require('./utils/password-utils');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'jb-creations-secret-key-change-in-production';
 const MAX_FAILED_ATTEMPTS = 10;
@@ -20,11 +20,11 @@ let adminDb = null;
 async function initFirebaseAdmin() {
     if (adminApp) return { auth: adminAuth, db: adminDb };
 
-    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT;
-    if (!serviceAccountJson) throw new Error('FIREBASE_SERVICE_ACCOUNT environment variable is not set.');
-
     const admin = require('firebase-admin');
-    const serviceAccount = JSON.parse(serviceAccountJson);
+    const { serviceAccount } = resolveServiceAccountConfig();
+    if (!serviceAccount) {
+        throw new Error('Firebase Admin credentials are not configured. Set FIREBASE_SERVICE_ACCOUNT or add firebase-service-account.json in the project root.');
+    }
 
     if (!admin.apps.length) {
         adminApp = admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
@@ -122,9 +122,22 @@ exports.handler = async (event) => {
         }
 
         // Compare password
-        const isMatch = await bcrypt.compare(password, cred.passwordHash);
+        const passwordCheck = await verifyPassword(password, cred.passwordHash);
+        const isMatch = passwordCheck.valid;
 
         if (!isMatch) {
+            if (passwordCheck.requiresReset) {
+                return {
+                    statusCode: 403,
+                    headers,
+                    body: JSON.stringify({
+                        success: false,
+                        otpOnly: true,
+                        message: passwordCheck.message
+                    })
+                };
+            }
+
             const newAttempts = (cred.failedAttempts || 0) + 1;
             const nowLocked = newAttempts >= MAX_FAILED_ATTEMPTS;
 

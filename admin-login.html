@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login — JB Creations</title>
+    <link rel="icon" href="image.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -261,6 +262,15 @@
             line-height: 1.5;
         }
 
+        .assistive-username-field {
+            position: absolute;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
         /* State visibility */
         .state { display: none; }
         .state.active { display: block; }
@@ -305,6 +315,8 @@
     </div>
 
     <div class="card">
+
+        <div id="local-dev-help" class="msg msg-info" style="margin-bottom: 16px;"></div>
 
         <!-- State A: Phone Number Entry -->
         <div id="state-phone" class="state active">
@@ -366,64 +378,72 @@
 
         <!-- State C: Password Login -->
         <div id="state-password" class="state">
-            <div class="card-title">Sign In with Password</div>
-            <div class="card-subtitle">Enter your phone number and your saved admin password.</div>
+            <form onsubmit="event.preventDefault(); loginWithPassword();">
+                <div class="card-title">Sign In with Password</div>
+                <div class="card-subtitle">Enter your phone number and your saved admin password.</div>
 
-            <div class="field">
-                <label for="pass-phone-input">Phone Number</label>
-                <div class="field-prefix">
-                    <span class="prefix-label"><i class="fas fa-mobile-alt" style="margin-right:5px"></i>+91</span>
-                    <input type="tel" id="pass-phone-input" placeholder="10-digit mobile number" maxlength="10" autocomplete="tel">
+                <input type="text" id="password-username-input" class="assistive-username-field" autocomplete="username" tabindex="-1" aria-hidden="true">
+
+                <div class="field">
+                    <label for="pass-phone-input">Phone Number</label>
+                    <div class="field-prefix">
+                        <span class="prefix-label"><i class="fas fa-mobile-alt" style="margin-right:5px"></i>+91</span>
+                        <input type="tel" id="pass-phone-input" placeholder="10-digit mobile number" maxlength="10" autocomplete="tel">
+                    </div>
                 </div>
-            </div>
 
-            <div class="field">
-                <label for="password-input">Password</label>
-                <input type="password" id="password-input" placeholder="Your admin password" autocomplete="current-password">
-            </div>
+                <div class="field">
+                    <label for="password-input">Password</label>
+                    <input type="password" id="password-input" placeholder="Your admin password" autocomplete="current-password">
+                </div>
 
-            <div id="pass-error" class="msg msg-error"></div>
+                <div id="pass-error" class="msg msg-error"></div>
 
-            <div class="btn-row">
-                <button class="btn btn-primary" id="login-pass-btn" onclick="loginWithPassword()">
-                    <span class="spinner" id="login-pass-spinner"></span>
-                    <i class="fas fa-sign-in-alt" id="login-pass-icon"></i>
-                    Sign In
+                <div class="btn-row">
+                    <button type="submit" class="btn btn-primary" id="login-pass-btn">
+                        <span class="spinner" id="login-pass-spinner"></span>
+                        <i class="fas fa-sign-in-alt" id="login-pass-icon"></i>
+                        Sign In
+                    </button>
+                </div>
+                <button type="button" class="back-link" onclick="showState('phone')">
+                    <i class="fas fa-arrow-left"></i> Use OTP instead
                 </button>
-            </div>
-            <button class="back-link" onclick="showState('phone')">
-                <i class="fas fa-arrow-left"></i> Use OTP instead
-            </button>
+            </form>
         </div>
 
         <!-- State D: First-Time Password Setup -->
         <div id="state-set-password" class="state">
-            <div class="card-title">Set Your Password</div>
-            <div class="card-subtitle">
-                OTP verified! Create a password for quick sign-in next time. 
-                You can always reset it using OTP.
-            </div>
+            <form onsubmit="event.preventDefault(); setPassword();">
+                <div class="card-title">Set Your Password</div>
+                <div class="card-subtitle">
+                    OTP verified! Create a password for quick sign-in next time. 
+                    You can always reset it using OTP.
+                </div>
 
-            <div class="field">
-                <label for="new-password-input">New Password</label>
-                <input type="password" id="new-password-input" placeholder="Min. 8 chars, letters + numbers" autocomplete="new-password">
-                <div class="pwd-hint">Must be at least 8 characters and contain at least one letter and one number.</div>
-            </div>
+                <input type="text" id="setup-username-input" class="assistive-username-field" autocomplete="username" tabindex="-1" aria-hidden="true">
 
-            <div class="field">
-                <label for="confirm-password-input">Confirm Password</label>
-                <input type="password" id="confirm-password-input" placeholder="Re-enter your password" autocomplete="new-password">
-            </div>
+                <div class="field">
+                    <label for="new-password-input">New Password</label>
+                    <input type="password" id="new-password-input" placeholder="Min. 8 chars, letters + numbers" autocomplete="new-password">
+                    <div class="pwd-hint">Must be at least 8 characters and contain at least one letter and one number.</div>
+                </div>
 
-            <div id="setpass-error" class="msg msg-error"></div>
+                <div class="field">
+                    <label for="confirm-password-input">Confirm Password</label>
+                    <input type="password" id="confirm-password-input" placeholder="Re-enter your password" autocomplete="new-password">
+                </div>
 
-            <div class="btn-row">
-                <button class="btn btn-primary" id="set-pass-btn" onclick="setPassword()">
-                    <span class="spinner" id="set-pass-spinner"></span>
-                    <i class="fas fa-lock" id="set-pass-icon"></i>
-                    Set Password &amp; Open Dashboard
-                </button>
-            </div>
+                <div id="setpass-error" class="msg msg-error"></div>
+
+                <div class="btn-row">
+                    <button type="submit" class="btn btn-primary" id="set-pass-btn">
+                        <span class="spinner" id="set-pass-spinner"></span>
+                        <i class="fas fa-lock" id="set-pass-icon"></i>
+                        Set Password &amp; Open Dashboard
+                    </button>
+                </div>
+            </form>
         </div>
 
     </div><!-- /card -->
@@ -432,45 +452,97 @@
 <script>
     // ── Firebase initialisation ────────────────────────────────────────────────
     var firebaseConfig = {
-        apiKey: "AIzaSyC0j3MFVGeOMCKZnot8DmoXYkBYKlPjHsT",
+        apiKey: "AIzaSyCQjSWFvoEQHCKZnot8DmcXYk8YKlPiHsI",
         authDomain: "jb-creations-backend.firebaseapp.com",
         projectId: "jb-creations-backend",
         storageBucket: "jb-creations-backend.firebasestorage.app",
-        messagingSenderId: "774184516486",
-        appId: "1:774128154860:web:c22384c401bd6838ab4d2f"
+        messagingSenderId: "774712815486",
+        appId: "1:774712815486:web:c22384c401bd6838ab4d2f"
     };
+    var firebaseConfigLoadPromise = null;
 
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
+    function mergeFirebaseConfig(nextConfig) {
+        if (!nextConfig || !nextConfig.apiKey) {
+            return firebaseConfig;
+        }
+
+        firebaseConfig = Object.assign({}, firebaseConfig, nextConfig);
+        window.__JB_FIREBASE_DYNAMIC_CONFIG__ = Object.assign({}, firebaseConfig);
+        return firebaseConfig;
     }
 
-    // Session persistence — auth state lives only as long as this browser tab is open
-    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION).catch(function(e) {
-        console.warn('setPersistence failed:', e);
-    });
-
-    // If already signed in as admin, skip the login page
-    firebase.auth().onAuthStateChanged(async function(user) {
-        if (user) {
-            try {
-                var result = await user.getIdTokenResult(true);
-                if (result.claims.admin) {
-                    window.location.replace('admin-firebase.html');
-                    return;
-                }
-            } catch (e) {
-                // If token check fails, fall through to the login form
-            }
+    async function loadRuntimeFirebaseConfig() {
+        if (window.__JB_FIREBASE_DYNAMIC_CONFIG__) {
+            return mergeFirebaseConfig(window.__JB_FIREBASE_DYNAMIC_CONFIG__);
         }
-        // Not signed in (or not admin) — show the phone-entry state
-        showState('phone');
-    });
+
+        if (!firebaseConfigLoadPromise) {
+            firebaseConfigLoadPromise = fetch('/.netlify/functions/firebase-web-config')
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('Firebase web config endpoint unavailable');
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data && data.success && data.config) {
+                        return mergeFirebaseConfig(data.config);
+                    }
+                    return firebaseConfig;
+                })
+                .catch(function(error) {
+                    console.warn('Runtime Firebase config unavailable:', error);
+                    return firebaseConfig;
+                });
+        }
+
+        return firebaseConfigLoadPromise;
+    }
+
+    async function initializeAdminAuth() {
+        try {
+            await loadRuntimeFirebaseConfig();
+
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+
+            // Session persistence — auth state lives only as long as this browser tab is open
+            firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION).catch(function(e) {
+                console.warn('setPersistence failed:', e);
+            });
+
+            // If already signed in as admin, skip the login page
+            firebase.auth().onAuthStateChanged(async function(user) {
+                if (user) {
+                    try {
+                        var result = await user.getIdTokenResult(true);
+                        if (result.claims.admin) {
+                            window.location.replace('admin-firebase.html');
+                            return;
+                        }
+                    } catch (e) {
+                        // If token check fails, fall through to the login form
+                    }
+                }
+                // Not signed in (or not admin) — show the phone-entry state
+                showState('phone');
+                checkLocalAdminHealth();
+            });
+        } catch (error) {
+            console.error('Firebase bootstrap failed:', error);
+            showLocalDevHelp('Failed to initialize Firebase for admin login.', 'error');
+        }
+    }
+
+    initializeAdminAuth();
 
     // ── State variables ────────────────────────────────────────────────────────
     var currentOtpToken  = null;
     var currentPhone     = null;   // raw value from the input (10 digits without country code)
     var currentSetupToken = null;
     var countdownInterval = null;
+    var adminHealthStatus = null;
 
     // ── UI helpers ─────────────────────────────────────────────────────────────
     function showState(id) {
@@ -495,6 +567,109 @@
         el.classList.remove('visible');
     }
 
+    function isLocalAdminHost() {
+        return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    }
+
+    function showLocalDevHelp(message, type) {
+        var el = document.getElementById('local-dev-help');
+        if (!el) return;
+        if (!message) {
+            el.textContent = '';
+            el.className = 'msg msg-info';
+            return;
+        }
+        el.textContent = message;
+        el.className = 'msg msg-' + (type || 'info') + ' visible';
+    }
+
+    function getLocalAdminHelpMessage(defaultMessage) {
+        if (!isLocalAdminHost()) {
+            return defaultMessage;
+        }
+
+        if (!adminHealthStatus) {
+            return 'Local admin login needs Netlify Dev. Start it with "npm run dev" and open http://localhost:8888/admin-login.html instead of the static server.';
+        }
+
+        if (!adminHealthStatus.firebaseAdminConfigured) {
+            return 'Netlify Functions are running, but Firebase Admin credentials are missing. Add FIREBASE_SERVICE_ACCOUNT to .env or place firebase-service-account.json in the project root, then restart "npm run dev".';
+        }
+
+        if (adminHealthStatus.firebaseAdminProjectId && adminHealthStatus.firebaseAdminProjectId !== firebaseConfig.projectId) {
+            return 'Firebase Admin is using project "' + adminHealthStatus.firebaseAdminProjectId + '" but this page is configured for "' + firebaseConfig.projectId + '". Use matching Firebase credentials or custom-token sign-in will fail.';
+        }
+
+        return defaultMessage;
+    }
+
+    function getFirebaseAuthErrorMessage(error, fallbackMessage) {
+        if (!error) {
+            return fallbackMessage;
+        }
+
+        if (isLocalAdminHost() && adminHealthStatus && adminHealthStatus.firebaseAdminProjectId && adminHealthStatus.firebaseAdminProjectId !== firebaseConfig.projectId) {
+            return getLocalAdminHelpMessage(fallbackMessage);
+        }
+
+        if (error.code === 'auth/custom-token-mismatch') {
+            return getLocalAdminHelpMessage('OTP was verified, but Firebase rejected the custom token because the backend and frontend are using different Firebase projects.');
+        }
+
+        if (error.code === 'auth/invalid-custom-token') {
+            return getLocalAdminHelpMessage('OTP was verified, but Firebase rejected the custom token. Check that the admin page and Firebase Admin credentials use the same Firebase project.');
+        }
+
+        if (error.code === 'auth/invalid-api-key' || /API key not valid/i.test(error.message || '')) {
+            return 'The Firebase web API key for this admin page is invalid. Refresh the page so it can load the runtime Firebase config, then try again.';
+        }
+
+        if (error.code === 'auth/configuration-not-found' || /CONFIGURATION_NOT_FOUND/i.test(error.message || '')) {
+            return 'Firebase Authentication is not configured for project "' + firebaseConfig.projectId + '". Enable Firebase Authentication for this project in the Firebase console before using admin OTP login.';
+        }
+
+        if (error.message) {
+            return error.message;
+        }
+
+        return fallbackMessage;
+    }
+
+    async function checkLocalAdminHealth() {
+        if (!isLocalAdminHost()) {
+            return;
+        }
+
+        try {
+            var response = await fetch('/.netlify/functions/admin-health');
+            if (!response.ok) {
+                throw new Error('Admin health endpoint unavailable');
+            }
+
+            adminHealthStatus = await response.json();
+
+            if (!adminHealthStatus.firebaseAdminConfigured) {
+                showLocalDevHelp(getLocalAdminHelpMessage(adminHealthStatus.message), 'info');
+                return;
+            }
+
+            if (adminHealthStatus.firebaseAdminProjectId && adminHealthStatus.firebaseAdminProjectId !== firebaseConfig.projectId) {
+                showLocalDevHelp(getLocalAdminHelpMessage('Firebase configuration mismatch detected.'), 'error');
+                return;
+            }
+
+            if (window.location.port && window.location.port !== '8888') {
+                showLocalDevHelp('Admin auth is configured, but you are not on the Netlify Dev server. Open http://localhost:8888/admin-login.html after starting "npm run dev".', 'info');
+                return;
+            }
+
+            showLocalDevHelp('Local admin auth is ready on this server.', 'success');
+        } catch (error) {
+            adminHealthStatus = null;
+            showLocalDevHelp(getLocalAdminHelpMessage('Unable to reach local admin functions.'), 'info');
+        }
+    }
+
     function setLoading(btnId, spinnerId, iconId, loading) {
         var btn = document.getElementById(btnId);
         var spinner = document.getElementById(spinnerId);
@@ -507,6 +682,25 @@
     function maskPhone(raw) {
         var cleaned = raw.replace(/\D/g, '').slice(-10);
         return '+91 ' + cleaned.substring(0, 2) + 'XXXXXX' + cleaned.substring(8);
+    }
+
+    function formatAdminUsername(phone) {
+        var cleaned = String(phone || '').replace(/\D/g, '').slice(-10);
+        return cleaned ? '+91' + cleaned : '';
+    }
+
+    function syncAdminUsernameFields(phone) {
+        var formattedUsername = formatAdminUsername(phone);
+        var passwordUsernameInput = document.getElementById('password-username-input');
+        var setupUsernameInput = document.getElementById('setup-username-input');
+
+        if (passwordUsernameInput) {
+            passwordUsernameInput.value = formattedUsername;
+        }
+
+        if (setupUsernameInput) {
+            setupUsernameInput.value = formattedUsername;
+        }
     }
 
     function startCountdown(seconds) {
@@ -567,6 +761,7 @@
             if (data.success) {
                 currentOtpToken = data.otpToken;
                 currentPhone    = phone;
+                syncAdminUsernameFields(phone);
 
                 document.getElementById('masked-phone-text').textContent = maskPhone(phone);
                 document.getElementById('otp-input').value = '';
@@ -574,13 +769,17 @@
                 var timerEl = document.getElementById('otp-timer-text');
                 if (timerEl) timerEl.classList.remove('expired');
 
+                if (isLocalAdminHost() && data.debugOtp) {
+                    showLocalDevHelp('Local test OTP: ' + data.debugOtp + '. Enter this code below to continue.', 'success');
+                }
+
                 showState('otp');
                 startCountdown(data.expiresIn || 300);
             } else {
-                showMsg('phone-error', data.message || 'Failed to send OTP. Please try again.');
+                showMsg('phone-error', data.message || getLocalAdminHelpMessage('Failed to send OTP. Please try again.'));
             }
         } catch (e) {
-            showMsg('phone-error', 'Network error. Please check your connection and try again.');
+            showMsg('phone-error', getLocalAdminHelpMessage('Network error. Please check your connection and try again.'));
         }
 
         setLoading('send-otp-btn', 'send-otp-spinner', 'send-otp-icon', false);
@@ -616,7 +815,12 @@
                 currentSetupToken = data.setupToken;
 
                 // Sign into Firebase Auth using the custom token issued by the backend
-                await firebase.auth().signInWithCustomToken(data.customToken);
+                try {
+                    await firebase.auth().signInWithCustomToken(data.customToken);
+                } catch (authError) {
+                    showMsg('otp-error', getFirebaseAuthErrorMessage(authError, 'OTP was verified, but sign-in failed.'));
+                    return;
+                }
 
                 if (!data.hasPassword) {
                     // First-time login — show password creation form
@@ -626,10 +830,14 @@
                     window.location.replace('admin-firebase.html');
                 }
             } else {
-                showMsg('otp-error', data.message || 'Incorrect OTP. Please try again.');
+                var otpErrorMessage = data.message || 'Incorrect OTP. Please try again.';
+                if (res.status >= 500) {
+                    otpErrorMessage = getLocalAdminHelpMessage(otpErrorMessage);
+                }
+                showMsg('otp-error', otpErrorMessage);
             }
         } catch (e) {
-            showMsg('otp-error', 'Network error. Please try again.');
+            showMsg('otp-error', getLocalAdminHelpMessage('Network error. Please try again.'));
         }
 
         setLoading('verify-otp-btn', 'verify-otp-spinner', 'verify-otp-icon', false);
@@ -639,11 +847,17 @@
         if (e.key === 'Enter') verifyOTP();
     });
 
+    document.getElementById('pass-phone-input').addEventListener('input', function(e) {
+        syncAdminUsernameFields(e.target.value);
+    });
+
     // ── State C: Password Login ────────────────────────────────────────────────
     async function loginWithPassword() {
         clearMsg('pass-error');
         var phone    = document.getElementById('pass-phone-input').value.trim();
         var password = document.getElementById('password-input').value;
+
+        syncAdminUsernameFields(phone);
 
         if (!phone || !password) {
             showMsg('pass-error', 'Please enter both your phone number and password.');
@@ -661,17 +875,25 @@
             var data = await res.json();
 
             if (data.success) {
-                await firebase.auth().signInWithCustomToken(data.customToken);
+                try {
+                    await firebase.auth().signInWithCustomToken(data.customToken);
+                } catch (authError) {
+                    showMsg('pass-error', getFirebaseAuthErrorMessage(authError, 'Password was verified, but sign-in failed.'));
+                    return;
+                }
                 window.location.replace('admin-firebase.html');
             } else {
                 var errMsg = data.message || 'Login failed.';
+                if (res.status >= 500) {
+                    errMsg = getLocalAdminHelpMessage(errMsg);
+                }
                 if (data.otpOnly) {
                     errMsg += ' Click "Use OTP instead" below to sign in via OTP.';
                 }
                 showMsg('pass-error', errMsg);
             }
         } catch (e) {
-            showMsg('pass-error', 'Network error. Please try again.');
+            showMsg('pass-error', getLocalAdminHelpMessage('Network error. Please try again.'));
         }
 
         setLoading('login-pass-btn', 'login-pass-spinner', 'login-pass-icon', false);
@@ -686,6 +908,8 @@
         clearMsg('setpass-error');
         var password = document.getElementById('new-password-input').value;
         var confirm  = document.getElementById('confirm-password-input').value;
+
+        syncAdminUsernameFields(currentPhone);
 
         if (password.length < 8) {
             showMsg('setpass-error', 'Password must be at least 8 characters long.');
@@ -713,10 +937,14 @@
             if (data.success) {
                 window.location.replace('admin-firebase.html');
             } else {
-                showMsg('setpass-error', data.message || 'Failed to set password. Please try again.');
+                var setPasswordMessage = data.message || 'Failed to set password. Please try again.';
+                if (res.status >= 500) {
+                    setPasswordMessage = getLocalAdminHelpMessage(setPasswordMessage);
+                }
+                showMsg('setpass-error', setPasswordMessage);
             }
         } catch (e) {
-            showMsg('setpass-error', 'Network error. Please try again.');
+            showMsg('setpass-error', getLocalAdminHelpMessage('Network error. Please try again.'));
         }
 
         setLoading('set-pass-btn', 'set-pass-spinner', 'set-pass-icon', false);

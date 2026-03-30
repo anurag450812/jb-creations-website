@@ -3,7 +3,7 @@
  * Production-ready serverless OTP verification with JWT tokens
  */
 
-const jwt = require('jsonwebtoken');
+const { createSignedToken, verifySignedToken } = require('./utils/token-utils');
 
 // Configuration
 const JWT_SECRET = process.env.JWT_SECRET || 'jb-creations-secret-key-change-in-production';
@@ -166,10 +166,10 @@ exports.handler = async (event, context) => {
 
         const formattedPhone = formatPhoneNumber(phoneNumber);
 
-        // Verify JWT token and extract OTP data
+        // Verify signed token and extract OTP data
         let otpData;
         try {
-            otpData = jwt.verify(otpToken, JWT_SECRET);
+            otpData = verifySignedToken(otpToken, JWT_SECRET);
         } catch (error) {
             return {
                 statusCode: 400,
@@ -221,8 +221,8 @@ exports.handler = async (event, context) => {
         // Get or create user
         const user = await getOrCreateUser(formattedPhone);
 
-        // Generate JWT token
-        const token = jwt.sign(
+        // Generate login token
+        const token = createSignedToken(
             { 
                 userId: user.id, 
                 phone: user.phone,

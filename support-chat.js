@@ -17,6 +17,7 @@ class SupportChat {
         this.maxRetries = 10;
         this.forceInit = options.forceInit || false; // Allow forced initialization for contact link
         this.hideFloatingButton = options.hideFloatingButton || false; // Hide the floating button
+        this.isFullscreen = false;
         
         // Only show floating button on my-orders page, unless forceInit is true
         const currentPage = window.location.pathname.toLowerCase();
@@ -107,6 +108,9 @@ class SupportChat {
                                 <span class="chat-status">We typically reply within a few hours</span>
                             </div>
                         </div>
+                        <button type="button" id="chat-close-btn" class="chat-close-btn" aria-label="Close support chat">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
 
                     <div class="chat-body" id="chat-body">
@@ -164,6 +168,10 @@ class SupportChat {
                     right: 20px;
                     z-index: 10000;
                     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                }
+
+                body.support-chat-fullscreen-open {
+                    overflow: hidden;
                 }
 
                 .chat-toggle-btn {
@@ -248,7 +256,7 @@ class SupportChat {
                     padding: 16px 20px;
                     display: flex;
                     align-items: center;
-                    justify-content: flex-start;
+                    justify-content: space-between;
                 }
 
                 .chat-header-info {
@@ -278,6 +286,26 @@ class SupportChat {
                 .chat-status {
                     font-size: 12px;
                     opacity: 0.9;
+                }
+
+                .chat-close-btn {
+                    width: 38px;
+                    height: 38px;
+                    border: none;
+                    border-radius: 50%;
+                    background: rgba(255,255,255,0.18);
+                    color: white;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    transition: background 0.2s ease, transform 0.2s ease;
+                    flex-shrink: 0;
+                }
+
+                .chat-close-btn:hover {
+                    background: rgba(255,255,255,0.28);
+                    transform: scale(1.05);
                 }
 
                 .chat-body {
@@ -443,6 +471,24 @@ class SupportChat {
                     transform: none;
                 }
 
+                .support-chat-widget.chat-fullscreen .chat-toggle-btn {
+                    display: none !important;
+                }
+
+                .support-chat-widget.chat-fullscreen .chat-window {
+                    position: fixed;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    left: 0;
+                    width: 100vw;
+                    max-width: 100vw;
+                    height: 100vh;
+                    max-height: 100vh;
+                    border-radius: 0;
+                    animation: none;
+                }
+
                 /* Mobile optimizations - Full screen chat */
                 @media (max-width: 480px) {
                     .support-chat-widget {
@@ -496,6 +542,10 @@ class SupportChat {
             this.toggleChat();
         });
 
+        document.getElementById('chat-close-btn').addEventListener('click', () => {
+            this.closeChat();
+        });
+
         // Handle browser back button on mobile - close chat and stay on same page
         window.addEventListener('popstate', (event) => {
             if (this.isOpen && window.innerWidth <= 480) {
@@ -519,9 +569,23 @@ class SupportChat {
         }
     }
 
-    async openChat() {
+    setFullscreenMode(isFullscreen) {
+        this.isFullscreen = isFullscreen;
+
+        const widget = document.getElementById('support-chat-widget');
+        if (widget) {
+            widget.classList.toggle('chat-fullscreen', isFullscreen);
+        }
+
+        document.body.classList.toggle('support-chat-fullscreen-open', isFullscreen);
+    }
+
+    async openChat(options = {}) {
         this.isOpen = true;
         const widget = document.getElementById('support-chat-widget');
+        const shouldFullscreen = options.fullscreen === true;
+
+        this.setFullscreenMode(shouldFullscreen);
         widget.classList.add('chat-open');
         document.getElementById('chat-window').classList.add('active');
         document.getElementById('chat-toggle-btn').classList.add('active');
@@ -557,6 +621,7 @@ class SupportChat {
         this.isOpen = false;
         const widget = document.getElementById('support-chat-widget');
         widget.classList.remove('chat-open');
+        this.setFullscreenMode(false);
         document.getElementById('chat-window').classList.remove('active');
         document.getElementById('chat-toggle-btn').classList.remove('active');
     }

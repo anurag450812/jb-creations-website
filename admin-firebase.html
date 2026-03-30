@@ -1060,6 +1060,287 @@
             resize: vertical;
         }
 
+        .storefront-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .storefront-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+            gap: 1.5rem;
+        }
+
+        .storefront-helper-text {
+            margin-top: 0.35rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .storefront-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .pricing-card {
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            box-shadow: var(--shadow-sm);
+            padding: 1rem;
+        }
+
+        .pricing-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .pricing-card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .pricing-card-subtitle {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 0.2rem;
+        }
+
+        .pricing-card-badge {
+            padding: 0.35rem 0.65rem;
+            border-radius: 999px;
+            background: var(--bg-tertiary);
+            color: var(--primary);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            white-space: nowrap;
+        }
+
+        .pricing-card-meta {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .pricing-meta-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.45rem 0.7rem;
+            border-radius: 999px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .pricing-card-fields {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.85rem;
+        }
+
+        .coupon-editor-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.4rem 0.7rem;
+            border-radius: 999px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .coupon-preview-card {
+            --coupon-accent: #16697A;
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            border: 1px solid var(--border-light);
+            background: linear-gradient(135deg, rgba(22, 105, 122, 0.08) 0%, #ffffff 100%);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .coupon-preview-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--coupon-accent);
+        }
+
+        .coupon-preview-emoji {
+            position: absolute;
+            top: 0.9rem;
+            right: 0.9rem;
+            font-size: 1.4rem;
+        }
+
+        .coupon-preview-code {
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--coupon-accent);
+            margin-bottom: 0.45rem;
+        }
+
+        .coupon-preview-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.35rem;
+        }
+
+        .coupon-preview-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .coupon-preview-footer {
+            margin-top: 0.8rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .coupon-admin-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .coupon-admin-item {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            background: var(--bg-primary);
+        }
+
+        .coupon-admin-main {
+            display: grid;
+            grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .coupon-admin-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+        }
+
+        .coupon-admin-title-row {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+        }
+
+        .coupon-admin-code {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: 0.04em;
+        }
+
+        .coupon-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.3rem 0.65rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .coupon-status-pill.active {
+            background: rgba(16, 185, 129, 0.14);
+            color: #047857;
+        }
+
+        .coupon-status-pill.inactive {
+            background: rgba(239, 68, 68, 0.12);
+            color: #b91c1c;
+        }
+
+        .coupon-admin-description {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+            line-height: 1.55;
+        }
+
+        .coupon-admin-metrics {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .coupon-admin-actions {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .storefront-empty-state {
+            border: 1px dashed var(--border-medium);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+            background: var(--bg-secondary);
+        }
+
+        @media (max-width: 1100px) {
+            .storefront-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .coupon-admin-item,
+            .coupon-admin-main {
+                grid-template-columns: 1fr;
+            }
+
+            .coupon-admin-actions {
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .pricing-card-fields {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .review-editor-flags {
             display: flex;
             gap: 1rem;
@@ -4657,12 +4938,100 @@
                 </div>
 
                 <div id="products-view" class="view" style="display: none;">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Products</h3>
+                    <div class="storefront-stack">
+                        <div class="storefront-grid">
+                            <div class="card storefront-section">
+                                <div class="card-header">
+                                    <div>
+                                        <h3 class="card-title">Size Pricing</h3>
+                                        <p class="storefront-helper-text">Change the live selling price and MRP for every frame size.</p>
+                                    </div>
+                                    <div class="storefront-actions">
+                                        <button class="btn btn-secondary btn-sm" onclick="loadStorefrontConfigAdmin(true)">
+                                            <i class="fas fa-rotate"></i> Refresh
+                                        </button>
+                                        <button class="btn btn-primary btn-sm" onclick="saveSizePricingAdmin()">
+                                            <i class="fas fa-floppy-disk"></i> Save Pricing
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div id="size-pricing-admin-grid" class="pricing-grid">
+                                        <div class="storefront-empty-state">Loading pricing settings...</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card storefront-section">
+                                <div class="card-header">
+                                    <div>
+                                        <h3 class="card-title">Coupon Studio</h3>
+                                        <p class="storefront-helper-text">Create, style and launch new coupon codes for the storefront.</p>
+                                    </div>
+                                    <div class="coupon-editor-status" id="coupon-editor-mode-label">
+                                        <i class="fas fa-plus"></i>
+                                        Creating new coupon
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="review-editor-grid">
+                                        <div class="review-editor-field">
+                                            <label for="coupon-editor-code">Coupon Code</label>
+                                            <input id="coupon-editor-code" type="text" placeholder="SAVE500" oninput="updateCouponEditorPreview()">
+                                        </div>
+                                        <div class="review-editor-field">
+                                            <label for="coupon-editor-emoji">Emoji</label>
+                                            <input id="coupon-editor-emoji" type="text" maxlength="4" placeholder="🎁" oninput="updateCouponEditorPreview()">
+                                        </div>
+                                        <div class="review-editor-field">
+                                            <label for="coupon-editor-discount">Discount Amount</label>
+                                            <input id="coupon-editor-discount" type="number" min="1" placeholder="100" oninput="updateCouponEditorPreview()">
+                                        </div>
+                                        <div class="review-editor-field">
+                                            <label for="coupon-editor-min-order">Minimum Order</label>
+                                            <input id="coupon-editor-min-order" type="number" min="0" placeholder="500" oninput="updateCouponEditorPreview()">
+                                        </div>
+                                        <div class="review-editor-field">
+                                            <label for="coupon-editor-color">Accent Color</label>
+                                            <input id="coupon-editor-color" type="color" value="#16697A" oninput="updateCouponEditorPreview()">
+                                        </div>
+                                        <div class="review-editor-field">
+                                            <label for="coupon-editor-active">Status</label>
+                                            <select id="coupon-editor-active" onchange="updateCouponEditorPreview()">
+                                                <option value="true">Active</option>
+                                                <option value="false">Inactive</option>
+                                            </select>
+                                        </div>
+                                        <div class="review-editor-field" style="grid-column: 1 / -1;">
+                                            <label for="coupon-editor-description">Description</label>
+                                            <textarea id="coupon-editor-description" placeholder="₹100 OFF on orders above ₹500" oninput="updateCouponEditorPreview()"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div id="coupon-editor-preview" class="coupon-preview-card"></div>
+
+                                    <div class="storefront-actions" style="margin-top: 1rem;">
+                                        <button class="btn btn-secondary" onclick="resetCouponEditor(true)">Clear</button>
+                                        <button class="btn btn-primary" onclick="saveCouponEditor()">
+                                            <i class="fas fa-ticket"></i> Save Coupon
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <p style="text-align: center; color: var(--text-muted); padding: 3rem;">Product management coming soon...</p>
+
+                        <div class="card storefront-section">
+                            <div class="card-header">
+                                <div>
+                                    <h3 class="card-title">Active Coupon List</h3>
+                                    <p class="storefront-helper-text">Edit, disable or remove coupons that customers can see in cart.</p>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="admin-coupon-list" class="coupon-admin-list">
+                                    <div class="storefront-empty-state">Loading coupons...</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -4816,6 +5185,30 @@
         let reviewSettings = null;
         let reviewEditorState = { mode: 'create', reviewId: null };
         let stats = {};
+        let storefrontSettings = null;
+        let storefrontCouponEditingId = null;
+        let storefrontProductsLoaded = false;
+
+        const STOREFRONT_VARIANTS = [
+            { key: '13x19-portrait', label: '13x19 Portrait', size: '13x19', orientation: 'portrait' },
+            { key: '13x19-landscape', label: '13x19 Landscape', size: '13x19', orientation: 'landscape' },
+            { key: '13x10-portrait', label: '13x10 Portrait', size: '13x10', orientation: 'portrait' },
+            { key: '13x10-landscape', label: '13x10 Landscape', size: '13x10', orientation: 'landscape' }
+        ];
+
+        const DEFAULT_STOREFRONT_PRODUCTS = {
+            sizePricing: {
+                '13x19-portrait': { size: '13x19', orientation: 'portrait', label: '13x19 Portrait', price: 499, mrp: 999 },
+                '13x19-landscape': { size: '13x19', orientation: 'landscape', label: '13x19 Landscape', price: 499, mrp: 999 },
+                '13x10-portrait': { size: '13x10', orientation: 'portrait', label: '13x10 Portrait', price: 349, mrp: 799 },
+                '13x10-landscape': { size: '13x10', orientation: 'landscape', label: '13x10 Landscape', price: 349, mrp: 799 }
+            },
+            coupons: [
+                { id: 'SAVE100', discount: 100, minOrder: 500, description: '₹100 OFF on orders above ₹500', emoji: '🎁', accentColor: '#16697A', active: true },
+                { id: 'SAVE250', discount: 250, minOrder: 1000, description: '₹250 OFF on orders above ₹1000', emoji: '🎉', accentColor: '#489FB5', active: true },
+                { id: 'SAVE300', discount: 300, minOrder: 1500, description: '₹300 OFF on orders above ₹1500', emoji: '💎', accentColor: '#FFA62B', active: true }
+            ]
+        };
         
         // Pagination variables
         let currentPage = 1;
@@ -4950,7 +5343,7 @@
                 'reviews': 'Moderate customer reviews and control automation',
                 'support': 'Chat with customers and provide support',
                 'analytics': 'Business insights and analytics',
-                'products': 'Manage your product catalog',
+                'products': 'Manage live pricing and coupons',
                 'inventory': 'Track stock and inventory',
                 'reports': 'Generate and view reports',
                 'settings': 'Configure system settings',
@@ -4979,6 +5372,9 @@
                 case 'support':
                     loadSupportChats();
                     break;
+                case 'products':
+                    loadStorefrontConfigAdmin();
+                    break;
                 // Add more cases as needed
             }
         }
@@ -4993,6 +5389,444 @@
             
             if (dateSortFilter) {
                 dateSortFilter.addEventListener('change', filterOrders);
+            }
+        }
+
+        function cloneDefaultStorefrontProducts() {
+            return JSON.parse(JSON.stringify(DEFAULT_STOREFRONT_PRODUCTS));
+        }
+
+        function sanitizeCouponAccentColor(value) {
+            return /^#([0-9a-f]{6})$/i.test(value || '') ? value : '#16697A';
+        }
+
+        function normalizeAdminStorefrontSettings(settings = {}) {
+            const defaults = cloneDefaultStorefrontProducts();
+            const normalized = cloneDefaultStorefrontProducts();
+
+            Object.keys(defaults.sizePricing).forEach(key => {
+                normalized.sizePricing[key] = {
+                    ...defaults.sizePricing[key],
+                    ...((settings.sizePricing && settings.sizePricing[key]) || {})
+                };
+                normalized.sizePricing[key].price = Number(normalized.sizePricing[key].price) || defaults.sizePricing[key].price;
+                normalized.sizePricing[key].mrp = Number(normalized.sizePricing[key].mrp) || defaults.sizePricing[key].mrp;
+            });
+
+            if (Array.isArray(settings.coupons) && settings.coupons.length) {
+                normalized.coupons = settings.coupons.map((coupon, index) => {
+                    const fallback = defaults.coupons[index % defaults.coupons.length] || defaults.coupons[0];
+                    const rawMinOrder = Number(coupon.minOrder);
+                    const rawDiscount = Number(coupon.discount);
+
+                    return {
+                        id: String(coupon.id || fallback.id).trim().toUpperCase(),
+                        discount: Number.isFinite(rawDiscount) && rawDiscount > 0 ? rawDiscount : fallback.discount,
+                        minOrder: Number.isFinite(rawMinOrder) && rawMinOrder >= 0 ? rawMinOrder : fallback.minOrder,
+                        description: String(coupon.description || fallback.description).trim(),
+                        emoji: String(coupon.emoji || fallback.emoji).trim() || fallback.emoji,
+                        accentColor: sanitizeCouponAccentColor(coupon.accentColor || fallback.accentColor),
+                        active: coupon.active !== false
+                    };
+                });
+            }
+
+            return normalized;
+        }
+
+        function waitForAdminStorefrontApi(timeoutMs = 5000) {
+            if (window.jbAPI) {
+                return Promise.resolve(window.jbAPI);
+            }
+
+            return new Promise(resolve => {
+                let resolved = false;
+                const timeout = setTimeout(() => {
+                    if (!resolved) {
+                        resolved = true;
+                        resolve(window.jbAPI || null);
+                    }
+                }, timeoutMs);
+
+                function handleReady() {
+                    if (resolved) {
+                        return;
+                    }
+                    resolved = true;
+                    clearTimeout(timeout);
+                    window.removeEventListener('firebaseReady', handleReady);
+                    resolve(window.jbAPI || null);
+                }
+
+                window.addEventListener('firebaseReady', handleReady);
+            });
+        }
+
+        function renderStorefrontUnavailable(message) {
+            const pricingGrid = document.getElementById('size-pricing-admin-grid');
+            const couponList = document.getElementById('admin-coupon-list');
+
+            if (pricingGrid) {
+                pricingGrid.innerHTML = `<div class="storefront-empty-state">${escapeHtml(message)}</div>`;
+            }
+
+            if (couponList) {
+                couponList.innerHTML = `<div class="storefront-empty-state">${escapeHtml(message)}</div>`;
+            }
+        }
+
+        function renderSizePricingAdmin() {
+            const grid = document.getElementById('size-pricing-admin-grid');
+            if (!grid || !storefrontSettings) {
+                return;
+            }
+
+            grid.innerHTML = STOREFRONT_VARIANTS.map(variant => {
+                const pricing = storefrontSettings.sizePricing[variant.key] || DEFAULT_STOREFRONT_PRODUCTS.sizePricing[variant.key];
+                const savings = Math.max(0, Number(pricing.mrp) - Number(pricing.price));
+
+                return `
+                    <div class="pricing-card" data-size-key="${variant.key}">
+                        <div class="pricing-card-header">
+                            <div>
+                                <div class="pricing-card-title">${escapeHtml(pricing.label || variant.label)}</div>
+                                <div class="pricing-card-subtitle">${escapeHtml(variant.size)} ${escapeHtml(variant.orientation)}</div>
+                            </div>
+                            <span class="pricing-card-badge">${escapeHtml(variant.orientation)}</span>
+                        </div>
+                        <div class="pricing-card-meta">
+                            <span class="pricing-meta-pill"><i class="fas fa-tag"></i> Sell ₹${Number(pricing.price).toLocaleString()}</span>
+                            <span class="pricing-meta-pill"><i class="fas fa-wallet"></i> Save ₹${savings.toLocaleString()}</span>
+                        </div>
+                        <div class="pricing-card-fields">
+                            <div class="review-editor-field">
+                                <label>Selling Price</label>
+                                <input type="number" min="1" value="${Number(pricing.price)}" data-pricing-field="price">
+                            </div>
+                            <div class="review-editor-field">
+                                <label>MRP</label>
+                                <input type="number" min="1" value="${Number(pricing.mrp)}" data-pricing-field="mrp">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderCouponListAdmin() {
+            const list = document.getElementById('admin-coupon-list');
+            if (!list || !storefrontSettings) {
+                return;
+            }
+
+            if (!storefrontSettings.coupons.length) {
+                list.innerHTML = '<div class="storefront-empty-state">No coupons created yet.</div>';
+                return;
+            }
+
+            list.innerHTML = storefrontSettings.coupons.map(coupon => {
+                const accentColor = sanitizeCouponAccentColor(coupon.accentColor);
+                return `
+                    <div class="coupon-admin-item">
+                        <div class="coupon-admin-main">
+                            <div class="coupon-preview-card" style="--coupon-accent: ${accentColor};">
+                                <div class="coupon-preview-emoji">${escapeHtml(coupon.emoji || '🎁')}</div>
+                                <div class="coupon-preview-code">${escapeHtml(coupon.id)}</div>
+                                <div class="coupon-preview-value">₹${Number(coupon.discount).toLocaleString()} OFF</div>
+                                <div class="coupon-preview-text">${escapeHtml(coupon.description)}</div>
+                                <div class="coupon-preview-footer">Min order: ₹${Number(coupon.minOrder).toLocaleString()}</div>
+                            </div>
+                            <div class="coupon-admin-details">
+                                <div class="coupon-admin-title-row">
+                                    <span class="coupon-admin-code">${escapeHtml(coupon.id)}</span>
+                                    <span class="coupon-status-pill ${coupon.active !== false ? 'active' : 'inactive'}">${coupon.active !== false ? 'Active' : 'Inactive'}</span>
+                                </div>
+                                <div class="coupon-admin-description">${escapeHtml(coupon.description)}</div>
+                                <div class="coupon-admin-metrics">
+                                    <span class="pricing-meta-pill"><i class="fas fa-wallet"></i> ₹${Number(coupon.discount).toLocaleString()} OFF</span>
+                                    <span class="pricing-meta-pill"><i class="fas fa-bag-shopping"></i> Min ₹${Number(coupon.minOrder).toLocaleString()}</span>
+                                    <span class="pricing-meta-pill"><i class="fas fa-palette"></i> ${accentColor}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="coupon-admin-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="editCouponAdmin('${coupon.id}')">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteCouponAdmin('${coupon.id}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateCouponEditorPreview() {
+            const preview = document.getElementById('coupon-editor-preview');
+            if (!preview) {
+                return;
+            }
+
+            const code = (document.getElementById('coupon-editor-code')?.value || 'NEWCODE').trim().toUpperCase();
+            const emoji = (document.getElementById('coupon-editor-emoji')?.value || '🎁').trim() || '🎁';
+            const discount = Number(document.getElementById('coupon-editor-discount')?.value) || 100;
+            const minOrder = Number(document.getElementById('coupon-editor-min-order')?.value) || 500;
+            const accentColor = sanitizeCouponAccentColor(document.getElementById('coupon-editor-color')?.value);
+            const description = (document.getElementById('coupon-editor-description')?.value || '').trim() || `₹${discount} OFF on orders above ₹${minOrder}`;
+            const isActive = document.getElementById('coupon-editor-active')?.value !== 'false';
+
+            preview.style.setProperty('--coupon-accent', accentColor);
+            preview.innerHTML = `
+                <div class="coupon-preview-emoji">${escapeHtml(emoji)}</div>
+                <div class="coupon-preview-code">${escapeHtml(code)}</div>
+                <div class="coupon-preview-value">₹${discount.toLocaleString()} OFF</div>
+                <div class="coupon-preview-text">${escapeHtml(description)}</div>
+                <div class="coupon-preview-footer">Min order: ₹${minOrder.toLocaleString()} · ${isActive ? 'Visible in cart' : 'Saved as inactive'}</div>
+            `;
+        }
+
+        function resetCouponEditor(showMessage = false) {
+            storefrontCouponEditingId = null;
+
+            const defaultCoupon = DEFAULT_STOREFRONT_PRODUCTS.coupons[0];
+            document.getElementById('coupon-editor-code').value = '';
+            document.getElementById('coupon-editor-emoji').value = defaultCoupon.emoji;
+            document.getElementById('coupon-editor-discount').value = defaultCoupon.discount;
+            document.getElementById('coupon-editor-min-order').value = defaultCoupon.minOrder;
+            document.getElementById('coupon-editor-color').value = defaultCoupon.accentColor;
+            document.getElementById('coupon-editor-active').value = 'true';
+            document.getElementById('coupon-editor-description').value = defaultCoupon.description;
+
+            const modeLabel = document.getElementById('coupon-editor-mode-label');
+            if (modeLabel) {
+                modeLabel.innerHTML = '<i class="fas fa-plus"></i> Creating new coupon';
+            }
+
+            updateCouponEditorPreview();
+
+            if (showMessage) {
+                showShippingToast('Coupon editor reset', 'info');
+            }
+        }
+
+        function editCouponAdmin(couponId) {
+            if (!storefrontSettings) {
+                return;
+            }
+
+            const coupon = storefrontSettings.coupons.find(item => item.id === couponId);
+            if (!coupon) {
+                showShippingToast('Coupon not found', 'error');
+                return;
+            }
+
+            storefrontCouponEditingId = coupon.id;
+            document.getElementById('coupon-editor-code').value = coupon.id;
+            document.getElementById('coupon-editor-emoji').value = coupon.emoji || '🎁';
+            document.getElementById('coupon-editor-discount').value = coupon.discount;
+            document.getElementById('coupon-editor-min-order').value = coupon.minOrder;
+            document.getElementById('coupon-editor-color').value = sanitizeCouponAccentColor(coupon.accentColor);
+            document.getElementById('coupon-editor-active').value = coupon.active !== false ? 'true' : 'false';
+            document.getElementById('coupon-editor-description').value = coupon.description || '';
+
+            const modeLabel = document.getElementById('coupon-editor-mode-label');
+            if (modeLabel) {
+                modeLabel.innerHTML = `<i class="fas fa-pen"></i> Editing ${escapeHtml(coupon.id)}`;
+            }
+
+            updateCouponEditorPreview();
+            document.getElementById('coupon-editor-code')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function collectSizePricingFromAdmin() {
+            const nextPricing = cloneDefaultStorefrontProducts().sizePricing;
+
+            document.querySelectorAll('#size-pricing-admin-grid .pricing-card').forEach(card => {
+                const sizeKey = card.dataset.sizeKey;
+                if (!sizeKey || !nextPricing[sizeKey]) {
+                    return;
+                }
+
+                const priceValue = Number(card.querySelector('[data-pricing-field="price"]')?.value);
+                const mrpValue = Number(card.querySelector('[data-pricing-field="mrp"]')?.value);
+
+                nextPricing[sizeKey] = {
+                    ...nextPricing[sizeKey],
+                    ...(storefrontSettings?.sizePricing?.[sizeKey] || {}),
+                    price: priceValue,
+                    mrp: mrpValue
+                };
+            });
+
+            return nextPricing;
+        }
+
+        async function saveSizePricingAdmin() {
+            const api = await waitForAdminStorefrontApi();
+            if (!api || typeof api.updateStorefrontSettings !== 'function') {
+                showShippingToast('Storefront settings API is not ready yet', 'error');
+                return;
+            }
+
+            const nextPricing = collectSizePricingFromAdmin();
+
+            for (const variant of STOREFRONT_VARIANTS) {
+                const entry = nextPricing[variant.key];
+                if (!entry || entry.price <= 0 || entry.mrp <= 0) {
+                    showShippingToast(`Please enter valid prices for ${variant.label}`, 'error');
+                    return;
+                }
+                if (entry.mrp < entry.price) {
+                    showShippingToast(`MRP cannot be lower than selling price for ${variant.label}`, 'error');
+                    return;
+                }
+            }
+
+            const result = await api.updateStorefrontSettings({ sizePricing: nextPricing });
+            if (!result.success) {
+                showShippingToast(result.error || 'Failed to save size pricing', 'error');
+                return;
+            }
+
+            storefrontSettings = normalizeAdminStorefrontSettings(result.settings || {
+                sizePricing: nextPricing,
+                coupons: storefrontSettings?.coupons || []
+            });
+            renderSizePricingAdmin();
+            showShippingToast('Size pricing saved successfully', 'success');
+        }
+
+        async function saveCouponEditor() {
+            const api = await waitForAdminStorefrontApi();
+            if (!api || typeof api.updateStorefrontSettings !== 'function') {
+                showShippingToast('Storefront settings API is not ready yet', 'error');
+                return;
+            }
+
+            const id = (document.getElementById('coupon-editor-code')?.value || '').trim().toUpperCase();
+            const emoji = (document.getElementById('coupon-editor-emoji')?.value || '🎁').trim() || '🎁';
+            const discount = Number(document.getElementById('coupon-editor-discount')?.value);
+            const minOrder = Number(document.getElementById('coupon-editor-min-order')?.value);
+            const accentColor = sanitizeCouponAccentColor(document.getElementById('coupon-editor-color')?.value);
+            const active = document.getElementById('coupon-editor-active')?.value !== 'false';
+            const descriptionField = (document.getElementById('coupon-editor-description')?.value || '').trim();
+            const description = descriptionField || `₹${discount} OFF on orders above ₹${minOrder}`;
+
+            if (!/^[A-Z0-9_-]{4,20}$/.test(id)) {
+                showShippingToast('Coupon code must be 4-20 characters using letters, numbers, _ or -', 'error');
+                return;
+            }
+
+            if (!(discount > 0) || !(minOrder >= 0)) {
+                showShippingToast('Please enter valid discount and minimum order values', 'error');
+                return;
+            }
+
+            const nextCoupon = { id, emoji, discount, minOrder, description, accentColor, active };
+            const coupons = [...(storefrontSettings?.coupons || [])];
+            const duplicateIndex = coupons.findIndex(item => item.id === id);
+            const editingIndex = storefrontCouponEditingId ? coupons.findIndex(item => item.id === storefrontCouponEditingId) : -1;
+
+            if (duplicateIndex !== -1 && duplicateIndex !== editingIndex) {
+                showShippingToast('A coupon with that code already exists', 'error');
+                return;
+            }
+
+            if (editingIndex !== -1) {
+                coupons.splice(editingIndex, 1, nextCoupon);
+            } else {
+                coupons.unshift(nextCoupon);
+            }
+
+            coupons.sort((left, right) => {
+                if ((left.active !== false) !== (right.active !== false)) {
+                    return left.active === false ? 1 : -1;
+                }
+                return left.minOrder - right.minOrder;
+            });
+
+            const result = await api.updateStorefrontSettings({ coupons });
+            if (!result.success) {
+                showShippingToast(result.error || 'Failed to save coupon', 'error');
+                return;
+            }
+
+            storefrontSettings = normalizeAdminStorefrontSettings(result.settings || {
+                sizePricing: storefrontSettings?.sizePricing || cloneDefaultStorefrontProducts().sizePricing,
+                coupons
+            });
+            renderCouponListAdmin();
+            resetCouponEditor();
+            showShippingToast(`Coupon ${id} saved successfully`, 'success');
+        }
+
+        async function deleteCouponAdmin(couponId) {
+            const api = await waitForAdminStorefrontApi();
+            if (!api || typeof api.updateStorefrontSettings !== 'function') {
+                showShippingToast('Storefront settings API is not ready yet', 'error');
+                return;
+            }
+
+            if (!confirm(`Delete coupon ${couponId}?`)) {
+                return;
+            }
+
+            const coupons = (storefrontSettings?.coupons || []).filter(item => item.id !== couponId);
+            const result = await api.updateStorefrontSettings({ coupons });
+            if (!result.success) {
+                showShippingToast(result.error || 'Failed to delete coupon', 'error');
+                return;
+            }
+
+            storefrontSettings = normalizeAdminStorefrontSettings(result.settings || {
+                sizePricing: storefrontSettings?.sizePricing || cloneDefaultStorefrontProducts().sizePricing,
+                coupons
+            });
+            renderCouponListAdmin();
+
+            if (storefrontCouponEditingId === couponId) {
+                resetCouponEditor();
+            }
+
+            showShippingToast(`Coupon ${couponId} deleted`, 'success');
+        }
+
+        async function loadStorefrontConfigAdmin(forceReload = false) {
+            const pricingGrid = document.getElementById('size-pricing-admin-grid');
+            const couponList = document.getElementById('admin-coupon-list');
+
+            if (!pricingGrid || !couponList) {
+                return;
+            }
+
+            if (storefrontProductsLoaded && !forceReload) {
+                renderSizePricingAdmin();
+                renderCouponListAdmin();
+                updateCouponEditorPreview();
+                return;
+            }
+
+            pricingGrid.innerHTML = '<div class="storefront-empty-state">Loading pricing settings...</div>';
+            couponList.innerHTML = '<div class="storefront-empty-state">Loading coupons...</div>';
+
+            const api = await waitForAdminStorefrontApi();
+            if (!api || typeof api.getStorefrontSettings !== 'function') {
+                renderStorefrontUnavailable('Storefront settings are not available yet.');
+                return;
+            }
+
+            const result = await api.getStorefrontSettings();
+            storefrontSettings = normalizeAdminStorefrontSettings(result.settings || cloneDefaultStorefrontProducts());
+            storefrontProductsLoaded = true;
+
+            renderSizePricingAdmin();
+            renderCouponListAdmin();
+
+            if (!storefrontCouponEditingId) {
+                resetCouponEditor();
+            } else {
+                updateCouponEditorPreview();
+            }
+
+            if (!result.success && result.error) {
+                showShippingToast(result.error, 'error');
             }
         }
 
