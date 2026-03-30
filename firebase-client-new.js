@@ -353,6 +353,76 @@ class JBCreationsAPI {
         console.log('🚀 Xidlz API powered by Firebase initialized');
     }
 
+    async waitForAuthenticatedUser(timeoutMs = 10000) {
+        if (typeof firebase === 'undefined' || !firebase.auth) {
+            throw new Error('Firebase Auth is not available yet. Please refresh and try again.');
+        }
+
+        const existingUser = firebase.auth().currentUser;
+        if (existingUser) {
+            return existingUser;
+        }
+
+        return new Promise((resolve, reject) => {
+            let settled = false;
+            let unsubscribe = function() {};
+
+            function finish(callback, value) {
+                if (settled) {
+                    return;
+                }
+                settled = true;
+                clearTimeout(timeout);
+                unsubscribe();
+                callback(value);
+            }
+
+            const timeout = setTimeout(() => {
+                finish(reject, new Error('Admin session is not ready yet. Please wait a moment and try again.'));
+            }, timeoutMs);
+
+            unsubscribe = firebase.auth().onAuthStateChanged(function(user) {
+                if (!user) {
+                    return;
+                }
+                finish(resolve, user);
+            }, function(error) {
+                finish(reject, error);
+            });
+        });
+    }
+
+    async ensureAdminSession(forceRefresh = false) {
+        const user = await this.waitForAuthenticatedUser();
+        const tokenResult = await user.getIdTokenResult(forceRefresh);
+        const hasAdminClaim = !!(tokenResult && tokenResult.claims && tokenResult.claims.admin);
+        const hasAdminUid = /^admin_[6-9]\d{9}$/.test(user.uid || '');
+
+        if (!hasAdminClaim && !hasAdminUid) {
+            throw new Error('Your account is signed in, but admin access is not available for this session. Please sign in again.');
+        }
+
+        return { user, tokenResult };
+    }
+
+    async withAdminSiteConfigAccess(operation) {
+        await this.ensureAdminSession(true);
+
+        try {
+            return await operation();
+        } catch (error) {
+            const message = (error && error.message) || '';
+            const isPermissionError = error && (error.code === 'permission-denied' || /Missing or insufficient permissions/i.test(message));
+
+            if (!isPermissionError) {
+                throw error;
+            }
+
+            await this.ensureAdminSession(true);
+            return operation();
+        }
+    }
+
     // Create customer record
     async createCustomer(customerData) {
         try {
@@ -636,15 +706,15 @@ class JBCreationsAPI {
     async ensureReviewSettings() {
         try {
             const settingsRef = this.db.collection('siteConfig').doc('reviewSettings');
-            const snapshot = await settingsRef.get();
+            const snapshot = await this.withAdminSiteConfigAccess(() => settingsRef.get());
 
             if (!snapshot.exists) {
                 const defaults = getDefaultReviewSettings();
-                await settingsRef.set({
+                await this.withAdminSiteConfigAccess(() => settingsRef.set({
                     ...defaults,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                }));
                 return defaults;
             }
 
@@ -658,16 +728,16 @@ class JBCreationsAPI {
 
             const needsRepair = !data.stats || !Array.isArray(data.usedAutoReviewKeys) || typeof data.autoReviewsEnabled !== 'boolean';
             if (needsRepair) {
-                await settingsRef.set({
+                await this.withAdminSiteConfigAccess(() => settingsRef.set({
                     ...mergedSettings,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
+                }, { merge: true }));
             }
 
             return mergedSettings;
         } catch (error) {
             console.error('❌ Error ensuring review settings:', error);
-            return getDefaultReviewSettings();
+            throw error;
         }
     }
 
@@ -684,10 +754,10 @@ class JBCreationsAPI {
     async updateReviewSettings(updateData) {
         try {
             await this.ensureReviewSettings();
-            await this.db.collection('siteConfig').doc('reviewSettings').set({
+            await this.withAdminSiteConfigAccess(() => this.db.collection('siteConfig').doc('reviewSettings').set({
                 ...updateData,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
+            }, { merge: true }));
             return { success: true };
         } catch (error) {
             console.error('❌ Error updating review settings:', error);
@@ -698,15 +768,15 @@ class JBCreationsAPI {
     async ensureStorefrontSettings() {
         try {
             const settingsRef = this.db.collection('siteConfig').doc('storefrontSettings');
-            const snapshot = await settingsRef.get();
+            const snapshot = await this.withAdminSiteConfigAccess(() => settingsRef.get());
 
             if (!snapshot.exists) {
                 const defaults = getDefaultStorefrontSettings();
-                await settingsRef.set({
+                await this.withAdminSiteConfigAccess(() => settingsRef.set({
                     ...defaults,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                }));
                 return defaults;
             }
 
@@ -715,16 +785,16 @@ class JBCreationsAPI {
             const needsRepair = !data.sizePricing || !Array.isArray(data.coupons);
 
             if (needsRepair) {
-                await settingsRef.set({
+                await this.withAdminSiteConfigAccess(() => settingsRef.set({
                     ...mergedSettings,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
+                }, { merge: true }));
             }
 
             return mergedSettings;
         } catch (error) {
             console.error('❌ Error ensuring storefront settings:', error);
-            return getDefaultStorefrontSettings();
+            throw error;
         }
     }
 
@@ -748,10 +818,10 @@ class JBCreationsAPI {
                 coupons: updateData.coupons || currentSettings.coupons
             });
 
-            await this.db.collection('siteConfig').doc('storefrontSettings').set({
+            await this.withAdminSiteConfigAccess(() => this.db.collection('siteConfig').doc('storefrontSettings').set({
                 ...nextSettings,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
+            }, { merge: true }));
 
             return { success: true, settings: nextSettings };
         } catch (error) {

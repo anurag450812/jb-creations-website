@@ -541,6 +541,7 @@
     var currentOtpToken  = null;
     var currentPhone     = null;   // raw value from the input (10 digits without country code)
     var currentSetupToken = null;
+    var currentCustomToken = null;
     var countdownInterval = null;
     var adminHealthStatus = null;
 
@@ -813,22 +814,25 @@
             if (data.success) {
                 clearInterval(countdownInterval);
                 currentSetupToken = data.setupToken;
+                currentCustomToken = data.customToken;
+
+                if (!data.hasPassword) {
+                    // First-time login — collect the password before signing into Firebase.
+                    showState('set-password');
+                    return;
+                }
 
                 // Sign into Firebase Auth using the custom token issued by the backend
                 try {
-                    await firebase.auth().signInWithCustomToken(data.customToken);
+                    await firebase.auth().signInWithCustomToken(currentCustomToken);
+                    currentCustomToken = null;
                 } catch (authError) {
                     showMsg('otp-error', getFirebaseAuthErrorMessage(authError, 'OTP was verified, but sign-in failed.'));
                     return;
                 }
 
-                if (!data.hasPassword) {
-                    // First-time login — show password creation form
-                    showState('set-password');
-                } else {
-                    // Password already set — go straight to the dashboard
-                    window.location.replace('admin-firebase.html');
-                }
+                // Password already set — go straight to the dashboard
+                window.location.replace('admin-firebase.html');
             } else {
                 var otpErrorMessage = data.message || 'Incorrect OTP. Please try again.';
                 if (res.status >= 500) {
@@ -935,6 +939,20 @@
             var data = await res.json();
 
             if (data.success) {
+                if (!currentCustomToken) {
+                    showMsg('setpass-error', 'Your verified admin session expired. Please verify the OTP again.');
+                    return;
+                }
+
+                try {
+                    await firebase.auth().signInWithCustomToken(currentCustomToken);
+                    currentCustomToken = null;
+                    currentSetupToken = null;
+                } catch (authError) {
+                    showMsg('setpass-error', getFirebaseAuthErrorMessage(authError, 'Password was saved, but sign-in failed.'));
+                    return;
+                }
+
                 window.location.replace('admin-firebase.html');
             } else {
                 var setPasswordMessage = data.message || 'Failed to set password. Please try again.';
