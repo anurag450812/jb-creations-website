@@ -6013,6 +6013,7 @@
                         updateTabCounts(); // Update tab counts
                         applyTabFilter(); // Apply current tab filter
                         debugAfterLoad(); // Debug the loaded data
+                        loadStorageUsage(); // Load storage stats once
                         return;
                     } else {
                         console.error('❌ Failed to load orders from Firebase:', result?.error || 'Unknown error');
@@ -6056,9 +6057,6 @@
             document.getElementById('total-revenue').textContent = '₹' + totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 });
             document.getElementById('pending-orders').textContent = pendingOrders.toLocaleString();
             document.getElementById('new-customers').textContent = newCustomers.toLocaleString();
-
-            // Also load storage usage when dashboard stats update
-            loadStorageUsage();
         }
 
         // ============ STORAGE USAGE DISPLAY ============
@@ -6096,9 +6094,11 @@
                 </div>`;
         }
 
+        let _storageLoading = false;
         async function loadStorageUsage() {
             const grid = document.getElementById('storage-grid');
-            if (!grid) return;
+            if (!grid || _storageLoading) return;
+            _storageLoading = true;
 
             try {
                 const resp = await fetch('/api/cloudinary-manage', {
@@ -6140,6 +6140,8 @@
             } catch (err) {
                 console.error('Storage usage fetch error:', err);
                 grid.innerHTML = '<div style="color:var(--danger);padding:1rem;">Error: ' + err.message + '</div>';
+            } finally {
+                _storageLoading = false;
             }
         }
 
@@ -9868,19 +9870,23 @@
                 });
             }
 
-            // 3. Check order.items[].cloudinaryUrl – derive public ID from URL
+            // 3. Check order.items[] – derive public IDs from Cloudinary URLs
             if (order.items && Array.isArray(order.items)) {
                 order.items.forEach(item => {
-                    const url = item.cloudinaryUrl;
-                    if (url && url.includes('res.cloudinary.com')) {
-                        // URL format: https://res.cloudinary.com/<cloud>/image/upload/v.../folder/file.ext
-                        const match = url.match(/\/upload\/(?:v\d+\/)?(jb-creations-orders\/.+?)(?:\.\w+)?$/);
-                        if (match) {
-                            publicIds.push(match[1]);
-                            const parts = match[1].split('/');
-                            if (parts.length > 1) folderPrefixes.add(parts.slice(0, -1).join('/'));
+                    // Check all possible URL fields on each item
+                    const urlFields = ['cloudinaryUrl', 'printImagePath', 'displayImagePath', 'originalImagePath'];
+                    urlFields.forEach(field => {
+                        const url = item[field];
+                        if (url && url.includes('res.cloudinary.com')) {
+                            // URL format: https://res.cloudinary.com/<cloud>/image/upload/v.../folder/file.ext
+                            const match = url.match(/\/upload\/(?:v\d+\/)?(jb-creations-orders\/.+?)(?:\.\w+)?$/);
+                            if (match) {
+                                publicIds.push(match[1]);
+                                const parts = match[1].split('/');
+                                if (parts.length > 1) folderPrefixes.add(parts.slice(0, -1).join('/'));
+                            }
                         }
-                    }
+                    });
                 });
             }
 
