@@ -90,28 +90,28 @@ exports.handler = async (event) => {
                 body: JSON.stringify({
                     success: true,
                     storage: {
-                        used_bytes: usage.storage ? usage.storage.usage : 0,
-                        limit_bytes: usage.storage ? usage.storage.limit : 0,
-                        used_percent: usage.storage ? usage.storage.used_percent : 0
+                        used_bytes: (usage.storage && usage.storage.usage) || 0,
+                        limit_bytes: (usage.storage && usage.storage.limit) || 0,
+                        used_percent: (usage.storage && usage.storage.used_percent) || 0
                     },
                     credits: {
-                        used: usage.credits ? usage.credits.usage : 0,
-                        limit: usage.credits ? usage.credits.limit : 0,
-                        used_percent: usage.credits ? usage.credits.used_percent : 0
+                        used: (usage.credits && usage.credits.usage) || 0,
+                        limit: (usage.credits && usage.credits.limit) || 0,
+                        used_percent: (usage.credits && usage.credits.used_percent) || 0
                     },
                     transformations: {
-                        used: usage.transformations ? usage.transformations.usage : 0,
-                        limit: usage.transformations ? usage.transformations.limit : 0,
-                        used_percent: usage.transformations ? usage.transformations.used_percent : 0
+                        used: (usage.transformations && usage.transformations.usage) || 0,
+                        limit: (usage.transformations && usage.transformations.limit) || 0,
+                        used_percent: (usage.transformations && usage.transformations.used_percent) || 0
                     },
                     objects: {
                         used: usage.resources || 0,
                         limit: usage.resource_limit || 0
                     },
                     bandwidth: {
-                        used_bytes: usage.bandwidth ? usage.bandwidth.usage : 0,
-                        limit_bytes: usage.bandwidth ? usage.bandwidth.limit : 0,
-                        used_percent: usage.bandwidth ? usage.bandwidth.used_percent : 0
+                        used_bytes: (usage.bandwidth && usage.bandwidth.usage) || 0,
+                        limit_bytes: (usage.bandwidth && usage.bandwidth.limit) || 0,
+                        used_percent: (usage.bandwidth && usage.bandwidth.used_percent) || 0
                     }
                 })
             };

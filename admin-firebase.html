@@ -6113,27 +6113,27 @@
                     return;
                 }
 
-                const s = data.storage;
-                const bw = data.bandwidth;
-                const cr = data.credits;
-                const obj = data.objects;
-                const t = data.transformations;
+                const s = data.storage || {};
+                const bw = data.bandwidth || {};
+                const cr = data.credits || {};
+                const obj = data.objects || {};
+                const t = data.transformations || {};
 
                 // Calculate Firebase Firestore usage (estimated from loaded orders)
                 const firestoreDocsUsed = orders.length;
 
                 grid.innerHTML =
                     renderStorageCard('Cloudinary Storage', 'fa-cloud',
-                        formatBytes(s.used_bytes), formatBytes(s.limit_bytes), s.used_percent || 0) +
+                        formatBytes(s.used_bytes || 0), formatBytes(s.limit_bytes || 0), s.used_percent || 0) +
                     renderStorageCard('Cloudinary Bandwidth', 'fa-exchange-alt',
-                        formatBytes(bw.used_bytes), formatBytes(bw.limit_bytes), bw.used_percent || 0) +
+                        formatBytes(bw.used_bytes || 0), formatBytes(bw.limit_bytes || 0), bw.used_percent || 0) +
                     renderStorageCard('Cloudinary Credits', 'fa-coins',
-                        cr.used.toFixed(1), cr.limit.toFixed(0), cr.used_percent || 0) +
+                        (cr.used || 0).toFixed(1), (cr.limit || 0).toFixed(0), cr.used_percent || 0) +
                     renderStorageCard('Cloudinary Transforms', 'fa-magic',
-                        t.used.toLocaleString(), t.limit.toLocaleString(), t.used_percent || 0) +
+                        (t.used || 0).toLocaleString(), (t.limit || 0).toLocaleString(), t.used_percent || 0) +
                     renderStorageCard('Cloudinary Resources', 'fa-images',
-                        obj.used.toLocaleString(), obj.limit.toLocaleString(),
-                        obj.limit > 0 ? (obj.used / obj.limit * 100) : 0) +
+                        (obj.used || 0).toLocaleString(), (obj.limit || 0).toLocaleString(),
+                        (obj.limit || 0) > 0 ? ((obj.used || 0) / obj.limit * 100) : 0) +
                     renderStorageCard('Firebase Orders', 'fa-fire',
                         firestoreDocsUsed.toLocaleString(), '∞ docs', 0);
 
