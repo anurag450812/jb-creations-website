@@ -113,6 +113,8 @@ const DEFAULT_STOREFRONT_SIZE_PRICING = {
 };
 
 let storefrontSizePricing = JSON.parse(JSON.stringify(DEFAULT_STOREFRONT_SIZE_PRICING));
+let storefrontPricingSubscription = null;
+let storefrontPricingSyncInitialized = false;
 
 function cloneDefaultStorefrontPricing() {
     return JSON.parse(JSON.stringify(DEFAULT_STOREFRONT_SIZE_PRICING));
@@ -211,6 +213,17 @@ function applySelectedFramePricing(size = state.frameSize?.size, orientation = s
     return pricing;
 }
 
+function applyStorefrontPricingSettings(settings = {}) {
+    if (!settings || !settings.sizePricing) {
+        return false;
+    }
+
+    storefrontSizePricing = normalizeStorefrontPricing(settings.sizePricing);
+    syncSizeButtonPricesFromStorefront();
+    applySelectedFramePricing();
+    return true;
+}
+
 async function loadStorefrontPricingSettings() {
     const api = await waitForReviewApi();
     if (!api || typeof api.getStorefrontSettings !== 'function') {
@@ -219,12 +232,32 @@ async function loadStorefrontPricingSettings() {
 
     const result = await api.getStorefrontSettings();
     if (result.success && result.settings && result.settings.sizePricing) {
-        storefrontSizePricing = normalizeStorefrontPricing(result.settings.sizePricing);
-        syncSizeButtonPricesFromStorefront();
-        applySelectedFramePricing();
+        applyStorefrontPricingSettings(result.settings);
+    }
+
+    if (!storefrontPricingSubscription && typeof api.subscribeStorefrontSettings === 'function') {
+        storefrontPricingSubscription = api.subscribeStorefrontSettings(settings => {
+            applyStorefrontPricingSettings(settings);
+        });
     }
 
     return result;
+}
+
+function initializeStorefrontPricingSync() {
+    if (storefrontPricingSyncInitialized) {
+        return;
+    }
+
+    storefrontPricingSyncInitialized = true;
+    loadStorefrontPricingSettings();
+
+    if (!window.jbAPI) {
+        window.addEventListener('firebaseReady', function handleStorefrontPricingReady() {
+            loadStorefrontPricingSettings();
+            window.removeEventListener('firebaseReady', handleStorefrontPricingReady);
+        });
+    }
 }
 
 // DOM Elements - will be initialized in DOMContentLoaded
@@ -452,7 +485,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeDefaults();
 
     // Load admin-managed pricing and refresh all size labels after Firebase is ready
-    loadStorefrontPricingSettings();
+    initializeStorefrontPricingSync();
     
     // Initialize cart count
     updateCartCount();

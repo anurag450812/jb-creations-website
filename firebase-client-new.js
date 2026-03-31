@@ -423,6 +423,17 @@ class JBCreationsAPI {
         }
     }
 
+    async withPublicSiteConfigRead(operation) {
+        // Allow public reads from siteConfig without requiring admin credentials
+        // Firestore rules allow read: if true for siteConfig collection
+        try {
+            return await operation();
+        } catch (error) {
+            console.error('❌ Error in public siteConfig read:', error);
+            throw error;
+        }
+    }
+
     // Create customer record
     async createCustomer(customerData) {
         try {
@@ -706,7 +717,8 @@ class JBCreationsAPI {
     async ensureReviewSettings() {
         try {
             const settingsRef = this.db.collection('siteConfig').doc('reviewSettings');
-            const snapshot = await this.withAdminSiteConfigAccess(() => settingsRef.get());
+            // Use public read access for customer-facing review settings
+            const snapshot = await this.withPublicSiteConfigRead(() => settingsRef.get());
 
             if (!snapshot.exists) {
                 const defaults = getDefaultReviewSettings();
@@ -768,7 +780,8 @@ class JBCreationsAPI {
     async ensureStorefrontSettings() {
         try {
             const settingsRef = this.db.collection('siteConfig').doc('storefrontSettings');
-            const snapshot = await this.withAdminSiteConfigAccess(() => settingsRef.get());
+            // Use public read access for customer-facing pricing data
+            const snapshot = await this.withPublicSiteConfigRead(() => settingsRef.get());
 
             if (!snapshot.exists) {
                 const defaults = getDefaultStorefrontSettings();
@@ -806,6 +819,25 @@ class JBCreationsAPI {
             console.error('❌ Error getting storefront settings:', error);
             return { success: false, error: error.message, settings: getDefaultStorefrontSettings() };
         }
+    }
+
+    subscribeStorefrontSettings(onUpdate, onError) {
+        if (typeof onUpdate !== 'function') {
+            throw new Error('subscribeStorefrontSettings requires an update callback');
+        }
+
+        return this.db.collection('siteConfig').doc('storefrontSettings').onSnapshot(snapshot => {
+            const settings = snapshot.exists
+                ? normalizeStorefrontSettings(snapshot.data() || {})
+                : getDefaultStorefrontSettings();
+
+            onUpdate(settings, snapshot);
+        }, error => {
+            console.error('❌ Error subscribing to storefront settings:', error);
+            if (typeof onError === 'function') {
+                onError(error);
+            }
+        });
     }
 
     async updateStorefrontSettings(updateData) {
