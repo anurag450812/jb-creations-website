@@ -2544,109 +2544,6 @@
             }
             .total-final { border-top: none; background: transparent; }
         }
-
-        .saved-address-suggestions {
-            margin-bottom: 20px;
-            padding: 16px;
-            border-radius: 14px;
-            border: 1px solid rgba(22, 105, 122, 0.12);
-            background: linear-gradient(135deg, rgba(130, 192, 204, 0.18), rgba(255, 255, 255, 0.96));
-        }
-
-        .saved-address-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .saved-address-header strong {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--primary-color);
-        }
-
-        .saved-address-manage-link {
-            color: var(--primary-color);
-            font-size: 13px;
-            font-weight: 700;
-            text-decoration: none;
-        }
-
-        .saved-address-manage-link:hover {
-            text-decoration: underline;
-        }
-
-        .saved-address-list {
-            display: grid;
-            gap: 12px;
-            margin-bottom: 10px;
-        }
-
-        .saved-address-card {
-            background: #fff;
-            border: 1px solid rgba(22, 105, 122, 0.12);
-            border-radius: 12px;
-            padding: 14px;
-        }
-
-        .saved-address-card-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 8px;
-        }
-
-        .saved-address-title {
-            color: var(--primary-color);
-            font-weight: 700;
-        }
-
-        .saved-address-meta {
-            color: rgba(22, 105, 122, 0.72);
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .saved-address-text {
-            color: #355862;
-            line-height: 1.5;
-            margin-bottom: 12px;
-        }
-
-        .saved-address-action {
-            background: var(--primary-color);
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 14px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .saved-address-action:hover {
-            opacity: 0.92;
-        }
-
-        @media (min-width: 769px) {
-            .saved-address-list {
-                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            }
-        }
-
-        @media (max-width: 768px) {
-            .saved-address-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .saved-address-action {
-                width: 100%;
-            }
-        }
     </style>
     <!-- Global Header Component -->
     <script src="global-header.js"></script>
@@ -2741,15 +2638,6 @@
                         </div>
                         <div class="form-help-text">Backup contact number (Indian format)</div>
                     </div>
-                </div>
-
-                <div class="saved-address-suggestions" id="savedAddressSuggestions" style="display: none;">
-                    <div class="saved-address-header">
-                        <strong><i class="fas fa-map-marker-alt"></i> Use a saved address</strong>
-                        <a class="saved-address-manage-link" href="my-profile.html">Manage saved addresses</a>
-                    </div>
-                    <div class="saved-address-list" id="savedAddressList"></div>
-                    <div class="form-help-text">Saved addresses appear here after your first successful order, and you can store up to 3 in your profile.</div>
                 </div>
 
                 <!-- Address Fields -->
@@ -3038,7 +2926,7 @@
     </script>
     
     <script src="otp-auth-realsms.js?v=5.0.1208"></script>
-    <script type="module" src="firebase-client-new.js?v=4.2-saved-addresses"></script>
+    <script type="module" src="firebase-client-new.js?v=4.1-storefront-sync"></script>
     
     <!-- Authentication Check Script -->
     <script>
@@ -3395,7 +3283,7 @@
     
     <!-- Cache-busted checkout script to ensure latest version loads -->
     <script src="utils/notifications.js"></script>
-    <script src="checkout.js?v=9.6-saved-addresses"></script>
+    <script src="checkout.js?v=9.5-razorpay-server"></script>
     <script>
         (function() {
             function mirrorDesktopButtonState(sourceButton, desktopButton) {
