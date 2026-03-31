@@ -462,6 +462,87 @@
                 position: static;
             }
         }
+
+        .form-field textarea {
+            padding: 10px 12px;
+            border: 1px solid rgba(22,105,122,0.25);
+            border-radius: 10px;
+            outline: none;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 88px;
+        }
+
+        .saved-address-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .saved-address-limit {
+            color: rgba(22,105,122,0.76);
+            font-weight: 700;
+        }
+
+        .profile-saved-addresses {
+            display: grid;
+            gap: 12px;
+        }
+
+        .profile-address-card {
+            background: #F9F7F5;
+            border: 1px solid rgba(22,105,122,0.1);
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        .profile-address-card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .profile-address-title {
+            color: var(--primary-color);
+            font-weight: 800;
+        }
+
+        .profile-address-badge {
+            color: rgba(22,105,122,0.72);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .profile-address-text {
+            color: var(--text-color);
+            line-height: 1.55;
+            margin-bottom: 12px;
+        }
+
+        .profile-address-meta {
+            color: rgba(22,105,122,0.72);
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .saved-address-empty {
+            border-radius: 14px;
+            background: #F9F7F5;
+            border: 1px dashed rgba(22,105,122,0.18);
+            box-shadow: none;
+            padding: 24px 16px;
+        }
+
+        @media (min-width: 769px) {
+            .profile-saved-addresses {
+                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            }
+        }
     </style>
     <!-- Global Header Component -->
     <script src="global-header.js"></script>
@@ -536,6 +617,21 @@
             </div>
         </div>
 
+        <div class="section">
+            <div class="section-header"><i class="fas fa-map-marker-alt"></i> Saved addresses</div>
+            <div class="section-body">
+                <div class="saved-address-toolbar">
+                    <div class="saved-address-limit" id="savedAddressLimitText">0/3 addresses saved</div>
+                    <button class="btn-primary" id="addAddressBtn"><i class="fas fa-plus"></i> Add address</button>
+                </div>
+                <div id="savedAddressesEmpty" class="empty-state saved-address-empty" style="display:none">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <div>No saved addresses yet. Your first successful order address will appear here, and you can also add up to 3 manually.</div>
+                </div>
+                <div class="profile-saved-addresses" id="profileSavedAddresses"></div>
+            </div>
+        </div>
+
         
 
         <div id="loadingState" class="empty-state" style="display:none">
@@ -572,11 +668,46 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="addressModal">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="addressTitle">
+            <div class="modal-header">
+                <div id="addressTitle"><i class="fas fa-map-marker-alt"></i> Add saved address</div>
+                <button class="btn-icon" id="closeAddressBtn" aria-label="Close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-field">
+                    <label for="addressStreet">House/Flat No. & Street Address</label>
+                    <textarea id="addressStreet" rows="2" placeholder="House/Flat Number, Building Name, Street Name"></textarea>
+                </div>
+                <div class="form-field">
+                    <label for="addressCity">City</label>
+                    <input id="addressCity" type="text" placeholder="Enter city" />
+                </div>
+                <div class="form-field">
+                    <label for="addressState">State</label>
+                    <input id="addressState" type="text" placeholder="Enter state" />
+                </div>
+                <div class="form-field">
+                    <label for="addressLandmark">Landmark (Optional)</label>
+                    <input id="addressLandmark" type="text" placeholder="Near school, mall, etc." />
+                </div>
+                <div class="form-field">
+                    <label for="addressPincode">Pincode (Optional)</label>
+                    <input id="addressPincode" type="text" placeholder="6-digit pincode" maxlength="6" inputmode="numeric" />
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-outline" id="cancelAddressBtn">Cancel</button>
+                <button class="btn-primary" id="saveAddressBtn"><i class="fas fa-save"></i> Save address</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     <!-- App scripts -->
-    <script src="firebase-client-new.js?v=4.1-storefront-sync"></script>
+    <script src="firebase-client-new.js?v=4.2-saved-addresses"></script>
     <script src="fast2sms-client.js?v=3.0"></script>
     <script src="otp-auth-realsms.js?v=3.0"></script>
     <script src="auth.js?v=3.0"></script>
@@ -651,6 +782,195 @@
             if (authOptions) authOptions.style.display = 'block';
         }
 
+        function buildProfileSavedAddressText(address) {
+            const street = (address && address.street ? String(address.street) : '').trim();
+            const city = (address && address.city ? String(address.city) : '').trim();
+            const stateName = (address && address.state ? String(address.state) : '').trim();
+            const landmark = (address && address.landmark ? String(address.landmark) : '').trim();
+            const pincode = (address && address.pincode ? String(address.pincode) : '').trim();
+
+            let fullAddress = street;
+            if (city) fullAddress += `, ${city}`;
+            if (stateName) fullAddress += `, ${stateName}`;
+            if (landmark) fullAddress += ` (Near ${landmark})`;
+            if (pincode) fullAddress += ` - ${pincode}`;
+
+            return fullAddress;
+        }
+
+        function getSavedAddresses() {
+            return Array.isArray(state.user && state.user.savedAddresses) ? state.user.savedAddresses.slice(0, 3) : [];
+        }
+
+        function renderSavedAddresses() {
+            const addresses = getSavedAddresses();
+            const list = document.getElementById('profileSavedAddresses');
+            const emptyState = document.getElementById('savedAddressesEmpty');
+            const limitText = document.getElementById('savedAddressLimitText');
+            const addButton = document.getElementById('addAddressBtn');
+
+            if (!list || !emptyState || !limitText || !addButton) return;
+
+            list.innerHTML = '';
+            limitText.textContent = `${addresses.length}/3 addresses saved`;
+            addButton.disabled = addresses.length >= 3;
+            addButton.style.opacity = addButton.disabled ? '0.6' : '1';
+            addButton.style.cursor = addButton.disabled ? 'not-allowed' : 'pointer';
+
+            if (addresses.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            addresses.forEach((address, index) => {
+                const card = document.createElement('div');
+                card.className = 'profile-address-card';
+
+                const cardHead = document.createElement('div');
+                cardHead.className = 'profile-address-card-head';
+
+                const title = document.createElement('div');
+                title.className = 'profile-address-title';
+                title.textContent = `Saved Address ${index + 1}`;
+                cardHead.appendChild(title);
+
+                if (address.pincode) {
+                    const badge = document.createElement('div');
+                    badge.className = 'profile-address-badge';
+                    badge.textContent = `PIN ${address.pincode}`;
+                    cardHead.appendChild(badge);
+                }
+
+                const text = document.createElement('div');
+                text.className = 'profile-address-text';
+                text.textContent = address.fullAddress || buildProfileSavedAddressText(address);
+
+                const meta = document.createElement('div');
+                meta.className = 'profile-address-meta';
+                meta.textContent = address.landmark ? `Landmark: ${address.landmark}` : 'Ready to use in checkout';
+
+                const deleteButton = document.createElement('button');
+                deleteButton.type = 'button';
+                deleteButton.className = 'btn-danger';
+                deleteButton.dataset.addressId = address.id;
+                deleteButton.textContent = 'Delete';
+
+                card.appendChild(cardHead);
+                card.appendChild(text);
+                card.appendChild(meta);
+                card.appendChild(deleteButton);
+                list.appendChild(card);
+            });
+        }
+
+        function clearAddressForm() {
+            ['addressStreet', 'addressCity', 'addressState', 'addressLandmark', 'addressPincode'].forEach((id) => {
+                const input = document.getElementById(id);
+                if (input) input.value = '';
+            });
+        }
+
+        function openAddressModal() {
+            if (getSavedAddresses().length >= 3) {
+                alert('You can save up to 3 addresses only.');
+                return;
+            }
+
+            clearAddressForm();
+            document.getElementById('addressModal').classList.add('show');
+        }
+
+        function closeAddressModal() {
+            document.getElementById('addressModal').classList.remove('show');
+        }
+
+        async function saveAddress() {
+            const street = document.getElementById('addressStreet').value.trim();
+            const city = document.getElementById('addressCity').value.trim();
+            const stateName = document.getElementById('addressState').value.trim();
+            const landmark = document.getElementById('addressLandmark').value.trim();
+            const pincode = document.getElementById('addressPincode').value.trim();
+
+            if (!street || !city || !stateName) {
+                alert('Street address, city, and state are required.');
+                return;
+            }
+
+            if (pincode && !/^\d{6}$/.test(pincode)) {
+                alert('Please enter a valid 6-digit pincode.');
+                return;
+            }
+
+            if (!state.user || !state.user.phone) {
+                alert('Please sign in again to manage saved addresses.');
+                return;
+            }
+
+            try {
+                if (!window.jbAPI || typeof window.jbAPI.addUserSavedAddress !== 'function') {
+                    throw new Error('Address API not initialized yet');
+                }
+
+                const result = await window.jbAPI.addUserSavedAddress(state.user.phone, {
+                    street,
+                    city,
+                    state: stateName,
+                    landmark,
+                    pincode
+                }, {
+                    name: state.user.name || 'User',
+                    email: state.user.email || '',
+                    phone: state.user.phone,
+                    signInMethod: state.user.signInMethod || 'phone'
+                });
+
+                if (result && result.success) {
+                    closeAddressModal();
+                    await loadProfile();
+                    return;
+                }
+
+                if (result && result.duplicate) {
+                    alert('This address is already saved.');
+                    return;
+                }
+
+                if (result && result.limitReached) {
+                    alert('You can save up to 3 addresses only.');
+                    return;
+                }
+
+                throw new Error(result && result.error ? result.error : 'Could not save address');
+            } catch (error) {
+                console.error('Save address failed', error);
+                alert('Could not save address. Please try again.');
+            }
+        }
+
+        async function deleteSavedAddress(addressId) {
+            if (!addressId || !state.user || !state.user.phone) return;
+            if (!window.confirm('Delete this saved address?')) return;
+
+            try {
+                if (!window.jbAPI || typeof window.jbAPI.deleteUserSavedAddress !== 'function') {
+                    throw new Error('Address API not initialized yet');
+                }
+
+                const result = await window.jbAPI.deleteUserSavedAddress(state.user.phone, addressId);
+                if (result && result.success) {
+                    await loadProfile();
+                    return;
+                }
+
+                throw new Error(result && result.error ? result.error : 'Could not delete address');
+            } catch (error) {
+                console.error('Delete address failed', error);
+                alert('Could not delete address. Please try again.');
+            }
+        }
+
         async function ensureAuthOrRedirect() {
             try {
                 // Prefer otpAuth current user
@@ -693,6 +1013,7 @@
 
                 state.user = fullUser; state.userDocId = docId;
                 fillUI(fullUser);
+                renderSavedAddresses();
             } catch (err) {
                 console.error('Failed to load profile', err);
                 setError(true);
@@ -761,7 +1082,18 @@
             document.getElementById('closeEditBtn').addEventListener('click', closeEdit);
             document.getElementById('cancelEditBtn').addEventListener('click', closeEdit);
             document.getElementById('saveEditBtn').addEventListener('click', saveProfileEdits);
+            document.getElementById('addAddressBtn').addEventListener('click', openAddressModal);
+            document.getElementById('closeAddressBtn').addEventListener('click', closeAddressModal);
+            document.getElementById('cancelAddressBtn').addEventListener('click', closeAddressModal);
+            document.getElementById('saveAddressBtn').addEventListener('click', saveAddress);
+            document.getElementById('profileSavedAddresses').addEventListener('click', function(event) {
+                const deleteButton = event.target.closest('[data-address-id]');
+                if (!deleteButton) return;
+                deleteSavedAddress(deleteButton.dataset.addressId);
+            });
             // Removed Security & Preferences section, so no related event bindings
+
+            renderSavedAddresses();
 
             // Wait a bit for Firebase API
             setTimeout(loadProfile, 250);
