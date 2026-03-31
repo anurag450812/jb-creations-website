@@ -364,6 +364,33 @@
             color: var(--danger);
         }
 
+        /* Storage Usage Cards */
+        .storage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+        .storage-bar-track {
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        .storage-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.6s ease;
+        }
+        .storage-bar-fill.green  { background: var(--success); }
+        .storage-bar-fill.yellow { background: var(--warning); }
+        .storage-bar-fill.red    { background: var(--danger); }
+        .storage-pct {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
         /* Buttons */
         .btn {
             display: inline-flex;
@@ -403,6 +430,16 @@
         .btn-sm {
             padding: 0.5rem 1rem;
             font-size: 0.75rem;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger, #ef4444), #dc2626);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
         }
 
         /* Table */
@@ -4272,6 +4309,28 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Storage Usage -->
+                    <div class="card" id="storage-usage-card">
+                        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+                            <h3 class="card-title"><i class="fas fa-database"></i> Storage Usage</h3>
+                            <div style="display:flex;gap:0.5rem;">
+                                <button class="btn btn-secondary btn-sm" onclick="loadStorageUsage()" title="Refresh storage stats">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="triggerCloudinaryCleanup()" title="Delete Cloudinary images older than 10 days">
+                                    <i class="fas fa-broom"></i> Cleanup &gt;10 days
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="storage-grid" id="storage-grid">
+                                <div style="text-align:center;color:var(--text-muted);padding:1rem;">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading storage info…
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Orders View - Simplified Workflow -->
@@ -5997,6 +6056,122 @@
             document.getElementById('total-revenue').textContent = '₹' + totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 });
             document.getElementById('pending-orders').textContent = pendingOrders.toLocaleString();
             document.getElementById('new-customers').textContent = newCustomers.toLocaleString();
+
+            // Also load storage usage when dashboard stats update
+            loadStorageUsage();
+        }
+
+        // ============ STORAGE USAGE DISPLAY ============
+
+        function formatBytes(bytes) {
+            if (!bytes || bytes <= 0) return '0 B';
+            const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + units[i];
+        }
+
+        function barColor(pct) {
+            if (pct >= 80) return 'red';
+            if (pct >= 50) return 'yellow';
+            return 'green';
+        }
+
+        function renderStorageCard(label, icon, usedText, limitText, pct) {
+            const col = barColor(pct);
+            return `
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-label">${label}</div>
+                            <div class="stat-value" style="font-size:1.25rem;">${usedText}</div>
+                        </div>
+                        <div class="stat-icon ${col === 'green' ? 'success' : col === 'yellow' ? 'warning' : 'info'}">
+                            <i class="fas ${icon}"></i>
+                        </div>
+                    </div>
+                    <div class="storage-bar-track">
+                        <div class="storage-bar-fill ${col}" style="width:${Math.min(pct, 100)}%"></div>
+                    </div>
+                    <div class="storage-pct">${pct.toFixed(1)}% used · Limit: ${limitText}</div>
+                </div>`;
+        }
+
+        async function loadStorageUsage() {
+            const grid = document.getElementById('storage-grid');
+            if (!grid) return;
+
+            try {
+                const resp = await fetch('/api/cloudinary-manage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'usage' })
+                });
+                const data = await resp.json();
+
+                if (!data.success) {
+                    grid.innerHTML = '<div style="color:var(--danger);padding:1rem;">Failed to load storage info: ' + (data.error || 'unknown') + '</div>';
+                    return;
+                }
+
+                const s = data.storage;
+                const bw = data.bandwidth;
+                const cr = data.credits;
+                const obj = data.objects;
+                const t = data.transformations;
+
+                // Calculate Firebase Firestore usage (estimated from loaded orders)
+                const firestoreDocsUsed = orders.length;
+
+                grid.innerHTML =
+                    renderStorageCard('Cloudinary Storage', 'fa-cloud',
+                        formatBytes(s.used_bytes), formatBytes(s.limit_bytes), s.used_percent || 0) +
+                    renderStorageCard('Cloudinary Bandwidth', 'fa-exchange-alt',
+                        formatBytes(bw.used_bytes), formatBytes(bw.limit_bytes), bw.used_percent || 0) +
+                    renderStorageCard('Cloudinary Credits', 'fa-coins',
+                        cr.used.toFixed(1), cr.limit.toFixed(0), cr.used_percent || 0) +
+                    renderStorageCard('Cloudinary Transforms', 'fa-magic',
+                        t.used.toLocaleString(), t.limit.toLocaleString(), t.used_percent || 0) +
+                    renderStorageCard('Cloudinary Resources', 'fa-images',
+                        obj.used.toLocaleString(), obj.limit.toLocaleString(),
+                        obj.limit > 0 ? (obj.used / obj.limit * 100) : 0) +
+                    renderStorageCard('Firebase Orders', 'fa-fire',
+                        firestoreDocsUsed.toLocaleString(), '∞ docs', 0);
+
+            } catch (err) {
+                console.error('Storage usage fetch error:', err);
+                grid.innerHTML = '<div style="color:var(--danger);padding:1rem;">Error: ' + err.message + '</div>';
+            }
+        }
+
+        async function triggerCloudinaryCleanup() {
+            if (!confirm('This will permanently delete all Cloudinary images older than 10 days.\n\nAre you sure?')) return;
+
+            const btn = event.target.closest('button');
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cleaning…';
+            btn.disabled = true;
+
+            try {
+                const resp = await fetch('/api/cloudinary-manage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'cleanup', maxAgeDays: 10 })
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    showNotification(`Cleanup complete: ${data.deletedCount} old image(s) deleted`, 'success');
+                    loadStorageUsage(); // refresh the cards
+                } else {
+                    showNotification('Cleanup failed: ' + (data.error || 'unknown'), 'error');
+                }
+            } catch (err) {
+                console.error('Cleanup error:', err);
+                showNotification('Cleanup error: ' + err.message, 'error');
+            } finally {
+                btn.innerHTML = origHTML;
+                btn.disabled = false;
+            }
         }
 
         // No longer needed - dashboard doesn't show recent orders table
@@ -9664,6 +9839,112 @@
             downloadImage(base64Data, filename);
         }
 
+        // ============ CLOUDINARY IMAGE CLEANUP HELPERS ============
+
+        // Extract all Cloudinary public IDs and folder prefixes from an order object
+        function extractCloudinaryInfoFromOrder(order) {
+            const publicIds = [];
+            const folderPrefixes = new Set();
+
+            // 1. Check order.images[] array (primary image store)
+            if (order.images && Array.isArray(order.images)) {
+                order.images.forEach(img => {
+                    if (img.publicId) {
+                        publicIds.push(img.publicId);
+                        const parts = img.publicId.split('/');
+                        if (parts.length > 1) folderPrefixes.add(parts.slice(0, -1).join('/'));
+                    }
+                });
+            }
+
+            // 2. Check order.cloudinaryImages[] array
+            if (order.cloudinaryImages && Array.isArray(order.cloudinaryImages)) {
+                order.cloudinaryImages.forEach(ci => {
+                    if (ci.urls && ci.urls.publicId) {
+                        publicIds.push(ci.urls.publicId);
+                        const parts = ci.urls.publicId.split('/');
+                        if (parts.length > 1) folderPrefixes.add(parts.slice(0, -1).join('/'));
+                    }
+                });
+            }
+
+            // 3. Check order.items[].cloudinaryUrl – derive public ID from URL
+            if (order.items && Array.isArray(order.items)) {
+                order.items.forEach(item => {
+                    const url = item.cloudinaryUrl;
+                    if (url && url.includes('res.cloudinary.com')) {
+                        // URL format: https://res.cloudinary.com/<cloud>/image/upload/v.../folder/file.ext
+                        const match = url.match(/\/upload\/(?:v\d+\/)?(jb-creations-orders\/.+?)(?:\.\w+)?$/);
+                        if (match) {
+                            publicIds.push(match[1]);
+                            const parts = match[1].split('/');
+                            if (parts.length > 1) folderPrefixes.add(parts.slice(0, -1).join('/'));
+                        }
+                    }
+                });
+            }
+
+            // 4. Fallback: if we found no public IDs but the order has an order number,
+            //    add the standard folder prefix so delete-folder can sweep it
+            if (publicIds.length === 0 && (order.orderNumber || order.id)) {
+                const orderKey = order.orderNumber || order.id;
+                folderPrefixes.add('jb-creations-orders/' + orderKey);
+            }
+
+            return { publicIds: [...new Set(publicIds)], folderPrefixes: [...folderPrefixes] };
+        }
+
+        // Call the Netlify function to delete Cloudinary images for one or more orders
+        async function deleteCloudinaryImagesForOrders(orderObjects) {
+            const allPublicIds = [];
+            const allFolderPrefixes = new Set();
+
+            orderObjects.forEach(order => {
+                const info = extractCloudinaryInfoFromOrder(order);
+                allPublicIds.push(...info.publicIds);
+                info.folderPrefixes.forEach(fp => allFolderPrefixes.add(fp));
+            });
+
+            const errors = [];
+
+            // Delete by specific public IDs first
+            if (allPublicIds.length > 0) {
+                try {
+                    const resp = await fetch('/api/cloudinary-manage', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'delete', publicIds: allPublicIds })
+                    });
+                    const data = await resp.json();
+                    if (!data.success) errors.push('ID delete failed: ' + (data.error || 'unknown'));
+                    else console.log('✅ Cloudinary IDs deleted:', allPublicIds.length);
+                } catch (e) {
+                    console.error('❌ Cloudinary ID delete error:', e);
+                    errors.push(e.message);
+                }
+            }
+
+            // Also delete by folder prefix to catch any orphaned images
+            const prefixes = [...allFolderPrefixes];
+            if (prefixes.length > 0) {
+                try {
+                    const resp = await fetch('/api/cloudinary-manage', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'delete-folder', publicIds: prefixes })
+                    });
+                    const data = await resp.json();
+                    if (!data.success) errors.push('Folder delete failed: ' + (data.error || 'unknown'));
+                    else console.log('✅ Cloudinary folders deleted:', prefixes);
+                } catch (e) {
+                    console.error('❌ Cloudinary folder delete error:', e);
+                    errors.push(e.message);
+                }
+            }
+
+            return { success: errors.length === 0, errors };
+        }
+
         // ============ DELETE ORDER FUNCTIONALITY ============
         
         // Store pending delete info
@@ -9719,11 +10000,21 @@
             if (!window.jbAPI || typeof window.jbAPI.deleteOrder !== 'function') {
                 throw new Error('Firebase API not available');
             }
+
+            // Find the order object so we can extract Cloudinary info before deleting
+            const orderObj = orders.find(o => (o.id || o.orderId) === orderId);
             
             const result = await window.jbAPI.deleteOrder(orderId);
             
             if (result.success) {
                 console.log('✅ Order deleted successfully from Firebase');
+
+                // Delete associated Cloudinary images (non-blocking – don't fail the delete if this errors)
+                if (orderObj) {
+                    deleteCloudinaryImagesForOrders([orderObj]).catch(e =>
+                        console.warn('⚠️ Cloudinary cleanup had errors:', e)
+                    );
+                }
                 
                 // Remove from local arrays using both id and orderId
                 const beforeCount = orders.length;
@@ -9763,11 +10054,24 @@
             if (!window.jbAPI || typeof window.jbAPI.deleteMultipleOrders !== 'function') {
                 throw new Error('Firebase API not available');
             }
+
+            // Collect order objects to extract Cloudinary info before deletion
+            const orderObjects = orders.filter(o => {
+                const docId = o.id || o.orderId;
+                return orderIds.includes(docId);
+            });
             
             const result = await window.jbAPI.deleteMultipleOrders(orderIds);
             
             if (result.success) {
                 console.log('✅ Orders deleted successfully from Firebase:', result.deletedCount);
+
+                // Delete associated Cloudinary images (non-blocking)
+                if (orderObjects.length > 0) {
+                    deleteCloudinaryImagesForOrders(orderObjects).catch(e =>
+                        console.warn('⚠️ Cloudinary cleanup had errors:', e)
+                    );
+                }
                 
                 // Remove from local arrays
                 orders = orders.filter(o => {
