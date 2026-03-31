@@ -601,8 +601,8 @@ class JBCreationsAPI {
                 
                 ordersSnapshot.forEach(doc => {
                     orders.push({
-                        orderId: doc.id,
-                        ...doc.data()
+                        ...doc.data(),
+                        orderId: doc.id  // MUST come after spread so doc.id can't be overwritten
                     });
                 });
             } catch (indexError) {
@@ -620,8 +620,8 @@ class JBCreationsAPI {
                             // Avoid duplicates
                             if (!orders.find(o => o.orderId === doc.id)) {
                                 orders.push({
-                                    orderId: doc.id,
-                                    ...doc.data()
+                                    ...doc.data(),
+                                    orderId: doc.id  // MUST come after spread so doc.id can't be overwritten
                                 });
                             }
                         });
@@ -1156,8 +1156,8 @@ class JBCreationsAPI {
             const orders = [];
             ordersSnapshot.forEach(doc => {
                 orders.push({
-                    orderId: doc.id,
-                    ...doc.data()
+                    ...doc.data(),
+                    orderId: doc.id  // MUST come after spread so doc.id can't be overwritten
                 });
             });
             
