@@ -1,11 +1,20 @@
 /**
  * Service Worker for Xidlz
  * Provides offline caching and performance optimization
- * Version: 1.0.0
+ * Version: 1.2.0
  */
 
-const CACHE_NAME = 'xidlz-v1.1';
-const RUNTIME_CACHE = 'xidlz-runtime-v1.1';
+const SW_VERSION = '1.2.0';
+const CACHE_NAME = `xidlz-v${SW_VERSION}`;
+const RUNTIME_CACHE = `xidlz-runtime-v${SW_VERSION}`;
+
+// Admin and Firebase assets must stay fresh; stale cached copies break order actions.
+const NETWORK_FIRST_PATTERNS = [
+    /\/admin-firebase\.html$/,
+    /\/admin-login\.html$/,
+    /\/firebase-client-new\.js$/,
+    /\/shiprocket-client\.js$/
+];
 
 // Critical assets to cache immediately
 const CRITICAL_ASSETS = [
@@ -98,6 +107,11 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    if (shouldBypassCache(url)) {
+        event.respondWith(handleFreshRequest(request));
+        return;
+    }
+
     // Handle different request types
     if (request.destination === 'image') {
         event.respondWith(handleImageRequest(request));
@@ -109,6 +123,34 @@ self.addEventListener('fetch', (event) => {
         event.respondWith(handleOtherRequest(request));
     }
 });
+
+function shouldBypassCache(url) {
+    return NETWORK_FIRST_PATTERNS.some((pattern) => pattern.test(url.pathname));
+}
+
+async function handleFreshRequest(request) {
+    try {
+        const response = await fetch(new Request(request, { cache: 'no-store' }));
+        await deleteCachedRequest(request);
+        return response;
+    } catch (error) {
+        const cachedResponse = await caches.match(request);
+        if (cachedResponse) {
+            return cachedResponse;
+        }
+        return new Response('', { status: 503, statusText: 'Service Unavailable' });
+    }
+}
+
+async function deleteCachedRequest(request) {
+    const cachesToClean = [CACHE_NAME, RUNTIME_CACHE];
+    await Promise.all(
+        cachesToClean.map(async (cacheName) => {
+            const cache = await caches.open(cacheName);
+            await cache.delete(request);
+        })
+    );
+}
 
 // Handle image requests - cache first, then network
 async function handleImageRequest(request) {

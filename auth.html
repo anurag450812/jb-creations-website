@@ -1423,8 +1423,9 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register('/sw.js?v=1.2.0', { updateViaCache: 'none' })
                     .then(function(registration) {
+                        registration.update().catch(function() {});
                         console.log('SW registered: ', registration);
                     })
                     .catch(function(registrationError) {

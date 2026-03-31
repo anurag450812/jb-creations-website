@@ -11200,6 +11200,38 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+    <script>
+        (function syncAdminCaches() {
+            if (!('serviceWorker' in navigator) || !('caches' in window) || !window.isSecureContext) {
+                return;
+            }
+
+            const adminCacheVersion = 'admin-cache-reset-2026-03-31';
+            if (localStorage.getItem('xidlzAdminCacheVersion') === adminCacheVersion) {
+                navigator.serviceWorker.getRegistrations().then((registrations) => {
+                    registrations.forEach((registration) => registration.update().catch(() => {}));
+                }).catch(() => {});
+                return;
+            }
+
+            window.addEventListener('load', async function() {
+                try {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(registrations.map((registration) => registration.update().catch(() => {})));
+
+                    const cacheNames = await caches.keys();
+                    const xidlzCaches = cacheNames.filter((cacheName) => cacheName.startsWith('xidlz-'));
+                    await Promise.all(xidlzCaches.map((cacheName) => caches.delete(cacheName)));
+
+                    localStorage.setItem('xidlzAdminCacheVersion', adminCacheVersion);
+                    window.location.reload();
+                } catch (error) {
+                    console.warn('Admin cache sync skipped:', error);
+                }
+            }, { once: true });
+        })();
+    </script>
     
     <!-- Load Firebase client after SDK is loaded -->
     <script src="firebase-client-new.js?v=4.2-fix-orderid"></script>
