@@ -6344,6 +6344,26 @@
             if (downloadedEl) downloadedEl.textContent = downloadedCount;
             if (shiprocketEl) shiprocketEl.textContent = shiprocketCount;
         }
+
+        function getOrderDocumentId(order) {
+            return order?.id || order?.orderId || order?.orderNumber || null;
+        }
+
+        function isSelectedAllOrder(order) {
+            const orderId = getOrderDocumentId(order);
+            const orderNumber = order?.orderNumber;
+            return !!orderId && (selectedAllOrders.has(orderId) || (orderNumber && selectedAllOrders.has(orderNumber)));
+        }
+
+        function getSelectedAllOrderObjects() {
+            return orders.filter(order => isSelectedAllOrder(order));
+        }
+
+        function getSelectedAllOrderIds() {
+            return getSelectedAllOrderObjects()
+                .map(order => getOrderDocumentId(order))
+                .filter(Boolean);
+        }
         
         // Render orders table for workflow view
         function renderOrdersWorkflowTable(ordersToShow) {
@@ -6383,7 +6403,8 @@
                 const orderDateTime = formatFullDateTime(order.orderDate);
                 const amount = order.totals?.total || order.totalAmount || 299;
                 const itemCount = order.items?.length || 1;
-                const isSelected = selectedAllOrders.has(order.orderNumber);
+                const orderId = getOrderDocumentId(order);
+                const isSelected = isSelectedAllOrder(order);
                 
                 // Get workflow-specific timestamp
                 let workflowTimestamp = '';
@@ -6411,7 +6432,8 @@
                     <tr data-order="${order.orderNumber}" class="${isSelected ? 'selected' : ''}">
                         <td>
                             <input type="checkbox" class="order-checkbox all-order-checkbox" 
-                                   data-order-id="${order.orderNumber}"
+                                   data-order-id="${orderId}"
+                                   data-order-number="${order.orderNumber}"
                                    onchange="toggleAllOrderSelection(this)"
                                    ${isSelected ? 'checked' : ''}>
                         </td>
@@ -6541,20 +6563,20 @@
         
         // Download selected images as ZIP file
         async function downloadSelectedImagesAsZip() {
-            const selectedOrderNumbers = Array.from(selectedAllOrders);
-            if (selectedOrderNumbers.length === 0) {
+            const selectedOrders = getSelectedAllOrderObjects();
+            if (selectedOrders.length === 0) {
                 showShippingToast('No orders selected', 'error');
                 return;
             }
             
-            showShippingToast(`Preparing ZIP for ${selectedOrderNumbers.length} orders...`, 'info');
+            showShippingToast(`Preparing ZIP for ${selectedOrders.length} orders...`, 'info');
             
             try {
                 const zip = new JSZip();
                 let totalImages = 0;
                 
-                for (const orderNumber of selectedOrderNumbers) {
-                    const order = orders.find(o => o.orderNumber === orderNumber);
+                for (const order of selectedOrders) {
+                    const orderNumber = order.orderNumber || getOrderDocumentId(order);
                     if (!order || !order.items) continue;
                     
                     // Create a folder for each order
@@ -6602,7 +6624,7 @@
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
                 
-                showShippingToast(`ZIP downloaded with ${totalImages} images from ${selectedOrderNumbers.length} orders!`, 'success');
+                showShippingToast(`ZIP downloaded with ${totalImages} images from ${selectedOrders.length} orders!`, 'success');
                 clearAllOrdersSelection();
                 
             } catch (error) {
@@ -6613,15 +6635,16 @@
         
         // Download selected images (kept for single order download)
         async function downloadSelectedImages() {
-            const selectedOrderNumbers = Array.from(selectedAllOrders);
-            if (selectedOrderNumbers.length === 0) {
+            const selectedOrders = getSelectedAllOrderObjects();
+            if (selectedOrders.length === 0) {
                 showShippingToast('No orders selected', 'error');
                 return;
             }
             
-            showShippingToast(`Downloading images for ${selectedOrderNumbers.length} orders...`, 'info');
+            showShippingToast(`Downloading images for ${selectedOrders.length} orders...`, 'info');
             
-            for (const orderNumber of selectedOrderNumbers) {
+            for (const order of selectedOrders) {
+                const orderNumber = order.orderNumber || getOrderDocumentId(order);
                 await downloadOrderImages(orderNumber);
             }
             
@@ -6683,17 +6706,14 @@
         
         // Send selected orders to Shiprocket
         async function sendToShiprocket() {
-            const selectedOrderNumbers = Array.from(selectedAllOrders);
-            if (selectedOrderNumbers.length === 0) {
+            const selectedOrders = getSelectedAllOrderObjects();
+            if (selectedOrders.length === 0) {
                 showShippingToast('No orders selected', 'error');
                 return;
             }
             
             // Filter to orders that haven't been sent yet
-            const ordersToSend = orders.filter(o => 
-                selectedOrderNumbers.includes(o.orderNumber) && 
-                !o.shiprocket?.orderId
-            );
+            const ordersToSend = selectedOrders.filter(o => !o.shiprocket?.orderId);
             
             if (ordersToSend.length === 0) {
                 showShippingToast('Selected orders are already in Shiprocket', 'error');
@@ -6838,18 +6858,14 @@
         
         // Move selected orders to Shiprocket
         async function moveSelectedToShiprocket() {
-            const selectedOrderNumbers = Array.from(selectedAllOrders);
-            if (selectedOrderNumbers.length === 0) {
+            const selectedOrders = getSelectedAllOrderObjects();
+            if (selectedOrders.length === 0) {
                 showShippingToast('No orders selected', 'error');
                 return;
             }
             
             // Filter to orders that have images downloaded but not sent to Shiprocket
-            const ordersToMove = orders.filter(o => 
-                selectedOrderNumbers.includes(o.orderNumber) && 
-                o.imageDownloaded && 
-                !o.sentToShiprocket
-            );
+            const ordersToMove = selectedOrders.filter(o => o.imageDownloaded && !o.sentToShiprocket);
             
             if (ordersToMove.length === 0) {
                 showShippingToast('No eligible orders to move (images must be downloaded first)', 'error');
@@ -6983,7 +6999,7 @@
                 const eta = order.shiprocket?.edd ? `ETA: ${formatShortDate(order.shiprocket.edd)}` : '';
                 
                 // Check if order is selected
-                const isSelected = selectedAllOrders.has(order.orderNumber);
+                const isSelected = isSelectedAllOrder(order);
                 
                 return `
                 <tr class="${isSelected ? 'selected' : ''}" data-order-id="${orderId}" data-order-number="${order.orderNumber}">
@@ -7322,16 +7338,14 @@
         
         // Bulk generate labels
         async function bulkGenerateLabels() {
-            const selectedOrderNumbers = Array.from(selectedAllOrders);
-            if (selectedOrderNumbers.length === 0) {
+            const selectedOrders = getSelectedAllOrderObjects();
+            if (selectedOrders.length === 0) {
                 showShippingToast('No orders selected', 'error');
                 return;
             }
             
             // Filter to orders with AWB
-            const ordersWithAWB = orders.filter(o => 
-                selectedOrderNumbers.includes(o.orderNumber) && o.shiprocket?.awb
-            );
+            const ordersWithAWB = selectedOrders.filter(o => o.shiprocket?.awb);
             
             if (ordersWithAWB.length === 0) {
                 showShippingToast('Selected orders don\'t have AWB yet. Generate AWB first.', 'error');
@@ -7364,15 +7378,14 @@
         
         // Bulk request pickup
         async function bulkRequestPickup() {
-            const selectedOrderNumbers = Array.from(selectedAllOrders);
-            if (selectedOrderNumbers.length === 0) {
+            const selectedOrders = getSelectedAllOrderObjects();
+            if (selectedOrders.length === 0) {
                 showShippingToast('No orders selected', 'error');
                 return;
             }
             
             // Filter to orders with AWB (AWB is required for pickup)
-            const ordersToPickup = orders.filter(o => 
-                selectedOrderNumbers.includes(o.orderNumber) && 
+            const ordersToPickup = selectedOrders.filter(o => 
                 o.shiprocket?.shipmentId &&
                 o.shiprocket?.awbCode &&
                 !o.shiprocket?.pickupRequested
@@ -7380,8 +7393,7 @@
             
             if (ordersToPickup.length === 0) {
                 // Check if orders need AWB first
-                const ordersNeedingAWB = orders.filter(o => 
-                    selectedOrderNumbers.includes(o.orderNumber) && 
+                const ordersNeedingAWB = selectedOrders.filter(o => 
                     o.shiprocket?.shipmentId &&
                     !o.shiprocket?.awbCode
                 );
@@ -7436,19 +7448,19 @@
         
         // Download bulk images for selected orders
         async function downloadBulkImages() {
-            const selectedOrderNumbers = Array.from(selectedAllOrders);
-            if (selectedOrderNumbers.length === 0) {
+            const selectedOrders = getSelectedAllOrderObjects();
+            if (selectedOrders.length === 0) {
                 showShippingToast('No orders selected', 'error');
                 return;
             }
             
-            showShippingToast(`Downloading images for ${selectedOrderNumbers.length} orders...`, 'info');
+            showShippingToast(`Downloading images for ${selectedOrders.length} orders...`, 'info');
             
             let totalImages = 0;
             let downloadedImages = 0;
             
-            for (const orderNumber of selectedOrderNumbers) {
-                const order = orders.find(o => o.orderNumber === orderNumber);
+            for (const order of selectedOrders) {
+                const orderNumber = order.orderNumber || getOrderDocumentId(order);
                 if (order && order.items) {
                     for (let i = 0; i < order.items.length; i++) {
                         totalImages++;
@@ -8794,17 +8806,14 @@
         // Bulk create shipments for selected orders
         async function bulkCreateShipments() {
             // Get selected orders
-            const selectedOrderNumbers = Array.from(selectedAllOrders);
-            if (selectedOrderNumbers.length === 0) {
+            const selectedOrders = getSelectedAllOrderObjects();
+            if (selectedOrders.length === 0) {
                 showShippingToast('No orders selected', 'error');
                 return;
             }
 
             // Filter to only orders that don't already have shiprocket data
-            const ordersToShip = orders.filter(o => {
-                const orderNumber = o.orderNumber || o.id;
-                return selectedOrderNumbers.includes(orderNumber) && !o.shiprocket?.orderId;
-            });
+            const ordersToShip = selectedOrders.filter(o => !o.shiprocket?.orderId);
 
             if (ordersToShip.length === 0) {
                 showShippingToast('Selected orders are already shipped or have shipments created', 'error');
@@ -8812,7 +8821,7 @@
             }
 
             // Confirm action
-            const skippedCount = selectedOrderNumbers.length - ordersToShip.length;
+            const skippedCount = selectedOrders.length - ordersToShip.length;
             let confirmMsg = `Create shipments for ${ordersToShip.length} order(s)?`;
             if (skippedCount > 0) {
                 confirmMsg += `\n\n(${skippedCount} order(s) will be skipped as they already have shipments)`;
@@ -8875,15 +8884,14 @@
         
         // Bulk generate AWB for selected orders
         async function bulkGenerateAWB() {
-            const selectedOrderNumbers = Array.from(selectedAllOrders);
-            if (selectedOrderNumbers.length === 0) {
+            const selectedOrders = getSelectedAllOrderObjects();
+            if (selectedOrders.length === 0) {
                 showShippingToast('No orders selected', 'error');
                 return;
             }
             
             // Filter to orders with shipments but no AWB
-            const ordersNeedingAWB = orders.filter(o => 
-                selectedOrderNumbers.includes(o.orderNumber) && 
+            const ordersNeedingAWB = selectedOrders.filter(o => 
                 o.shiprocket?.shipmentId && 
                 !o.shiprocket?.awbCode
             );
@@ -10206,12 +10214,13 @@
         }
         
         function deleteSelectedAllOrders() {
-            const count = selectedAllOrders.size;
+            const orderIds = getSelectedAllOrderIds();
+            const count = orderIds.length;
             if (count === 0) return;
             
             pendingDeleteInfo = {
                 type: 'bulk',
-                orderIds: Array.from(selectedAllOrders),
+                orderIds: orderIds,
                 source: 'all'
             };
             
