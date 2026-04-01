@@ -1100,23 +1100,26 @@
 
         .image-review-shell {
             display: grid;
-            grid-template-columns: 320px minmax(0, 1fr);
+            grid-template-columns: minmax(360px, 430px) minmax(0, 1fr);
             height: 100%;
+            min-height: 0;
         }
 
         .image-review-sidebar {
-            padding: 1rem;
+            padding: 1.25rem;
             border-right: 1px solid var(--border-light);
             background: rgba(248, 250, 252, 0.9);
             display: flex;
             flex-direction: column;
             gap: 1rem;
+            min-height: 0;
             overflow-y: auto;
         }
 
         .image-review-progress-card,
         .image-review-details-card,
-        .image-review-help-card {
+        .image-review-help-card,
+        .image-review-toolbar {
             background: white;
             border: 1px solid var(--border-light);
             border-radius: var(--radius-lg);
@@ -1270,17 +1273,19 @@
             display: flex;
             flex-direction: column;
             min-width: 0;
+            min-height: 0;
             overflow: hidden;
+            padding: 1.25rem;
+            background:
+                radial-gradient(circle at top right, rgba(37, 99, 235, 0.08), transparent 30%),
+                linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
         }
 
         .image-review-toolbar {
-            padding: 1rem 1.25rem 0.85rem;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: flex-start;
             gap: 1rem;
-            border-bottom: 1px solid var(--border-light);
-            background: rgba(255, 255, 255, 0.9);
         }
 
         .image-review-toolbar h4 {
@@ -1296,11 +1301,37 @@
         }
 
         .image-review-nav {
-            display: inline-flex;
+            display: flex;
             align-items: center;
             gap: 0.5rem;
             flex-wrap: wrap;
-            justify-content: flex-end;
+            justify-content: flex-start;
+            width: 100%;
+        }
+
+        .image-review-section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.9rem;
+        }
+
+        .image-review-section-title strong {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .image-review-section-title span {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+
+        .image-review-stage-panel {
+            flex: 1;
+            min-height: 0;
+            display: flex;
         }
 
         .image-review-nav button,
@@ -1333,22 +1364,10 @@
             cursor: not-allowed;
         }
 
-        .image-review-stage-wrap {
-            flex: 1;
-            min-height: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            padding: 1rem 1.25rem 1.25rem;
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
-
         .image-review-stage {
             position: relative;
-            flex: 0 0 auto;
-            min-height: 320px;
-            max-height: 70vh;
+            flex: 1;
+            min-height: 0;
             border-radius: 24px;
             background:
                 radial-gradient(circle at top left, rgba(37, 99, 235, 0.1), transparent 40%),
@@ -1358,8 +1377,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: auto;
+            overflow: hidden;
             touch-action: none;
+            padding: 1.5rem;
         }
 
         .image-review-swipe-label {
@@ -1397,20 +1417,19 @@
         }
 
         .image-review-card {
-            width: min(100%, 920px);
-            height: auto;
-            max-height: calc(70vh - 8rem);
-            margin: 1rem;
+            width: 100%;
+            height: 100%;
+            margin: 0;
             border-radius: 20px;
-            background: rgba(255, 255, 255, 0.96);
-            box-shadow: 0 24px 50px rgba(15, 23, 42, 0.14);
-            border: 1px solid rgba(148, 163, 184, 0.24);
+            background: transparent;
+            box-shadow: none;
+            border: none;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 1rem;
-            padding: 1rem;
+            gap: 0;
+            padding: 0;
             cursor: grab;
             user-select: none;
             transition: transform 0.12s ease, box-shadow 0.12s ease;
@@ -1418,12 +1437,13 @@
 
         .image-review-card.dragging {
             cursor: grabbing;
-            box-shadow: 0 28px 60px rgba(15, 23, 42, 0.2);
         }
 
         .image-review-card img {
+            width: 100%;
+            height: 100%;
             max-width: 100%;
-            max-height: 500px;
+            max-height: 100%;
             border-radius: 16px;
             object-fit: contain;
             background: #f8fafc;
@@ -1432,6 +1452,7 @@
         .image-review-placeholder {
             width: 100%;
             height: 100%;
+            min-height: 320px;
             border-radius: 16px;
             border: 2px dashed rgba(148, 163, 184, 0.4);
             display: flex;
@@ -1445,32 +1466,17 @@
             background: rgba(248, 250, 252, 0.95);
         }
 
-        .image-review-caption {
-            display: flex;
-            justify-content: space-between;
-            gap: 1rem;
-            width: 100%;
-            flex-wrap: wrap;
-            color: var(--text-secondary);
-            font-size: 0.88rem;
-        }
-
-        .image-review-caption strong {
-            color: var(--text-primary);
-        }
-
         .image-review-decision-row {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            align-items: stretch;
             gap: 1rem;
-            flex-wrap: wrap;
         }
 
         .image-review-decision-actions {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 0.65rem;
-            flex-wrap: wrap;
         }
 
         .image-review-decision-button.is-clear {
@@ -1493,6 +1499,7 @@
             display: inline-flex;
             align-items: center;
             gap: 0.45rem;
+            flex-wrap: wrap;
             color: var(--text-secondary);
             font-size: 0.86rem;
             font-weight: 600;
@@ -1500,10 +1507,8 @@
 
         .image-review-thumbnails {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
             gap: 0.75rem;
-            overflow-y: auto;
-            padding-right: 0.1rem;
         }
 
         .image-review-thumb {
@@ -1582,13 +1587,23 @@
         @media (max-width: 1100px) {
             .image-review-shell {
                 grid-template-columns: 1fr;
-                grid-template-rows: auto minmax(0, 1fr);
+                grid-template-rows: minmax(280px, 42vh) minmax(0, 1fr);
             }
 
             .image-review-sidebar {
+                order: 2;
                 border-right: none;
-                border-bottom: 1px solid var(--border-light);
-                max-height: 38vh;
+                border-top: 1px solid var(--border-light);
+                padding-top: 1rem;
+            }
+
+            .image-review-main {
+                order: 1;
+                padding: 1rem;
+            }
+
+            .image-review-stage {
+                padding: 1rem;
             }
         }
 
@@ -1600,28 +1615,22 @@
                 border-radius: 0;
             }
 
-            .image-review-toolbar,
-            .image-review-stage-wrap,
-            .image-review-sidebar {
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-
             .image-review-toolbar {
-                flex-direction: column;
+                padding: 0.9rem;
             }
 
-            .image-review-nav {
-                width: 100%;
-                justify-content: flex-start;
+            .image-review-sidebar,
+            .image-review-main {
+                padding: 0.9rem;
             }
 
             .image-review-stage {
                 min-height: 260px;
+                padding: 0.75rem;
             }
 
-            .image-review-card {
-                margin: 0.75rem;
+            .image-review-decision-actions {
+                grid-template-columns: 1fr;
             }
 
             .image-review-thumbnails {
@@ -11169,6 +11178,8 @@
             const activeOrderStatus = deriveOrderImageReviewStatus(activeEntry.workingReview, activeEntry.totalItems);
             const paymentSummary = getOrderPaymentSummary(activeOrder);
             const imageSource = getOrderItemBestImage(activeOrder, imageReviewSession.activeItemIndex);
+            const activeItemSummary = getOrderItemReviewSummary(activeItem);
+            const activeItemPrice = activeItem?.price ? `₹${activeItem.price}` : 'Frame details available in order modal';
             const orderReviewCount = getReviewedImageCountForSessionOrder(activeEntry);
             const isFirstOrder = imageReviewSession.activeOrderIndex === 0;
             const isLastOrder = imageReviewSession.activeOrderIndex === imageReviewSession.orders.length - 1;
@@ -11213,6 +11224,27 @@
             root.innerHTML = `
                 <div class="image-review-shell">
                     <aside class="image-review-sidebar">
+                        <section class="image-review-toolbar">
+                            <div>
+                                <h4>Order #${escapeHtml(activeOrder.orderNumber || getOrderDocumentId(activeOrder) || 'Order')}</h4>
+                                <p>Order ${imageReviewSession.activeOrderIndex + 1} of ${imageReviewSession.orders.length} • Image ${imageReviewSession.activeItemIndex + 1} of ${activeEntry.totalItems} • ${orderReviewCount}/${activeEntry.totalItems} reviewed</p>
+                            </div>
+                            <div class="image-review-nav">
+                                <button type="button" onclick="selectImageReviewOrder(${Math.max(imageReviewSession.activeOrderIndex - 1, 0)})" ${disableAttr} ${isFirstOrder ? 'disabled' : ''}>
+                                    <i class="fas fa-arrow-left"></i> Prev Order
+                                </button>
+                                <button type="button" onclick="goToPreviousImageReviewTarget()" ${disableAttr} ${isFirstOrder && isFirstItem ? 'disabled' : ''}>
+                                    <i class="fas fa-chevron-left"></i> Prev Image
+                                </button>
+                                <button type="button" onclick="goToNextImageReviewTarget()" ${disableAttr} ${isLastOrder && isLastItem ? 'disabled' : ''}>
+                                    Next Image <i class="fas fa-chevron-right"></i>
+                                </button>
+                                <button type="button" onclick="selectImageReviewOrder(${Math.min(imageReviewSession.activeOrderIndex + 1, imageReviewSession.orders.length - 1)})" ${disableAttr} ${isLastOrder ? 'disabled' : ''}>
+                                    Next Order <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </section>
+
                         <section class="image-review-progress-card">
                             <div class="image-review-progress-top">
                                 <strong>Batch Progress</strong>
@@ -11226,6 +11258,51 @@
                         </section>
 
                         <section class="image-review-details-card">
+                            <div class="image-review-section-title">
+                                <strong>Current Image</strong>
+                                <span>Item ${imageReviewSession.activeItemIndex + 1} of ${activeEntry.totalItems}</span>
+                            </div>
+                            <div class="image-review-details-grid">
+                                <div class="image-review-detail">
+                                    <span class="image-review-detail-label">Frame Details</span>
+                                    <span class="image-review-detail-value">${escapeHtml(activeItemSummary)}</span>
+                                </div>
+                                <div class="image-review-detail">
+                                    <span class="image-review-detail-label">Price</span>
+                                    <span class="image-review-detail-value">${escapeHtml(activeItemPrice)}</span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="image-review-details-card">
+                            <div class="image-review-section-title">
+                                <strong>Review Status</strong>
+                                <span>${escapeHtml(reviewHint)}</span>
+                            </div>
+                            <div class="image-review-decision-row">
+                                <div class="image-review-current-status">
+                                    ${getImageReviewStatusChipMarkup(activeDecision || IMAGE_REVIEW_STATUS.pending, activeDecision ? `Current: ${getImageReviewStatusLabel(activeDecision)}` : 'Current: Pending')}
+                                    ${getImageReviewStatusChipMarkup(activeOrderStatus, `Order: ${getImageReviewStatusLabel(activeOrderStatus)}`)}
+                                </div>
+                                <div class="image-review-decision-actions">
+                                    <button type="button" class="image-review-decision-button is-blurry" onclick="setActiveImageReviewDecision('${IMAGE_REVIEW_STATUS.blurry}')" ${disableAttr}>
+                                        <i class="fas fa-arrow-left"></i> Mark Blurry
+                                    </button>
+                                    <button type="button" class="image-review-secondary-button" onclick="clearActiveImageReviewDecision()" ${disableAttr} ${!activeDecision ? 'disabled' : ''}>
+                                        <i class="fas fa-eraser"></i> Reset Decision
+                                    </button>
+                                    <button type="button" class="image-review-decision-button is-clear" onclick="setActiveImageReviewDecision('${IMAGE_REVIEW_STATUS.clear}')" ${disableAttr}>
+                                        Mark Clear <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="image-review-details-card">
+                            <div class="image-review-section-title">
+                                <strong>Order Details</strong>
+                                <span>${escapeHtml(activeOrder.customer?.name || 'Guest')}</span>
+                            </div>
                             <div class="image-review-details-grid">
                                 <div class="image-review-detail">
                                     <span class="image-review-detail-label">Customer</span>
@@ -11250,6 +11327,16 @@
                             </div>
                         </section>
 
+                        <section class="image-review-details-card">
+                            <div class="image-review-section-title">
+                                <strong>All Images</strong>
+                                <span>Select any item to review it</span>
+                            </div>
+                            <div class="image-review-thumbnails">
+                                ${thumbnailsHtml}
+                            </div>
+                        </section>
+
                         <section class="image-review-help-card">
                             <ul>
                                 <li>${escapeHtml(reviewHint)}</li>
@@ -11261,60 +11348,11 @@
                     </aside>
 
                     <section class="image-review-main">
-                        <div class="image-review-toolbar">
-                            <div>
-                                <h4>Order #${escapeHtml(activeOrder.orderNumber || getOrderDocumentId(activeOrder) || 'Order')}</h4>
-                                <p>Order ${imageReviewSession.activeOrderIndex + 1} of ${imageReviewSession.orders.length} • Image ${imageReviewSession.activeItemIndex + 1} of ${activeEntry.totalItems} • ${orderReviewCount}/${activeEntry.totalItems} reviewed</p>
-                            </div>
-                            <div class="image-review-nav">
-                                <button type="button" onclick="selectImageReviewOrder(${Math.max(imageReviewSession.activeOrderIndex - 1, 0)})" ${disableAttr} ${isFirstOrder ? 'disabled' : ''}>
-                                    <i class="fas fa-arrow-left"></i> Prev Order
-                                </button>
-                                <button type="button" onclick="goToPreviousImageReviewTarget()" ${disableAttr} ${isFirstOrder && isFirstItem ? 'disabled' : ''}>
-                                    <i class="fas fa-chevron-left"></i> Prev Image
-                                </button>
-                                <button type="button" onclick="goToNextImageReviewTarget()" ${disableAttr} ${isLastOrder && isLastItem ? 'disabled' : ''}>
-                                    Next Image <i class="fas fa-chevron-right"></i>
-                                </button>
-                                <button type="button" onclick="selectImageReviewOrder(${Math.min(imageReviewSession.activeOrderIndex + 1, imageReviewSession.orders.length - 1)})" ${disableAttr} ${isLastOrder ? 'disabled' : ''}>
-                                    Next Order <i class="fas fa-arrow-right"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="image-review-stage-wrap">
+                        <div class="image-review-stage-panel">
                             <div class="image-review-stage" id="image-review-stage">
-                                <div class="image-review-swipe-label left">Blurry</div>
-                                <div class="image-review-swipe-label right">Clear</div>
                                 <div class="image-review-card" id="image-review-card">
                                     ${imageSource ? `<img src="${imageSource}" alt="Review image ${imageReviewSession.activeItemIndex + 1}" draggable="false">` : `<div class="image-review-placeholder"><i class="fas fa-image" style="font-size: 2rem;"></i><div>No image preview available for this item.</div></div>`}
-                                    <div class="image-review-caption">
-                                        <span><strong>Item ${imageReviewSession.activeItemIndex + 1}</strong> • ${escapeHtml(getOrderItemReviewSummary(activeItem))}</span>
-                                        <span>${activeItem?.price ? `₹${activeItem.price}` : 'Frame details available in order modal'}</span>
-                                    </div>
                                 </div>
-                            </div>
-
-                            <div class="image-review-decision-row">
-                                <div class="image-review-current-status">
-                                    ${getImageReviewStatusChipMarkup(activeDecision || IMAGE_REVIEW_STATUS.pending, activeDecision ? `Current: ${getImageReviewStatusLabel(activeDecision)}` : 'Current: Pending')}
-                                    ${getImageReviewStatusChipMarkup(activeOrderStatus, `Order: ${getImageReviewStatusLabel(activeOrderStatus)}`)}
-                                </div>
-                                <div class="image-review-decision-actions">
-                                    <button type="button" class="image-review-decision-button is-blurry" onclick="setActiveImageReviewDecision('${IMAGE_REVIEW_STATUS.blurry}')" ${disableAttr}>
-                                        <i class="fas fa-arrow-left"></i> Mark Blurry
-                                    </button>
-                                    <button type="button" class="image-review-secondary-button" onclick="clearActiveImageReviewDecision()" ${disableAttr} ${!activeDecision ? 'disabled' : ''}>
-                                        <i class="fas fa-eraser"></i> Reset Decision
-                                    </button>
-                                    <button type="button" class="image-review-decision-button is-clear" onclick="setActiveImageReviewDecision('${IMAGE_REVIEW_STATUS.clear}')" ${disableAttr}>
-                                        Mark Clear <i class="fas fa-arrow-right"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="image-review-thumbnails">
-                                ${thumbnailsHtml}
                             </div>
                         </div>
                     </section>
