@@ -1414,6 +1414,30 @@
             padding: 0.5rem;
         }
 
+        .image-review-stage::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            z-index: 10;
+            border-radius: 24px;
+        }
+
+        .image-review-stage.show-left::before {
+            opacity: 0.35;
+            background: rgba(239, 68, 68, 0.4);
+        }
+
+        .image-review-stage.show-right::before {
+            opacity: 0.35;
+            background: rgba(34, 197, 94, 0.4);
+        }
+
         .image-review-swipe-label {
             position: absolute;
             top: 1.25rem;
@@ -1478,7 +1502,7 @@
             max-width: 100%;
             max-height: none;
             display: block;
-            border-radius: 16px;
+            border-radius: 0;
             object-fit: contain;
             background: #f8fafc;
         }
@@ -11291,27 +11315,6 @@
                                 <span>${reviewedItems}/${totalItems} reviewed</span>
                             </div>
                             <div class="image-review-progress-bar"><span style="width: ${progressPercent}%;"></span></div>
-                        </section>
-
-                        <section class="image-review-order-list">
-                            ${orderButtonsHtml}
-                        </section>
-
-                        <section class="image-review-details-card">
-                            <div class="image-review-section-title">
-                                <strong>Current Image</strong>
-                                <span>Item ${imageReviewSession.activeItemIndex + 1} of ${activeEntry.totalItems}</span>
-                            </div>
-                            <div class="image-review-details-grid">
-                                <div class="image-review-detail">
-                                    <span class="image-review-detail-label">Frame Details</span>
-                                    <span class="image-review-detail-value">${escapeHtml(activeItemSummary)}</span>
-                                </div>
-                                <div class="image-review-detail">
-                                    <span class="image-review-detail-label">Price</span>
-                                    <span class="image-review-detail-value">${escapeHtml(activeItemPrice)}</span>
-                                </div>
-                            </div>
                         </section>
 
                         <section class="image-review-details-card">
