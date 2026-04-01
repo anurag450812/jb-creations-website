@@ -525,46 +525,6 @@
             line-height: 1.65;
         }
 
-        .bullet-list {
-            display: grid;
-            gap: 12px;
-        }
-
-        .bullet-item {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 12px;
-            align-items: flex-start;
-            padding: 14px 16px;
-            border-radius: 18px;
-            background: rgba(255, 255, 255, 0.72);
-            border: 1px solid var(--border);
-        }
-
-        .bullet-item i {
-            width: 40px;
-            height: 40px;
-            border-radius: 14px;
-            display: grid;
-            place-items: center;
-            background: rgba(242, 184, 75, 0.16);
-            color: #9a6300;
-        }
-
-        .bullet-item strong {
-            display: block;
-            margin-bottom: 4px;
-            font-size: 0.95rem;
-            color: var(--ink);
-        }
-
-        .bullet-item span {
-            display: block;
-            color: var(--muted);
-            font-size: 0.88rem;
-            line-height: 1.6;
-        }
-
         .quick-actions {
             display: grid;
             gap: 12px;
@@ -595,22 +555,6 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
-        }
-
-        .note-card {
-            padding: 18px;
-            border-radius: 22px;
-            background: linear-gradient(135deg, rgba(242, 184, 75, 0.18), rgba(255, 255, 255, 0.92));
-            border: 1px solid rgba(242, 184, 75, 0.28);
-            color: #734800;
-            line-height: 1.7;
-        }
-
-        .note-card strong {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 0.98rem;
-            color: #734800;
         }
 
         @keyframes pulseDot {
@@ -681,10 +625,10 @@
             <section class="panel hero-copy">
                 <div class="eyebrow">
                     <span class="eyebrow-dot"></span>
-                    XIDLZ custom frame order confirmed
+                    Order confirmed
                 </div>
-                <h1 id="heroHeading">Your order is officially in.</h1>
-                <p class="hero-lead" id="heroSubcopy">We captured your payment and secured your order. The next steps below show exactly what happens from here.</p>
+                <h1 id="heroHeading">Its official, Anurag.</h1>
+                <p class="hero-lead" id="heroSubcopy">Your payment is secured and your custom frame order is queued for production. Track it anytime from your account.</p>
 
                 <div class="hero-highlight">
                     <div class="hero-stat">
@@ -700,7 +644,7 @@
                 <div class="hero-actions">
                     <a id="primaryActionBtn" class="btn btn-primary" href="my-orders.html">
                         <i class="fas fa-box-open"></i>
-                        My Orders
+                        Track Order
                     </a>
                     <a class="btn btn-secondary" href="index.html">
                         <i class="fas fa-arrow-left"></i>
@@ -712,37 +656,37 @@
             <aside class="panel order-card">
                 <header>
                     <div>
-                        <div class="card-kicker">Order token</div>
-                        <h2>Keep this ID handy</h2>
+                        <div class="card-kicker">Order ID</div>
+                        <h2>Keep this handy</h2>
                     </div>
                     <div class="status-pill">
                         <i class="fas fa-circle-check"></i>
-                        <span id="checkoutType">Signed-in checkout</span>
+                        <span id="statusLabel">In progress</span>
                     </div>
                 </header>
 
                 <div class="order-token">
                     <div class="order-token-top">
-                        <span class="order-token-label">Order ID</span>
+                        <span class="order-token-label">Order number</span>
                         <button type="button" class="copy-btn" id="copyOrderIdBtn">
                             <i class="fa-regular fa-clone"></i>
                             Copy
                         </button>
                     </div>
                     <strong id="orderNumber">Loading...</strong>
-                    <p class="token-caption">Use this order ID anywhere you need support, status tracking, or account lookup later.</p>
+                    <p class="token-caption">Use this to track your order or contact support anytime.</p>
                 </div>
 
                 <div class="metric-grid">
                     <div class="metric-card">
-                        <span>Status</span>
-                        <strong id="queueStatus">Paid and queued</strong>
-                        <small id="queueStatusNote">We have your payment and your custom frame details.</small>
+                        <span>Current stage</span>
+                        <strong id="currentStage">Payment received</strong>
+                        <small id="stageNote">Your order is queued for artwork review.</small>
                     </div>
                     <div class="metric-card">
-                        <span>Confirmation date</span>
+                        <span>Confirmed on</span>
                         <strong id="orderDateHero">Loading...</strong>
-                        <small>This is the date your confirmation was generated.</small>
+                        <small>This confirmation is saved to your account.</small>
                     </div>
                 </div>
 
@@ -751,21 +695,21 @@
                         <div class="progress-icon"><i class="fas fa-credit-card"></i></div>
                         <div class="progress-copy">
                             <strong>Payment received</strong>
-                            <span>Your payment cleared and this order is secured in our system.</span>
+                            <span>Your payment cleared and locked in.</span>
                         </div>
                     </div>
                     <div class="progress-card">
                         <div class="progress-icon"><i class="fas fa-image"></i></div>
                         <div class="progress-copy">
-                            <strong>Artwork and framing review</strong>
-                            <span>Your selected photos, frame style, and finish details move into preparation next.</span>
+                            <strong>Artwork review</strong>
+                            <span>Photos and frame details preparing.</span>
                         </div>
                     </div>
                     <div class="progress-card">
                         <div class="progress-icon"><i class="fas fa-truck"></i></div>
                         <div class="progress-copy">
-                            <strong>Shipping updates later</strong>
-                            <span>As soon as your order moves forward, the latest status will appear in tracking.</span>
+                            <strong>Production & shipping</strong>
+                            <span>Status updates in your orders.</span>
                         </div>
                     </div>
                 </div>
@@ -777,14 +721,13 @@
                 <section class="panel info-card">
                     <div class="section-heading">
                         <div>
-                            <div class="card-kicker">Order snapshot</div>
-                            <h2>Your confirmation details</h2>
+                            <div class="card-kicker">Order details</div>
+                            <h2>Your confirmation</h2>
                         </div>
-                        <p>A clean summary of the essentials you are most likely to need after checkout.</p>
                     </div>
                     <div class="detail-grid">
                         <div class="detail-card">
-                            <span class="detail-label">Customer name</span>
+                            <span class="detail-label">Name</span>
                             <span class="detail-value" id="customerName">Loading...</span>
                         </div>
                         <div class="detail-card">
@@ -805,31 +748,30 @@
                 <section class="panel info-card">
                     <div class="section-heading">
                         <div>
-                            <div class="card-kicker">What happens next</div>
-                            <h2>The next few stages</h2>
+                            <div class="card-kicker">What's next</div>
+                            <h2>Your order timeline</h2>
                         </div>
-                        <p>This is the rough order journey after confirmation, so the page feels useful and not just celebratory.</p>
                     </div>
                     <div class="timeline-list">
                         <div class="timeline-item">
-                            <div class="timeline-icon"><i class="fas fa-envelope-open-text"></i></div>
+                            <div class="timeline-icon"><i class="fas fa-circle-check"></i></div>
                             <div class="timeline-copy">
-                                <strong>Confirmation is now live</strong>
-                                <p>Your order number is active, and this confirmation page is your first handoff from checkout to fulfilment.</p>
+                                <strong>Order confirmed</strong>
+                                <p>Your payment is processed and order is now in our system ready for the next steps.</p>
                             </div>
                         </div>
                         <div class="timeline-item">
                             <div class="timeline-icon"><i class="fas fa-sliders"></i></div>
                             <div class="timeline-copy">
-                                <strong>Artwork and custom details are reviewed</strong>
-                                <p>Your uploaded photos and frame selections are prepared for the next production stage before printing and assembly.</p>
+                                <strong>Artwork review underway</strong>
+                                <p>Your photos and frame customizations are being prepared for production setup.</p>
                             </div>
                         </div>
                         <div class="timeline-item">
                             <div class="timeline-icon"><i class="fas fa-box"></i></div>
                             <div class="timeline-copy">
-                                <strong>Production and packaging follow</strong>
-                                <p>Once your order progresses, the status trail continues through production, shipment, and final delivery updates.</p>
+                                <strong>Production & shipment</strong>
+                                <p>Once complete, your order ships with tracking updates sent to your account.</p>
                             </div>
                         </div>
                     </div>
@@ -840,61 +782,24 @@
                 <section class="panel info-card">
                     <div class="section-heading">
                         <div>
-                            <div class="card-kicker">Why this page matters</div>
-                            <h2>Useful after checkout</h2>
-                        </div>
-                    </div>
-                    <div class="bullet-list">
-                        <div class="bullet-item">
-                            <i class="fas fa-id-card"></i>
-                            <div>
-                                <strong>Order ID is front and center</strong>
-                                <span>That keeps the page practical for follow-up support and future tracking.</span>
-                            </div>
-                        </div>
-                        <div class="bullet-item">
-                            <i class="fas fa-bell"></i>
-                            <div>
-                                <strong>Status updates continue later</strong>
-                                <span>Use your order tools anytime instead of wondering where the order moved next.</span>
-                            </div>
-                        </div>
-                        <div class="bullet-item">
-                            <i class="fas fa-shield-heart"></i>
-                            <div>
-                                <strong>Payment is already secured</strong>
-                                <span>This page exists after a successful order save, not as a vague halfway state.</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="panel info-card">
-                    <div class="section-heading">
-                        <div>
-                            <div class="card-kicker">Quick actions</div>
-                            <h2>Where to go next</h2>
+                            <div class="card-kicker">Next actions</div>
+                            <h2>Where to go</h2>
                         </div>
                     </div>
                     <div class="quick-actions">
-                        <a class="action-link" id="secondaryPrimaryAction" href="my-orders.html">
-                            <span><i class="fas fa-box-open"></i> Open order tools</span>
+                        <a class="action-link" id="trackOrderLink" href="my-orders.html">
+                            <span><i class="fas fa-location-dot"></i> Track this order</span>
                             <i class="fas fa-arrow-right"></i>
                         </a>
                         <a class="action-link" href="faq.html">
-                            <span><i class="fas fa-circle-question"></i> Read delivery and support FAQs</span>
+                            <span><i class="fas fa-circle-question"></i> FAQs & support</span>
                             <i class="fas fa-arrow-right"></i>
                         </a>
                         <a class="action-link" href="index.html">
-                            <span><i class="fas fa-store"></i> Return to the storefront</span>
+                            <span><i class="fas fa-store"></i> Back to storefront</span>
                             <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>
-                </section>
-
-                <section class="note-card" id="guestHintCard">
-                    <strong>Tracking note</strong>
-                    <span id="guestHint">You can use your account order history for updates, payment records, and future shipment changes.</span>
                 </section>
             </aside>
         </section>
@@ -909,8 +814,7 @@
                 orderNumber: urlParams.get('order') || sessionStorage.getItem('lastOrderNumber') || '',
                 customerName: urlParams.get('name') || sessionStorage.getItem('lastCustomerName') || 'Valued Customer',
                 customerEmail: urlParams.get('email') || sessionStorage.getItem('lastCustomerEmail') || '',
-                totalAmount: urlParams.get('amount') || sessionStorage.getItem('lastOrderAmount') || '299',
-                isGuest: urlParams.get('guest') === 'true' || !sessionStorage.getItem('user')
+                totalAmount: urlParams.get('amount') || sessionStorage.getItem('lastOrderAmount') || '299'
             };
         }
 
@@ -944,80 +848,11 @@
         function getMeaningfulFirstName(name) {
             const trimmed = (name || '').trim();
 
-            if (!trimmed || /guest customer|valued customer/i.test(trimmed)) {
+            if (!trimmed || /valued customer/i.test(trimmed)) {
                 return '';
             }
 
             return trimmed.split(/\s+/)[0];
-        }
-
-        function setActionTargets(details, orderId) {
-            const primaryActionBtn = document.getElementById('primaryActionBtn');
-            const secondaryPrimaryAction = document.getElementById('secondaryPrimaryAction');
-            const guestHint = document.getElementById('guestHint');
-            const checkoutType = document.getElementById('checkoutType');
-            const queueStatus = document.getElementById('queueStatus');
-            const queueStatusNote = document.getElementById('queueStatusNote');
-            const encodedOrder = encodeURIComponent(orderId);
-            const encodedEmail = encodeURIComponent(details.customerEmail || '');
-
-            if (details.isGuest) {
-                const guestTrackingHref = `track-order.html?order=${encodedOrder}&email=${encodedEmail}`;
-
-                if (primaryActionBtn) {
-                    primaryActionBtn.href = guestTrackingHref;
-                    primaryActionBtn.innerHTML = '<i class="fas fa-location-dot"></i> Track Order';
-                }
-
-                if (secondaryPrimaryAction) {
-                    secondaryPrimaryAction.href = guestTrackingHref;
-                    secondaryPrimaryAction.innerHTML = '<span><i class="fas fa-location-dot"></i> Open Track Order</span><i class="fas fa-arrow-right"></i>';
-                }
-
-                if (guestHint) {
-                    guestHint.textContent = 'Guest checkout detected. Keep your order ID and email ready so you can use Track Order anytime.';
-                }
-
-                if (checkoutType) {
-                    checkoutType.textContent = 'Guest checkout';
-                }
-
-                if (queueStatus) {
-                    queueStatus.textContent = 'Guest order saved';
-                }
-
-                if (queueStatusNote) {
-                    queueStatusNote.textContent = 'Use your order ID plus email when you want to check status later.';
-                }
-
-                return;
-            }
-
-            if (primaryActionBtn) {
-                primaryActionBtn.href = 'my-orders.html';
-                primaryActionBtn.innerHTML = '<i class="fas fa-box-open"></i> My Orders';
-            }
-
-            if (secondaryPrimaryAction) {
-                secondaryPrimaryAction.href = 'my-orders.html';
-                secondaryPrimaryAction.innerHTML = '<span><i class="fas fa-box-open"></i> Open My Orders</span><i class="fas fa-arrow-right"></i>';
-            }
-
-            if (guestHint) {
-                guestHint.textContent = 'Signed-in checkout detected. You can use My Orders to review status, payment records, and future shipment updates.';
-            }
-
-            if (checkoutType) {
-                checkoutType.textContent = 'Signed-in checkout';
-            }
-
-            if (queueStatus) {
-                queueStatus.textContent = 'Account order saved';
-            }
-
-            if (queueStatusNote) {
-                queueStatusNote.textContent = 'Your account will reflect the latest order status as it moves forward.';
-            }
         }
 
         function wireCopyButton(orderId) {
@@ -1058,14 +893,10 @@
             const firstName = getMeaningfulFirstName(details.customerName);
             const heroHeading = firstName
                 ? `Its official, ${firstName}.`
-                : 'Your order is officially in.';
-            const heroSubcopy = details.isGuest
-                ? 'We captured your payment and secured your order. Keep your order ID and email handy for future tracking.'
-                : 'We captured your payment and secured your order. You can review the next updates from your account whenever you want.';
+                : 'Its official, Anurag.';
 
             document.title = `Order Confirmed - ${orderId} | Xidlz`;
             document.getElementById('heroHeading').textContent = heroHeading;
-            document.getElementById('heroSubcopy').textContent = heroSubcopy;
             document.getElementById('orderNumber').textContent = orderId;
             document.getElementById('customerName').textContent = details.customerName;
             document.getElementById('customerEmail').textContent = details.customerEmail || 'Not provided';
@@ -1074,7 +905,6 @@
             document.getElementById('orderDate').textContent = formattedDate;
             document.getElementById('orderDateHero').textContent = formattedDate;
 
-            setActionTargets(details, orderId);
             wireCopyButton(orderId);
         }
 

@@ -2046,7 +2046,6 @@ function prepareOrderData() {
     
     orderData.customer = {
         userId: user ? user.id : null,
-        isGuest: !user, // Add guest indicator
         name: formData.get('customerName'),
         email: formData.get('customerEmail'),
         phone: '+91 ' + formData.get('customerPhone'), // Add +91 prefix for storage
@@ -2066,7 +2065,6 @@ function prepareOrderData() {
     orderData.orderNumber = generateOrderNumber(formData.get('customerPhone'));
     orderData.orderDate = new Date().toISOString();
     orderData.status = 'pending';
-    orderData.customerType = user ? 'registered' : 'guest';
     
     return orderData;
 }
@@ -2836,14 +2834,8 @@ async function placeOrder() {
 
                     // Delay redirect to show success animation
                     setTimeout(() => {
-                        // Redirect to success page ONLY for Firebase success
-                        if (user) {
-                            // For logged-in users
-                            window.location.href = `order-success.html?order=${orderData.orderNumber}&name=${encodeURIComponent(orderData.customer?.name || 'Customer')}&email=${encodeURIComponent(orderData.customer?.email || '')}&amount=${orderData.totals?.total || 299}&guest=false`;
-                        } else {
-                            // For guest users
-                            window.location.href = `order-success.html?order=${orderData.orderNumber}&name=${encodeURIComponent(orderData.customer?.name || 'Guest Customer')}&email=${encodeURIComponent(orderData.customer?.email || '')}&amount=${orderData.totals?.total || 299}&guest=true`;
-                        }
+                        // Redirect to success page after successful order
+                        window.location.href = `order-success.html?order=${orderData.orderNumber}&name=${encodeURIComponent(orderData.customer?.name || 'Customer')}&email=${encodeURIComponent(orderData.customer?.email || '')}&amount=${orderData.totals?.total || 299}`;
                     }, 2000); // 2 second delay to show success animation
                 } else {
                     // For localStorage fallback, show error instead of success
