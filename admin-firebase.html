@@ -11319,25 +11319,11 @@
 
                         <section class="image-review-details-card">
                             <div class="image-review-section-title">
-                                <strong>Review Status</strong>
-                                <span>${escapeHtml(reviewHint)}</span>
+                                <strong>All Images</strong>
+                                <span>Select any item to review it</span>
                             </div>
-                            <div class="image-review-decision-row">
-                                <div class="image-review-current-status">
-                                    ${getImageReviewStatusChipMarkup(activeDecision || IMAGE_REVIEW_STATUS.pending, activeDecision ? `Current: ${getImageReviewStatusLabel(activeDecision)}` : 'Current: Pending')}
-                                    ${getImageReviewStatusChipMarkup(activeOrderStatus, `Order: ${getImageReviewStatusLabel(activeOrderStatus)}`)}
-                                </div>
-                                <div class="image-review-decision-actions">
-                                    <button type="button" class="image-review-decision-button is-blurry" onclick="setActiveImageReviewDecision('${IMAGE_REVIEW_STATUS.blurry}')" ${disableAttr}>
-                                        <i class="fas fa-arrow-left"></i> Mark Blurry
-                                    </button>
-                                    <button type="button" class="image-review-secondary-button" onclick="clearActiveImageReviewDecision()" ${disableAttr} ${!activeDecision ? 'disabled' : ''}>
-                                        <i class="fas fa-eraser"></i> Reset Decision
-                                    </button>
-                                    <button type="button" class="image-review-decision-button is-clear" onclick="setActiveImageReviewDecision('${IMAGE_REVIEW_STATUS.clear}')" ${disableAttr}>
-                                        Mark Clear <i class="fas fa-arrow-right"></i>
-                                    </button>
-                                </div>
+                            <div class="image-review-thumbnails">
+                                ${thumbnailsHtml}
                             </div>
                         </section>
 
@@ -11367,16 +11353,6 @@
                                     <span class="image-review-detail-label">Payment</span>
                                     <span class="image-review-detail-value">${escapeHtml(paymentSummary.status)}${paymentSummary.method ? ` • ${escapeHtml(paymentSummary.method)}` : ''}${paymentSummary.paymentId ? `<br><small>${escapeHtml(paymentSummary.paymentId)}</small>` : ''}</span>
                                 </div>
-                            </div>
-                        </section>
-
-                        <section class="image-review-details-card">
-                            <div class="image-review-section-title">
-                                <strong>All Images</strong>
-                                <span>Select any item to review it</span>
-                            </div>
-                            <div class="image-review-thumbnails">
-                                ${thumbnailsHtml}
                             </div>
                         </section>
 
