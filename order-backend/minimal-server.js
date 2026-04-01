@@ -6,6 +6,21 @@ const PORT = process.env.PORT || 3001;
 
 // Import Cloudinary service
 const cloudinaryService = require('./services/cloudinary-service');
+const { getAllowedOrigins } = require('../netlify/functions/utils/http');
+const { verifyCheckoutUploadPermit } = require('../netlify/functions/utils/upload-permit');
+const { normalizeBase64Image, validateCloudinaryPublicId } = require('../netlify/functions/utils/upload-validation');
+
+const allowedOrigins = new Set(getAllowedOrigins());
+
+function getValidatedOrigin(req, res) {
+    const origin = req.headers.origin;
+    if (origin && !allowedOrigins.has(origin)) {
+        res.status(403).json({ success: false, error: 'Origin not allowed' });
+        return null;
+    }
+
+    return origin || null;
+}
 
 console.log('=== MINIMAL SERVER STARTING ===');
 console.log('Node version:', process.version);
@@ -25,11 +40,18 @@ app.use(express.json({ limit: '50mb' }));
 
 // Add CORS headers for all routes
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
+    const origin = req.headers.origin;
+    if (origin && allowedOrigins.has(origin)) {
+        res.header('Access-Control-Allow-Origin', origin);
+    }
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Vary', 'Origin');
     
     if (req.method === 'OPTIONS') {
+        if (origin && !allowedOrigins.has(origin)) {
+            return res.sendStatus(403);
+        }
         res.sendStatus(200);
     } else {
         next();
@@ -75,21 +97,26 @@ app.get('/test', (req, res) => {
 app.post('/api/upload-to-cloudinary', async (req, res) => {
     try {
         console.log('🔄 Upload to Cloudinary requested');
-        
-        const { image, publicId } = req.body;
-        
-        if (!image || !publicId) {
-            console.error('❌ Missing required fields for Cloudinary upload');
-            return res.status(400).json({ 
-                success: false, 
-                error: 'Image data and publicId are required' 
-            });
+        const origin = getValidatedOrigin(req, res);
+        if (origin === null && req.headers.origin) {
+            return;
         }
         
-        console.log(`🖼️ Uploading image to Cloudinary with publicId: ${publicId}`);
+        const { image, imageData, publicId, uploadPermit } = req.body;
+        const normalizedImage = normalizeBase64Image(imageData || image, imageData ? 'imageData' : 'image');
+        const permit = verifyCheckoutUploadPermit(uploadPermit, {
+            origin,
+            byteLength: normalizedImage.byteLength
+        });
+        const normalizedPublicId = validateCloudinaryPublicId(publicId, permit.folderPrefix);
+        
+        console.log(`🖼️ Uploading image to Cloudinary with publicId: ${normalizedPublicId}`);
         
         // Upload the image
-        const result = await cloudinaryService.uploadBase64Image(image, publicId);
+        const result = await cloudinaryService.uploadBase64Image(
+            `data:${normalizedImage.mimeType};base64,${normalizedImage.base64Payload}`,
+            normalizedPublicId
+        );
         
         if (result.success) {
             console.log('✅ Image uploaded successfully to Cloudinary');
@@ -107,7 +134,7 @@ app.post('/api/upload-to-cloudinary', async (req, res) => {
         }
     } catch (error) {
         console.error('❌ Error in Cloudinary upload endpoint:', error);
-        res.status(500).json({
+        res.status(error.statusCode || 500).json({
             success: false,
             error: error.message
         });

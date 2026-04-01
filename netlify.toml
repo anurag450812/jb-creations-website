@@ -38,3 +38,6 @@
   for = "/firebase-client-new.js"
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
+
+[functions."cloudinary-maintenance-scheduled"]
+  schedule = "*/30 * * * *"

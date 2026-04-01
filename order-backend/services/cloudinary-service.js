@@ -1,17 +1,7 @@
 // cloudinary-service.js
 // This file contains server-side functions for Cloudinary integration
 
-const cloudinary = require('cloudinary').v2;
-const fs = require('fs');
-const path = require('path');
-
-// Configure Cloudinary with your credentials
-// These will be replaced with actual values from environment variables
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dfhxnpp9m',
-  api_key: process.env.CLOUDINARY_API_KEY || '629699618349166',
-  api_secret: process.env.CLOUDINARY_API_SECRET || '-8gGXZCe-4ORvEQSPcdajA38yQQ'
-});
+const { getCloudinaryClient } = require('../../netlify/functions/utils/cloudinary-client');
 
 // Helper function to generate a unique folder name for each order
 function getCloudinaryOrderFolder(orderId) {
@@ -21,6 +11,7 @@ function getCloudinaryOrderFolder(orderId) {
 // Function to upload an image to Cloudinary from a base64 string
 async function uploadBase64Image(base64Image, publicId) {
   try {
+    const cloudinary = getCloudinaryClient();
     // Remove the data:image/jpeg;base64, part if it exists
     const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
     
@@ -48,6 +39,7 @@ async function uploadBase64Image(base64Image, publicId) {
 // Function to upload an image to Cloudinary from a file path
 async function uploadImageFile(filePath, publicId) {
   try {
+    const cloudinary = getCloudinaryClient();
     // Upload to Cloudinary
     const result = await cloudinary.uploader.upload(filePath, {
       public_id: publicId,
@@ -71,6 +63,7 @@ async function uploadImageFile(filePath, publicId) {
 
 // Function to get a signed URL for a Cloudinary image
 function getSignedUrl(publicId, options = {}) {
+  const cloudinary = getCloudinaryClient();
   const defaults = {
     resource_type: 'image',
     type: 'upload',
@@ -88,6 +81,7 @@ function getSignedUrl(publicId, options = {}) {
 // Function to delete an image from Cloudinary
 async function deleteImage(publicId) {
   try {
+    const cloudinary = getCloudinaryClient();
     const result = await cloudinary.uploader.destroy(publicId);
     return {
       success: result.result === 'ok',

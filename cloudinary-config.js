@@ -1,10 +1,26 @@
 // cloudinary-config.js
-// This file contains configuration and helper functions for Cloudinary integration
+// Client-side Cloudinary helpers. Secrets must never be exposed here.
 
-// Replace these with your actual Cloudinary credentials
 const CLOUDINARY_CLOUD_NAME = 'dfhxnpp9m';
-const CLOUDINARY_API_KEY = '629699618349166';
-const CLOUDINARY_API_SECRET = '-8gGXZCe-4ORvEQSPcdajA38yQQ';
+
+function resolveCloudinaryApiBase() {
+  const hostname = window.location.hostname;
+  const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1';
+
+  if (window.otpClient && window.otpClient.apiBaseURL) {
+    return window.otpClient.apiBaseURL.replace(/\/$/, '');
+  }
+
+  if (isLocalHost) {
+    return 'https://jbcreationss.netlify.app/.netlify/functions';
+  }
+
+  return `${window.location.origin}/api`;
+}
+
+function getCloudinaryApiUrl(path) {
+  return `${resolveCloudinaryApiBase()}/${path}`;
+}
 
 // Initialize the Cloudinary client (client-side)
 const cl = window.cloudinary ? new cloudinary.Cloudinary({
@@ -26,28 +42,44 @@ function uploadImageToCloudinary(imageData, orderId, itemIndex) {
     const timestamp = new Date().getTime();
     const publicId = `${getCloudinaryOrderFolder(orderId)}/item${itemIndex}_${timestamp}`;
     
-    // For client-side, we'll need to use a server endpoint to handle the actual upload
-    // This is a placeholder for now
-    fetch('/api/upload-to-cloudinary', {
+    fetch(getCloudinaryApiUrl('create-upload-permit'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        image: imageData,
-        publicId: publicId
+        orderNumber: orderId
       })
     })
     .then(response => response.json())
     .then(data => {
-      if (data.secure_url) {
-        resolve({
-          url: data.secure_url,
-          publicId: data.public_id
-        });
-      } else {
-        reject(new Error('Failed to upload image to Cloudinary'));
+      if (!data.success || !data.uploadPermit) {
+        throw new Error(data.error || 'Failed to create upload permit');
       }
+
+      return fetch(getCloudinaryApiUrl('upload-image'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          imageData: imageData,
+          publicId: publicId,
+          uploadPermit: data.uploadPermit
+        })
+      });
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (!data.success || !data.secure_url) {
+        reject(new Error(data.error || 'Failed to upload image to Cloudinary'));
+        return;
+      }
+
+      resolve({
+        url: data.secure_url,
+        publicId: data.public_id
+      });
     })
     .catch(error => {
       console.error('Error uploading to Cloudinary:', error);
@@ -69,7 +101,6 @@ function getCloudinaryUrl(publicId, transformation = {}) {
 // Export the functions and configuration
 window.cloudinaryConfig = {
   cloudName: CLOUDINARY_CLOUD_NAME,
-  apiKey: CLOUDINARY_API_KEY,
   uploadImage: uploadImageToCloudinary,
   getUrl: getCloudinaryUrl,
   getOrderFolder: getCloudinaryOrderFolder

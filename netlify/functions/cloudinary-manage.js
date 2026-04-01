@@ -1,181 +1,124 @@
-// Netlify Function for Cloudinary image management (delete, usage, cleanup)
-const { v2: cloudinary } = require('cloudinary');
+const { requireAdminUser } = require('./utils/admin-auth');
+const { enqueueCleanupJob } = require('./utils/cloudinary-cleanup-queue');
+const { deleteFolders, deleteResources, getUsageSummary, runCleanupPass } = require('./utils/cloudinary-cleanup');
+const { emptyResponse, enforceAllowedOrigin, getAllowedOrigins, getRequestOrigin, jsonResponse, parseJsonBody } = require('./utils/http');
 
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dfhxnpp9m',
-    api_key: process.env.CLOUDINARY_API_KEY || '629699618349166',
-    api_secret: process.env.CLOUDINARY_API_SECRET || '-8gGXZCe-4ORvEQSPcdajA38yQQ'
-});
+function createOriginOptions() {
+    return {
+        allowedOrigins: getAllowedOrigins(),
+        allowHeaders: ['Content-Type', 'Authorization'],
+        allowMethods: ['POST', 'OPTIONS']
+    };
+}
 
-const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS'
-};
+async function queueFailures(jobType, failures, requestedBy) {
+    const jobIds = [];
+
+    for (const failure of failures) {
+        if (jobType === 'delete-resources') {
+            jobIds.push(await enqueueCleanupJob({
+                jobType,
+                payload: { publicIds: failure.ids || [] },
+                requestedBy,
+                source: 'admin-cloudinary-manage',
+                lastError: failure.error || 'Cloudinary resource delete failed'
+            }));
+            continue;
+        }
+
+        jobIds.push(await enqueueCleanupJob({
+            jobType,
+            payload: { prefixes: [failure.prefix].filter(Boolean) },
+            requestedBy,
+            source: 'admin-cloudinary-manage',
+            lastError: failure.error || 'Cloudinary folder delete failed'
+        }));
+    }
+
+    return jobIds;
+}
 
 exports.handler = async (event) => {
+    const origin = getRequestOrigin(event);
+    const originOptions = createOriginOptions();
+
     if (event.httpMethod === 'OPTIONS') {
-        return { statusCode: 200, headers, body: '' };
+        return emptyResponse(200, origin, originOptions);
     }
 
     if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
+        return jsonResponse(405, origin, { success: false, error: 'Method not allowed' }, originOptions);
     }
 
     try {
-        const { action, publicIds, maxAgeDays } = JSON.parse(event.body);
+        enforceAllowedOrigin(event, originOptions);
+        const adminUser = await requireAdminUser(event);
+        const { action, publicIds, maxAgeDays, nextCursor, maxPages } = parseJsonBody(event);
 
-        // ── DELETE IMAGES BY PUBLIC IDs ──
         if (action === 'delete') {
             if (!Array.isArray(publicIds) || publicIds.length === 0) {
-                return { statusCode: 400, headers, body: JSON.stringify({ error: 'publicIds array required' }) };
+                return jsonResponse(400, origin, { success: false, error: 'publicIds array required' }, originOptions);
             }
 
-            // Cloudinary allows bulk delete of up to 100 at a time
-            const results = [];
-            const chunks = [];
-            for (let i = 0; i < publicIds.length; i += 100) {
-                chunks.push(publicIds.slice(i, i + 100));
-            }
+            const result = await deleteResources(publicIds);
+            const queuedJobIds = await queueFailures('delete-resources', result.failedChunks, adminUser.uid);
 
-            for (const chunk of chunks) {
-                try {
-                    const result = await cloudinary.api.delete_resources(chunk);
-                    results.push(result);
-                } catch (err) {
-                    console.error('Cloudinary bulk delete error:', err.message);
-                    results.push({ error: err.message, ids: chunk });
-                }
-            }
-
-            return {
-                statusCode: 200,
-                headers,
-                body: JSON.stringify({ success: true, results })
-            };
+            return jsonResponse(200, origin, {
+                success: true,
+                deletedCount: result.deletedCount,
+                queuedJobIds,
+                partialFailure: queuedJobIds.length > 0,
+                results: result.results
+            }, originOptions);
         }
 
-        // ── DELETE FOLDER (all images under a folder prefix) ──
         if (action === 'delete-folder') {
             if (!Array.isArray(publicIds) || publicIds.length === 0) {
-                return { statusCode: 400, headers, body: JSON.stringify({ error: 'folder prefixes array required' }) };
+                return jsonResponse(400, origin, { success: false, error: 'folder prefixes array required' }, originOptions);
             }
 
-            const results = [];
-            for (const prefix of publicIds) {
-                try {
-                    const result = await cloudinary.api.delete_resources_by_prefix(prefix);
-                    results.push({ prefix, result });
-                    // Try to remove the empty folder too
-                    try { await cloudinary.api.delete_folder(prefix); } catch (_) { /* ignore */ }
-                } catch (err) {
-                    console.error('Cloudinary folder delete error:', err.message);
-                    results.push({ prefix, error: err.message });
-                }
-            }
+            const result = await deleteFolders(publicIds);
+            const queuedJobIds = await queueFailures('delete-prefixes', result.failedPrefixes, adminUser.uid);
 
-            return {
-                statusCode: 200,
-                headers,
-                body: JSON.stringify({ success: true, results })
-            };
+            return jsonResponse(200, origin, {
+                success: true,
+                deletedCount: result.deletedCount,
+                queuedJobIds,
+                partialFailure: queuedJobIds.length > 0,
+                results: result.results
+            }, originOptions);
         }
 
-        // ── GET STORAGE USAGE ──
         if (action === 'usage') {
-            const usage = await cloudinary.api.usage();
-            return {
-                statusCode: 200,
-                headers,
-                body: JSON.stringify({
-                    success: true,
-                    storage: {
-                        used_bytes: (usage.storage && usage.storage.usage) || 0,
-                        limit_bytes: (usage.storage && usage.storage.limit) || 0,
-                        used_percent: (usage.storage && usage.storage.used_percent) || 0
-                    },
-                    credits: {
-                        used: (usage.credits && usage.credits.usage) || 0,
-                        limit: (usage.credits && usage.credits.limit) || 0,
-                        used_percent: (usage.credits && usage.credits.used_percent) || 0
-                    },
-                    transformations: {
-                        used: (usage.transformations && usage.transformations.usage) || 0,
-                        limit: (usage.transformations && usage.transformations.limit) || 0,
-                        used_percent: (usage.transformations && usage.transformations.used_percent) || 0
-                    },
-                    objects: {
-                        used: usage.resources || 0,
-                        limit: usage.resource_limit || 0
-                    },
-                    bandwidth: {
-                        used_bytes: (usage.bandwidth && usage.bandwidth.usage) || 0,
-                        limit_bytes: (usage.bandwidth && usage.bandwidth.limit) || 0,
-                        used_percent: (usage.bandwidth && usage.bandwidth.used_percent) || 0
-                    }
-                })
-            };
+            const usage = await getUsageSummary();
+            return jsonResponse(200, origin, { success: true, ...usage }, originOptions);
         }
 
-        // ── CLEANUP OLD IMAGES (older than maxAgeDays, default 10) ──
         if (action === 'cleanup') {
-            const days = maxAgeDays || 10;
-            const cutoffDate = new Date();
-            cutoffDate.setDate(cutoffDate.getDate() - days);
-            const cutoffISO = cutoffDate.toISOString();
+            const cleanupResult = await runCleanupPass({
+                maxAgeDays,
+                nextCursor,
+                maxPages: maxPages || 2
+            });
 
-            let deletedCount = 0;
-            let nextCursor = null;
-            const errors = [];
-
-            // Paginate through all resources in the jb-creations-orders folder
-            do {
-                try {
-                    const params = {
-                        type: 'upload',
-                        prefix: 'jb-creations-orders',
-                        max_results: 100
-                    };
-                    if (nextCursor) params.next_cursor = nextCursor;
-
-                    const resources = await cloudinary.api.resources(params);
-                    nextCursor = resources.next_cursor || null;
-
-                    const oldIds = resources.resources
-                        .filter(r => r.created_at < cutoffISO)
-                        .map(r => r.public_id);
-
-                    if (oldIds.length > 0) {
-                        await cloudinary.api.delete_resources(oldIds);
-                        deletedCount += oldIds.length;
-                    }
-                } catch (err) {
-                    console.error('Cleanup pagination error:', err.message);
-                    errors.push(err.message);
-                    nextCursor = null; // stop on error
-                }
-            } while (nextCursor);
-
-            return {
-                statusCode: 200,
-                headers,
-                body: JSON.stringify({
-                    success: true,
-                    deletedCount,
-                    cutoffDate: cutoffISO,
-                    errors: errors.length > 0 ? errors : undefined
-                })
-            };
+            return jsonResponse(200, origin, {
+                success: cleanupResult.success,
+                deletedCount: cleanupResult.deletedCount,
+                cutoffDate: cleanupResult.cutoffDate,
+                pagesProcessed: cleanupResult.pagesProcessed,
+                nextCursor: cleanupResult.nextCursor,
+                hasMore: cleanupResult.hasMore,
+                errors: cleanupResult.errors.length > 0 ? cleanupResult.errors : undefined
+            }, originOptions);
         }
 
-        return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid action. Use: delete, delete-folder, usage, cleanup' }) };
-
+        return jsonResponse(400, origin, { success: false, error: 'Invalid action. Use: delete, delete-folder, usage, cleanup' }, originOptions);
     } catch (error) {
+        const statusCode = error.statusCode || 500;
         console.error('cloudinary-manage error:', error);
-        return {
-            statusCode: 500,
-            headers,
-            body: JSON.stringify({ success: false, error: error.message })
-        };
+        return jsonResponse(statusCode, origin, {
+            success: false,
+            error: error.message || 'Cloudinary management request failed.'
+        }, originOptions);
     }
 };

@@ -281,9 +281,7 @@ setTimeout(() => {
 }, 1000);
 
 function canUseLocalUploadFallback() {
-    const hostname = window.location.hostname;
-    const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1';
-    return window.location.protocol === 'http:' && isLocalHost;
+    return window.location.protocol === 'http:' || window.location.protocol === 'https:';
 }
 
 function resolveApiBaseUrl() {
@@ -325,6 +323,44 @@ async function parseApiResponse(response) {
 
         throw new Error('Server returned an invalid response');
     }
+}
+
+async function createCheckoutUploadPermit(orderNumber) {
+    const response = await fetch(getApiUrl('create-upload-permit'), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ orderNumber })
+    });
+
+    const result = await parseApiResponse(response);
+    if (!response.ok || !result.success || !result.uploadPermit) {
+        throw new Error(result.error || 'Unable to create a secure upload permit');
+    }
+
+    return result;
+}
+
+async function uploadImageWithServerFallback(imageData, publicId, uploadPermit) {
+    const response = await fetch(getApiUrl('upload-image'), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            imageData,
+            publicId,
+            uploadPermit
+        })
+    });
+
+    const result = await parseApiResponse(response);
+    if (!response.ok || !result.success || !result.secure_url) {
+        throw new Error(result.error || 'Secure fallback upload failed');
+    }
+
+    return result;
 }
 
 async function createRazorpayOrder(amountInRupees, orderData) {
@@ -438,9 +474,9 @@ async function uploadOrderImagesToCloudinaryEnhanced(orderData) {
         console.log('📋 Direct upload not available, using server-based upload...');
     }
     
-    // Only use the localhost upload proxy during local HTTP development.
+    // Use the permit-protected upload fallback when direct uploads are unavailable.
     if (!canUseLocalUploadFallback()) {
-        console.warn('⚠️ Skipping localhost Cloudinary fallback on non-local or HTTPS page');
+        console.warn('⚠️ Secure Cloudinary fallback is unavailable in this environment');
         return null;
     }
 
@@ -2846,7 +2882,7 @@ async function uploadOrderImagesToCloudinary(orderData) {
         console.log('🖼️ Starting image uploads to Cloudinary...');
 
         if (!canUseLocalUploadFallback()) {
-            console.warn('⚠️ Local Cloudinary upload endpoint disabled for this environment');
+            console.warn('⚠️ Secure Cloudinary upload fallback is unavailable for this environment');
             return null;
         }
         
@@ -2880,6 +2916,7 @@ async function uploadOrderImagesToCloudinary(orderData) {
         };
         
         const orderNumber = orderData.orderNumber || generateOrderNumber(orderData.customer?.phone);
+        const permitPayload = await createCheckoutUploadPermit(orderNumber);
         const cloudinaryImages = [];
         
         // For each item in the order, upload its images to Cloudinary
@@ -2979,19 +3016,11 @@ async function uploadOrderImagesToCloudinary(orderData) {
                 const timestamp = Date.now();
                 const publicId = `jb-creations-orders/${orderNumber}/item${i+1}_${timestamp}`;
                 
-                // Use fetch to upload to our backend endpoint
-                const response = await fetch('http://localhost:3001/api/upload-to-cloudinary', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        image: imageToUpload,
-                        publicId: publicId
-                    })
-                });
-                
-                const result = await response.json();
+                const result = await uploadImageWithServerFallback(
+                    imageToUpload,
+                    publicId,
+                    permitPayload.uploadPermit
+                );
                 
                 if (result.success) {
                     console.log(`✅ Image uploaded successfully for item ${i+1}:`, result.secure_url);

@@ -1,74 +1,62 @@
-// Netlify Function for Cloudinary uploads
-const { v2: cloudinary } = require('cloudinary');
+const { getCloudinaryClient } = require('./utils/cloudinary-client');
+const { emptyResponse, enforceAllowedOrigin, getAllowedOrigins, getRequestOrigin, jsonResponse, parseJsonBody } = require('./utils/http');
+const { normalizeBase64Image, validateCloudinaryPublicId } = require('./utils/upload-validation');
+const { verifyCheckoutUploadPermit } = require('./utils/upload-permit');
 
-// Configure Cloudinary (these would be environment variables in Netlify)
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dfhxnpp9m',
-    api_key: process.env.CLOUDINARY_API_KEY || '629699618349166',
-    api_secret: process.env.CLOUDINARY_API_SECRET || '-8gGXZCe-4ORvEQSPcdajA38yQQ'
-});
-
-exports.handler = async (event, context) => {
-    // Enable CORS
-    const headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS'
+function createOriginOptions() {
+    return {
+        allowedOrigins: getAllowedOrigins(),
+        allowHeaders: ['Content-Type'],
+        allowMethods: ['POST', 'OPTIONS']
     };
+}
+
+exports.handler = async (event) => {
+    const origin = getRequestOrigin(event);
+    const originOptions = createOriginOptions();
 
     if (event.httpMethod === 'OPTIONS') {
-        return { statusCode: 200, headers, body: '' };
+        return emptyResponse(200, origin, originOptions);
     }
 
     if (event.httpMethod !== 'POST') {
-        return {
-            statusCode: 405,
-            headers,
-            body: JSON.stringify({ error: 'Method not allowed' })
-        };
+        return jsonResponse(405, origin, { success: false, error: 'Method not allowed' }, originOptions);
     }
 
     try {
-        const { imageData, publicId, folder } = JSON.parse(event.body);
-
-        if (!imageData) {
-            return {
-                statusCode: 400,
-                headers,
-                body: JSON.stringify({ error: 'No image data provided' })
-            };
-        }
-
-        console.log('Uploading image to Cloudinary...');
-
-        const uploadResult = await cloudinary.uploader.upload(imageData, {
-            public_id: publicId,
-            folder: folder || 'jb-creations-orders',
-            resource_type: 'auto'
+        enforceAllowedOrigin(event, originOptions);
+        const { imageData, image, publicId, uploadPermit } = parseJsonBody(event);
+        const normalizedImage = normalizeBase64Image(imageData || image, imageData ? 'imageData' : 'image');
+        const permit = verifyCheckoutUploadPermit(uploadPermit, {
+            origin,
+            byteLength: normalizedImage.byteLength
         });
+        const normalizedPublicId = validateCloudinaryPublicId(publicId, permit.folderPrefix);
 
-        console.log('Upload successful:', uploadResult.secure_url);
+        const uploadResult = await getCloudinaryClient().uploader.upload(
+            `data:${normalizedImage.mimeType};base64,${normalizedImage.base64Payload}`,
+            {
+                public_id: normalizedPublicId,
+                resource_type: 'image',
+                overwrite: true,
+                folder: undefined
+            }
+        );
 
-        return {
-            statusCode: 200,
-            headers,
-            body: JSON.stringify({
-                success: true,
-                secure_url: uploadResult.secure_url,
-                public_id: uploadResult.public_id
-            })
-        };
-
+        return jsonResponse(200, origin, {
+            success: true,
+            secure_url: uploadResult.secure_url,
+            public_id: uploadResult.public_id,
+            bytes: uploadResult.bytes,
+            width: uploadResult.width,
+            height: uploadResult.height
+        }, originOptions);
     } catch (error) {
-        console.error('Upload failed:', error);
-
-        return {
-            statusCode: 500,
-            headers,
-            body: JSON.stringify({
-                success: false,
-                error: error.message
-            })
-        };
+        const statusCode = error.statusCode || 500;
+        console.error('upload-image error:', error);
+        return jsonResponse(statusCode, origin, {
+            success: false,
+            error: error.message || 'Image upload failed.'
+        }, originOptions);
     }
 };

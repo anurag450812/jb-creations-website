@@ -1205,17 +1205,31 @@ class JBCreationsAPI {
     // Delete multiple orders by order IDs (document IDs)
     async deleteMultipleOrders(orderIds) {
         try {
-            console.log('🗑️ Deleting multiple orders:', orderIds.length);
-            const batch = this.db.batch();
-            
-            orderIds.forEach(orderId => {
-                const orderRef = this.db.collection('orders').doc(orderId);
-                batch.delete(orderRef);
-            });
-            
-            await batch.commit();
-            console.log('✅ Multiple orders deleted successfully:', orderIds.length);
-            return { success: true, deletedCount: orderIds.length };
+            const uniqueOrderIds = [...new Set((orderIds || []).filter(Boolean))];
+            console.log('🗑️ Deleting multiple orders:', uniqueOrderIds.length);
+
+            if (uniqueOrderIds.length === 0) {
+                return { success: true, deletedCount: 0 };
+            }
+
+            const chunkSize = 450;
+            let deletedCount = 0;
+
+            for (let index = 0; index < uniqueOrderIds.length; index += chunkSize) {
+                const chunk = uniqueOrderIds.slice(index, index + chunkSize);
+                const batch = this.db.batch();
+
+                chunk.forEach(orderId => {
+                    const orderRef = this.db.collection('orders').doc(orderId);
+                    batch.delete(orderRef);
+                });
+
+                await batch.commit();
+                deletedCount += chunk.length;
+            }
+
+            console.log('✅ Multiple orders deleted successfully:', deletedCount);
+            return { success: true, deletedCount };
         } catch (error) {
             console.error('❌ Error deleting multiple orders:', error);
             return { success: false, error: error.message };

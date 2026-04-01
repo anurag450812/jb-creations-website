@@ -1061,6 +1061,571 @@
             padding: 1.5rem;
         }
 
+        .image-review-modal {
+            z-index: 1100;
+        }
+
+        .image-review-modal .modal-content {
+            width: min(1500px, 96vw);
+            height: min(92vh, 980px);
+            max-height: 92vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        }
+
+        .image-review-modal .modal-header {
+            padding: 1rem 1.25rem;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .image-review-modal .modal-title-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .image-review-modal .modal-subtitle {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .image-review-modal .modal-body {
+            padding: 0;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .image-review-shell {
+            display: grid;
+            grid-template-columns: 320px minmax(0, 1fr);
+            height: 100%;
+        }
+
+        .image-review-sidebar {
+            padding: 1rem;
+            border-right: 1px solid var(--border-light);
+            background: rgba(248, 250, 252, 0.9);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow-y: auto;
+        }
+
+        .image-review-progress-card,
+        .image-review-details-card,
+        .image-review-help-card {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .image-review-progress-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .image-review-progress-top strong {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .image-review-progress-top span {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .image-review-progress-bar {
+            width: 100%;
+            height: 10px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(148, 163, 184, 0.18);
+        }
+
+        .image-review-progress-bar span {
+            display: block;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(135deg, #0f766e, #2563eb);
+            transition: width 0.2s ease;
+        }
+
+        .image-review-order-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+        }
+
+        .image-review-order-button {
+            border: 1px solid var(--border-light);
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+            text-align: left;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .image-review-order-button:hover {
+            border-color: var(--primary-light);
+            box-shadow: var(--shadow-sm);
+            transform: translateY(-1px);
+        }
+
+        .image-review-order-button.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.06), rgba(99, 102, 241, 0.12));
+        }
+
+        .image-review-order-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .image-review-order-number {
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 0.92rem;
+        }
+
+        .image-review-order-helper {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+        }
+
+        .image-review-status-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            border-radius: 999px;
+            padding: 0.28rem 0.65rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .image-review-status-chip.status-pending {
+            color: #b45309;
+            background: rgba(245, 158, 11, 0.14);
+        }
+
+        .image-review-status-chip.status-clear {
+            color: #047857;
+            background: rgba(16, 185, 129, 0.14);
+        }
+
+        .image-review-status-chip.status-blurry {
+            color: #c2410c;
+            background: rgba(249, 115, 22, 0.14);
+        }
+
+        .image-review-details-grid {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .image-review-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .image-review-detail-label {
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .image-review-detail-value {
+            color: var(--text-primary);
+            font-size: 0.92rem;
+            word-break: break-word;
+        }
+
+        .image-review-help-card ul {
+            margin: 0;
+            padding-left: 1rem;
+            color: var(--text-secondary);
+            display: grid;
+            gap: 0.5rem;
+            font-size: 0.84rem;
+        }
+
+        .image-review-main {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .image-review-toolbar {
+            padding: 1rem 1.25rem 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            border-bottom: 1px solid var(--border-light);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .image-review-toolbar h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .image-review-toolbar p {
+            margin: 0.25rem 0 0;
+            color: var(--text-muted);
+            font-size: 0.86rem;
+        }
+
+        .image-review-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .image-review-nav button,
+        .image-review-decision-button,
+        .image-review-secondary-button {
+            border: 1px solid var(--border-light);
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 0.6rem 0.9rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+
+        .image-review-nav button:hover,
+        .image-review-decision-button:hover,
+        .image-review-secondary-button:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-medium);
+        }
+
+        .image-review-nav button:disabled,
+        .image-review-decision-button:disabled,
+        .image-review-secondary-button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .image-review-stage-wrap {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1rem 1.25rem 1.25rem;
+            overflow: hidden;
+        }
+
+        .image-review-stage {
+            position: relative;
+            flex: 1;
+            min-height: 320px;
+            border-radius: 24px;
+            background:
+                radial-gradient(circle at top left, rgba(37, 99, 235, 0.1), transparent 40%),
+                radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.08), transparent 38%),
+                linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .image-review-swipe-label {
+            position: absolute;
+            top: 1.25rem;
+            padding: 0.55rem 0.9rem;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            opacity: 0;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            pointer-events: none;
+        }
+
+        .image-review-swipe-label.left {
+            left: 1.25rem;
+            color: #c2410c;
+            background: rgba(249, 115, 22, 0.12);
+            transform: translateX(-10px);
+        }
+
+        .image-review-swipe-label.right {
+            right: 1.25rem;
+            color: #047857;
+            background: rgba(16, 185, 129, 0.12);
+            transform: translateX(10px);
+        }
+
+        .image-review-stage.show-left .image-review-swipe-label.left,
+        .image-review-stage.show-right .image-review-swipe-label.right {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .image-review-card {
+            width: min(100%, 920px);
+            height: calc(100% - 2rem);
+            margin: 1rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 24px 50px rgba(15, 23, 42, 0.14);
+            border: 1px solid rgba(148, 163, 184, 0.24);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1rem;
+            cursor: grab;
+            user-select: none;
+            transition: transform 0.12s ease, box-shadow 0.12s ease;
+        }
+
+        .image-review-card.dragging {
+            cursor: grabbing;
+            box-shadow: 0 28px 60px rgba(15, 23, 42, 0.2);
+        }
+
+        .image-review-card img {
+            max-width: 100%;
+            max-height: calc(100% - 4.5rem);
+            border-radius: 16px;
+            object-fit: contain;
+            background: #f8fafc;
+        }
+
+        .image-review-placeholder {
+            width: 100%;
+            height: 100%;
+            border-radius: 16px;
+            border: 2px dashed rgba(148, 163, 184, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 2rem;
+            background: rgba(248, 250, 252, 0.95);
+        }
+
+        .image-review-caption {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            width: 100%;
+            flex-wrap: wrap;
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+        }
+
+        .image-review-caption strong {
+            color: var(--text-primary);
+        }
+
+        .image-review-decision-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .image-review-decision-actions {
+            display: flex;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+        }
+
+        .image-review-decision-button.is-clear {
+            color: #047857;
+            border-color: rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+        .image-review-decision-button.is-blurry {
+            color: #c2410c;
+            border-color: rgba(249, 115, 22, 0.28);
+            background: rgba(249, 115, 22, 0.08);
+        }
+
+        .image-review-secondary-button {
+            color: var(--text-muted);
+        }
+
+        .image-review-current-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            color: var(--text-secondary);
+            font-size: 0.86rem;
+            font-weight: 600;
+        }
+
+        .image-review-thumbnails {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 0.75rem;
+            overflow-y: auto;
+            padding-right: 0.1rem;
+        }
+
+        .image-review-thumb {
+            position: relative;
+            border: 1px solid var(--border-light);
+            background: white;
+            border-radius: 16px;
+            padding: 0.45rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            cursor: pointer;
+            transition: var(--transition);
+            min-height: 108px;
+            overflow: hidden;
+        }
+
+        .image-review-thumb:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-1px);
+        }
+
+        .image-review-thumb.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.14);
+        }
+
+        .image-review-thumb.status-clear {
+            border-color: rgba(16, 185, 129, 0.35);
+            background: rgba(16, 185, 129, 0.04);
+        }
+
+        .image-review-thumb.status-blurry {
+            border-color: rgba(249, 115, 22, 0.35);
+            background: rgba(249, 115, 22, 0.05);
+        }
+
+        .image-review-thumb img,
+        .image-review-thumb-placeholder {
+            width: 100%;
+            height: 74px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: #f8fafc;
+        }
+
+        .image-review-thumb-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            border: 1px dashed rgba(148, 163, 184, 0.4);
+        }
+
+        .image-review-thumb-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.74rem;
+            color: var(--text-secondary);
+            font-weight: 700;
+        }
+
+        .image-review-empty-state {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 2rem;
+        }
+
+        @media (max-width: 1100px) {
+            .image-review-shell {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto minmax(0, 1fr);
+            }
+
+            .image-review-sidebar {
+                border-right: none;
+                border-bottom: 1px solid var(--border-light);
+                max-height: 38vh;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .image-review-modal .modal-content {
+                width: 100vw;
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+
+            .image-review-toolbar,
+            .image-review-stage-wrap,
+            .image-review-sidebar {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .image-review-toolbar {
+                flex-direction: column;
+            }
+
+            .image-review-nav {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .image-review-stage {
+                min-height: 260px;
+            }
+
+            .image-review-card {
+                margin: 0.75rem;
+            }
+
+            .image-review-thumbnails {
+                grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+            }
+        }
+
         .review-editor-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -2633,8 +3198,16 @@
             text-align: center;
         }
         
-        .workflow-tab[data-workflow="new"] .tab-count {
+        .workflow-tab[data-workflow="pending"] .tab-count {
             background: var(--warning);
+        }
+
+        .workflow-tab[data-workflow="clear"] .tab-count {
+            background: var(--success);
+        }
+
+        .workflow-tab[data-workflow="blurry"] .tab-count {
+            background: #f97316;
         }
         
         .workflow-tab[data-workflow="downloaded"] .tab-count {
@@ -2656,9 +3229,20 @@
             font-weight: 600;
         }
         
-        .workflow-status-badge.status-new {
+        .workflow-status-badge.status-new,
+        .workflow-status-badge.status-pending {
             background: rgba(245, 158, 11, 0.1);
             color: #d97706;
+        }
+
+        .workflow-status-badge.status-clear {
+            background: rgba(16, 185, 129, 0.12);
+            color: #059669;
+        }
+
+        .workflow-status-badge.status-blurry {
+            background: rgba(249, 115, 22, 0.12);
+            color: #ea580c;
         }
         
         .workflow-status-badge.status-downloaded {
@@ -3305,12 +3889,16 @@
         .bulk-btn.btn-ship { color: var(--primary); }
         .bulk-btn.btn-label { color: #06b6d4; }
         .bulk-btn.btn-pickup { color: #10b981; }
+        .bulk-btn.btn-review { color: #2563eb; }
+        .bulk-btn.btn-reset { color: #b45309; }
         .bulk-btn.btn-download { color: #8b5cf6; }
         .bulk-btn.btn-cancel { color: #ef4444; }
         
         .bulk-btn.btn-ship:hover { background: rgba(99, 102, 241, 0.1); border-color: var(--primary); }
         .bulk-btn.btn-label:hover { background: rgba(6, 182, 212, 0.1); border-color: #06b6d4; }
         .bulk-btn.btn-pickup:hover { background: rgba(16, 185, 129, 0.1); border-color: #10b981; }
+        .bulk-btn.btn-review:hover { background: rgba(37, 99, 235, 0.1); border-color: #2563eb; }
+        .bulk-btn.btn-reset:hover { background: rgba(180, 83, 9, 0.1); border-color: #b45309; }
         .bulk-btn.btn-download:hover { background: rgba(139, 92, 246, 0.1); border-color: #8b5cf6; }
         .bulk-btn.btn-cancel:hover { background: rgba(239, 68, 68, 0.1); border-color: #ef4444; }
         
@@ -3539,6 +4127,8 @@
         }
         
         .action-icon-btn.btn-view:hover { color: var(--primary); border-color: var(--primary); }
+        .action-icon-btn.btn-review:hover { color: #2563eb; border-color: #2563eb; }
+        .action-icon-btn.btn-reset:hover { color: #b45309; border-color: #b45309; }
         .action-icon-btn.btn-label:hover { color: #06b6d4; border-color: #06b6d4; }
         .action-icon-btn.btn-track:hover { color: #f59e0b; border-color: #f59e0b; }
         .action-icon-btn.btn-pickup:hover { color: #10b981; border-color: #10b981; }
@@ -4355,10 +4945,20 @@
                             <span class="tab-label">All Orders</span>
                             <span class="tab-count" id="workflow-all-count">0</span>
                         </div>
-                        <div class="workflow-tab" onclick="filterOrdersWorkflow('new')" data-workflow="new">
+                        <div class="workflow-tab" onclick="filterOrdersWorkflow('pending')" data-workflow="pending">
                             <i class="fas fa-plus-circle"></i>
-                            <span class="tab-label">New Orders</span>
-                            <span class="tab-count" id="workflow-new-count">0</span>
+                            <span class="tab-label">Pending Review</span>
+                            <span class="tab-count" id="workflow-pending-count">0</span>
+                        </div>
+                        <div class="workflow-tab" onclick="filterOrdersWorkflow('clear')" data-workflow="clear">
+                            <i class="fas fa-circle-check"></i>
+                            <span class="tab-label">Clear Images</span>
+                            <span class="tab-count" id="workflow-clear-count">0</span>
+                        </div>
+                        <div class="workflow-tab" onclick="filterOrdersWorkflow('blurry')" data-workflow="blurry">
+                            <i class="fas fa-triangle-exclamation"></i>
+                            <span class="tab-label">Blurry Images</span>
+                            <span class="tab-count" id="workflow-blurry-count">0</span>
                         </div>
                         <div class="workflow-tab" onclick="filterOrdersWorkflow('downloaded')" data-workflow="downloaded">
                             <i class="fas fa-download"></i>
@@ -4390,13 +4990,19 @@
                                 </select>
                             </div>
                             <div class="bulk-actions" id="bulk-actions-container">
+                                <button class="bulk-btn btn-review" onclick="openImageReviewForSelectedOrders()" title="Review Selected Images" id="bulk-review-btn">
+                                    <i class="fas fa-images"></i> Review Images
+                                </button>
                                 <button class="bulk-btn btn-download" onclick="downloadSelectedImagesAsZip()" title="Download Images as ZIP" id="bulk-download-btn">
                                     <i class="fas fa-file-archive"></i> Download Images (ZIP)
+                                </button>
+                                <button class="bulk-btn btn-reset" onclick="moveSelectedToPendingReview()" title="Move Selected Orders Back to Pending Review" id="bulk-reset-review-btn">
+                                    <i class="fas fa-rotate-left"></i> Move to Pending Review
                                 </button>
                                 <button class="bulk-btn btn-shiprocket" onclick="moveSelectedToShiprocket()" title="Move to Shiprocket" id="bulk-shiprocket-btn" style="background: linear-gradient(135deg, #7c3aed, #a855f7);">
                                     <i class="fas fa-shipping-fast"></i> Move to Shiprocket
                                 </button>
-                                <button class="bulk-btn btn-cancel" onclick="deleteSelectedAllOrders()" title="Delete Selected">
+                                <button class="bulk-btn btn-cancel" onclick="deleteSelectedAllOrders()" title="Delete Selected" id="bulk-delete-btn">
                                     <i class="fas fa-trash"></i> Delete
                                 </button>
                             </div>
@@ -5159,6 +5765,25 @@
         </div>
     </div>
 
+    <div id="image-review-modal" class="modal image-review-modal" onclick="handleImageReviewModalBackdrop(event)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <h3 class="modal-title">Image Review Queue</h3>
+                    <div class="modal-subtitle" id="image-review-modal-subtitle">Review selected orders image by image before download.</div>
+                </div>
+                <button class="modal-close" id="image-review-close-btn" onclick="void closeImageReviewModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="image-review-root" class="image-review-empty-state">
+                    Select orders and start a review session to inspect images here.
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="review-editor-modal" class="modal">
         <div class="modal-content" style="width: 760px; max-width: 96vw;">
             <div class="modal-header">
@@ -5274,6 +5899,13 @@
         let itemsPerPage = 10;
         let currentTab = 'pending-labels';
         let tabFilteredOrders = [];
+        const IMAGE_REVIEW_STATUS = Object.freeze({
+            pending: 'pending',
+            clear: 'clear',
+            blurry: 'blurry'
+        });
+        const IMAGE_REVIEW_SWIPE_THRESHOLD = 110;
+        let imageReviewSession = null;
 
         // Navigation handling
         document.addEventListener('DOMContentLoaded', function() {
@@ -5285,6 +5917,7 @@
             
             // Set up search and filter
             setupSearchAndFilter();
+            document.addEventListener('keydown', handleImageReviewKeydown);
             
             // Auto-refresh disabled - orders refresh when clicking tabs
             // setInterval(loadDashboardData, 30000);
@@ -5443,11 +6076,11 @@
             const dateSortFilter = document.getElementById('date-sort-filter');
             
             if (searchInput) {
-                searchInput.addEventListener('input', filterOrders);
+                searchInput.addEventListener('input', applyOrdersWorkflowFilter);
             }
             
             if (dateSortFilter) {
-                dateSortFilter.addEventListener('change', filterOrders);
+                dateSortFilter.addEventListener('change', applyOrdersWorkflowFilter);
             }
         }
 
@@ -5890,46 +6523,8 @@
         }
 
         function filterOrders() {
-            const searchTerm = document.getElementById('order-search')?.value.toLowerCase() || '';
-            const dateSortFilter = document.getElementById('date-sort-filter')?.value || 'latest';
-            
-            filteredOrders = orders.filter(order => {
-                const matchesSearch = !searchTerm || 
-                    order.orderNumber.toLowerCase().includes(searchTerm) ||
-                    order.customer?.name?.toLowerCase().includes(searchTerm) ||
-                    order.customer?.email?.toLowerCase().includes(searchTerm) ||
-                    order.customer?.phone?.toLowerCase().includes(searchTerm);
-                
-                return matchesSearch;
-            });
-            
-            // Sort orders based on selected option
-            filteredOrders.sort((a, b) => {
-                switch(dateSortFilter) {
-                    case 'oldest':
-                        return getOrderDate(a.orderDate) - getOrderDate(b.orderDate);
-                    case 'email-asc':
-                        return (a.customer?.email || '').localeCompare(b.customer?.email || '');
-                    case 'email-desc':
-                        return (b.customer?.email || '').localeCompare(a.customer?.email || '');
-                    case 'name-asc':
-                        return (a.customer?.name || '').localeCompare(b.customer?.name || '');
-                    case 'name-desc':
-                        return (b.customer?.name || '').localeCompare(a.customer?.name || '');
-                    case 'phone-asc':
-                        return (a.customer?.phone || '').localeCompare(b.customer?.phone || '');
-                    case 'phone-desc':
-                        return (b.customer?.phone || '').localeCompare(a.customer?.phone || '');
-                    default: // 'latest'
-                        return getOrderDate(b.orderDate) - getOrderDate(a.orderDate);
-                }
-            });
-            
-            // Reset to first page when filtering
             currentPage = 1;
-            
-            // Apply tab filter and update table
-            applyTabFilter();
+            applyOrdersWorkflowFilter();
         }
         
         // Helper function to get comparable date from various date formats
@@ -5949,6 +6544,425 @@
             return isNaN(date.getTime()) ? new Date(0) : date;
         }
 
+        function createEmptyOrderImageReview() {
+            return {
+                status: IMAGE_REVIEW_STATUS.pending,
+                items: {},
+                updatedAt: null
+            };
+        }
+
+        function normalizeImageReviewDecision(status) {
+            const normalized = String(status || '').trim().toLowerCase();
+            if (['clear', 'approved', 'accept', 'accepted'].includes(normalized)) {
+                return IMAGE_REVIEW_STATUS.clear;
+            }
+
+            if (['blurry', 'blur', 'rejected', 'reject'].includes(normalized)) {
+                return IMAGE_REVIEW_STATUS.blurry;
+            }
+
+            return null;
+        }
+
+        function getOrderItemCount(order) {
+            return Array.isArray(order?.items) ? order.items.length : 0;
+        }
+
+        function getImageReviewItemEntry(review, itemIndex) {
+            const rawEntry = review?.items?.[itemIndex] ?? review?.items?.[String(itemIndex)] ?? null;
+            if (!rawEntry) {
+                return null;
+            }
+
+            if (typeof rawEntry === 'string') {
+                return {
+                    status: normalizeImageReviewDecision(rawEntry),
+                    updatedAt: null
+                };
+            }
+
+            return {
+                status: normalizeImageReviewDecision(rawEntry.status || rawEntry.decision || rawEntry.value || rawEntry),
+                updatedAt: rawEntry.updatedAt || null
+            };
+        }
+
+        function getImageReviewItemStatus(review, itemIndex) {
+            return getImageReviewItemEntry(review, itemIndex)?.status || null;
+        }
+
+        function hasAnyImageReviewDecisions(review) {
+            return Object.keys(review?.items || {}).some(key => !!getImageReviewItemStatus(review, Number(key)));
+        }
+
+        function deriveOrderImageReviewStatus(review, itemCount) {
+            if (!itemCount) {
+                return IMAGE_REVIEW_STATUS.pending;
+            }
+
+            let clearCount = 0;
+            for (let itemIndex = 0; itemIndex < itemCount; itemIndex++) {
+                const decision = getImageReviewItemStatus(review, itemIndex);
+                if (decision === IMAGE_REVIEW_STATUS.blurry) {
+                    return IMAGE_REVIEW_STATUS.blurry;
+                }
+                if (decision === IMAGE_REVIEW_STATUS.clear) {
+                    clearCount += 1;
+                }
+            }
+
+            return clearCount === itemCount ? IMAGE_REVIEW_STATUS.clear : IMAGE_REVIEW_STATUS.pending;
+        }
+
+        function cloneOrderImageReview(review = createEmptyOrderImageReview()) {
+            return JSON.parse(JSON.stringify(review));
+        }
+
+        function normalizeOrderImageReviewData(order = {}) {
+            const rawReview = order.imageReview || {};
+            const normalizedReview = createEmptyOrderImageReview();
+            const itemCount = getOrderItemCount(order);
+            const rawItems = rawReview.items;
+
+            const applyDecision = (itemIndex, value) => {
+                if (!Number.isInteger(itemIndex) || itemIndex < 0 || itemIndex >= itemCount) {
+                    return;
+                }
+
+                const status = normalizeImageReviewDecision(value?.status || value?.decision || value?.value || value);
+                if (!status) {
+                    return;
+                }
+
+                normalizedReview.items[String(itemIndex)] = {
+                    status,
+                    updatedAt: value?.updatedAt || null
+                };
+            };
+
+            if (Array.isArray(rawItems)) {
+                rawItems.forEach((entry, index) => {
+                    const itemIndex = Number.isInteger(Number(entry?.itemIndex)) ? Number(entry.itemIndex) : index;
+                    applyDecision(itemIndex, entry);
+                });
+            } else if (rawItems && typeof rawItems === 'object') {
+                Object.entries(rawItems).forEach(([key, value]) => {
+                    applyDecision(Number(key), value);
+                });
+            }
+
+            normalizedReview.status = deriveOrderImageReviewStatus(normalizedReview, itemCount);
+            normalizedReview.updatedAt = rawReview.updatedAt || order.updatedAt || order.orderDate || null;
+
+            if (!hasAnyImageReviewDecisions(normalizedReview)) {
+                normalizedReview.updatedAt = null;
+            }
+
+            return normalizedReview;
+        }
+
+        function serializeOrderImageReview(review, itemCount) {
+            const serializedItems = {};
+            Object.keys(review?.items || {}).forEach(key => {
+                const itemIndex = Number(key);
+                const status = getImageReviewItemStatus(review, itemIndex);
+                if (!status) {
+                    return;
+                }
+
+                const entry = getImageReviewItemEntry(review, itemIndex) || {};
+                serializedItems[String(itemIndex)] = {
+                    status,
+                    updatedAt: entry.updatedAt || new Date().toISOString()
+                };
+            });
+
+            const normalizedReview = {
+                status: deriveOrderImageReviewStatus({ items: serializedItems }, itemCount),
+                items: serializedItems,
+                updatedAt: Object.keys(serializedItems).length ? (review?.updatedAt || new Date().toISOString()) : null
+            };
+
+            return normalizedReview;
+        }
+
+        function setImageReviewDecision(review, itemIndex, status, itemCount) {
+            if (!review.items || typeof review.items !== 'object') {
+                review.items = {};
+            }
+
+            if (!status) {
+                delete review.items[String(itemIndex)];
+            } else {
+                review.items[String(itemIndex)] = {
+                    status,
+                    updatedAt: new Date().toISOString()
+                };
+            }
+
+            review.updatedAt = hasAnyImageReviewDecisions(review) ? new Date().toISOString() : null;
+            review.status = deriveOrderImageReviewStatus(review, itemCount);
+            return review;
+        }
+
+        function getOrderImageReviewStatus(order) {
+            return deriveOrderImageReviewStatus(order?.imageReview || createEmptyOrderImageReview(), getOrderItemCount(order));
+        }
+
+        function getOrderWorkflowStatus(order) {
+            if (order?.sentToShiprocket) {
+                return 'shiprocket';
+            }
+
+            if (order?.imageDownloaded) {
+                return 'downloaded';
+            }
+
+            const reviewStatus = getOrderImageReviewStatus(order);
+            if (reviewStatus === IMAGE_REVIEW_STATUS.blurry) {
+                return 'blurry';
+            }
+
+            if (reviewStatus === IMAGE_REVIEW_STATUS.clear) {
+                return 'clear';
+            }
+
+            return 'pending';
+        }
+
+        function getOrderWorkflowMeta(order) {
+            const workflowKey = getOrderWorkflowStatus(order);
+            switch (workflowKey) {
+                case 'clear':
+                    return { key: workflowKey, label: 'Clear Images', icon: 'fa-circle-check', badgeClass: 'status-clear' };
+                case 'blurry':
+                    return { key: workflowKey, label: 'Blurry Images', icon: 'fa-triangle-exclamation', badgeClass: 'status-blurry' };
+                case 'downloaded':
+                    return { key: workflowKey, label: 'Image Downloaded', icon: 'fa-download', badgeClass: 'status-downloaded' };
+                case 'shiprocket':
+                    return { key: workflowKey, label: 'Sent to Shiprocket', icon: 'fa-shipping-fast', badgeClass: 'status-shiprocket' };
+                default:
+                    return { key: 'pending', label: 'Pending Review', icon: 'fa-hourglass-half', badgeClass: 'status-pending' };
+            }
+        }
+
+        function getImageReviewStatusLabel(status) {
+            switch (status) {
+                case IMAGE_REVIEW_STATUS.clear:
+                    return 'Clear';
+                case IMAGE_REVIEW_STATUS.blurry:
+                    return 'Blurry';
+                default:
+                    return 'Pending';
+            }
+        }
+
+        function getImageReviewStatusIcon(status) {
+            switch (status) {
+                case IMAGE_REVIEW_STATUS.clear:
+                    return 'fa-circle-check';
+                case IMAGE_REVIEW_STATUS.blurry:
+                    return 'fa-triangle-exclamation';
+                default:
+                    return 'fa-hourglass-half';
+            }
+        }
+
+        function getImageReviewStatusChipMarkup(status, label = null) {
+            const normalizedStatus = status === IMAGE_REVIEW_STATUS.clear || status === IMAGE_REVIEW_STATUS.blurry
+                ? status
+                : IMAGE_REVIEW_STATUS.pending;
+            return `<span class="image-review-status-chip status-${normalizedStatus}"><i class="fas ${getImageReviewStatusIcon(normalizedStatus)}"></i> ${label || getImageReviewStatusLabel(normalizedStatus)}</span>`;
+        }
+
+        function getOrderWorkflowSortDate(order, workflow = currentWorkflowFilter) {
+            switch (workflow) {
+                case 'clear':
+                case 'blurry':
+                    return order?.imageReview?.updatedAt ? getOrderDate(order.imageReview.updatedAt) : getOrderDate(order.orderDate);
+                case 'downloaded':
+                    return order?.imageDownloadedAt ? getOrderDate(order.imageDownloadedAt) : getOrderDate(order.orderDate);
+                case 'shiprocket':
+                    return order?.sentToShiprocketAt ? getOrderDate(order.sentToShiprocketAt) : getOrderDate(order.orderDate);
+                default:
+                    return getOrderDate(order?.orderDate);
+            }
+        }
+
+        function getOrderWorkflowTimestampMarkup(order) {
+            const workflowKey = getOrderWorkflowStatus(order);
+            let timestamp = null;
+            let icon = 'fa-calendar-alt';
+            let color = '#64748b';
+
+            if (workflowKey === 'shiprocket') {
+                timestamp = order?.sentToShiprocketAt;
+                icon = 'fa-shipping-fast';
+                color = '#7c3aed';
+            } else if (workflowKey === 'downloaded') {
+                timestamp = order?.imageDownloadedAt;
+                icon = 'fa-download';
+                color = '#059669';
+            } else if (workflowKey === 'clear' || workflowKey === 'blurry') {
+                timestamp = order?.imageReview?.updatedAt;
+                icon = workflowKey === 'clear' ? 'fa-circle-check' : 'fa-triangle-exclamation';
+                color = workflowKey === 'clear' ? '#059669' : '#ea580c';
+            }
+
+            if (!timestamp) {
+                return '';
+            }
+
+            return `<div style="font-size: 0.7rem; color: ${color}; margin-top: 2px;"><i class="fas ${icon}"></i> ${formatFullDateTime(timestamp)}</div>`;
+        }
+
+        function formatAdminLabel(value) {
+            return String(value || '')
+                .replace(/[_-]+/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .replace(/\b\w/g, char => char.toUpperCase());
+        }
+
+        function getOrderPaymentSummary(order) {
+            const paymentId = order?.paymentId || order?.payment?.id || order?.payment?.paymentId || order?.payment?.razorpay_payment_id || '';
+            const rawStatus = String(order?.paymentStatus || order?.payment?.status || order?.payment?.state || '').trim().toLowerCase();
+            const rawMethod = order?.payment?.method || order?.payment?.mode || order?.paymentMethod || '';
+            let paymentStatus = 'Unknown';
+
+            if (typeof order?.payment?.paid === 'boolean') {
+                paymentStatus = order.payment.paid ? 'Paid' : 'Unpaid';
+            } else if (['paid', 'captured', 'success', 'successful', 'completed', 'prepaid', 'authorized'].includes(rawStatus)) {
+                paymentStatus = 'Paid';
+            } else if (['unpaid', 'failed', 'pending', 'cancelled', 'refunded', 'cod'].includes(rawStatus)) {
+                paymentStatus = 'Unpaid';
+            } else if (paymentId) {
+                paymentStatus = 'Paid';
+            }
+
+            return {
+                status: paymentStatus,
+                method: rawMethod ? formatAdminLabel(rawMethod) : '',
+                paymentId
+            };
+        }
+
+        function getOrderItemBestImage(order, itemIndex) {
+            const item = Array.isArray(order?.items) ? (order.items[itemIndex] || {}) : {};
+            const orderImage = Array.isArray(order?.images) ? (order.images[itemIndex] || {}) : {};
+            const candidates = [
+                item.printImagePath,
+                item.enhancedPrintPath,
+                item.displayImagePath,
+                item.originalImagePath,
+                item.cloudinaryUrl,
+                item.printImage,
+                item.previewImage,
+                item.displayImage,
+                item.originalImage,
+                orderImage.print,
+                orderImage.display,
+                orderImage.original,
+                orderImage.printImage,
+                orderImage.displayImage,
+                orderImage.originalImage,
+                orderImage.data,
+                orderImage.fallbackImage
+            ];
+
+            return candidates.find(source => typeof source === 'string' && source.trim()) || '';
+        }
+
+        function getOrderItemReviewSummary(item = {}) {
+            const sizeLabel = item?.frameSize?.size ? `${item.frameSize.size}${item?.frameSize?.orientation ? ` • ${formatAdminLabel(item.frameSize.orientation)}` : ''}` : 'Custom Frame';
+            const colorLabel = item?.frameColor ? formatAdminLabel(item.frameColor) : 'Standard Color';
+            const textureLabel = item?.frameTexture ? formatAdminLabel(item.frameTexture) : 'Standard Finish';
+            return `${sizeLabel} • ${colorLabel} • ${textureLabel}`;
+        }
+
+        function canOrderBeReviewed(order) {
+            return getOrderWorkflowStatus(order) !== 'shiprocket';
+        }
+
+        function canOrderBeDownloaded(order) {
+            return !order?.sentToShiprocket && !order?.imageDownloaded && getOrderImageReviewStatus(order) === IMAGE_REVIEW_STATUS.clear;
+        }
+
+        function canOrderResetToPending(order) {
+            return !order?.sentToShiprocket && getOrderWorkflowStatus(order) === 'blurry';
+        }
+
+        function sortOrdersOldestFirst(orderList) {
+            return [...orderList].sort((a, b) => getOrderDate(a?.orderDate) - getOrderDate(b?.orderDate));
+        }
+
+        function pruneSelectedAllOrders() {
+            if (!(selectedAllOrders instanceof Set)) {
+                return;
+            }
+
+            const validOrderKeys = new Set();
+            orders.forEach(order => {
+                const orderId = getOrderDocumentId(order);
+                if (orderId) {
+                    validOrderKeys.add(orderId);
+                }
+                if (order?.orderNumber) {
+                    validOrderKeys.add(order.orderNumber);
+                }
+            });
+
+            selectedAllOrders = new Set([...selectedAllOrders].filter(key => validOrderKeys.has(key)));
+        }
+
+        function handleImageReviewModalBackdrop(event) {
+            if (event.target?.id === 'image-review-modal') {
+                void closeImageReviewModal();
+            }
+        }
+
+        function handleImageReviewKeydown(event) {
+            const modal = document.getElementById('image-review-modal');
+            if (!imageReviewSession || !modal?.classList.contains('show') || imageReviewSession.saveInProgress) {
+                return;
+            }
+
+            const activeTagName = document.activeElement?.tagName;
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTagName)) {
+                return;
+            }
+
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                void closeImageReviewModal();
+                return;
+            }
+
+            if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                setActiveImageReviewDecision(IMAGE_REVIEW_STATUS.blurry);
+                return;
+            }
+
+            if (event.key === 'ArrowRight') {
+                event.preventDefault();
+                setActiveImageReviewDecision(IMAGE_REVIEW_STATUS.clear);
+                return;
+            }
+
+            if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                goToPreviousImageReviewTarget();
+                return;
+            }
+
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                goToNextImageReviewTarget();
+            }
+        }
+
         // Data loading functions - Firebase version
         async function loadDashboardData() {
             console.log('🔄 Loading dashboard data from Firebase...');
@@ -5963,39 +6977,53 @@
                     
                     if (result.success && result.orders) {
                         // Transform Firebase data to match expected format
-                        orders = result.orders.map(order => ({
-                            orderNumber: order.orderNumber || order.orderId, // Use actual orderNumber, fallback to document ID
-                            id: order.orderId, // Use orderId (the Firebase document ID) as the id for deletion
-                            orderId: order.orderId, // Also keep orderId explicitly
-                            customer: {
-                                name: order.customerName || order.customer?.name || 'Guest',
-                                email: order.customerEmail || order.customer?.email || '',
-                                phone: order.customerPhone || order.customer?.phone || '',
-                                address: order.customerAddress || order.customer?.address || '',
-                                specialInstructions: order.specialInstructions || order.customer?.specialInstructions || ''
-                            },
-                            status: order.status || 'pending',
-                            orderDate: order.orderDate || order.createdAt,
-                            createdAt: order.createdAt || order.orderDate, // Keep original creation time
-                            totals: order.totals || {
-                                total: order.totalAmount || 299,
-                                subtotal: order.subtotal || order.totalAmount || 299,
-                                discount: order.discount || 0
-                            },
-                            items: order.items || [], // Use the actual items array from new structure
-                            images: order.images || [], // Use the actual images array
-                            deliveryMethod: order.deliveryMethod || 'standard',
-                            usingCloudinary: order.usingCloudinary || false,
-                            paymentId: order.paymentId || null,
-                            payment: order.payment || null, // Payment method info
-                            shiprocket: order.shiprocket || null, // Preserve Shiprocket data
-                            packageWeight: order.packageWeight || null,
-                            packageDimensions: order.packageDimensions || null,
-                            imageDownloaded: order.imageDownloaded || false, // Track if images downloaded
-                            imageDownloadedAt: order.imageDownloadedAt || null,
-                            sentToShiprocket: order.sentToShiprocket || false, // Track if sent to Shiprocket
-                            sentToShiprocketAt: order.sentToShiprocketAt || null
-                        }));
+                        orders = result.orders.map(order => {
+                            const normalizedOrder = {
+                                orderNumber: order.orderNumber || order.orderId || order.id,
+                                id: order.orderId || order.id || order.orderNumber,
+                                orderId: order.orderId || order.id || order.orderNumber,
+                                customer: {
+                                    name: order.customerName || order.customer?.name || 'Guest',
+                                    email: order.customerEmail || order.customer?.email || '',
+                                    phone: order.customerPhone || order.customer?.phone || '',
+                                    address: order.customerAddress || order.customer?.address || '',
+                                    specialInstructions: order.specialInstructions || order.customer?.specialInstructions || ''
+                                },
+                                status: order.status || 'pending',
+                                orderDate: order.orderDate || order.createdAt,
+                                createdAt: order.createdAt || order.orderDate,
+                                updatedAt: order.updatedAt || order.createdAt || order.orderDate,
+                                totals: order.totals || {
+                                    total: order.totalAmount || 299,
+                                    subtotal: order.subtotal || order.totalAmount || 299,
+                                    discount: order.discount || 0
+                                },
+                                items: order.items || [],
+                                images: order.images || [],
+                                deliveryMethod: order.deliveryMethod || 'standard',
+                                usingCloudinary: order.usingCloudinary || false,
+                                paymentId: order.paymentId || null,
+                                payment: order.payment || null,
+                                paymentStatus: order.paymentStatus || order.payment?.status || null,
+                                shiprocket: order.shiprocket || null,
+                                packageWeight: order.packageWeight || null,
+                                packageDimensions: order.packageDimensions || null,
+                                imageDownloaded: order.imageDownloaded || false,
+                                imageDownloadedAt: order.imageDownloadedAt || null,
+                                sentToShiprocket: order.sentToShiprocket || false,
+                                sentToShiprocketAt: order.sentToShiprocketAt || null,
+                                imageReview: createEmptyOrderImageReview()
+                            };
+
+                            normalizedOrder.imageReview = normalizeOrderImageReviewData({
+                                ...normalizedOrder,
+                                imageReview: order.imageReview || null
+                            });
+
+                            return normalizedOrder;
+                        });
+
+                        pruneSelectedAllOrders();
                         
                         filteredOrders = [...orders];
                         
@@ -6095,18 +7123,52 @@
         }
 
         let _storageLoading = false;
+        const MAX_BULK_DELETE_ORDERS = 500;
+
+        async function getAdminAuthToken(forceRefresh = false) {
+            if (!window.firebase || typeof firebase.auth !== 'function') {
+                throw new Error('Firebase auth is not ready yet');
+            }
+
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                throw new Error('Admin session expired. Please sign in again.');
+            }
+
+            return user.getIdToken(forceRefresh);
+        }
+
+        async function fetchCloudinaryManage(payload) {
+            const sendRequest = async (forceRefresh = false) => {
+                const token = await getAdminAuthToken(forceRefresh);
+                const resp = await fetch('/api/cloudinary-manage', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await resp.json().catch(() => ({ success: false, error: `Request failed with status ${resp.status}` }));
+                return { resp, data };
+            };
+
+            let result = await sendRequest(false);
+            if ((result.resp.status === 401 || result.resp.status === 403) && firebase?.auth()?.currentUser) {
+                result = await sendRequest(true);
+            }
+
+            return result;
+        }
+
         async function loadStorageUsage() {
             const grid = document.getElementById('storage-grid');
             if (!grid || _storageLoading) return;
             _storageLoading = true;
 
             try {
-                const resp = await fetch('/api/cloudinary-manage', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'usage' })
-                });
-                const data = await resp.json();
+                const { data } = await fetchCloudinaryManage({ action: 'usage' });
 
                 if (!data.success) {
                     grid.innerHTML = '<div style="color:var(--danger);padding:1rem;">Failed to load storage info: ' + (data.error || 'unknown') + '</div>';
@@ -6154,18 +7216,36 @@
             btn.disabled = true;
 
             try {
-                const resp = await fetch('/api/cloudinary-manage', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'cleanup', maxAgeDays: 10 })
-                });
-                const data = await resp.json();
+                let totalDeleted = 0;
+                let nextCursor = null;
+                let passCount = 0;
+                let hasMore = false;
 
-                if (data.success) {
-                    showNotification(`Cleanup complete: ${data.deletedCount} old image(s) deleted`, 'success');
-                    loadStorageUsage(); // refresh the cards
+                do {
+                    passCount += 1;
+                    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Cleaning ${passCount}…`;
+
+                    const { data } = await fetchCloudinaryManage({
+                        action: 'cleanup',
+                        maxAgeDays: 10,
+                        maxPages: 2,
+                        nextCursor
+                    });
+
+                    if (!data.success) {
+                        throw new Error(data.error || 'Cleanup failed');
+                    }
+
+                    totalDeleted += Number(data.deletedCount || 0);
+                    nextCursor = data.nextCursor || null;
+                    hasMore = !!data.hasMore && !!nextCursor;
+                } while (hasMore && passCount < 10);
+
+                if (hasMore) {
+                    showNotification(`Cleanup processed ${totalDeleted} old image(s). More assets remain and will continue on the next run.`, 'info');
                 } else {
-                    showNotification('Cleanup failed: ' + (data.error || 'unknown'), 'error');
+                    showNotification(`Cleanup complete: ${totalDeleted} old image(s) deleted`, 'success');
+                    loadStorageUsage(); // refresh the cards
                 }
             } catch (err) {
                 console.error('Cleanup error:', err);
@@ -6274,52 +7354,28 @@
                 const matchesSearch = !searchTerm || 
                     order.orderNumber?.toLowerCase().includes(searchTerm) ||
                     order.customer?.name?.toLowerCase().includes(searchTerm) ||
+                    order.customer?.email?.toLowerCase().includes(searchTerm) ||
+                    order.customer?.address?.toLowerCase().includes(searchTerm) ||
                     order.customer?.phone?.toLowerCase().includes(searchTerm);
                 return matchesSearch;
             });
             
             // Filter by workflow stage
-            switch(currentWorkflowFilter) {
-                case 'new':
-                    // New orders: No imageDownloaded flag and not sent to Shiprocket
-                    filteredOrders = filteredOrders.filter(o => !o.imageDownloaded && !o.sentToShiprocket);
-                    break;
-                case 'downloaded':
-                    // Image downloaded but not sent to Shiprocket
-                    filteredOrders = filteredOrders.filter(o => o.imageDownloaded && !o.sentToShiprocket);
-                    break;
-                case 'shiprocket':
-                    // Sent to Shiprocket
-                    filteredOrders = filteredOrders.filter(o => o.sentToShiprocket);
-                    break;
+            if (currentWorkflowFilter !== 'all') {
+                filteredOrders = filteredOrders.filter(order => getOrderWorkflowStatus(order) === currentWorkflowFilter);
             }
             
             // Sort orders - use workflow-specific date for sorting when relevant
             filteredOrders.sort((a, b) => {
-                // Helper to get the relevant date for current workflow
-                const getWorkflowDate = (order) => {
-                    switch(currentWorkflowFilter) {
-                        case 'downloaded':
-                            // Sort by when image was downloaded
-                            return order.imageDownloadedAt ? getOrderDate(order.imageDownloadedAt) : getOrderDate(order.orderDate);
-                        case 'shiprocket':
-                            // Sort by when sent to Shiprocket
-                            return order.sentToShiprocketAt ? getOrderDate(order.sentToShiprocketAt) : getOrderDate(order.orderDate);
-                        default:
-                            // New orders / All orders - sort by order date
-                            return getOrderDate(order.orderDate);
-                    }
-                };
-                
                 switch(dateSortFilter) {
                     case 'oldest':
-                        return getWorkflowDate(a) - getWorkflowDate(b);
+                        return getOrderWorkflowSortDate(a, currentWorkflowFilter) - getOrderWorkflowSortDate(b, currentWorkflowFilter);
                     case 'name-asc':
                         return (a.customer?.name || '').localeCompare(b.customer?.name || '');
                     case 'name-desc':
                         return (b.customer?.name || '').localeCompare(a.customer?.name || '');
                     default: // 'latest'
-                        return getWorkflowDate(b) - getWorkflowDate(a); // Latest first
+                        return getOrderWorkflowSortDate(b, currentWorkflowFilter) - getOrderWorkflowSortDate(a, currentWorkflowFilter);
                 }
             });
             
@@ -6330,17 +7386,23 @@
         // Update workflow tab counts
         function updateOrderWorkflowCounts() {
             const allCount = orders.length;
-            const newCount = orders.filter(o => !o.imageDownloaded && !o.sentToShiprocket).length;
-            const downloadedCount = orders.filter(o => o.imageDownloaded && !o.sentToShiprocket).length;
-            const shiprocketCount = orders.filter(o => o.sentToShiprocket).length;
+            const pendingCount = orders.filter(order => getOrderWorkflowStatus(order) === 'pending').length;
+            const clearCount = orders.filter(order => getOrderWorkflowStatus(order) === 'clear').length;
+            const blurryCount = orders.filter(order => getOrderWorkflowStatus(order) === 'blurry').length;
+            const downloadedCount = orders.filter(order => getOrderWorkflowStatus(order) === 'downloaded').length;
+            const shiprocketCount = orders.filter(order => getOrderWorkflowStatus(order) === 'shiprocket').length;
             
             const allEl = document.getElementById('workflow-all-count');
-            const newEl = document.getElementById('workflow-new-count');
+            const pendingEl = document.getElementById('workflow-pending-count');
+            const clearEl = document.getElementById('workflow-clear-count');
+            const blurryEl = document.getElementById('workflow-blurry-count');
             const downloadedEl = document.getElementById('workflow-downloaded-count');
             const shiprocketEl = document.getElementById('workflow-shiprocket-count');
             
             if (allEl) allEl.textContent = allCount;
-            if (newEl) newEl.textContent = newCount;
+            if (pendingEl) pendingEl.textContent = pendingCount;
+            if (clearEl) clearEl.textContent = clearCount;
+            if (blurryEl) blurryEl.textContent = blurryCount;
             if (downloadedEl) downloadedEl.textContent = downloadedCount;
             if (shiprocketEl) shiprocketEl.textContent = shiprocketCount;
         }
@@ -6369,14 +7431,13 @@
         function renderOrdersWorkflowTable(ordersToShow) {
             const tableBody = document.getElementById('all-orders-table-body');
             if (!tableBody) return;
-            
-            // Clear selection
-            selectedAllOrders.clear();
-            updateAllBulkActionsBar();
-            
+
             // Calculate pagination
             const totalOrders = ordersToShow.length;
             const totalPages = Math.ceil(totalOrders / itemsPerPage);
+            if (currentPage > Math.max(totalPages, 1)) {
+                currentPage = Math.max(totalPages, 1);
+            }
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = Math.min(startIndex + itemsPerPage, totalOrders);
             const paginatedOrders = ordersToShow.slice(startIndex, endIndex);
@@ -6395,38 +7456,29 @@
                         </td>
                     </tr>
                 `;
+                updatePaginationButtons(totalPages);
+                updateAllSelectAllCheckbox();
+                updateAllBulkActionsBar();
+                const loading = document.getElementById('all-orders-loading');
+                const tableContainer = document.getElementById('all-orders-table-container');
+                if (loading) loading.style.display = 'none';
+                if (tableContainer) tableContainer.style.display = 'block';
                 return;
             }
             
             tableBody.innerHTML = paginatedOrders.map(order => {
-                const orderDate = formatShortDate(order.orderDate);
                 const orderDateTime = formatFullDateTime(order.orderDate);
                 const amount = order.totals?.total || order.totalAmount || 299;
                 const itemCount = order.items?.length || 1;
                 const orderId = getOrderDocumentId(order);
                 const isSelected = isSelectedAllOrder(order);
-                
-                // Get workflow-specific timestamp
-                let workflowTimestamp = '';
-                if (order.sentToShiprocket && order.sentToShiprocketAt) {
-                    workflowTimestamp = `<div style="font-size: 0.7rem; color: #7c3aed; margin-top: 2px;"><i class="fas fa-shipping-fast"></i> ${formatFullDateTime(order.sentToShiprocketAt)}</div>`;
-                } else if (order.imageDownloaded && order.imageDownloadedAt) {
-                    workflowTimestamp = `<div style="font-size: 0.7rem; color: #10b981; margin-top: 2px;"><i class="fas fa-download"></i> ${formatFullDateTime(order.imageDownloadedAt)}</div>`;
-                }
-                
-                // Determine workflow status
-                let workflowStatus = '';
-                let workflowBadge = '';
-                if (order.sentToShiprocket) {
-                    workflowStatus = 'shiprocket';
-                    workflowBadge = '<span class="workflow-status-badge status-shiprocket"><i class="fas fa-shipping-fast"></i> Sent to Shiprocket</span>';
-                } else if (order.imageDownloaded) {
-                    workflowStatus = 'downloaded';
-                    workflowBadge = '<span class="workflow-status-badge status-downloaded"><i class="fas fa-check-circle"></i> Image Downloaded</span>';
-                } else {
-                    workflowStatus = 'new';
-                    workflowBadge = '<span class="workflow-status-badge status-new"><i class="fas fa-clock"></i> New Order</span>';
-                }
+                const workflowMeta = getOrderWorkflowMeta(order);
+                const workflowBadge = `<span class="workflow-status-badge ${workflowMeta.badgeClass}"><i class="fas ${workflowMeta.icon}"></i> ${workflowMeta.label}</span>`;
+                const workflowTimestamp = getOrderWorkflowTimestampMarkup(order);
+                const canReview = canOrderBeReviewed(order);
+                const canDownload = canOrderBeDownloaded(order);
+                const canShip = order.imageDownloaded && !order.sentToShiprocket;
+                const canReset = canOrderResetToPending(order);
                 
                 return `
                     <tr data-order="${order.orderNumber}" class="${isSelected ? 'selected' : ''}">
@@ -6465,17 +7517,27 @@
                                 <button class="action-icon-btn btn-view" onclick="viewOrder('${order.orderNumber}')" title="View Order">
                                     <i class="fas fa-eye"></i>
                                 </button>
+                                ${canReview ? `
+                                    <button class="action-icon-btn btn-review" onclick="openImageReviewForOrder('${order.orderNumber}')" title="Review Images">
+                                        <i class="fas fa-images"></i>
+                                    </button>
+                                ` : ''}
+                                ${canReset ? `
+                                    <button class="action-icon-btn btn-reset" onclick="resetSingleOrderToPending('${order.orderNumber}')" title="Move to Pending Review">
+                                        <i class="fas fa-rotate-left"></i>
+                                    </button>
+                                ` : ''}
                                 ${order.status !== 'delivered' ? `
                                     <button class="action-icon-btn" onclick="updateOrderStatusInline('${order.orderNumber}', 'delivered')" title="Mark Delivered" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
                                         <i class="fas fa-box-open"></i>
                                     </button>
                                 ` : ''}
-                                ${currentWorkflowFilter === 'new' ? `
+                                ${canDownload ? `
                                     <button class="action-icon-btn btn-download" onclick="downloadOrderImages('${order.orderNumber}')" title="Download Images">
                                         <i class="fas fa-download"></i>
                                     </button>
                                 ` : ''}
-                                ${currentWorkflowFilter === 'downloaded' ? `
+                                ${canShip ? `
                                     <button class="action-icon-btn btn-shiprocket" onclick="moveToShiprocket('${order.orderNumber}')" title="Move to Shiprocket" style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: white;">
                                         <i class="fas fa-shipping-fast"></i>
                                     </button>
@@ -6488,6 +7550,8 @@
             
             // Update pagination - use updatePaginationButtons
             updatePaginationButtons(totalPages);
+            updateAllSelectAllCheckbox();
+            updateAllBulkActionsBar();
             
             // Hide loading
             const loading = document.getElementById('all-orders-loading');
@@ -6496,6 +7560,148 @@
             if (tableContainer) tableContainer.style.display = 'block';
         }
         
+        async function updateOrderWorkflowFields(order, updateData, options = {}) {
+            if (!order) {
+                throw new Error('Order not found');
+            }
+
+            if (!window.jbAPI || typeof window.jbAPI.updateOrder !== 'function') {
+                throw new Error('Firebase API not available');
+            }
+
+            const result = await window.jbAPI.updateOrder(order.orderId || order.id, updateData);
+            if (!result.success) {
+                throw new Error(result.error || 'Failed to update order');
+            }
+
+            Object.assign(order, updateData);
+            if (Object.prototype.hasOwnProperty.call(updateData, 'imageReview')) {
+                order.imageReview = normalizeOrderImageReviewData({
+                    ...order,
+                    imageReview: updateData.imageReview
+                });
+            }
+            order.updatedAt = new Date().toISOString();
+
+            if (!options.skipRefresh) {
+                updateOrderWorkflowCounts();
+                applyOrdersWorkflowFilter();
+            }
+            return result;
+        }
+
+        function getDownloadableOrderImages(order) {
+            const entries = [];
+            let missingCount = 0;
+            const items = Array.isArray(order?.items) ? order.items : [];
+
+            items.forEach((item, itemIndex) => {
+                const imageUrl = getOrderItemBestImage(order, itemIndex);
+                if (!imageUrl) {
+                    missingCount += 1;
+                    return;
+                }
+
+                entries.push({
+                    itemIndex,
+                    imageUrl,
+                    fileName: `${order.orderNumber}_item${itemIndex + 1}.jpg`
+                });
+            });
+
+            return { entries, missingCount };
+        }
+
+        function buildPendingResetPayload(order) {
+            const payload = {
+                imageReview: createEmptyOrderImageReview()
+            };
+
+            if (order?.imageDownloaded) {
+                payload.imageDownloaded = false;
+                payload.imageDownloadedAt = null;
+            }
+
+            return payload;
+        }
+
+        async function markSingleOrderDownloaded(orderNumber, options = {}) {
+            const order = orders.find(o => o.orderNumber === orderNumber);
+            if (!order) {
+                return;
+            }
+
+            const timestamp = new Date().toISOString();
+            await updateOrderWorkflowFields(order, {
+                imageDownloaded: true,
+                imageDownloadedAt: timestamp
+            }, options);
+        }
+
+        async function resetSingleOrderToPending(orderNumber) {
+            const order = orders.find(o => o.orderNumber === orderNumber);
+            if (!order) {
+                showShippingToast('Order not found', 'error');
+                return;
+            }
+
+            if (!canOrderResetToPending(order)) {
+                showShippingToast('Only blurry orders can be moved back to Pending Review', 'error');
+                return;
+            }
+
+            if (!confirm(`Move order #${orderNumber} back to Pending Review? This clears the saved image review decisions.`)) {
+                return;
+            }
+
+            try {
+                await updateOrderWorkflowFields(order, buildPendingResetPayload(order));
+                showShippingToast(`Order #${orderNumber} moved back to Pending Review`, 'success');
+            } catch (error) {
+                console.error('Failed to reset order to pending:', error);
+                showShippingToast('Failed to move order back to Pending Review: ' + error.message, 'error');
+            }
+        }
+
+        async function moveSelectedToPendingReview() {
+            const selectedOrders = getSelectedAllOrderObjects();
+            if (selectedOrders.length === 0) {
+                showShippingToast('No orders selected', 'error');
+                return;
+            }
+
+            const ordersToReset = selectedOrders.filter(order => canOrderResetToPending(order));
+            if (ordersToReset.length === 0) {
+                showShippingToast('Selected orders are not in Blurry Images', 'error');
+                return;
+            }
+
+            if (!confirm(`Move ${ordersToReset.length} order(s) back to Pending Review? This clears the saved image review decisions.`)) {
+                return;
+            }
+
+            let successCount = 0;
+            for (const order of ordersToReset) {
+                try {
+                    await updateOrderWorkflowFields(order, buildPendingResetPayload(order), { skipRefresh: true });
+                    successCount += 1;
+                } catch (error) {
+                    console.error(`Failed to reset ${order.orderNumber}:`, error);
+                }
+            }
+
+            updateOrderWorkflowCounts();
+            applyOrdersWorkflowFilter();
+
+            if (successCount === ordersToReset.length) {
+                showShippingToast(`${successCount} order(s) moved back to Pending Review`, 'success');
+            } else {
+                showShippingToast(`${successCount}/${ordersToReset.length} order(s) moved back to Pending Review`, successCount > 0 ? 'warning' : 'error');
+            }
+
+            clearAllOrdersSelection();
+        }
+
         // Download images for a single order
         async function downloadOrderImages(orderNumber) {
             const order = orders.find(o => o.orderNumber === orderNumber);
@@ -6503,64 +7709,55 @@
                 showShippingToast('Order not found', 'error');
                 return;
             }
-            
+
+            if (!canOrderBeDownloaded(order)) {
+                showShippingToast('Only orders in Clear Images can be downloaded', 'error');
+                return;
+            }
+
+            const { entries, missingCount } = getDownloadableOrderImages(order);
+            if (entries.length === 0) {
+                showShippingToast('No images found to download', 'error');
+                return;
+            }
+
             showShippingToast('Downloading images...', 'info');
-            
+
             let downloaded = 0;
-            for (let i = 0; i < order.items.length; i++) {
-                const item = order.items[i];
-                const imageUrl = item.printImagePath || item.enhancedPrintPath || item.displayImagePath || 
-                                 item.originalImagePath || item.cloudinaryUrl;
-                
-                if (imageUrl) {
-                    try {
-                        const response = await fetch(imageUrl);
-                        const blob = await response.blob();
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `${orderNumber}_item${i + 1}.jpg`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        window.URL.revokeObjectURL(url);
-                        downloaded++;
-                        await new Promise(r => setTimeout(r, 300));
-                    } catch (e) {
-                        console.error('Download failed:', e);
-                    }
+            for (const entry of entries) {
+                try {
+                    const response = await fetch(entry.imageUrl);
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = entry.fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    downloaded += 1;
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                } catch (error) {
+                    console.error(`Download failed for ${entry.fileName}:`, error);
                 }
             }
-            
-            if (downloaded > 0) {
-                // Mark as downloaded
+
+            const allImagesDownloaded = downloaded === entries.length && missingCount === 0;
+            if (allImagesDownloaded) {
                 await markSingleOrderDownloaded(orderNumber);
-                showShippingToast(`Downloaded ${downloaded} image(s)! Order marked as downloaded.`, 'success');
-            } else {
-                showShippingToast('No images found to download', 'error');
+                showShippingToast(`Downloaded ${downloaded} image(s). Order moved to Image Downloaded.`, 'success');
+                return;
             }
-        }
-        
-        // Mark single order as downloaded
-        async function markSingleOrderDownloaded(orderNumber) {
-            const order = orders.find(o => o.orderNumber === orderNumber);
-            if (!order) return;
-            
-            order.imageDownloaded = true;
-            order.imageDownloadedAt = new Date().toISOString();
-            
-            // Save to Firebase
-            if (window.jbAPI && typeof window.jbAPI.updateOrder === 'function') {
-                await window.jbAPI.updateOrder(order.orderId || order.id, {
-                    imageDownloaded: true,
-                    imageDownloadedAt: new Date().toISOString()
-                });
+
+            if (downloaded > 0) {
+                showShippingToast(`Downloaded ${downloaded}/${entries.length} available image(s). Order stayed in Clear Images because some files were missing or failed.`, 'warning');
+                return;
             }
-            
-            updateOrderWorkflowCounts();
-            applyOrdersWorkflowFilter();
+
+            showShippingToast('No images were downloaded successfully', 'error');
         }
-        
+
         // Download selected images as ZIP file
         async function downloadSelectedImagesAsZip() {
             const selectedOrders = getSelectedAllOrderObjects();
@@ -6568,53 +7765,60 @@
                 showShippingToast('No orders selected', 'error');
                 return;
             }
-            
-            showShippingToast(`Preparing ZIP for ${selectedOrders.length} orders...`, 'info');
-            
+
+            const eligibleOrders = selectedOrders.filter(order => canOrderBeDownloaded(order));
+            const skippedOrders = selectedOrders.length - eligibleOrders.length;
+            if (eligibleOrders.length === 0) {
+                showShippingToast('Only orders in Clear Images can be downloaded', 'error');
+                return;
+            }
+
+            showShippingToast(`Preparing ZIP for ${eligibleOrders.length} clear order(s)...`, 'info');
+
             try {
                 const zip = new JSZip();
                 let totalImages = 0;
-                
-                for (const order of selectedOrders) {
+                const downloadedOrderNumbers = [];
+                const partialOrderNumbers = [];
+
+                for (const order of eligibleOrders) {
                     const orderNumber = order.orderNumber || getOrderDocumentId(order);
-                    if (!order || !order.items) continue;
-                    
-                    // Create a folder for each order
+                    const { entries, missingCount } = getDownloadableOrderImages(order);
+                    if (entries.length === 0) {
+                        partialOrderNumbers.push(orderNumber);
+                        continue;
+                    }
+
                     const orderFolder = zip.folder(`Order_${orderNumber}`);
-                    
-                    for (let i = 0; i < order.items.length; i++) {
-                        const item = order.items[i];
-                        const imageUrl = item.printImagePath || item.enhancedPrintPath || item.displayImagePath || 
-                                         item.originalImagePath || item.cloudinaryUrl;
-                        
-                        if (imageUrl) {
-                            try {
-                                const response = await fetch(imageUrl);
-                                const blob = await response.blob();
-                                const fileName = `${orderNumber}_item${i + 1}.jpg`;
-                                orderFolder.file(fileName, blob);
-                                totalImages++;
-                            } catch (e) {
-                                console.error(`Failed to fetch image for ${orderNumber}:`, e);
-                            }
+                    let successCount = 0;
+
+                    for (const entry of entries) {
+                        try {
+                            const response = await fetch(entry.imageUrl);
+                            const blob = await response.blob();
+                            orderFolder.file(entry.fileName, blob);
+                            totalImages += 1;
+                            successCount += 1;
+                        } catch (error) {
+                            console.error(`Failed to fetch image for ${orderNumber}:`, error);
                         }
                     }
-                    
-                    // Mark as downloaded
-                    await markSingleOrderDownloaded(orderNumber);
+
+                    if (successCount === entries.length && missingCount === 0) {
+                        downloadedOrderNumbers.push(orderNumber);
+                    } else {
+                        partialOrderNumbers.push(orderNumber);
+                    }
                 }
-                
+
                 if (totalImages === 0) {
                     showShippingToast('No images found to download', 'error');
                     return;
                 }
-                
+
                 showShippingToast(`Creating ZIP with ${totalImages} images...`, 'info');
-                
-                // Generate the ZIP file
+
                 const content = await zip.generateAsync({ type: 'blob' });
-                
-                // Create download link
                 const url = window.URL.createObjectURL(content);
                 const a = document.createElement('a');
                 a.href = url;
@@ -6623,32 +7827,34 @@
                 a.click();
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
-                
-                showShippingToast(`ZIP downloaded with ${totalImages} images from ${selectedOrders.length} orders!`, 'success');
+
+                for (const orderNumber of downloadedOrderNumbers) {
+                    await markSingleOrderDownloaded(orderNumber, { skipRefresh: true });
+                }
+
+                updateOrderWorkflowCounts();
+                applyOrdersWorkflowFilter();
+
+                const notes = [];
+                if (skippedOrders > 0) {
+                    notes.push(`${skippedOrders} selected order(s) were not in Clear Images`);
+                }
+                if (partialOrderNumbers.length > 0) {
+                    notes.push(`${partialOrderNumbers.length} order(s) stayed in Clear Images because some files were missing or failed`);
+                }
+
+                const message = `ZIP downloaded with ${totalImages} image(s) from ${downloadedOrderNumbers.length} clear order(s)${notes.length ? `. ${notes.join('. ')}` : '!'}`;
+                showShippingToast(message, notes.length ? 'warning' : 'success');
                 clearAllOrdersSelection();
-                
             } catch (error) {
                 console.error('ZIP creation failed:', error);
                 showShippingToast('Failed to create ZIP file', 'error');
             }
         }
-        
-        // Download selected images (kept for single order download)
+
+        // Download selected images (kept for compatibility)
         async function downloadSelectedImages() {
-            const selectedOrders = getSelectedAllOrderObjects();
-            if (selectedOrders.length === 0) {
-                showShippingToast('No orders selected', 'error');
-                return;
-            }
-            
-            showShippingToast(`Downloading images for ${selectedOrders.length} orders...`, 'info');
-            
-            for (const order of selectedOrders) {
-                const orderNumber = order.orderNumber || getOrderDocumentId(order);
-                await downloadOrderImages(orderNumber);
-            }
-            
-            showShippingToast('All images downloaded!', 'success');
+            await downloadSelectedImagesAsZip();
         }
         
         // Send single order to Shiprocket
@@ -7840,6 +9046,8 @@
             console.log('📋 Showing order modal for:', order);
             const modal = document.getElementById('order-modal');
             const content = document.getElementById('order-details-content');
+            const paymentSummary = getOrderPaymentSummary(order);
+            const imageReviewStatus = getOrderImageReviewStatus(order);
             
             // Debug order structure
             console.log('Order items:', order.items);
@@ -8099,8 +9307,16 @@
                             <span class="detail-value" style="font-weight: 600; color: var(--success);">₹${order.totals.total}</span>
                         </div>
                         <div class="detail-row">
+                            <span class="detail-label">Payment:</span>
+                            <span class="detail-value">${paymentSummary.status}${paymentSummary.method ? ` • ${paymentSummary.method}` : ''}${paymentSummary.paymentId ? `<br><small>${paymentSummary.paymentId}</small>` : ''}</span>
+                        </div>
+                        <div class="detail-row">
                             <span class="detail-label">Delivery Method:</span>
                             <span class="detail-value">${order.deliveryMethod === 'express' ? 'Express (2-3 days)' : 'Standard (5-7 days)'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Image Review:</span>
+                            <span class="detail-value">${getImageReviewStatusChipMarkup(imageReviewStatus)}</span>
                         </div>
                     </div>
 
@@ -8122,6 +9338,25 @@
                                 <button class="btn btn-primary btn-sm" onclick="saveOrderStatusFromModal('${order.orderNumber}')">
                                     <i class="fas fa-save"></i> Save Status
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 18px; padding: 16px; border: 1px solid var(--border-light); border-radius: var(--radius-md); background: white;">
+                        <div style="display: flex; justify-content: space-between; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                            <div>
+                                <div style="font-weight: 600; color: var(--text-primary);">Image Review Workflow</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">Open the full-screen reviewer to reclassify this order image by image.</div>
+                            </div>
+                            <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                                ${getImageReviewStatusChipMarkup(imageReviewStatus, `Review: ${getImageReviewStatusLabel(imageReviewStatus)}`)}
+                                ${order.sentToShiprocket ? `
+                                    <span style="font-size: 0.85rem; color: var(--text-muted);">Review is locked after Shiprocket dispatch.</span>
+                                ` : `
+                                    <button class="btn btn-secondary btn-sm" onclick="openImageReviewForOrder('${order.orderNumber}')">
+                                        <i class="fas fa-images"></i> Open Reviewer
+                                    </button>
+                                `}
                             </div>
                         </div>
                     </div>
@@ -9506,6 +10741,596 @@
             modal.classList.remove('show');
         }
 
+        function createImageReviewSessionOrder(order) {
+            const normalizedReview = cloneOrderImageReview(normalizeOrderImageReviewData(order));
+            const sessionOrder = {
+                order,
+                totalItems: getOrderItemCount(order),
+                originalReview: cloneOrderImageReview(normalizedReview),
+                workingReview: normalizedReview,
+                lastActiveItemIndex: 0
+            };
+
+            sessionOrder.lastActiveItemIndex = getFirstPendingImageReviewIndex(sessionOrder);
+            return sessionOrder;
+        }
+
+        function getFirstPendingImageReviewIndex(sessionOrder) {
+            for (let itemIndex = 0; itemIndex < sessionOrder.totalItems; itemIndex++) {
+                if (!getImageReviewItemStatus(sessionOrder.workingReview, itemIndex)) {
+                    return itemIndex;
+                }
+            }
+
+            return 0;
+        }
+
+        function getReviewedImageCountForSessionOrder(sessionOrder) {
+            let reviewedCount = 0;
+            for (let itemIndex = 0; itemIndex < sessionOrder.totalItems; itemIndex++) {
+                if (getImageReviewItemStatus(sessionOrder.workingReview, itemIndex)) {
+                    reviewedCount += 1;
+                }
+            }
+            return reviewedCount;
+        }
+
+        function getImageReviewSessionTotalItems(session = imageReviewSession) {
+            return (session?.orders || []).reduce((total, entry) => total + entry.totalItems, 0);
+        }
+
+        function getImageReviewSessionReviewedItems(session = imageReviewSession) {
+            return (session?.orders || []).reduce((total, entry) => total + getReviewedImageCountForSessionOrder(entry), 0);
+        }
+
+        function getActiveImageReviewEntry() {
+            return imageReviewSession?.orders?.[imageReviewSession.activeOrderIndex] || null;
+        }
+
+        function getImageReviewSnapshot(review, itemCount) {
+            return JSON.stringify(serializeOrderImageReview(review, itemCount));
+        }
+
+        function hasImageReviewEntryChanges(sessionOrder) {
+            return getImageReviewSnapshot(sessionOrder.workingReview, sessionOrder.totalItems) !== getImageReviewSnapshot(sessionOrder.originalReview, sessionOrder.totalItems);
+        }
+
+        function selectImageReviewOrder(orderIndex) {
+            if (!imageReviewSession) {
+                return;
+            }
+
+            const safeIndex = Math.min(Math.max(orderIndex, 0), imageReviewSession.orders.length - 1);
+            const currentEntry = getActiveImageReviewEntry();
+            if (currentEntry) {
+                currentEntry.lastActiveItemIndex = imageReviewSession.activeItemIndex;
+            }
+
+            imageReviewSession.activeOrderIndex = safeIndex;
+            const nextEntry = getActiveImageReviewEntry();
+            if (!nextEntry) {
+                renderImageReviewModal();
+                return;
+            }
+
+            const preferredIndex = Number.isInteger(nextEntry.lastActiveItemIndex)
+                ? nextEntry.lastActiveItemIndex
+                : getFirstPendingImageReviewIndex(nextEntry);
+            imageReviewSession.activeItemIndex = Math.min(Math.max(preferredIndex, 0), Math.max(nextEntry.totalItems - 1, 0));
+            nextEntry.lastActiveItemIndex = imageReviewSession.activeItemIndex;
+            renderImageReviewModal();
+        }
+
+        function selectImageReviewItem(itemIndex) {
+            const entry = getActiveImageReviewEntry();
+            if (!entry) {
+                return;
+            }
+
+            imageReviewSession.activeItemIndex = Math.min(Math.max(itemIndex, 0), Math.max(entry.totalItems - 1, 0));
+            entry.lastActiveItemIndex = imageReviewSession.activeItemIndex;
+            renderImageReviewModal();
+        }
+
+        function goToPreviousImageReviewTarget() {
+            const entry = getActiveImageReviewEntry();
+            if (!entry) {
+                return;
+            }
+
+            if (imageReviewSession.activeItemIndex > 0) {
+                selectImageReviewItem(imageReviewSession.activeItemIndex - 1);
+                return;
+            }
+
+            if (imageReviewSession.activeOrderIndex > 0) {
+                const previousIndex = imageReviewSession.activeOrderIndex - 1;
+                const previousEntry = imageReviewSession.orders[previousIndex];
+                imageReviewSession.activeOrderIndex = previousIndex;
+                imageReviewSession.activeItemIndex = Math.max(previousEntry.totalItems - 1, 0);
+                previousEntry.lastActiveItemIndex = imageReviewSession.activeItemIndex;
+                renderImageReviewModal();
+            }
+        }
+
+        function goToNextImageReviewTarget() {
+            const entry = getActiveImageReviewEntry();
+            if (!entry) {
+                return;
+            }
+
+            if (imageReviewSession.activeItemIndex < entry.totalItems - 1) {
+                selectImageReviewItem(imageReviewSession.activeItemIndex + 1);
+                return;
+            }
+
+            if (imageReviewSession.activeOrderIndex < imageReviewSession.orders.length - 1) {
+                const nextIndex = imageReviewSession.activeOrderIndex + 1;
+                imageReviewSession.activeOrderIndex = nextIndex;
+                const nextEntry = imageReviewSession.orders[nextIndex];
+                imageReviewSession.activeItemIndex = getFirstPendingImageReviewIndex(nextEntry);
+                nextEntry.lastActiveItemIndex = imageReviewSession.activeItemIndex;
+                renderImageReviewModal();
+            }
+        }
+
+        function clearActiveImageReviewDecision() {
+            const entry = getActiveImageReviewEntry();
+            if (!entry) {
+                return;
+            }
+
+            setImageReviewDecision(entry.workingReview, imageReviewSession.activeItemIndex, null, entry.totalItems);
+            entry.lastActiveItemIndex = imageReviewSession.activeItemIndex;
+            renderImageReviewModal();
+        }
+
+        function setActiveImageReviewDecision(status) {
+            const entry = getActiveImageReviewEntry();
+            if (!entry || imageReviewSession?.saveInProgress) {
+                return;
+            }
+
+            setImageReviewDecision(entry.workingReview, imageReviewSession.activeItemIndex, status, entry.totalItems);
+            entry.lastActiveItemIndex = imageReviewSession.activeItemIndex;
+
+            if (imageReviewSession.activeItemIndex < entry.totalItems - 1) {
+                imageReviewSession.activeItemIndex += 1;
+                entry.lastActiveItemIndex = imageReviewSession.activeItemIndex;
+            } else if (imageReviewSession.activeOrderIndex < imageReviewSession.orders.length - 1) {
+                imageReviewSession.activeOrderIndex += 1;
+                const nextEntry = getActiveImageReviewEntry();
+                imageReviewSession.activeItemIndex = getFirstPendingImageReviewIndex(nextEntry);
+                nextEntry.lastActiveItemIndex = imageReviewSession.activeItemIndex;
+            }
+
+            renderImageReviewModal();
+        }
+
+        function openImageReviewForSelectedOrders() {
+            const selectedOrders = getSelectedAllOrderObjects();
+            if (selectedOrders.length === 0) {
+                showShippingToast('Select at least one order to review', 'error');
+                return;
+            }
+
+            openImageReviewModalForOrders(selectedOrders);
+        }
+
+        function openImageReviewForOrder(orderNumber) {
+            const order = orders.find(item => item.orderNumber === orderNumber);
+            if (!order) {
+                showShippingToast('Order not found', 'error');
+                return;
+            }
+
+            openImageReviewModalForOrders([order]);
+        }
+
+        function openImageReviewModalForOrders(orderList) {
+            const shiprocketSkipped = orderList.filter(order => !canOrderBeReviewed(order)).length;
+            const noImagesSkipped = orderList.filter(order => canOrderBeReviewed(order) && getOrderItemCount(order) === 0).length;
+            const reviewableOrders = sortOrdersOldestFirst(
+                orderList.filter(order => canOrderBeReviewed(order) && getOrderItemCount(order) > 0)
+            );
+
+            if (reviewableOrders.length === 0) {
+                showShippingToast('No reviewable orders found in this selection', 'error');
+                return;
+            }
+
+            imageReviewSession = {
+                orders: reviewableOrders.map(createImageReviewSessionOrder),
+                activeOrderIndex: 0,
+                activeItemIndex: 0,
+                saveInProgress: false
+            };
+
+            const firstEntry = getActiveImageReviewEntry();
+            imageReviewSession.activeItemIndex = getFirstPendingImageReviewIndex(firstEntry);
+            firstEntry.lastActiveItemIndex = imageReviewSession.activeItemIndex;
+
+            const modal = document.getElementById('image-review-modal');
+            if (modal) {
+                modal.classList.add('show');
+            }
+
+            renderImageReviewModal();
+
+            const notices = [];
+            if (shiprocketSkipped > 0) {
+                notices.push(`${shiprocketSkipped} Shiprocket order(s) were skipped`);
+            }
+            if (noImagesSkipped > 0) {
+                notices.push(`${noImagesSkipped} order(s) without items were skipped`);
+            }
+            if (notices.length) {
+                showShippingToast(notices.join('. '), 'info');
+            }
+        }
+
+        async function persistImageReviewSession() {
+            let savedOrders = 0;
+
+            for (const sessionOrder of imageReviewSession.orders) {
+                if (!hasImageReviewEntryChanges(sessionOrder)) {
+                    continue;
+                }
+
+                const serializedReview = serializeOrderImageReview(sessionOrder.workingReview, sessionOrder.totalItems);
+                const payload = {
+                    imageReview: serializedReview
+                };
+
+                if (sessionOrder.order.imageDownloaded && serializedReview.status !== IMAGE_REVIEW_STATUS.clear) {
+                    payload.imageDownloaded = false;
+                    payload.imageDownloadedAt = null;
+                }
+
+                await updateOrderWorkflowFields(sessionOrder.order, payload, { skipRefresh: true });
+                sessionOrder.originalReview = cloneOrderImageReview(sessionOrder.order.imageReview);
+                savedOrders += 1;
+            }
+
+            return savedOrders;
+        }
+
+        async function closeImageReviewModal() {
+            const modal = document.getElementById('image-review-modal');
+            if (!modal?.classList.contains('show')) {
+                return;
+            }
+
+            if (imageReviewSession?.saveInProgress) {
+                return;
+            }
+
+            if (imageReviewSession) {
+                try {
+                    imageReviewSession.saveInProgress = true;
+                    renderImageReviewModal();
+                    const savedOrders = await persistImageReviewSession();
+                    if (savedOrders > 0) {
+                        showShippingToast(`Saved image review changes for ${savedOrders} order(s)`, 'success');
+                    }
+                } catch (error) {
+                    console.error('Failed to save image review session:', error);
+                    imageReviewSession.saveInProgress = false;
+                    renderImageReviewModal();
+                    showShippingToast('Failed to save image review changes: ' + error.message, 'error');
+                    return;
+                }
+            }
+
+            modal.classList.remove('show');
+            const root = document.getElementById('image-review-root');
+            if (root) {
+                root.className = 'image-review-empty-state';
+                root.innerHTML = 'Select orders and start a review session to inspect images here.';
+            }
+
+            const subtitle = document.getElementById('image-review-modal-subtitle');
+            if (subtitle) {
+                subtitle.textContent = 'Review selected orders image by image before download.';
+            }
+
+            imageReviewSession = null;
+            updateOrderWorkflowCounts();
+            applyOrdersWorkflowFilter();
+        }
+
+        function bindImageReviewPointerHandlers() {
+            const stage = document.getElementById('image-review-stage');
+            const card = document.getElementById('image-review-card');
+            if (!stage || !card || stage.dataset.pointerBound === 'true') {
+                return;
+            }
+
+            stage.dataset.pointerBound = 'true';
+            let pointerState = null;
+
+            const resetCardPosition = () => {
+                card.style.transform = '';
+                card.classList.remove('dragging');
+                stage.classList.remove('show-left', 'show-right');
+            };
+
+            const finishGesture = (event) => {
+                if (!pointerState || imageReviewSession?.saveInProgress) {
+                    resetCardPosition();
+                    pointerState = null;
+                    return;
+                }
+
+                const deltaX = pointerState.lastX - pointerState.startX;
+                const deltaY = pointerState.lastY - pointerState.startY;
+
+                if (stage.hasPointerCapture && pointerState.pointerId != null && stage.hasPointerCapture(pointerState.pointerId)) {
+                    stage.releasePointerCapture(pointerState.pointerId);
+                }
+
+                resetCardPosition();
+                pointerState = null;
+
+                if (Math.abs(deltaX) >= IMAGE_REVIEW_SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY)) {
+                    setActiveImageReviewDecision(deltaX > 0 ? IMAGE_REVIEW_STATUS.clear : IMAGE_REVIEW_STATUS.blurry);
+                }
+            };
+
+            stage.addEventListener('pointerdown', event => {
+                if (imageReviewSession?.saveInProgress) {
+                    return;
+                }
+
+                if (event.button !== undefined && event.button !== 0) {
+                    return;
+                }
+
+                pointerState = {
+                    pointerId: event.pointerId,
+                    startX: event.clientX,
+                    startY: event.clientY,
+                    lastX: event.clientX,
+                    lastY: event.clientY
+                };
+                card.classList.add('dragging');
+                if (stage.setPointerCapture) {
+                    stage.setPointerCapture(event.pointerId);
+                }
+            });
+
+            stage.addEventListener('pointermove', event => {
+                if (!pointerState || pointerState.pointerId !== event.pointerId) {
+                    return;
+                }
+
+                pointerState.lastX = event.clientX;
+                pointerState.lastY = event.clientY;
+                const deltaX = event.clientX - pointerState.startX;
+                const deltaY = event.clientY - pointerState.startY;
+
+                if (Math.abs(deltaX) < Math.abs(deltaY)) {
+                    return;
+                }
+
+                const rotation = Math.max(-12, Math.min(12, deltaX / 18));
+                card.style.transform = `translateX(${deltaX}px) rotate(${rotation}deg)`;
+                stage.classList.toggle('show-right', deltaX > 24);
+                stage.classList.toggle('show-left', deltaX < -24);
+            });
+
+            stage.addEventListener('pointerup', finishGesture);
+            stage.addEventListener('pointercancel', finishGesture);
+        }
+
+        function renderImageReviewModal() {
+            const root = document.getElementById('image-review-root');
+            const subtitle = document.getElementById('image-review-modal-subtitle');
+            const closeButton = document.getElementById('image-review-close-btn');
+
+            if (!root) {
+                return;
+            }
+
+            if (!imageReviewSession || !imageReviewSession.orders.length) {
+                root.className = 'image-review-empty-state';
+                root.innerHTML = 'Select orders and start a review session to inspect images here.';
+                if (subtitle) {
+                    subtitle.textContent = 'Review selected orders image by image before download.';
+                }
+                if (closeButton) {
+                    closeButton.disabled = false;
+                }
+                return;
+            }
+
+            const activeEntry = getActiveImageReviewEntry();
+            const activeOrder = activeEntry?.order;
+            if (!activeEntry || !activeOrder) {
+                root.className = 'image-review-empty-state';
+                root.innerHTML = 'No active order available for this review session.';
+                return;
+            }
+
+            imageReviewSession.activeItemIndex = Math.min(
+                Math.max(imageReviewSession.activeItemIndex, 0),
+                Math.max(activeEntry.totalItems - 1, 0)
+            );
+            activeEntry.lastActiveItemIndex = imageReviewSession.activeItemIndex;
+
+            const totalItems = getImageReviewSessionTotalItems();
+            const reviewedItems = getImageReviewSessionReviewedItems();
+            const progressPercent = totalItems > 0 ? Math.round((reviewedItems / totalItems) * 100) : 0;
+            const activeItem = activeOrder.items?.[imageReviewSession.activeItemIndex] || {};
+            const activeDecision = getImageReviewItemStatus(activeEntry.workingReview, imageReviewSession.activeItemIndex);
+            const activeOrderStatus = deriveOrderImageReviewStatus(activeEntry.workingReview, activeEntry.totalItems);
+            const paymentSummary = getOrderPaymentSummary(activeOrder);
+            const imageSource = getOrderItemBestImage(activeOrder, imageReviewSession.activeItemIndex);
+            const orderReviewCount = getReviewedImageCountForSessionOrder(activeEntry);
+            const isFirstOrder = imageReviewSession.activeOrderIndex === 0;
+            const isLastOrder = imageReviewSession.activeOrderIndex === imageReviewSession.orders.length - 1;
+            const isFirstItem = imageReviewSession.activeItemIndex === 0;
+            const isLastItem = imageReviewSession.activeItemIndex >= activeEntry.totalItems - 1;
+            const disableAttr = imageReviewSession.saveInProgress ? 'disabled' : '';
+
+            const orderButtonsHtml = imageReviewSession.orders.map((entry, index) => {
+                const reviewCount = getReviewedImageCountForSessionOrder(entry);
+                const status = deriveOrderImageReviewStatus(entry.workingReview, entry.totalItems);
+                return `
+                    <button type="button" class="image-review-order-button ${index === imageReviewSession.activeOrderIndex ? 'active' : ''}" onclick="selectImageReviewOrder(${index})" ${disableAttr}>
+                        <div class="image-review-order-meta">
+                            <span class="image-review-order-number">#${escapeHtml(entry.order.orderNumber || getOrderDocumentId(entry.order) || 'Order')}</span>
+                            ${getImageReviewStatusChipMarkup(status)}
+                        </div>
+                        <div class="image-review-order-helper">${reviewCount}/${entry.totalItems} reviewed • ${escapeHtml(entry.order.customer?.name || 'Guest')}</div>
+                    </button>
+                `;
+            }).join('');
+
+            const thumbnailsHtml = Array.from({ length: activeEntry.totalItems }, (_, itemIndex) => {
+                const thumbnailSource = getOrderItemBestImage(activeOrder, itemIndex);
+                const thumbnailDecision = getImageReviewItemStatus(activeEntry.workingReview, itemIndex);
+                const thumbnailStatus = thumbnailDecision || IMAGE_REVIEW_STATUS.pending;
+                return `
+                    <button type="button" class="image-review-thumb status-${thumbnailStatus} ${itemIndex === imageReviewSession.activeItemIndex ? 'active' : ''}" onclick="selectImageReviewItem(${itemIndex})" ${disableAttr}>
+                        ${thumbnailSource ? `<img src="${thumbnailSource}" alt="Item ${itemIndex + 1}" draggable="false">` : '<div class="image-review-thumb-placeholder">No image</div>'}
+                        <div class="image-review-thumb-footer">
+                            <span>Item ${itemIndex + 1}</span>
+                            <span>${escapeHtml(getImageReviewStatusLabel(thumbnailStatus))}</span>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+
+            const reviewHint = reviewedItems === totalItems
+                ? 'All images are reviewed. Close the reviewer to save or tap any thumbnail to change a decision.'
+                : 'Swipe right for clear, swipe left for blurry. Close the reviewer at any time to save reviewed images and leave the rest pending.';
+
+            root.className = '';
+            root.innerHTML = `
+                <div class="image-review-shell">
+                    <aside class="image-review-sidebar">
+                        <section class="image-review-progress-card">
+                            <div class="image-review-progress-top">
+                                <strong>Batch Progress</strong>
+                                <span>${reviewedItems}/${totalItems} reviewed</span>
+                            </div>
+                            <div class="image-review-progress-bar"><span style="width: ${progressPercent}%;"></span></div>
+                        </section>
+
+                        <section class="image-review-order-list">
+                            ${orderButtonsHtml}
+                        </section>
+
+                        <section class="image-review-details-card">
+                            <div class="image-review-details-grid">
+                                <div class="image-review-detail">
+                                    <span class="image-review-detail-label">Customer</span>
+                                    <span class="image-review-detail-value">${escapeHtml(activeOrder.customer?.name || 'Guest')}</span>
+                                </div>
+                                <div class="image-review-detail">
+                                    <span class="image-review-detail-label">Mobile</span>
+                                    <span class="image-review-detail-value">${escapeHtml(activeOrder.customer?.phone || 'N/A')}</span>
+                                </div>
+                                <div class="image-review-detail">
+                                    <span class="image-review-detail-label">Address</span>
+                                    <span class="image-review-detail-value">${escapeHtml(activeOrder.customer?.address || 'N/A')}</span>
+                                </div>
+                                <div class="image-review-detail">
+                                    <span class="image-review-detail-label">Order Total</span>
+                                    <span class="image-review-detail-value">₹${activeOrder.totals?.total || activeOrder.totalAmount || 0}</span>
+                                </div>
+                                <div class="image-review-detail">
+                                    <span class="image-review-detail-label">Payment</span>
+                                    <span class="image-review-detail-value">${escapeHtml(paymentSummary.status)}${paymentSummary.method ? ` • ${escapeHtml(paymentSummary.method)}` : ''}${paymentSummary.paymentId ? `<br><small>${escapeHtml(paymentSummary.paymentId)}</small>` : ''}</span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="image-review-help-card">
+                            <ul>
+                                <li>${escapeHtml(reviewHint)}</li>
+                                <li>Arrow left marks blurry, arrow right marks clear, arrow up and down move between images.</li>
+                                <li>Any blurry image moves the full order into Blurry Images.</li>
+                                <li>Every image must be clear for the order to land in Clear Images.</li>
+                            </ul>
+                        </section>
+                    </aside>
+
+                    <section class="image-review-main">
+                        <div class="image-review-toolbar">
+                            <div>
+                                <h4>Order #${escapeHtml(activeOrder.orderNumber || getOrderDocumentId(activeOrder) || 'Order')}</h4>
+                                <p>Order ${imageReviewSession.activeOrderIndex + 1} of ${imageReviewSession.orders.length} • Image ${imageReviewSession.activeItemIndex + 1} of ${activeEntry.totalItems} • ${orderReviewCount}/${activeEntry.totalItems} reviewed</p>
+                            </div>
+                            <div class="image-review-nav">
+                                <button type="button" onclick="selectImageReviewOrder(${Math.max(imageReviewSession.activeOrderIndex - 1, 0)})" ${disableAttr} ${isFirstOrder ? 'disabled' : ''}>
+                                    <i class="fas fa-arrow-left"></i> Prev Order
+                                </button>
+                                <button type="button" onclick="goToPreviousImageReviewTarget()" ${disableAttr} ${isFirstOrder && isFirstItem ? 'disabled' : ''}>
+                                    <i class="fas fa-chevron-left"></i> Prev Image
+                                </button>
+                                <button type="button" onclick="goToNextImageReviewTarget()" ${disableAttr} ${isLastOrder && isLastItem ? 'disabled' : ''}>
+                                    Next Image <i class="fas fa-chevron-right"></i>
+                                </button>
+                                <button type="button" onclick="selectImageReviewOrder(${Math.min(imageReviewSession.activeOrderIndex + 1, imageReviewSession.orders.length - 1)})" ${disableAttr} ${isLastOrder ? 'disabled' : ''}>
+                                    Next Order <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="image-review-stage-wrap">
+                            <div class="image-review-stage" id="image-review-stage">
+                                <div class="image-review-swipe-label left">Blurry</div>
+                                <div class="image-review-swipe-label right">Clear</div>
+                                <div class="image-review-card" id="image-review-card">
+                                    ${imageSource ? `<img src="${imageSource}" alt="Review image ${imageReviewSession.activeItemIndex + 1}" draggable="false">` : `<div class="image-review-placeholder"><i class="fas fa-image" style="font-size: 2rem;"></i><div>No image preview available for this item.</div></div>`}
+                                    <div class="image-review-caption">
+                                        <span><strong>Item ${imageReviewSession.activeItemIndex + 1}</strong> • ${escapeHtml(getOrderItemReviewSummary(activeItem))}</span>
+                                        <span>${activeItem?.price ? `₹${activeItem.price}` : 'Frame details available in order modal'}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="image-review-decision-row">
+                                <div class="image-review-current-status">
+                                    ${getImageReviewStatusChipMarkup(activeDecision || IMAGE_REVIEW_STATUS.pending, activeDecision ? `Current: ${getImageReviewStatusLabel(activeDecision)}` : 'Current: Pending')}
+                                    ${getImageReviewStatusChipMarkup(activeOrderStatus, `Order: ${getImageReviewStatusLabel(activeOrderStatus)}`)}
+                                </div>
+                                <div class="image-review-decision-actions">
+                                    <button type="button" class="image-review-decision-button is-blurry" onclick="setActiveImageReviewDecision('${IMAGE_REVIEW_STATUS.blurry}')" ${disableAttr}>
+                                        <i class="fas fa-arrow-left"></i> Mark Blurry
+                                    </button>
+                                    <button type="button" class="image-review-secondary-button" onclick="clearActiveImageReviewDecision()" ${disableAttr} ${!activeDecision ? 'disabled' : ''}>
+                                        <i class="fas fa-eraser"></i> Reset Decision
+                                    </button>
+                                    <button type="button" class="image-review-decision-button is-clear" onclick="setActiveImageReviewDecision('${IMAGE_REVIEW_STATUS.clear}')" ${disableAttr}>
+                                        Mark Clear <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="image-review-thumbnails">
+                                ${thumbnailsHtml}
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            `;
+
+            if (subtitle) {
+                subtitle.textContent = imageReviewSession.saveInProgress
+                    ? 'Saving reviewed image decisions...'
+                    : `Reviewing ${imageReviewSession.orders.length} order(s) • ${reviewedItems}/${totalItems} images decided`;
+            }
+
+            if (closeButton) {
+                closeButton.disabled = imageReviewSession.saveInProgress;
+            }
+
+            bindImageReviewPointerHandlers();
+        }
+
         // Debug function to check Firebase order data
         function debugOrderData() {
             console.log('🔍 Current orders data:', orders);
@@ -9924,14 +11749,9 @@
             // Delete by specific public IDs first
             if (allPublicIds.length > 0) {
                 try {
-                    const resp = await fetch('/api/cloudinary-manage', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'delete', publicIds: allPublicIds })
-                    });
-                    const data = await resp.json();
+                    const { data } = await fetchCloudinaryManage({ action: 'delete', publicIds: allPublicIds });
                     if (!data.success) errors.push('ID delete failed: ' + (data.error || 'unknown'));
-                    else console.log('✅ Cloudinary IDs deleted:', allPublicIds.length);
+                    else console.log('✅ Cloudinary IDs deleted:', allPublicIds.length, 'queued:', data.queuedJobIds || []);
                 } catch (e) {
                     console.error('❌ Cloudinary ID delete error:', e);
                     errors.push(e.message);
@@ -9942,14 +11762,9 @@
             const prefixes = [...allFolderPrefixes];
             if (prefixes.length > 0) {
                 try {
-                    const resp = await fetch('/api/cloudinary-manage', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'delete-folder', publicIds: prefixes })
-                    });
-                    const data = await resp.json();
+                    const { data } = await fetchCloudinaryManage({ action: 'delete-folder', publicIds: prefixes });
                     if (!data.success) errors.push('Folder delete failed: ' + (data.error || 'unknown'));
-                    else console.log('✅ Cloudinary folders deleted:', prefixes);
+                    else console.log('✅ Cloudinary folders deleted:', prefixes, 'queued:', data.queuedJobIds || []);
                 } catch (e) {
                     console.error('❌ Cloudinary folder delete error:', e);
                     errors.push(e.message);
@@ -10128,7 +11943,7 @@
         // ============ SELECTION FUNCTIONALITY FOR ALL ORDERS ============
         
         function toggleAllOrderSelection(checkbox) {
-            const orderId = checkbox.dataset.orderId;
+            const orderId = checkbox.dataset.orderId || checkbox.dataset.orderNumber;
             if (checkbox.checked) {
                 selectedAllOrders.add(orderId);
             } else {
@@ -10142,7 +11957,7 @@
             const checkboxes = document.querySelectorAll('.all-order-checkbox');
             checkboxes.forEach(cb => {
                 cb.checked = checkbox.checked;
-                const orderId = cb.dataset.orderId;
+                const orderId = cb.dataset.orderId || cb.dataset.orderNumber;
                 if (checkbox.checked) {
                     selectedAllOrders.add(orderId);
                 } else {
@@ -10165,7 +11980,16 @@
             const mobileSelectAllCheckbox = document.getElementById('mobile-select-all');
             const headerSelectAllCheckbox = document.getElementById('select-all-orders');
             const checkboxes = document.querySelectorAll('.all-order-checkbox');
-            if (checkboxes.length === 0) return;
+            if (checkboxes.length === 0) {
+                [selectAllCheckbox, mobileSelectAllCheckbox, headerSelectAllCheckbox].forEach(checkbox => {
+                    if (!checkbox) {
+                        return;
+                    }
+                    checkbox.checked = false;
+                    checkbox.indeterminate = false;
+                });
+                return;
+            }
             
             const allChecked = Array.from(checkboxes).every(cb => cb.checked);
             const someChecked = Array.from(checkboxes).some(cb => cb.checked);
@@ -10183,9 +12007,46 @@
                 headerSelectAllCheckbox.indeterminate = someChecked && !allChecked;
             }
         }
+
+        function updateOrdersBulkActionState() {
+            const selectedOrders = getSelectedAllOrderObjects();
+            const selectedCount = selectedOrders.length;
+            const reviewBtn = document.getElementById('bulk-review-btn');
+            const downloadBtn = document.getElementById('bulk-download-btn');
+            const resetBtn = document.getElementById('bulk-reset-review-btn');
+            const shiprocketBtn = document.getElementById('bulk-shiprocket-btn');
+            const deleteBtn = document.getElementById('bulk-delete-btn');
+
+            if (reviewBtn) {
+                reviewBtn.style.display = currentWorkflowFilter === 'shiprocket' ? 'none' : 'inline-flex';
+                reviewBtn.disabled = selectedCount === 0 || !selectedOrders.some(order => canOrderBeReviewed(order));
+            }
+
+            if (downloadBtn) {
+                const showDownload = currentWorkflowFilter === 'all' || currentWorkflowFilter === 'clear';
+                downloadBtn.style.display = showDownload ? 'inline-flex' : 'none';
+                downloadBtn.disabled = selectedCount === 0 || !selectedOrders.some(order => canOrderBeDownloaded(order));
+            }
+
+            if (resetBtn) {
+                const showReset = currentWorkflowFilter === 'all' || currentWorkflowFilter === 'blurry';
+                resetBtn.style.display = showReset ? 'inline-flex' : 'none';
+                resetBtn.disabled = selectedCount === 0 || !selectedOrders.some(order => canOrderResetToPending(order));
+            }
+
+            if (shiprocketBtn) {
+                const showShiprocket = currentWorkflowFilter === 'all' || currentWorkflowFilter === 'downloaded';
+                shiprocketBtn.style.display = showShiprocket ? 'inline-flex' : 'none';
+                shiprocketBtn.disabled = selectedCount === 0 || !selectedOrders.some(order => order.imageDownloaded && !order.sentToShiprocket);
+            }
+
+            if (deleteBtn) {
+                deleteBtn.style.display = 'inline-flex';
+                deleteBtn.disabled = selectedCount === 0;
+            }
+        }
         
         function updateAllBulkActionsBar() {
-            const bar = document.getElementById('all-orders-bulk-actions');
             const countSpan = document.getElementById('all-selected-count');
             const selectedCountText = document.getElementById('selected-count-text');
             
@@ -10194,14 +12055,8 @@
             // Update both count displays
             if (countSpan) countSpan.textContent = count;
             if (selectedCountText) selectedCountText.textContent = `${count} selected`;
-            
-            if (bar) {
-                if (count > 0) {
-                    bar.classList.add('show');
-                } else {
-                    bar.classList.remove('show');
-                }
-            }
+
+            updateOrdersBulkActionState();
         }
         
         function clearAllOrdersSelection() {
@@ -10209,7 +12064,20 @@
             const checkboxes = document.querySelectorAll('.all-order-checkbox');
             checkboxes.forEach(cb => cb.checked = false);
             const selectAllCheckbox = document.getElementById('all-select-all');
-            if (selectAllCheckbox) selectAllCheckbox.checked = false;
+            const mobileSelectAllCheckbox = document.getElementById('mobile-select-all');
+            const headerSelectAllCheckbox = document.getElementById('select-all-orders');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            }
+            if (mobileSelectAllCheckbox) {
+                mobileSelectAllCheckbox.checked = false;
+                mobileSelectAllCheckbox.indeterminate = false;
+            }
+            if (headerSelectAllCheckbox) {
+                headerSelectAllCheckbox.checked = false;
+                headerSelectAllCheckbox.indeterminate = false;
+            }
             updateAllBulkActionsBar();
         }
         
@@ -10217,6 +12085,10 @@
             const orderIds = getSelectedAllOrderIds();
             const count = orderIds.length;
             if (count === 0) return;
+            if (count > MAX_BULK_DELETE_ORDERS) {
+                showNotification(`You can delete up to ${MAX_BULK_DELETE_ORDERS} orders at once. Clear some selections and try again.`, 'error');
+                return;
+            }
             
             pendingDeleteInfo = {
                 type: 'bulk',

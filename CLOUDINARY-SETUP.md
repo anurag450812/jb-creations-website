@@ -63,7 +63,8 @@ If images aren't uploading to Cloudinary:
 1. Check if your environment variables are set correctly
 2. Verify your Cloudinary account is active
 3. Check browser console for any error messages
-4. Make sure your server has the `/api/upload-to-cloudinary` endpoint working
+4. Make sure the permit-backed fallback endpoints are deployed and configured: `/api/create-upload-permit` and `/api/upload-image`
+5. For the legacy local upload server, set `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, and `UPLOAD_PERMIT_SECRET` before starting `/api/upload-to-cloudinary`
 
 ## Need Help?
 
