@@ -2,291 +2,1094 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#155e63">
     <title>Order Confirmed - Xidlz</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root{
-            --bg: #0f3f49;
-            --bg-2:#16697A;
-            --brand:#489FB5;
-            --accent:#82C09A;
-            --card:#ffffff;
-            --text:#0f172a;
-            --muted:#64748b;
-            --ring: rgba(72,159,181,0.25);
-            --radius:16px;
-            --shadow: 0 10px 30px rgba(8, 47, 73, 0.18);
+        :root {
+            --ink: #122f37;
+            --deep-teal: #0f5c63;
+            --sea: #16697a;
+            --sky: #489fb5;
+            --gold: #f2b84b;
+            --sand: #f7ead2;
+            --mist: #edf4f2;
+            --paper: #fffdf8;
+            --card: rgba(255, 255, 255, 0.88);
+            --card-strong: rgba(255, 255, 255, 0.96);
+            --muted: #5f7480;
+            --border: rgba(15, 92, 99, 0.12);
+            --border-strong: rgba(15, 92, 99, 0.2);
+            --shadow: 0 18px 54px rgba(11, 37, 47, 0.16);
+            --shadow-soft: 0 10px 30px rgba(11, 37, 47, 0.1);
+            --radius-xl: 28px;
+            --radius-lg: 22px;
+            --radius-md: 16px;
+            --page-width: 1200px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
-            font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-            background: linear-gradient(160deg, var(--bg) 0%, var(--bg-2) 50%, var(--accent) 130%);
             min-height: 100svh;
-            display: flex;
-            align-items: stretch;
-            justify-content: center;
-            color: var(--text);
+            font-family: 'Manrope', sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at top left, rgba(242, 184, 75, 0.16), transparent 32%),
+                radial-gradient(circle at top right, rgba(72, 159, 181, 0.18), transparent 30%),
+                linear-gradient(180deg, #f5f2ea 0%, #eaf2f0 42%, #f9f6f0 100%);
+            overflow-x: hidden;
         }
 
-        .page {
-            width: 100%;
-            max-width: 520px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            inset: auto;
+            border-radius: 50%;
+            filter: blur(18px);
+            pointer-events: none;
+            z-index: 0;
         }
 
-        .card {
-            background: var(--card);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            overflow: hidden;
+        body::before {
+            top: -120px;
+            right: -100px;
+            width: 320px;
+            height: 320px;
+            background: rgba(72, 159, 181, 0.12);
         }
 
-        .success-hero{
-            display:flex;
-            flex-direction: column;
-            align-items:center;
-            text-align:center;
-            padding: 24px 20px 16px;
-            background: linear-gradient(135deg, var(--bg-2), var(--brand));
-            color:#fff;
-            border-radius: var(--radius);
+        body::after {
+            left: -120px;
+            bottom: 40px;
+            width: 300px;
+            height: 300px;
+            background: rgba(242, 184, 75, 0.12);
+        }
+
+        .mobile-global-header-placeholder,
+        .success-shell {
             position: relative;
-        }
-        .success-hero .icon{
-            width:76px; height:76px; border-radius:999px; background: var(--accent);
-            display:grid; place-items:center; box-shadow: 0 8px 18px rgba(130,192,154,.45);
-            margin-bottom:10px;
-            animation: pop .6s ease-out;
-        }
-        .success-hero .icon i{ color:#fff; font-size:36px; }
-        .success-hero h1{ font-size:22px; line-height:1.2; font-weight:700; margin: 6px 0 4px; }
-        .success-hero p{ font-size:13px; opacity:.95; }
-
-        @keyframes pop { 0%{transform:scale(.7); opacity:.2} 100%{transform:scale(1); opacity:1} }
-
-        .order-chip{
-            display:flex; align-items:center; gap:8px; justify-content:center;
-            margin: 14px auto 0; padding: 10px 12px; border-radius: 999px;
-            background: rgba(255,255,255,.15); backdrop-filter: blur(6px);
-            border:1px solid rgba(255,255,255,.25);
-        }
-        .order-chip .label{ font-size:12px; opacity:.9 }
-        .order-chip .value{ font-family: 'Courier New', ui-monospace, SFMono-Regular, Menlo, monospace; font-weight:700; }
-        .order-chip button{
-            background: rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.35); color:#fff;
-            padding:6px 10px; border-radius:999px; font-size:12px; font-weight:600; cursor:pointer;
+            z-index: 1;
         }
 
-        .section { padding: 14px; }
-
-        .summary { display:grid; gap:10px; }
-        .row { display:flex; align-items:center; justify-content:space-between; padding: 12px 10px; border-radius:12px; background:#f8fafc; }
-        .row .label{ color: var(--muted); font-size:13px; }
-        .row .value{ color: var(--text); font-weight:600; font-size:14px; }
-        .row .value.amount{ color: var(--accent); font-size:16px; }
-
-        .info { padding: 12px 14px 14px; }
-        .info h3{ font-size:14px; color: var(--bg-2); display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-        .info ul{ list-style:none; display:grid; gap:8px; }
-        .info li{ display:flex; align-items:center; gap:10px; color:#334155; font-size:13px; }
-        .info li i{ color: var(--accent); }
-
-        .spacer { height: 68px; }
-
-        .sticky-actions{
-            position: sticky; bottom: 0; z-index: 10;
-            margin-top:auto;
+        .success-shell {
+            width: min(var(--page-width), calc(100% - 32px));
+            margin: 0 auto;
+            padding: 24px 0 48px;
+            display: grid;
+            gap: 22px;
         }
-        .sticky-actions .bar{
-            background: rgba(255,255,255,.8);
-            backdrop-filter: blur(10px);
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+            gap: 22px;
+            align-items: stretch;
+        }
+
+        .panel {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--radius-xl);
+            border: 1px solid rgba(255, 255, 255, 0.48);
+            background: var(--card);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+        }
+
+        .hero-copy {
+            padding: clamp(28px, 5vw, 52px);
+            background: linear-gradient(145deg, rgba(15, 92, 99, 0.98), rgba(22, 105, 122, 0.96) 50%, rgba(72, 159, 181, 0.92));
+            color: white;
+        }
+
+        .hero-copy::after {
+            content: '';
+            position: absolute;
+            right: -60px;
+            bottom: -80px;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(242, 184, 75, 0.22) 0%, rgba(242, 184, 75, 0) 72%);
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .eyebrow-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--gold);
+            box-shadow: 0 0 0 0 rgba(242, 184, 75, 0.52);
+            animation: pulseDot 1.8s infinite;
+        }
+
+        .hero-copy h1 {
+            margin-top: 20px;
+            max-width: 10ch;
+            font-family: 'Fraunces', serif;
+            font-size: clamp(2.9rem, 6vw, 4.8rem);
+            line-height: 0.94;
+            letter-spacing: -0.05em;
+        }
+
+        .hero-lead {
+            margin-top: 18px;
+            max-width: 48ch;
+            font-size: 1.03rem;
+            line-height: 1.78;
+            color: rgba(255, 255, 255, 0.84);
+        }
+
+        .hero-highlight {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .hero-stat {
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+        }
+
+        .hero-stat span {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.72);
+        }
+
+        .hero-stat strong {
+            font-size: 1.05rem;
+            line-height: 1.4;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 52px;
+            padding: 0 18px;
             border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(15,63,73,.35);
-            padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
-            display:grid; grid-template-columns: 1fr 1fr; gap:10px;
-        }
-        .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:14px 12px; border-radius:12px; font-weight:700; font-size:14px; text-decoration:none; border:0; cursor:pointer; transition: transform .15s ease, filter .15s ease; }
-        .btn:active{ transform: translateY(1px) scale(.99); }
-        .btn-primary{ background: linear-gradient(135deg, var(--bg-2), var(--brand)); color:#fff; }
-        .btn-secondary{ background:#f1f5f9; color: var(--bg-2); border:1px solid #e2e8f0; }
-
-        /* Larger screens enhancements */
-        @media (min-width: 600px){
-            .page{ padding: 24px; gap:20px; }
-            .success-hero{ padding: 28px 24px 18px; }
-            .section{ padding: 16px; }
-            .sticky-actions .bar{ grid-template-columns: 1fr 1fr; }
+            border: 1px solid transparent;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 800;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
         }
 
-        @media (max-width: 768px) {
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--deep-teal);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border-color: rgba(255, 255, 255, 0.24);
+        }
+
+        .order-card {
+            padding: 24px;
+            display: grid;
+            gap: 18px;
+            background: linear-gradient(180deg, rgba(255, 255, 253, 0.96), rgba(248, 244, 236, 0.98));
+        }
+
+        .order-card header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .card-kicker {
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(18, 47, 55, 0.52);
+        }
+
+        .order-card h2,
+        .section-heading h2 {
+            margin-top: 8px;
+            font-family: 'Fraunces', serif;
+            color: var(--ink);
+            font-size: clamp(1.6rem, 3vw, 2.25rem);
+            line-height: 1.05;
+            letter-spacing: -0.04em;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(15, 92, 99, 0.08);
+            border: 1px solid rgba(15, 92, 99, 0.14);
+            color: var(--deep-teal);
+            font-size: 0.82rem;
+            font-weight: 800;
+        }
+
+        .order-token {
+            padding: 18px;
+            border-radius: 22px;
+            background: linear-gradient(135deg, rgba(15, 92, 99, 0.05), rgba(242, 184, 75, 0.12));
+            border: 1px solid var(--border);
+            display: grid;
+            gap: 12px;
+        }
+
+        .order-token-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .order-token-label {
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(18, 47, 55, 0.56);
+        }
+
+        .order-token strong {
+            font-size: clamp(1.2rem, 2.4vw, 1.65rem);
+            letter-spacing: 0.04em;
+            color: var(--ink);
+            word-break: break-word;
+        }
+
+        .copy-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 42px;
+            padding: 0 14px;
+            border: 1px solid var(--border-strong);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.76);
+            color: var(--deep-teal);
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .token-caption {
+            color: var(--muted);
+            font-size: 0.92rem;
+            line-height: 1.65;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .metric-card {
+            padding: 16px;
+            border-radius: 18px;
+            background: var(--card-strong);
+            border: 1px solid var(--border);
+        }
+
+        .metric-card span {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(18, 47, 55, 0.54);
+        }
+
+        .metric-card strong {
+            display: block;
+            color: var(--ink);
+            font-size: 1rem;
+            line-height: 1.45;
+        }
+
+        .metric-card small {
+            display: block;
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 0.86rem;
+            line-height: 1.55;
+        }
+
+        .progress-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .progress-card {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(15, 92, 99, 0.04);
+            border: 1px solid rgba(15, 92, 99, 0.08);
+        }
+
+        .progress-card.active {
+            background: linear-gradient(135deg, rgba(72, 159, 181, 0.12), rgba(255, 255, 255, 0.9));
+            border-color: rgba(72, 159, 181, 0.18);
+        }
+
+        .progress-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            background: white;
+            color: var(--deep-teal);
+            box-shadow: inset 0 0 0 1px rgba(15, 92, 99, 0.08);
+        }
+
+        .progress-copy strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.95rem;
+        }
+
+        .progress-copy span {
+            display: block;
+            color: var(--muted);
+            font-size: 0.88rem;
+            line-height: 1.55;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .card-stack,
+        .sidebar-stack {
+            display: grid;
+            gap: 22px;
+        }
+
+        .info-card {
+            padding: 24px;
+        }
+
+        .section-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .section-heading p {
+            max-width: 28ch;
+            color: var(--muted);
+            font-size: 0.94rem;
+            line-height: 1.65;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .detail-card {
+            padding: 16px;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #ffffff, #f8fbfa);
+            border: 1px solid var(--border);
+        }
+
+        .detail-label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(18, 47, 55, 0.56);
+        }
+
+        .detail-value {
+            display: block;
+            color: var(--ink);
+            font-size: 1rem;
+            font-weight: 700;
+            line-height: 1.55;
+            word-break: break-word;
+        }
+
+        .timeline-list {
+            display: grid;
+            gap: 14px;
+        }
+
+        .timeline-item {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 14px;
+            align-items: flex-start;
+            padding-top: 14px;
+            border-top: 1px dashed rgba(15, 92, 99, 0.14);
+        }
+
+        .timeline-item:first-child {
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .timeline-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, rgba(15, 92, 99, 0.12), rgba(72, 159, 181, 0.16));
+            color: var(--deep-teal);
+            font-size: 1rem;
+        }
+
+        .timeline-copy strong {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--ink);
+            font-size: 0.98rem;
+        }
+
+        .timeline-copy p {
+            color: var(--muted);
+            font-size: 0.92rem;
+            line-height: 1.65;
+        }
+
+        .bullet-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .bullet-item {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid var(--border);
+        }
+
+        .bullet-item i {
+            width: 40px;
+            height: 40px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            background: rgba(242, 184, 75, 0.16);
+            color: #9a6300;
+        }
+
+        .bullet-item strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.95rem;
+            color: var(--ink);
+        }
+
+        .bullet-item span {
+            display: block;
+            color: var(--muted);
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+
+        .quick-actions {
+            display: grid;
+            gap: 12px;
+        }
+
+        .action-link {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 16px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 244, 236, 0.92));
+            color: var(--ink);
+            text-decoration: none;
+            font-weight: 800;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+
+        .action-link:hover {
+            transform: translateY(-1px);
+            border-color: rgba(15, 92, 99, 0.22);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .action-link span {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .note-card {
+            padding: 18px;
+            border-radius: 22px;
+            background: linear-gradient(135deg, rgba(242, 184, 75, 0.18), rgba(255, 255, 255, 0.92));
+            border: 1px solid rgba(242, 184, 75, 0.28);
+            color: #734800;
+            line-height: 1.7;
+        }
+
+        .note-card strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.98rem;
+            color: #734800;
+        }
+
+        @keyframes pulseDot {
+            0% {
+                box-shadow: 0 0 0 0 rgba(242, 184, 75, 0.52);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(242, 184, 75, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(242, 184, 75, 0);
+            }
+        }
+
+        @media (max-width: 980px) {
+            .hero-grid,
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-copy h1 {
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 720px) {
             body {
                 padding-top: 52px;
+            }
+
+            .success-shell {
+                width: min(calc(100% - 24px), var(--page-width));
+                padding: 18px 0 36px;
+            }
+
+            .panel,
+            .info-card,
+            .order-card {
+                border-radius: 24px;
+            }
+
+            .hero-highlight,
+            .metric-grid,
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .order-card header,
+            .section-heading {
+                flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
     <div class="mobile-global-header-placeholder"></div>
-    <div class="page">
-        <section class="success-hero card">
-            <div class="icon"><i class="fas fa-check"></i></div>
-            <h1>Order Confirmed</h1>
-            <p>Thanks for choosing XIDLZ</p>
-            <div class="order-chip">
-                <span class="label">Order ID</span>
-                <span class="value" id="orderNumber">Loading...</span>
-                <button type="button" id="copyOrderIdBtn"><i class="fa-regular fa-clone"></i> Copy</button>
-            </div>
+
+    <main class="success-shell">
+        <section class="hero-grid">
+            <section class="panel hero-copy">
+                <div class="eyebrow">
+                    <span class="eyebrow-dot"></span>
+                    XIDLZ custom frame order confirmed
+                </div>
+                <h1 id="heroHeading">Your order is officially in.</h1>
+                <p class="hero-lead" id="heroSubcopy">We captured your payment and secured your order. The next steps below show exactly what happens from here.</p>
+
+                <div class="hero-highlight">
+                    <div class="hero-stat">
+                        <span>Payment</span>
+                        <strong>Paid and secured</strong>
+                    </div>
+                    <div class="hero-stat">
+                        <span>Total</span>
+                        <strong id="totalAmountHero">Loading...</strong>
+                    </div>
+                </div>
+
+                <div class="hero-actions">
+                    <a id="primaryActionBtn" class="btn btn-primary" href="my-orders.html">
+                        <i class="fas fa-box-open"></i>
+                        My Orders
+                    </a>
+                    <a class="btn btn-secondary" href="index.html">
+                        <i class="fas fa-arrow-left"></i>
+                        Continue Shopping
+                    </a>
+                </div>
+            </section>
+
+            <aside class="panel order-card">
+                <header>
+                    <div>
+                        <div class="card-kicker">Order token</div>
+                        <h2>Keep this ID handy</h2>
+                    </div>
+                    <div class="status-pill">
+                        <i class="fas fa-circle-check"></i>
+                        <span id="checkoutType">Signed-in checkout</span>
+                    </div>
+                </header>
+
+                <div class="order-token">
+                    <div class="order-token-top">
+                        <span class="order-token-label">Order ID</span>
+                        <button type="button" class="copy-btn" id="copyOrderIdBtn">
+                            <i class="fa-regular fa-clone"></i>
+                            Copy
+                        </button>
+                    </div>
+                    <strong id="orderNumber">Loading...</strong>
+                    <p class="token-caption">Use this order ID anywhere you need support, status tracking, or account lookup later.</p>
+                </div>
+
+                <div class="metric-grid">
+                    <div class="metric-card">
+                        <span>Status</span>
+                        <strong id="queueStatus">Paid and queued</strong>
+                        <small id="queueStatusNote">We have your payment and your custom frame details.</small>
+                    </div>
+                    <div class="metric-card">
+                        <span>Confirmation date</span>
+                        <strong id="orderDateHero">Loading...</strong>
+                        <small>This is the date your confirmation was generated.</small>
+                    </div>
+                </div>
+
+                <div class="progress-grid">
+                    <div class="progress-card active">
+                        <div class="progress-icon"><i class="fas fa-credit-card"></i></div>
+                        <div class="progress-copy">
+                            <strong>Payment received</strong>
+                            <span>Your payment cleared and this order is secured in our system.</span>
+                        </div>
+                    </div>
+                    <div class="progress-card">
+                        <div class="progress-icon"><i class="fas fa-image"></i></div>
+                        <div class="progress-copy">
+                            <strong>Artwork and framing review</strong>
+                            <span>Your selected photos, frame style, and finish details move into preparation next.</span>
+                        </div>
+                    </div>
+                    <div class="progress-card">
+                        <div class="progress-icon"><i class="fas fa-truck"></i></div>
+                        <div class="progress-copy">
+                            <strong>Shipping updates later</strong>
+                            <span>As soon as your order moves forward, the latest status will appear in tracking.</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
         </section>
 
-        <section class="card section">
-            <div class="summary">
-                <div class="row">
-                    <span class="label">Customer</span>
-                    <span class="value" id="customerName">Loading...</span>
-                </div>
-                <div class="row">
-                    <span class="label">Email</span>
-                    <span class="value" id="customerEmail">Loading...</span>
-                </div>
-                <div class="row">
-                    <span class="label">Payment</span>
-                    <span class="value" style="color: var(--accent);"><i class="fas fa-check-circle"></i> Paid</span>
-                </div>
-                <div class="row">
-                    <span class="label">Total</span>
-                    <span class="value amount" id="totalAmount">Loading...</span>
-                </div>
-                <div class="row">
-                    <span class="label">Date</span>
-                    <span class="value" id="orderDate">Loading...</span>
-                </div>
+        <section class="content-grid">
+            <div class="card-stack">
+                <section class="panel info-card">
+                    <div class="section-heading">
+                        <div>
+                            <div class="card-kicker">Order snapshot</div>
+                            <h2>Your confirmation details</h2>
+                        </div>
+                        <p>A clean summary of the essentials you are most likely to need after checkout.</p>
+                    </div>
+                    <div class="detail-grid">
+                        <div class="detail-card">
+                            <span class="detail-label">Customer name</span>
+                            <span class="detail-value" id="customerName">Loading...</span>
+                        </div>
+                        <div class="detail-card">
+                            <span class="detail-label">Email</span>
+                            <span class="detail-value" id="customerEmail">Loading...</span>
+                        </div>
+                        <div class="detail-card">
+                            <span class="detail-label">Total paid</span>
+                            <span class="detail-value" id="totalAmount">Loading...</span>
+                        </div>
+                        <div class="detail-card">
+                            <span class="detail-label">Date</span>
+                            <span class="detail-value" id="orderDate">Loading...</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel info-card">
+                    <div class="section-heading">
+                        <div>
+                            <div class="card-kicker">What happens next</div>
+                            <h2>The next few stages</h2>
+                        </div>
+                        <p>This is the rough order journey after confirmation, so the page feels useful and not just celebratory.</p>
+                    </div>
+                    <div class="timeline-list">
+                        <div class="timeline-item">
+                            <div class="timeline-icon"><i class="fas fa-envelope-open-text"></i></div>
+                            <div class="timeline-copy">
+                                <strong>Confirmation is now live</strong>
+                                <p>Your order number is active, and this confirmation page is your first handoff from checkout to fulfilment.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-icon"><i class="fas fa-sliders"></i></div>
+                            <div class="timeline-copy">
+                                <strong>Artwork and custom details are reviewed</strong>
+                                <p>Your uploaded photos and frame selections are prepared for the next production stage before printing and assembly.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-icon"><i class="fas fa-box"></i></div>
+                            <div class="timeline-copy">
+                                <strong>Production and packaging follow</strong>
+                                <p>Once your order progresses, the status trail continues through production, shipment, and final delivery updates.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
+
+            <aside class="sidebar-stack">
+                <section class="panel info-card">
+                    <div class="section-heading">
+                        <div>
+                            <div class="card-kicker">Why this page matters</div>
+                            <h2>Useful after checkout</h2>
+                        </div>
+                    </div>
+                    <div class="bullet-list">
+                        <div class="bullet-item">
+                            <i class="fas fa-id-card"></i>
+                            <div>
+                                <strong>Order ID is front and center</strong>
+                                <span>That keeps the page practical for follow-up support and future tracking.</span>
+                            </div>
+                        </div>
+                        <div class="bullet-item">
+                            <i class="fas fa-bell"></i>
+                            <div>
+                                <strong>Status updates continue later</strong>
+                                <span>Use your order tools anytime instead of wondering where the order moved next.</span>
+                            </div>
+                        </div>
+                        <div class="bullet-item">
+                            <i class="fas fa-shield-heart"></i>
+                            <div>
+                                <strong>Payment is already secured</strong>
+                                <span>This page exists after a successful order save, not as a vague halfway state.</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel info-card">
+                    <div class="section-heading">
+                        <div>
+                            <div class="card-kicker">Quick actions</div>
+                            <h2>Where to go next</h2>
+                        </div>
+                    </div>
+                    <div class="quick-actions">
+                        <a class="action-link" id="secondaryPrimaryAction" href="my-orders.html">
+                            <span><i class="fas fa-box-open"></i> Open order tools</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                        <a class="action-link" href="faq.html">
+                            <span><i class="fas fa-circle-question"></i> Read delivery and support FAQs</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                        <a class="action-link" href="index.html">
+                            <span><i class="fas fa-store"></i> Return to the storefront</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </section>
+
+                <section class="note-card" id="guestHintCard">
+                    <strong>Tracking note</strong>
+                    <span id="guestHint">You can use your account order history for updates, payment records, and future shipment changes.</span>
+                </section>
+            </aside>
         </section>
-
-        <section class="card info">
-            <h3><i class="fas fa-info-circle"></i> What happens next?</h3>
-            <ul>
-                <li><i class="fas fa-envelope"></i> You’ll receive a confirmation email shortly</li>
-                <li><i class="fas fa-cog"></i> Your photos will be professionally processed</li>
-                <li><i class="fas fa-print"></i> High-quality prints will be created and framed</li>
-                <li><i class="fas fa-truck"></i> Your order will be carefully packaged and shipped</li>
-                <li><i class="fas fa-bell"></i> Track your order status anytime with your order number</li>
-            </ul>
-        </section>
-
-        <div class="spacer" aria-hidden="true"></div>
-
-        <div class="sticky-actions">
-            <div class="bar">
-                <a href="my-orders.html" class="btn btn-primary"><i class="fas fa-list"></i> My Orders</a>
-                <a href="index.html" class="btn btn-secondary"><i class="fas fa-home"></i> Home</a>
-            </div>
-        </div>
-    </div>
+    </main>
 
     <script src="global-header.js"></script>
     <script>
+        function getOrderDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            return {
+                orderNumber: urlParams.get('order') || sessionStorage.getItem('lastOrderNumber') || '',
+                customerName: urlParams.get('name') || sessionStorage.getItem('lastCustomerName') || 'Valued Customer',
+                customerEmail: urlParams.get('email') || sessionStorage.getItem('lastCustomerEmail') || '',
+                totalAmount: urlParams.get('amount') || sessionStorage.getItem('lastOrderAmount') || '299',
+                isGuest: urlParams.get('guest') === 'true' || !sessionStorage.getItem('user')
+            };
+        }
+
+        function generateFallbackOrderNumber() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const date = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const suffix = Math.floor(1000 + Math.random() * 9000).toString();
+
+            return `JB${year}${month}${date}${hours}${minutes}${seconds}${suffix}`;
+        }
+
+        function formatCurrency(amount) {
+            const numericAmount = Number(String(amount ?? '').replace(/[^0-9.]/g, ''));
+
+            if (Number.isFinite(numericAmount) && numericAmount > 0) {
+                return new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    maximumFractionDigits: 0
+                }).format(numericAmount);
+            }
+
+            return '₹299';
+        }
+
+        function getMeaningfulFirstName(name) {
+            const trimmed = (name || '').trim();
+
+            if (!trimmed || /guest customer|valued customer/i.test(trimmed)) {
+                return '';
+            }
+
+            return trimmed.split(/\s+/)[0];
+        }
+
+        function setActionTargets(details, orderId) {
+            const primaryActionBtn = document.getElementById('primaryActionBtn');
+            const secondaryPrimaryAction = document.getElementById('secondaryPrimaryAction');
+            const guestHint = document.getElementById('guestHint');
+            const checkoutType = document.getElementById('checkoutType');
+            const queueStatus = document.getElementById('queueStatus');
+            const queueStatusNote = document.getElementById('queueStatusNote');
+            const encodedOrder = encodeURIComponent(orderId);
+            const encodedEmail = encodeURIComponent(details.customerEmail || '');
+
+            if (details.isGuest) {
+                const guestTrackingHref = `track-order.html?order=${encodedOrder}&email=${encodedEmail}`;
+
+                if (primaryActionBtn) {
+                    primaryActionBtn.href = guestTrackingHref;
+                    primaryActionBtn.innerHTML = '<i class="fas fa-location-dot"></i> Track Order';
+                }
+
+                if (secondaryPrimaryAction) {
+                    secondaryPrimaryAction.href = guestTrackingHref;
+                    secondaryPrimaryAction.innerHTML = '<span><i class="fas fa-location-dot"></i> Open Track Order</span><i class="fas fa-arrow-right"></i>';
+                }
+
+                if (guestHint) {
+                    guestHint.textContent = 'Guest checkout detected. Keep your order ID and email ready so you can use Track Order anytime.';
+                }
+
+                if (checkoutType) {
+                    checkoutType.textContent = 'Guest checkout';
+                }
+
+                if (queueStatus) {
+                    queueStatus.textContent = 'Guest order saved';
+                }
+
+                if (queueStatusNote) {
+                    queueStatusNote.textContent = 'Use your order ID plus email when you want to check status later.';
+                }
+
+                return;
+            }
+
+            if (primaryActionBtn) {
+                primaryActionBtn.href = 'my-orders.html';
+                primaryActionBtn.innerHTML = '<i class="fas fa-box-open"></i> My Orders';
+            }
+
+            if (secondaryPrimaryAction) {
+                secondaryPrimaryAction.href = 'my-orders.html';
+                secondaryPrimaryAction.innerHTML = '<span><i class="fas fa-box-open"></i> Open My Orders</span><i class="fas fa-arrow-right"></i>';
+            }
+
+            if (guestHint) {
+                guestHint.textContent = 'Signed-in checkout detected. You can use My Orders to review status, payment records, and future shipment updates.';
+            }
+
+            if (checkoutType) {
+                checkoutType.textContent = 'Signed-in checkout';
+            }
+
+            if (queueStatus) {
+                queueStatus.textContent = 'Account order saved';
+            }
+
+            if (queueStatusNote) {
+                queueStatusNote.textContent = 'Your account will reflect the latest order status as it moves forward.';
+            }
+        }
+
+        function wireCopyButton(orderId) {
+            const copyBtn = document.getElementById('copyOrderIdBtn');
+
+            if (!copyBtn) {
+                return;
+            }
+
+            copyBtn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(orderId);
+                } catch (error) {
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = orderId;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                }
+
+                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied';
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<i class="fa-regular fa-clone"></i> Copy';
+                }, 1300);
+            });
+        }
+
+        function populateOrderDetails() {
+            const details = getOrderDetails();
+            const orderId = details.orderNumber || generateFallbackOrderNumber();
+            const formattedAmount = formatCurrency(details.totalAmount);
+            const formattedDate = new Date().toLocaleDateString('en-IN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            const firstName = getMeaningfulFirstName(details.customerName);
+            const heroHeading = firstName
+                ? `Its official, ${firstName}.`
+                : 'Your order is officially in.';
+            const heroSubcopy = details.isGuest
+                ? 'We captured your payment and secured your order. Keep your order ID and email handy for future tracking.'
+                : 'We captured your payment and secured your order. You can review the next updates from your account whenever you want.';
+
+            document.title = `Order Confirmed - ${orderId} | Xidlz`;
+            document.getElementById('heroHeading').textContent = heroHeading;
+            document.getElementById('heroSubcopy').textContent = heroSubcopy;
+            document.getElementById('orderNumber').textContent = orderId;
+            document.getElementById('customerName').textContent = details.customerName;
+            document.getElementById('customerEmail').textContent = details.customerEmail || 'Not provided';
+            document.getElementById('totalAmount').textContent = formattedAmount;
+            document.getElementById('totalAmountHero').textContent = formattedAmount;
+            document.getElementById('orderDate').textContent = formattedDate;
+            document.getElementById('orderDateHero').textContent = formattedDate;
+
+            setActionTargets(details, orderId);
+            wireCopyButton(orderId);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             if (window.innerWidth <= 768 && typeof GlobalWebsiteHeader !== 'undefined') {
                 const placeholder = document.querySelector('.mobile-global-header-placeholder');
+
                 if (placeholder) {
                     placeholder.id = 'global-header-container';
                     GlobalWebsiteHeader.init();
                 }
             }
-        });
 
-        // Get order details from URL parameters or sessionStorage
-        function getOrderDetails() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const orderNumber = urlParams.get('order') || sessionStorage.getItem('lastOrderNumber');
-            const customerName = urlParams.get('name') || sessionStorage.getItem('lastCustomerName') || 'Valued Customer';
-            const customerEmail = urlParams.get('email') || sessionStorage.getItem('lastCustomerEmail') || '';
-            const totalAmount = urlParams.get('amount') || sessionStorage.getItem('lastOrderAmount') || '299';
-            const isGuest = urlParams.get('guest') === 'true' || !sessionStorage.getItem('user');
-
-            return {
-                orderNumber,
-                customerName,
-                customerEmail,
-                totalAmount,
-                isGuest
-            };
-        }
-
-        // Populate order details
-        function populateOrderDetails() {
-            const details = getOrderDetails();
-            
-            // Generate fallback order number in yearmonthdatetimeseconds+phone format
-            const generateFallbackOrderNumber = (customerPhone = '') => {
-                const now = new Date();
-                const year = now.getFullYear();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const date = String(now.getDate()).padStart(2, '0');
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const seconds = String(now.getSeconds()).padStart(2, '0');
-                
-                // Extract last 4 digits of phone number, default to random if not available
-                let phoneLastFour = '0000';
-                if (customerPhone) {
-                    const digitsOnly = customerPhone.replace(/\D/g, '');
-                    if (digitsOnly.length >= 4) {
-                        phoneLastFour = digitsOnly.slice(-4);
-                    } else if (digitsOnly.length > 0) {
-                        phoneLastFour = digitsOnly.padStart(4, '0');
-                    }
-                } else {
-                    phoneLastFour = Math.floor(1000 + Math.random() * 9000).toString();
-                }
-                
-                return `JB${year}${month}${date}${hours}${minutes}${seconds}${phoneLastFour}`;
-            };
-            
-            // Update DOM elements
-            const orderId = details.orderNumber || generateFallbackOrderNumber(details.customerPhone);
-            document.getElementById('orderNumber').textContent = orderId;
-            document.getElementById('customerName').textContent = details.customerName;
-            document.getElementById('customerEmail').textContent = details.customerEmail || 'Not provided';
-            document.getElementById('totalAmount').textContent = '₹' + details.totalAmount;
-            document.getElementById('orderDate').textContent = new Date().toLocaleDateString('en-IN', {
-                year: 'numeric', month: 'long', day: 'numeric'
-            });
-
-            // Copy button wiring
-            const copyBtn = document.getElementById('copyOrderIdBtn');
-            if (copyBtn) {
-                copyBtn.addEventListener('click', async () => {
-                    try {
-                        await navigator.clipboard.writeText(orderId);
-                        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied';
-                        setTimeout(() => copyBtn.innerHTML = '<i class="fa-regular fa-clone"></i> Copy', 1200);
-                    } catch (e) {
-                        // Fallback
-                        const tmp = document.createElement('textarea');
-                        tmp.value = orderId; document.body.appendChild(tmp); tmp.select();
-                        document.execCommand('copy'); document.body.removeChild(tmp);
-                        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied';
-                        setTimeout(() => copyBtn.innerHTML = '<i class="fa-regular fa-clone"></i> Copy', 1200);
-                    }
-                });
-            }
-        }
-
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
             populateOrderDetails();
-            
-            // Clear temporary order data after displaying
+
             setTimeout(() => {
                 sessionStorage.removeItem('lastOrderNumber');
                 sessionStorage.removeItem('lastCustomerName');

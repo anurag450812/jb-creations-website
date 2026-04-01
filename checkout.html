@@ -1170,38 +1170,142 @@
         }
 
         .processing-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 6000; /* Above mobile sticky bar and dropdowns */
-            backdrop-filter: blur(5px);
+                position: fixed;
+                inset: 0;
+                display: none;
+                justify-content: center;
+                align-items: center;
+                padding: 24px;
+                z-index: 6000;
+                background:
+                    radial-gradient(circle at top left, rgba(255, 166, 43, 0.22), transparent 34%),
+                    radial-gradient(circle at bottom right, rgba(72, 159, 181, 0.22), transparent 36%),
+                    rgba(7, 24, 29, 0.82);
+                backdrop-filter: blur(16px);
         }
 
+            .processing-overlay::before,
+            .processing-overlay::after {
+                content: '';
+                position: absolute;
+                inset: auto;
+                width: 320px;
+                height: 320px;
+                border-radius: 50%;
+                filter: blur(36px);
+                pointer-events: none;
+                opacity: 0.48;
+            }
+
+            .processing-overlay::before {
+                top: 6%;
+                right: 8%;
+                background: rgba(255, 166, 43, 0.28);
+            }
+
+            .processing-overlay::after {
+                left: 6%;
+                bottom: 8%;
+                background: rgba(72, 159, 181, 0.24);
+            }
+
         .processing-content {
-            background: white;
-            padding: 50px;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 450px;
+                position: relative;
+                width: min(980px, 100%);
+                padding: 28px;
+                border-radius: 28px;
+                border: 1px solid rgba(255, 255, 255, 0.24);
+                background: linear-gradient(140deg, rgba(255, 255, 255, 0.96), rgba(237, 231, 227, 0.94) 52%, rgba(255, 248, 241, 0.92));
             box-shadow: var(--shadow-heavy);
-            border: 1px solid var(--border-color);
+                overflow: hidden;
+            }
+
+            .processing-content::before,
+            .processing-content::after {
+                content: '';
+                position: absolute;
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            .processing-content::before {
+                top: -140px;
+                right: -90px;
+                width: 320px;
+                height: 320px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(255, 166, 43, 0.22) 0%, rgba(255, 166, 43, 0) 72%);
+            }
+
+            .processing-content::after {
+                left: -120px;
+                bottom: -180px;
+                width: 360px;
+                height: 360px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(72, 159, 181, 0.14) 0%, rgba(72, 159, 181, 0) 74%);
         }
 
         .processing-spinner {
-            font-size: 60px;
-            color: var(--primary-color);
-            margin-bottom: 25px;
+                position: relative;
+                width: 210px;
+                height: 210px;
+                display: grid;
+                place-items: center;
+                margin: 0 auto;
         }
 
-        .processing-spinner i {
-            display: inline-block;
-            animation: spin 1s linear infinite;
+            .processing-orbit {
+                position: absolute;
+                inset: 0;
+                border-radius: 50%;
+                border: 1px solid rgba(22, 105, 122, 0.18);
+                color: rgba(22, 105, 122, 0.8);
+                animation: processingOrbit 12s linear infinite;
+            }
+
+            .processing-orbit::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                right: -6px;
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: currentColor;
+                transform: translateY(-50%);
+                box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.35);
+            }
+
+            .processing-orbit.orbit-two {
+                inset: 16px;
+                border-style: dashed;
+                color: rgba(72, 159, 181, 0.88);
+                border-color: rgba(72, 159, 181, 0.24);
+                animation-direction: reverse;
+                animation-duration: 10s;
+            }
+
+            .processing-orbit.orbit-three {
+                inset: 38px;
+                color: rgba(255, 166, 43, 0.92);
+                border-color: rgba(255, 166, 43, 0.28);
+                animation-duration: 8s;
+            }
+
+            .processing-spinner-core {
+                width: 112px;
+                height: 112px;
+                border-radius: 30px;
+                display: grid;
+                place-items: center;
+                background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+                color: white;
+                box-shadow: 0 18px 34px rgba(22, 105, 122, 0.28);
+            }
+
+            .processing-spinner-core i {
+                font-size: 40px;
         }
 
         /* Loading dots animation */
@@ -1218,30 +1322,247 @@
         }
 
         .processing-content h3 {
-            margin-bottom: 15px;
-            color: var(--text-color);
-            font-size: 24px;
+            margin: 0;
+            color: #0f3f49;
+            font-size: clamp(2rem, 4vw, 3.1rem);
+            line-height: 1.02;
+            letter-spacing: -0.03em;
+            font-weight: 800;
         }
 
-        .processing-content p {
+        .processing-layout {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+            gap: 22px;
+            align-items: stretch;
+        }
+
+        .processing-hero {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .processing-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            width: fit-content;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(22, 105, 122, 0.08);
+            color: var(--primary-color);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .processing-badge.success-badge {
+            background: rgba(255, 166, 43, 0.15);
+            color: #8a4b00;
+        }
+
+        .processing-live-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--highlight-color);
+            box-shadow: 0 0 0 0 rgba(255, 166, 43, 0.58);
+            animation: processingPing 1.8s infinite;
+        }
+
+        .processing-overline {
+            max-width: 34ch;
+            color: rgba(22, 105, 122, 0.78);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .processing-visual {
+            display: grid;
+            grid-template-columns: 220px minmax(0, 1fr);
+            gap: 18px;
+            align-items: center;
+        }
+
+        .processing-pulse-card {
+            padding: 18px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(22, 105, 122, 0.14);
+            box-shadow: 0 18px 36px rgba(15, 63, 73, 0.09);
+            display: grid;
+            gap: 10px;
+            animation: processingFloat 5s ease-in-out infinite;
+        }
+
+        .processing-pulse-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(22, 105, 122, 0.54);
+            font-weight: 800;
+        }
+
+        .processing-pulse-card strong {
+            color: #0f3f49;
+            font-size: 1.08rem;
+            line-height: 1.4;
+        }
+
+        .processing-pulse-card p {
             color: rgba(22, 105, 122, 0.7);
-            font-size: 16px;
+            font-size: 14px;
+            line-height: 1.6;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .processing-panel {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 22px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(22, 105, 122, 0.12);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
         }
 
-        /* Success Checkmark Animation */
+        .processing-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .processing-panel-header span {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(22, 105, 122, 0.56);
+            font-weight: 800;
+        }
+
+        .processing-panel-header strong {
+            color: #0f3f49;
+            font-size: 1rem;
+            line-height: 1.4;
+            max-width: 18ch;
+            text-align: right;
+        }
+
+        .processing-steps {
+            display: grid;
+            gap: 12px;
+        }
+
+        .processing-step {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 14px 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(22, 105, 122, 0.12);
+            transition: var(--transition-smooth);
+        }
+
+        .processing-step-index {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: rgba(22, 105, 122, 0.08);
+            color: var(--primary-color);
+            font-size: 0.95rem;
+            font-weight: 800;
+        }
+
+        .processing-step-copy strong {
+            display: block;
+            color: #0f3f49;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .processing-step-copy span {
+            display: block;
+            color: rgba(22, 105, 122, 0.72);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .processing-step.is-active {
+            transform: translateX(4px);
+            border-color: rgba(72, 159, 181, 0.32);
+            background: linear-gradient(135deg, rgba(72, 159, 181, 0.12), rgba(255, 255, 255, 0.92));
+            box-shadow: 0 16px 30px rgba(22, 105, 122, 0.12);
+        }
+
+        .processing-step.is-active .processing-step-index {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            box-shadow: 0 12px 22px rgba(22, 105, 122, 0.22);
+        }
+
+        .processing-step.is-complete {
+            background: rgba(22, 105, 122, 0.06);
+            border-color: rgba(22, 105, 122, 0.16);
+        }
+
+        .processing-step.is-complete .processing-step-index {
+            background: rgba(255, 166, 43, 0.18);
+            color: #8a4b00;
+        }
+
+        .processing-trust-row {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .processing-trust-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: rgba(15, 63, 73, 0.04);
+            border: 1px solid rgba(22, 105, 122, 0.1);
+            color: #0f3f49;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
         .success-state {
             text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .processing-success-layout {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            padding: 8px 0 4px;
         }
 
         .success-checkmark {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 25px;
+            width: 128px;
+            height: 128px;
+            margin: 0 auto;
+            padding: 10px;
+            border-radius: 999px;
+            background: radial-gradient(circle at top, rgba(255, 166, 43, 0.24), rgba(255, 255, 255, 0.92) 60%);
+            box-shadow: 0 20px 40px rgba(22, 105, 122, 0.16);
         }
 
         .checkmark {
@@ -1250,7 +1571,7 @@
             border-radius: 50%;
             display: block;
             stroke-width: 2;
-            stroke: #28a745;
+            stroke: var(--primary-color);
             stroke-miterlimit: 10;
             animation: fill 0.4s ease-in-out 0.4s forwards, scale 0.3s ease-in-out 0.9s both;
         }
@@ -1260,7 +1581,7 @@
             stroke-dashoffset: 166;
             stroke-width: 2;
             stroke-miterlimit: 10;
-            stroke: #28a745;
+            stroke: var(--primary-color);
             fill: none;
             animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
         }
@@ -1289,19 +1610,206 @@
 
         @keyframes fill {
             100% {
-                box-shadow: inset 0px 0px 0px 50px rgba(40, 167, 69, 0.1);
+                box-shadow: inset 0px 0px 0px 50px rgba(22, 105, 122, 0.08);
             }
         }
 
         .success-state h3 {
-            color: #28a745;
-            margin-bottom: 15px;
-            font-size: 24px;
+            margin: 0;
+            color: #0f3f49;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.04;
+            letter-spacing: -0.03em;
         }
 
         .success-state p {
-            color: rgba(22, 105, 122, 0.7);
+            margin: 0;
+            color: rgba(22, 105, 122, 0.72);
             font-size: 16px;
+            line-height: 1.7;
+            max-width: 38ch;
+        }
+
+        .processing-success-summary {
+            width: 100%;
+            max-width: 640px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .processing-summary-pill {
+            text-align: left;
+            padding: 16px 18px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(237, 231, 227, 0.88));
+            border: 1px solid rgba(22, 105, 122, 0.12);
+            box-shadow: 0 12px 24px rgba(15, 63, 73, 0.08);
+        }
+
+        .processing-summary-pill span {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(22, 105, 122, 0.56);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .processing-summary-pill strong {
+            display: block;
+            color: #0f3f49;
+            font-size: 1.05rem;
+            word-break: break-word;
+        }
+
+        .processing-success-timeline {
+            width: 100%;
+            max-width: 760px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .processing-success-step {
+            padding: 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(22, 105, 122, 0.12);
+        }
+
+        .processing-success-step i {
+            width: 44px;
+            height: 44px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 12px;
+            border-radius: 14px;
+            background: rgba(72, 159, 181, 0.12);
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+
+        .processing-success-step strong {
+            display: block;
+            margin-bottom: 6px;
+            color: #0f3f49;
+            font-size: 14px;
+        }
+
+        .processing-success-step span {
+            display: block;
+            color: rgba(22, 105, 122, 0.7);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .processing-success-note {
+            color: rgba(22, 105, 122, 0.56);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        @keyframes processingOrbit {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes processingPing {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 166, 43, 0.58);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 166, 43, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 166, 43, 0);
+            }
+        }
+
+        @keyframes processingFloat {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-6px);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .processing-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .processing-visual {
+                grid-template-columns: 1fr;
+            }
+
+            .processing-spinner {
+                width: 184px;
+                height: 184px;
+            }
+
+            .processing-panel-header {
+                flex-direction: column;
+            }
+
+            .processing-panel-header strong {
+                max-width: none;
+                text-align: left;
+            }
+
+            .processing-success-summary,
+            .processing-success-timeline {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .processing-overlay {
+                padding: 16px;
+            }
+
+            .processing-content {
+                padding: 18px;
+                border-radius: 24px;
+            }
+
+            .processing-content h3,
+            .success-state h3 {
+                font-size: 1.95rem;
+            }
+
+            .processing-overline {
+                font-size: 14px;
+            }
+
+            .processing-pulse-card,
+            .processing-panel,
+            .processing-summary-pill,
+            .processing-success-step {
+                border-radius: 20px;
+            }
+
+            .processing-trust-row {
+                grid-template-columns: 1fr;
+            }
+
+            .processing-step {
+                grid-template-columns: 1fr;
+            }
+
+            .processing-step-index {
+                width: 36px;
+                height: 36px;
+            }
         }
 
         /* Guest Checkout Styles */
@@ -2837,26 +3345,121 @@
     </div>
 
     <!-- Processing Overlay -->
-    <div class="processing-overlay" id="processingOverlay">
+    <div class="processing-overlay" id="processingOverlay" role="status" aria-live="polite" aria-hidden="true" aria-busy="false">
         <div class="processing-content">
             <!-- Processing State -->
             <div class="processing-state" id="processingState">
-                <div class="processing-spinner">
-                    <i class="fas fa-spinner"></i>
+                <div class="processing-layout">
+                    <div class="processing-hero">
+                        <div class="processing-badge" id="processingEyebrow">
+                            <span class="processing-live-dot"></span>
+                            Secure checkout in motion
+                        </div>
+                        <div class="processing-headline">
+                            <h3 id="processingTitle">Preparing Secure Checkout<span class="loading-dots"></span></h3>
+                            <p class="processing-overline" id="processingSubtitle">We are reviewing your details before we move you into payment and final confirmation.</p>
+                        </div>
+                        <div class="processing-visual">
+                            <div class="processing-spinner" aria-hidden="true">
+                                <span class="processing-orbit orbit-one"></span>
+                                <span class="processing-orbit orbit-two"></span>
+                                <span class="processing-orbit orbit-three"></span>
+                                <div class="processing-spinner-core">
+                                    <i class="fas fa-receipt"></i>
+                                </div>
+                            </div>
+                            <div class="processing-pulse-card">
+                                <span class="processing-pulse-label">Live update</span>
+                                <strong id="processingPulseTitle">Checking frame selections and delivery details</strong>
+                                <p>We’ll move you to your confirmation page as soon as the order is safely stored.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="processing-panel">
+                        <div class="processing-panel-header">
+                            <span>Order pipeline</span>
+                            <strong>Please keep this screen open for a few seconds</strong>
+                        </div>
+                        <div class="processing-steps" id="processingSteps">
+                            <div class="processing-step is-active" data-step="0">
+                                <div class="processing-step-index">01</div>
+                                <div class="processing-step-copy">
+                                    <strong>Checkout review</strong>
+                                    <span>Verifying your delivery info, frame choices, and artwork preferences.</span>
+                                </div>
+                            </div>
+                            <div class="processing-step" data-step="1">
+                                <div class="processing-step-index">02</div>
+                                <div class="processing-step-copy">
+                                    <strong>Order sync</strong>
+                                    <span>Saving payment details and your custom order configuration securely.</span>
+                                </div>
+                            </div>
+                            <div class="processing-step" data-step="2">
+                                <div class="processing-step-index">03</div>
+                                <div class="processing-step-copy">
+                                    <strong>Confirmation ready</strong>
+                                    <span>Generating your order number and preparing your next-step view.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="processing-trust-row">
+                            <div class="processing-trust-pill">
+                                <i class="fas fa-lock"></i>
+                                <span>Encrypted payment flow</span>
+                            </div>
+                            <div class="processing-trust-pill">
+                                <i class="fas fa-cloud"></i>
+                                <span>Secure order sync</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <h3>Processing Your Order<span class="loading-dots"></span></h3>
-                <p>Please wait while we prepare your order details.</p>
             </div>
             <!-- Success State -->
             <div class="success-state" id="successState" style="display: none;">
-                <div class="success-checkmark">
-                    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                        <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
-                        <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-                    </svg>
+                <div class="processing-success-layout">
+                    <div class="success-checkmark">
+                        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                            <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                            <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                        </svg>
+                    </div>
+                    <div class="processing-badge success-badge">
+                        <span class="processing-live-dot"></span>
+                        Order locked in
+                    </div>
+                    <h3>Order Confirmed</h3>
+                    <p id="processingSuccessMessage">Your custom order is secured and your confirmation page is ready.</p>
+                    <div class="processing-success-summary">
+                        <div class="processing-summary-pill">
+                            <span>Order ID</span>
+                            <strong id="processingSuccessOrder">Generating...</strong>
+                        </div>
+                        <div class="processing-summary-pill">
+                            <span>Total</span>
+                            <strong id="processingSuccessTotal">Updating...</strong>
+                        </div>
+                    </div>
+                    <div class="processing-success-timeline">
+                        <div class="processing-success-step">
+                            <i class="fas fa-credit-card"></i>
+                            <strong>Payment secured</strong>
+                            <span>Your payment is verified and attached to this order.</span>
+                        </div>
+                        <div class="processing-success-step">
+                            <i class="fas fa-image"></i>
+                            <strong>Artwork queued</strong>
+                            <span>Your custom frame details are ready for the next production step.</span>
+                        </div>
+                        <div class="processing-success-step">
+                            <i class="fas fa-arrow-right"></i>
+                            <strong>Next view loading</strong>
+                            <span>We’re taking you to the detailed confirmation page now.</span>
+                        </div>
+                    </div>
+                    <p class="processing-success-note">Redirecting you to your order details...</p>
                 </div>
-                <h3>Order Confirmed!</h3>
-                <p>Redirecting you to order details...</p>
             </div>
         </div>
     </div>

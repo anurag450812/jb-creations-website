@@ -2521,15 +2521,155 @@ async function submitOrder(orderData) {
     }
 }
 
-// Show success animation in processing overlay
-function showOrderSuccessAnimation() {
+const PROCESSING_OVERLAY_STAGES = [
+    {
+        eyebrow: 'Secure checkout in motion',
+        title: 'Preparing Secure Checkout',
+        subtitle: 'We are reviewing your details before we move you into payment and final confirmation.',
+        pulse: 'Checking frame selections and delivery details',
+        activeStep: 0
+    },
+    {
+        eyebrow: 'Payment approved',
+        title: 'Saving Your Custom Order',
+        subtitle: 'We are syncing your artwork, payment confirmation, and delivery preferences securely.',
+        pulse: 'Creating a secure order record',
+        activeStep: 1
+    },
+    {
+        eyebrow: 'Almost there',
+        title: 'Preparing Your Confirmation',
+        subtitle: 'We are reserving your order number and getting your next steps ready.',
+        pulse: 'Building your confirmation experience',
+        activeStep: 2
+    }
+];
+
+let processingOverlayTimer = null;
+
+function setProcessingOverlayStage(stageIndex = 0) {
+    const stage = PROCESSING_OVERLAY_STAGES[Math.min(Math.max(stageIndex, 0), PROCESSING_OVERLAY_STAGES.length - 1)];
+    const eyebrow = document.getElementById('processingEyebrow');
+    const title = document.getElementById('processingTitle');
+    const subtitle = document.getElementById('processingSubtitle');
+    const pulseTitle = document.getElementById('processingPulseTitle');
+    const steps = document.querySelectorAll('#processingSteps .processing-step');
+
+    if (eyebrow) {
+        eyebrow.innerHTML = `<span class="processing-live-dot"></span>${stage.eyebrow}`;
+    }
+
+    if (title) {
+        title.innerHTML = `${stage.title}<span class="loading-dots"></span>`;
+    }
+
+    if (subtitle) {
+        subtitle.textContent = stage.subtitle;
+    }
+
+    if (pulseTitle) {
+        pulseTitle.textContent = stage.pulse;
+    }
+
+    steps.forEach((step, index) => {
+        step.classList.toggle('is-active', index === stage.activeStep);
+        step.classList.toggle('is-complete', index < stage.activeStep);
+    });
+}
+
+function stopProcessingOverlaySequence() {
+    if (processingOverlayTimer) {
+        clearInterval(processingOverlayTimer);
+        processingOverlayTimer = null;
+    }
+}
+
+function startProcessingOverlaySequence(startIndex = 0) {
+    const overlay = document.getElementById('processingOverlay');
     const processingState = document.getElementById('processingState');
     const successState = document.getElementById('successState');
+
+    stopProcessingOverlaySequence();
+
+    if (!overlay || !processingState || !successState) {
+        return;
+    }
+
+    processingState.style.display = 'block';
+    successState.style.display = 'none';
+    overlay.style.display = 'flex';
+    overlay.setAttribute('aria-hidden', 'false');
+    overlay.setAttribute('aria-busy', 'true');
+
+    let currentStage = Math.min(Math.max(startIndex, 0), PROCESSING_OVERLAY_STAGES.length - 1);
+    setProcessingOverlayStage(currentStage);
+
+    if (currentStage >= PROCESSING_OVERLAY_STAGES.length - 1) {
+        return;
+    }
+
+    processingOverlayTimer = setInterval(() => {
+        currentStage = Math.min(currentStage + 1, PROCESSING_OVERLAY_STAGES.length - 1);
+        setProcessingOverlayStage(currentStage);
+
+        if (currentStage >= PROCESSING_OVERLAY_STAGES.length - 1) {
+            stopProcessingOverlaySequence();
+        }
+    }, 1800);
+}
+
+function formatProcessingOverlayAmount(amount) {
+    const numericAmount = Number(String(amount ?? '').replace(/[^0-9.]/g, ''));
+
+    if (Number.isFinite(numericAmount) && numericAmount > 0) {
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            maximumFractionDigits: 0
+        }).format(numericAmount);
+    }
+
+    return 'Payment secured';
+}
+
+// Show success animation in processing overlay
+function showOrderSuccessAnimation(orderData = null) {
+    const processingState = document.getElementById('processingState');
+    const successState = document.getElementById('successState');
+    const overlay = document.getElementById('processingOverlay');
+    const successOrder = document.getElementById('processingSuccessOrder');
+    const successTotal = document.getElementById('processingSuccessTotal');
+    const successMessage = document.getElementById('processingSuccessMessage');
+
+    stopProcessingOverlaySequence();
+
+    if (successOrder) {
+        successOrder.textContent = orderData?.orderNumber || 'Order ready';
+    }
+
+    if (successTotal) {
+        successTotal.textContent = formatProcessingOverlayAmount(orderData?.totals?.total);
+    }
+
+    if (successMessage) {
+        const customerName = orderData?.customer?.name?.trim();
+        const firstName = customerName && !/guest customer|valued customer/i.test(customerName)
+            ? customerName.split(/\s+/)[0]
+            : '';
+
+        successMessage.textContent = firstName
+            ? `${firstName}, your custom frame order is locked in and ready for the next step.`
+            : 'Your custom frame order is locked in and ready for the next step.';
+    }
     
     if (processingState && successState) {
         // Hide processing state, show success state
         processingState.style.display = 'none';
         successState.style.display = 'block';
+
+        if (overlay) {
+            overlay.setAttribute('aria-busy', 'false');
+        }
         
         console.log('✅ Showing order success animation');
     }
@@ -2539,13 +2679,21 @@ function showOrderSuccessAnimation() {
 function resetProcessingOverlay() {
     const processingState = document.getElementById('processingState');
     const successState = document.getElementById('successState');
+    const overlay = document.getElementById('processingOverlay');
+
+    stopProcessingOverlaySequence();
+    setProcessingOverlayStage(0);
     
     if (processingState && successState) {
         processingState.style.display = 'block';
         successState.style.display = 'none';
     }
     
-    document.getElementById('processingOverlay').style.display = 'none';
+    if (overlay) {
+        overlay.style.display = 'none';
+        overlay.setAttribute('aria-hidden', 'true');
+        overlay.setAttribute('aria-busy', 'false');
+    }
 }
 
 // Main order placement function
@@ -2603,7 +2751,7 @@ async function placeOrder() {
     const user = getCurrentUser();
     
     // Show processing overlay
-    document.getElementById('processingOverlay').style.display = 'flex';
+    startProcessingOverlaySequence(0);
     document.getElementById('placeOrderBtn').disabled = true;
     const mobileBtn = document.getElementById('mobilePlaceOrderBtn');
     if (mobileBtn) mobileBtn.disabled = true;
@@ -2634,7 +2782,7 @@ async function placeOrder() {
         
         if (paymentResult.success) {
             // Show processing overlay during order submission
-            document.getElementById('processingOverlay').style.display = 'flex';
+            startProcessingOverlaySequence(1);
             document.getElementById('placeOrderBtn').disabled = true;
             if (mobileBtn) mobileBtn.disabled = true;
             
@@ -2682,7 +2830,7 @@ async function placeOrder() {
                     sessionStorage.setItem('lastOrderAmount', orderData.totals?.total || '299');
                     
                     // Show success animation before redirecting
-                    showOrderSuccessAnimation();
+                    showOrderSuccessAnimation(orderData);
                     
                     shouldEnableButtons = false; // Don't enable buttons on success redirect
 
