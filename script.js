@@ -9,7 +9,7 @@
  */
 
 // VERSION CHECK - Update this to force cache refresh
-const SCRIPT_VERSION = '5.7-UPLOAD-RESET';
+const SCRIPT_VERSION = '5.8-MOBILE-BACK-FIX';
 
 const DEFAULT_IMAGE_ADJUSTMENTS = {
     brightness: 100,
@@ -127,7 +127,7 @@ function cloneDefaultStorefrontPricing() {
 }
 
 function getStorefrontVariantKey(size, orientation = 'portrait') {
-                navigateToMobilePage('livePreview', { updateHistory: false });
+    return `${String(size || '13x19').toLowerCase()}-${String(orientation || 'portrait').toLowerCase()}`;
 }
 
 function normalizeStorefrontPricing(pricing = {}) {
@@ -135,19 +135,7 @@ function normalizeStorefrontPricing(pricing = {}) {
 
     Object.keys(normalized).forEach(key => {
         const base = normalized[key];
-                openUploadResetModal().then((choice) => {
-                    if (choice === 'discard') {
-                        resetCustomizeExperienceForUpload();
-                        return;
-                    }
-
-                    if (choice === 'reupload') {
-                        resetCustomizeExperienceForUpload({ openUploader: true });
-                        return;
-                    }
-
-                    navigateToMobilePage('livePreview');
-                });
+        const incoming = pricing[key] || {};
         const price = Number(incoming.price);
         const mrp = Number(incoming.mrp);
 
@@ -535,6 +523,7 @@ document.addEventListener('DOMContentLoaded', function() {
 let currentMobilePage = 'upload'; // 'upload', 'livePreview', 'roomPreview'
 
 let uploadResetModalResolver = null;
+let shouldPromptForUploadReset = false;
 
 function closeMobileDropup() {
     const bottomBar = document.getElementById('mobileBottomBar') || document.querySelector('.mobile-bottom-bar');
@@ -565,6 +554,20 @@ function closeMobileDropup() {
         if (icon) {
             icon.className = 'fas fa-chevron-up';
         }
+    }
+}
+
+function syncMobileCustomizationVisibility() {
+    const bottomBar = document.getElementById('mobileBottomBar') || document.querySelector('.mobile-bottom-bar');
+    const mobileSection = document.getElementById('mobileCustomizationSection');
+    const shouldShow = window.innerWidth <= 768 && currentMobilePage === 'livePreview' && document.body.classList.contains('has-upload');
+
+    if (bottomBar) {
+        bottomBar.style.display = shouldShow ? '' : 'none';
+    }
+
+    if (mobileSection) {
+        mobileSection.style.display = shouldShow ? 'block' : 'none';
     }
 }
 
@@ -653,6 +656,7 @@ function clearLoadedCustomizationImage() {
     document.body.classList.remove('has-upload');
     document.body.classList.remove('room-preview-active');
     currentMobilePage = 'upload';
+    shouldPromptForUploadReset = false;
 
     syncAdjustmentInputsToState();
     resetCustomizePurchaseButtons();
@@ -671,6 +675,8 @@ function clearLoadedCustomizationImage() {
     if (window.updateMobileSeeRoomPreviewBtn) {
         window.updateMobileSeeRoomPreviewBtn();
     }
+
+    syncMobileCustomizationVisibility();
 }
 
 function resetCustomizeExperienceForUpload({ openUploader = false, replaceHistory = false } = {}) {
@@ -807,10 +813,6 @@ function navigateToMobilePage(page, options = {}) {
             if (mainContainer) {
                 mainContainer.style.display = 'grid';
             }
-            // Show bottom bar if we have an upload
-            if (bottomBar && document.body.classList.contains('has-upload')) {
-                bottomBar.style.display = '';
-            }
             currentMobilePage = 'livePreview';
             break;
             
@@ -825,6 +827,8 @@ function navigateToMobilePage(page, options = {}) {
     
     // Scroll to top
     window.scrollTo(0, 0);
+
+    syncMobileCustomizationVisibility();
     
     // Push history state for back button navigation
     if (updateHistory && window.innerWidth <= 768) {
@@ -858,7 +862,9 @@ window.addEventListener('popstate', function(event) {
             return;
         }
         
-        if (isLivePreviewVisible) {
+        const hasPromptableUpload = shouldPromptForUploadReset && !!state.image && document.body.classList.contains('has-upload');
+
+        if (isLivePreviewVisible && hasPromptableUpload) {
             // From Live Preview -> Go back to Upload
             openUploadResetModal().then((choice) => {
                 if (choice === 'discard') {
@@ -2333,30 +2339,36 @@ function processCompressedImage(imageDataURL) {
             state.image = imageDataURL;
             state.originalImage = imageDataURL;
             elements.previewImage.src = state.image;
-                elements.previewImage.onload = () => {
-                    // Enable add to cart button and mark container as having image
-                    elements.addToCartBtn.disabled = false;
-                    elements.imageContainer.classList.add('has-image');
-                    // Show mobile customization bar/drop-up
-                    document.body.classList.add('has-upload');
-                    if (typeof window.recomputeMobileBarHeight === 'function') {
-                        // wait a tick so layout applies display changes
-                        setTimeout(() => window.recomputeMobileBarHeight(), 50);
-                    }
-                    // Ensure mobile total price and button state update
-                    if (typeof updateMobileTotalPrice === 'function') {
-                        updateMobileTotalPrice();
-                    }
-                    
-                    // Update room preview button state
-                    if (window.updateRoomPreviewButtonState) {
-                        window.updateRoomPreviewButtonState();
-                    }
-                    
-                    // Update mobile See Room Preview button state
-                    if (window.updateMobileSeeRoomPreviewBtn) {
-                        window.updateMobileSeeRoomPreviewBtn();
-                    }                // Set default frame color to black if not set
+            elements.previewImage.onload = () => {
+                // Enable add to cart button and mark container as having image
+                elements.addToCartBtn.disabled = false;
+                elements.imageContainer.classList.add('has-image');
+
+                // Show mobile customization controls only after the uploaded image is fully ready.
+                document.body.classList.add('has-upload');
+                shouldPromptForUploadReset = window.innerWidth <= 768;
+                syncMobileCustomizationVisibility();
+
+                if (typeof window.recomputeMobileBarHeight === 'function') {
+                    setTimeout(() => window.recomputeMobileBarHeight(), 50);
+                }
+
+                // Ensure mobile total price and button state update
+                if (typeof updateMobileTotalPrice === 'function') {
+                    updateMobileTotalPrice();
+                }
+
+                // Update room preview button state
+                if (window.updateRoomPreviewButtonState) {
+                    window.updateRoomPreviewButtonState();
+                }
+
+                // Update mobile See Room Preview button state
+                if (window.updateMobileSeeRoomPreviewBtn) {
+                    window.updateMobileSeeRoomPreviewBtn();
+                }
+
+                // Set default frame color to black if not set
                 if (!state.frameColor) {
                     state.frameColor = 'black';
                 }
@@ -6753,6 +6765,7 @@ function restoreDesktopLivePreviewFromCart() {
     if (primaryAddToCartBtn) primaryAddToCartBtn.disabled = false;
 
     document.body.classList.add('has-upload');
+    syncMobileCustomizationVisibility();
 
     const sizeSelector = `.desktop-size-btn[data-size="${state.frameSize.size}"][data-orientation="${state.frameSize.orientation}"]`;
     document.querySelectorAll('.desktop-size-btn').forEach(btn => btn.classList.remove('selected'));
@@ -6881,6 +6894,7 @@ function checkReturnToRoomPreview() {
             
             // Mark that we have an upload
             document.body.classList.add('has-upload');
+            syncMobileCustomizationVisibility();
             
             // Now show the room preview page
             setTimeout(() => {
