@@ -1375,6 +1375,8 @@
                             mainUpload.dispatchEvent(changeEvent);
                         }
                     }
+
+                    e.target.value = '';
                 });
             }
 
@@ -2285,6 +2287,120 @@
             </div>
         </template>
 
+        <style>
+            .upload-reset-modal[hidden] {
+                display: none !important;
+            }
+
+            .upload-reset-modal {
+                position: fixed;
+                inset: 0;
+                z-index: 12000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                background: rgba(12, 19, 25, 0.52);
+                backdrop-filter: blur(6px);
+            }
+
+            .upload-reset-modal__dialog {
+                width: min(100%, 420px);
+                background: #ffffff;
+                border-radius: 24px;
+                padding: 28px 24px 24px;
+                box-shadow: 0 26px 80px rgba(0, 0, 0, 0.22);
+                position: relative;
+                text-align: left;
+            }
+
+            .upload-reset-modal__close {
+                position: absolute;
+                top: 16px;
+                right: 16px;
+                width: 38px;
+                height: 38px;
+                border: none;
+                border-radius: 50%;
+                background: #eef4f5;
+                color: #23424c;
+                font-size: 20px;
+                cursor: pointer;
+            }
+
+            .upload-reset-modal__eyebrow {
+                font-size: 12px;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: #489fb5;
+                font-weight: 700;
+                margin-bottom: 10px;
+            }
+
+            .upload-reset-modal__title {
+                margin: 0;
+                font-size: 28px;
+                line-height: 1.1;
+                color: #102a43;
+            }
+
+            .upload-reset-modal__body {
+                margin: 12px 0 0;
+                font-size: 15px;
+                line-height: 1.6;
+                color: #486581;
+            }
+
+            .upload-reset-modal__actions {
+                display: grid;
+                gap: 12px;
+                margin-top: 24px;
+            }
+
+            .upload-reset-modal__button {
+                width: 100%;
+                border: none;
+                border-radius: 14px;
+                padding: 15px 18px;
+                font-size: 15px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+            }
+
+            .upload-reset-modal__button:hover {
+                transform: translateY(-1px);
+            }
+
+            .upload-reset-modal__button--discard {
+                background: #edf2f7;
+                color: #243b53;
+            }
+
+            .upload-reset-modal__button--reupload {
+                background: linear-gradient(135deg, #16697a, #489fb5);
+                color: #ffffff;
+                box-shadow: 0 14px 32px rgba(22, 105, 122, 0.24);
+            }
+
+            body.upload-reset-modal-open {
+                overflow: hidden;
+            }
+        </style>
+
+        <div class="upload-reset-modal" id="uploadResetModal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="uploadResetModalTitle">
+            <div class="upload-reset-modal__dialog">
+                <button type="button" class="upload-reset-modal__close" id="uploadResetModalClose" aria-label="Close reset options">&times;</button>
+                <div class="upload-reset-modal__eyebrow">Photo Options</div>
+                <h3 class="upload-reset-modal__title" id="uploadResetModalTitle">What do you want to do with this photo?</h3>
+                <p class="upload-reset-modal__body">Your current photo is still available. You can discard it and return to the upload screen, or reupload a different photo right now.</p>
+                <div class="upload-reset-modal__actions">
+                    <button type="button" class="upload-reset-modal__button upload-reset-modal__button--discard" id="uploadResetDiscardBtn">Discard Photo</button>
+                    <button type="button" class="upload-reset-modal__button upload-reset-modal__button--reupload" id="uploadResetReuploadBtn">Reupload Photo</button>
+                </div>
+            </div>
+        </div>
+
     <!-- Firebase Backend Integration (Backup) -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
@@ -2308,7 +2424,7 @@
     <script type="module" src="firebase-client-new.js?v=4.2-fix-orderid"></script>
     <script src="otp-auth-realsms.js?v=4.0"></script>
     <script src="auth.js?v=4.0"></script>
-    <script src="script.js?v=5.6-storefront-sync"></script>
+    <script src="script.js?v=5.7-upload-reset"></script>
     <script>
         function setProfileDropdownState(isOpen) {
             const dropdownContainer = document.getElementById('profileDropdown');

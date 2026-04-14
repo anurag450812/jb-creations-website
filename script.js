@@ -9,25 +9,36 @@
  */
 
 // VERSION CHECK - Update this to force cache refresh
-const SCRIPT_VERSION = '5.5-INDEXEDDB';
+const SCRIPT_VERSION = '5.7-UPLOAD-RESET';
+
+const DEFAULT_IMAGE_ADJUSTMENTS = {
+    brightness: 100,
+    contrast: 100,
+    highlights: 100,
+    shadows: 100,
+    vibrance: 100
+};
+
+function createDefaultImageAdjustments() {
+    return { ...DEFAULT_IMAGE_ADJUSTMENTS };
+}
 
 // Debug logging configuration with auto-timeout and scope isolation
 const DEBUG_LOGS_CONFIG = (() => {
     let enabled = false;
     let enabledAt = null;
     const TIMEOUT_DURATION = 3600000; // 1 hour auto-timeout
-    
+
     try {
         // Check URL or localStorage for debug flag
         const flagFromUrl = window.location.search.includes('debugLogs=true');
         const flagFromStorage = localStorage.getItem('jbDebugLogs') === 'true';
         enabled = flagFromUrl || flagFromStorage;
-        
+
         if (enabled) {
             enabledAt = Date.now();
-            // Warn when debug mode is active
             console.warn('⚠️ DEBUG LOGGING ACTIVE - This script\'s console.log is ENABLED. Auto-disables in 1 hour.');
-            
+
             // Set timeout to auto-disable
             setTimeout(() => {
                 console.warn('⚠️ DEBUG LOGGING AUTO-DISABLED after 1 hour timeout.');
@@ -37,12 +48,12 @@ const DEBUG_LOGS_CONFIG = (() => {
     } catch (error) {
         enabled = false;
     }
-    
+
     return {
         get isEnabled() { return enabled; },
         set isEnabled(val) { enabled = val; },
-        getEnabledDuration() { 
-            return enabled && enabledAt ? (Date.now() - enabledAt) / 1000 : 0; 
+        getEnabledDuration() {
+            return enabled && enabledAt ? (Date.now() - enabledAt) / 1000 : 0;
         }
     };
 })();
@@ -89,15 +100,10 @@ const state = {
     borderThickness: 15, // Border thickness in pixels (5-40)
     borderColor: 'white', // Automatic contrasting border color derived from frameColor
     price: 499,
-    adjustments: {
-        brightness: 100,
-        contrast: 100,
-        highlights: 100,
-        shadows: 100,
-        vibrance: 100
-    },
+    adjustments: createDefaultImageAdjustments(),
     zoom: 1,
     position: { x: 0, y: 0 },
+    cachedCartImages: null,
     roomSlider: {
         currentIndex: 0,
         images: [],
@@ -121,7 +127,7 @@ function cloneDefaultStorefrontPricing() {
 }
 
 function getStorefrontVariantKey(size, orientation = 'portrait') {
-    return `${String(size || '13x19').toLowerCase()}-${String(orientation || 'portrait').toLowerCase()}`;
+                navigateToMobilePage('livePreview', { updateHistory: false });
 }
 
 function normalizeStorefrontPricing(pricing = {}) {
@@ -129,7 +135,19 @@ function normalizeStorefrontPricing(pricing = {}) {
 
     Object.keys(normalized).forEach(key => {
         const base = normalized[key];
-        const incoming = pricing[key] || {};
+                openUploadResetModal().then((choice) => {
+                    if (choice === 'discard') {
+                        resetCustomizeExperienceForUpload();
+                        return;
+                    }
+
+                    if (choice === 'reupload') {
+                        resetCustomizeExperienceForUpload({ openUploader: true });
+                        return;
+                    }
+
+                    navigateToMobilePage('livePreview');
+                });
         const price = Number(incoming.price);
         const mrp = Number(incoming.mrp);
 
@@ -492,12 +510,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize mobile bottom bar/drop-up if present
     initMobileBottomBar();
+
+    initializeUploadResetModal();
     
     // Initialize mobile room preview page functionality
     initMobileRoomPreview();
     
     // Check if returning from cart to room preview
     checkReturnToRoomPreview();
+
+    if (window.innerWidth <= 768) {
+        history.replaceState({ mobilePage: currentMobilePage }, '', window.location.href);
+    }
 });
 
 // ===========================
@@ -510,15 +534,246 @@ document.addEventListener('DOMContentLoaded', function() {
 // Track current mobile page for navigation
 let currentMobilePage = 'upload'; // 'upload', 'livePreview', 'roomPreview'
 
+let uploadResetModalResolver = null;
+
+function closeMobileDropup() {
+    const bottomBar = document.getElementById('mobileBottomBar') || document.querySelector('.mobile-bottom-bar');
+    const mobileDropup = document.getElementById('mobileDropup');
+    const dropupToggle = document.getElementById('dropupToggle');
+
+    if (bottomBar) {
+        bottomBar.classList.remove('hidden-for-dropup');
+        bottomBar.querySelectorAll('.bar-tab').forEach(tab => {
+            tab.classList.remove('active');
+            tab.setAttribute('aria-selected', 'false');
+        });
+    }
+
+    if (mobileDropup) {
+        mobileDropup.classList.remove('active');
+        mobileDropup.classList.remove('open');
+        mobileDropup.style.transform = '';
+        mobileDropup.setAttribute('aria-hidden', 'true');
+        mobileDropup.querySelectorAll('.drawer').forEach(drawer => {
+            drawer.classList.remove('active');
+        });
+    }
+
+    if (dropupToggle) {
+        dropupToggle.setAttribute('aria-expanded', 'false');
+        const icon = dropupToggle.querySelector('i');
+        if (icon) {
+            icon.className = 'fas fa-chevron-up';
+        }
+    }
+}
+
+function syncAdjustmentInputsToState() {
+    ['brightness', 'contrast', 'highlights', 'shadows', 'vibrance'].forEach((key) => {
+        const value = state.adjustments && state.adjustments[key] !== undefined
+            ? state.adjustments[key]
+            : DEFAULT_IMAGE_ADJUSTMENTS[key];
+
+        const desktopSlider = document.getElementById(key);
+        if (desktopSlider) {
+            desktopSlider.value = value;
+        }
+
+        const mobileSliderId = `mobile${key.charAt(0).toUpperCase()}${key.slice(1)}`;
+        const mobileSlider = document.getElementById(mobileSliderId);
+        if (mobileSlider) {
+            mobileSlider.value = value;
+        }
+
+        const mobileValue = document.getElementById(`${mobileSliderId}Value`);
+        if (mobileValue) {
+            mobileValue.textContent = value;
+        }
+    });
+}
+
+function resetCustomizeUploadInputs() {
+    [document.getElementById('heroImageUpload'), document.getElementById('imageUpload')].forEach((input) => {
+        if (input) {
+            try {
+                input.value = '';
+            } catch (error) {
+                console.warn('Unable to reset upload input value:', error);
+            }
+        }
+    });
+}
+
+function clearLoadedCustomizationImage() {
+    state.image = null;
+    state.originalImage = null;
+    state.trueOriginalImage = null;
+    state.originalImageDimensions = null;
+    state.cachedCartImages = null;
+    state.zoom = 1;
+    state.position = { x: 0, y: 0 };
+    state.adjustments = createDefaultImageAdjustments();
+
+    if (elements.previewImage) {
+        elements.previewImage.onload = null;
+        elements.previewImage.onerror = null;
+        elements.previewImage.src = '';
+        elements.previewImage.style.transform = '';
+        elements.previewImage.style.filter = '';
+        elements.previewImage.style.cursor = '';
+    }
+
+    if (elements.imageContainer) {
+        elements.imageContainer.classList.remove('has-image');
+    }
+
+    const uploadSection = document.getElementById('uploadSection');
+    const previewSection = document.getElementById('previewSection');
+    const mobileRoomPreviewPage = document.getElementById('mobileRoomPreviewPage');
+    const bottomBar = document.getElementById('mobileBottomBar') || document.querySelector('.mobile-bottom-bar');
+
+    if (uploadSection) {
+        uploadSection.classList.remove('hidden');
+    }
+
+    if (previewSection) {
+        previewSection.classList.add('hidden');
+    }
+
+    if (mobileRoomPreviewPage) {
+        mobileRoomPreviewPage.style.display = 'none';
+    }
+
+    if (bottomBar) {
+        bottomBar.style.display = 'none';
+    }
+
+    closeMobileDropup();
+    resetCustomizeUploadInputs();
+    document.body.classList.remove('has-upload');
+    document.body.classList.remove('room-preview-active');
+    currentMobilePage = 'upload';
+
+    syncAdjustmentInputsToState();
+    resetCustomizePurchaseButtons();
+    updateImageFilters();
+    updateMobileSpecs();
+    updateRatingsDisplay();
+
+    if (typeof updateMobileTotalPrice === 'function') {
+        updateMobileTotalPrice();
+    }
+
+    if (window.updateRoomPreviewButtonState) {
+        window.updateRoomPreviewButtonState();
+    }
+
+    if (window.updateMobileSeeRoomPreviewBtn) {
+        window.updateMobileSeeRoomPreviewBtn();
+    }
+}
+
+function resetCustomizeExperienceForUpload({ openUploader = false, replaceHistory = false } = {}) {
+    clearLoadedCustomizationImage();
+    navigateToMobilePage('upload', { updateHistory: false });
+
+    if (window.innerWidth <= 768 && replaceHistory) {
+        history.replaceState({ mobilePage: 'upload' }, '', window.location.href);
+    }
+
+    if (openUploader) {
+        const uploadInput = document.getElementById('heroImageUpload') || document.getElementById('imageUpload');
+        if (uploadInput) {
+            uploadInput.click();
+        }
+    }
+}
+
+function getUploadResetModalElements() {
+    return {
+        modal: document.getElementById('uploadResetModal'),
+        close: document.getElementById('uploadResetModalClose'),
+        discard: document.getElementById('uploadResetDiscardBtn'),
+        reupload: document.getElementById('uploadResetReuploadBtn')
+    };
+}
+
+function closeUploadResetModal(choice = 'cancel') {
+    const { modal } = getUploadResetModalElements();
+    if (!modal) {
+        return;
+    }
+
+    modal.hidden = true;
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('upload-reset-modal-open');
+
+    if (uploadResetModalResolver) {
+        const resolver = uploadResetModalResolver;
+        uploadResetModalResolver = null;
+        resolver(choice);
+    }
+}
+
+function openUploadResetModal() {
+    const { modal, discard } = getUploadResetModalElements();
+
+    if (!modal) {
+        return Promise.resolve('discard');
+    }
+
+    if (uploadResetModalResolver) {
+        closeUploadResetModal('cancel');
+    }
+
+    modal.hidden = false;
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('upload-reset-modal-open');
+
+    if (discard) {
+        discard.focus();
+    }
+
+    return new Promise((resolve) => {
+        uploadResetModalResolver = resolve;
+    });
+}
+
+function initializeUploadResetModal() {
+    const { modal, close, discard, reupload } = getUploadResetModalElements();
+
+    if (!modal || modal.dataset.initialized === 'true') {
+        return;
+    }
+
+    modal.dataset.initialized = 'true';
+
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            closeUploadResetModal('cancel');
+        }
+    });
+
+    if (close) {
+        close.addEventListener('click', () => closeUploadResetModal('cancel'));
+    }
+
+    if (discard) {
+        discard.addEventListener('click', () => closeUploadResetModal('discard'));
+    }
+
+    if (reupload) {
+        reupload.addEventListener('click', () => closeUploadResetModal('reupload'));
+    }
+}
+
 // Navigate to specific mobile page
-function navigateToMobilePage(page) {
-    if (window.innerWidth > 768) return; // Desktop doesn't use this navigation
-    
+function navigateToMobilePage(page, options = {}) {
+    const { updateHistory = window.innerWidth <= 768, replaceHistory = false } = options;
     const uploadHeroWrapper = document.getElementById('uploadHeroWrapper');
     const mainContainer = document.getElementById('mainCustomizeContainer') || document.querySelector('.container');
     const mobileRoomPreviewPage = document.getElementById('mobileRoomPreviewPage');
     const bottomBar = document.getElementById('mobileBottomBar') || document.querySelector('.mobile-bottom-bar');
-    const mobileDropup = document.getElementById('mobileDropup');
     
     console.log(`📱 Navigating to: ${page} (from: ${currentMobilePage})`);
     
@@ -529,10 +784,7 @@ function navigateToMobilePage(page) {
     
     // Hide bottom bar and dropup by default
     if (bottomBar) bottomBar.style.display = 'none';
-    if (mobileDropup) {
-        mobileDropup.classList.remove('active');
-        mobileDropup.setAttribute('aria-hidden', 'true');
-    }
+    closeMobileDropup();
     
     // Remove room preview active class
     document.body.classList.remove('room-preview-active');
@@ -575,7 +827,14 @@ function navigateToMobilePage(page) {
     window.scrollTo(0, 0);
     
     // Push history state for back button navigation
-    history.pushState({ mobilePage: page }, '', window.location.href);
+    if (updateHistory && window.innerWidth <= 768) {
+        const statePayload = { mobilePage: page };
+        if (replaceHistory) {
+            history.replaceState(statePayload, '', window.location.href);
+        } else {
+            history.pushState(statePayload, '', window.location.href);
+        }
+    }
 }
 
 // Handle mobile back button - comprehensive navigation management
@@ -594,16 +853,26 @@ window.addEventListener('popstate', function(event) {
         // Navigate based on current visible page
         if (isRoomPreviewVisible) {
             // From Room Preview -> Go back to Live Preview
-            event.preventDefault();
-            navigateToMobilePage('livePreview');
+            navigateToMobilePage('livePreview', { updateHistory: false });
             console.log('📱 Mobile back: Room Preview → Live Preview');
             return;
         }
         
         if (isLivePreviewVisible) {
             // From Live Preview -> Go back to Upload
-            event.preventDefault();
-            navigateToMobilePage('upload');
+            openUploadResetModal().then((choice) => {
+                if (choice === 'discard') {
+                    resetCustomizeExperienceForUpload();
+                    return;
+                }
+
+                if (choice === 'reupload') {
+                    resetCustomizeExperienceForUpload({ openUploader: true });
+                    return;
+                }
+
+                navigateToMobilePage('livePreview');
+            });
             console.log('📱 Mobile back: Live Preview → Upload');
             return;
         }
@@ -1434,6 +1703,7 @@ function initializeEventListeners() {
         if (file) {
             handleImageUpload(file);
         }
+        e.target.value = '';
     });
 
     // Frame Size Selection
@@ -1855,16 +2125,10 @@ function initializeEventListeners() {
     
     function handleChangeImage() {
         console.log('handleChangeImage called');
-        // Hide mobile customization UI until next upload
-        document.body.classList.remove('has-upload');
-        
-        // On mobile, use the 3-page navigation system
-        if (window.innerWidth <= 768) {
-            navigateToMobilePage('upload');
-        } else {
-            // Desktop: Reload the page to start fresh with image upload
-            window.location.reload();
-        }
+        resetCustomizeExperienceForUpload({
+            openUploader: true,
+            replaceHistory: window.innerWidth <= 768
+        });
     }
     
     if (changeImageBtn) {
@@ -1938,10 +2202,7 @@ function handleImageUpload(file) {
             }
             
             // On mobile, use the 3-page navigation system
-            if (window.innerWidth <= 768) {
-                currentMobilePage = 'livePreview';
-                history.pushState({ mobilePage: 'livePreview' }, '', window.location.href);
-            }
+            navigateToMobilePage('livePreview', { updateHistory: window.innerWidth <= 768 });
 
             // Store the TRUE original image (full resolution, uncompressed) for print quality
             state.trueOriginalImage = e.target.result;
@@ -1968,9 +2229,7 @@ function handleImageUpload(file) {
             
             tempImg.onerror = () => {
                 console.error('Failed to load image');
-                // Reset to upload state
-                document.getElementById('uploadSection').classList.remove('hidden');
-                document.getElementById('previewSection').classList.add('hidden');
+                resetCustomizeExperienceForUpload();
             };
             
             tempImg.src = e.target.result;
@@ -2129,9 +2388,7 @@ function processCompressedImage(imageDataURL) {
         
         tempImg.onerror = () => {
             console.error('Failed to load processed image');
-            // Reset to upload state
-            document.getElementById('uploadSection').classList.remove('hidden');
-            document.getElementById('previewSection').classList.add('hidden');
+            resetCustomizeExperienceForUpload();
         };
         
         tempImg.src = imageDataURL;
@@ -6057,23 +6314,7 @@ function initMobileRoomPreview() {
                 
                 // Hide main container and show mobile room preview page using navigation system
                 console.log('Switching to room preview mode. Container:', container);
-                if (container) container.style.display = 'none';
-                mobileRoomPreviewPage.style.display = 'block';
-                document.body.classList.add('room-preview-active');
-                
-                // Update navigation state
-                currentMobilePage = 'roomPreview';
-                history.pushState({ mobilePage: 'roomPreview' }, '', window.location.href);
-                
-                // Explicitly hide bottom bar and close drawers to ensure they don't overlap
-                const bottomBarEl = document.getElementById('mobileBottomBar');
-                if (bottomBarEl) bottomBarEl.style.display = 'none';
-                
-                const mobileDropup = document.getElementById('mobileDropup');
-                if (mobileDropup) {
-                    mobileDropup.classList.remove('active');
-                    mobileDropup.setAttribute('aria-hidden', 'true');
-                }
+                navigateToMobilePage('roomPreview');
                 
                 // Scroll to top
                 window.scrollTo(0, 0);

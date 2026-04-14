@@ -5,7 +5,7 @@
  */
 
 // VERSION CHECK - Update this to force cache refresh
-const CHECKOUT_VERSION = '9.2-INDEXEDDB';
+const CHECKOUT_VERSION = '9.7-PAYMENT-GUARD';
 
 console.log('');
 console.log('%c╔═══════════════════════════════════════════════════════════════════════════╗', 'color: #00ff00; font-size: 16px; font-weight: bold;');
@@ -392,6 +392,14 @@ async function createRazorpayOrder(amountInRupees, orderData) {
     const result = await parseApiResponse(response);
     if (!response.ok || !result.success || !result.orderId || !result.keyId) {
         throw new Error(result.message || 'Unable to initialize Razorpay order');
+    }
+
+    const hostname = window.location.hostname;
+    const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1';
+    const keyId = String(result.keyId || '');
+
+    if (!isLocalHost && keyId.startsWith('rzp_test_')) {
+        throw new Error('Razorpay server is still returning a test key. Update the live Netlify RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET values and redeploy before accepting production payments.');
     }
 
     return result;
@@ -2150,9 +2158,27 @@ Order Date: ${new Date(orderData.orderDate).toLocaleString()}
     return emailContent;
 }
 
+function hasValidRazorpayPaymentId(paymentId) {
+    return /^pay_[A-Za-z0-9]+$/.test(String(paymentId || ''));
+}
+
+function clearLastOrderConfirmationState() {
+    sessionStorage.removeItem('lastOrderNumber');
+    sessionStorage.removeItem('lastCustomerName');
+    sessionStorage.removeItem('lastCustomerEmail');
+    sessionStorage.removeItem('lastOrderAmount');
+}
+
 // Submit order to backend with robust error handling
 async function submitOrder(orderData) {
     try {
+        if (!hasValidRazorpayPaymentId(orderData.paymentId)) {
+            return {
+                success: false,
+                error: 'Payment was not completed. Order was not created.'
+            };
+        }
+
         console.log('🔄 Starting order submission process...');
         console.log('🔍 Debug - Submit order data:', {
             hasCustomer: !!orderData.customer,
@@ -2757,6 +2783,8 @@ async function placeOrder() {
     let shouldEnableButtons = true;
 
     try {
+        clearLastOrderConfirmationState();
+
         // Prepare order data (includes guest customer information)
         const orderData = prepareOrderData();
         
@@ -2777,6 +2805,10 @@ async function placeOrder() {
 
         // Simple direct payment (works for both guests and logged-in users)
         const paymentResult = await processSimplePayment(totalAmount, orderData, user);
+
+        if (!paymentResult || paymentResult.success !== true || !hasValidRazorpayPaymentId(paymentResult.paymentId)) {
+            throw new Error('Payment was not completed. Your order was not placed.');
+        }
         
         if (paymentResult.success) {
             // Show processing overlay during order submission
@@ -2861,12 +2893,15 @@ async function placeOrder() {
         
     } catch (error) {
         console.error('Order placement error:', error);
+        clearLastOrderConfirmationState();
         
         // Show appropriate error message
         if (error.message && error.message.includes('Razorpay')) {
             notifications.error('Payment system error: ' + error.message);
         } else if (error.message && error.message.includes('Payment cancelled')) {
             notifications.info('Payment was cancelled. Your order was not placed.');
+        } else if (error.message && error.message.includes('Payment was not completed')) {
+            notifications.info('Payment was not completed. Your order was not placed.');
         } else {
             notifications.error('Sorry, there was an error processing your payment. Please try again or contact us directly.');
         }

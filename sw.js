@@ -1,19 +1,23 @@
 /**
  * Service Worker for Xidlz
  * Provides offline caching and performance optimization
- * Version: 1.2.0
+ * Version: 1.3.0
  */
 
-const SW_VERSION = '1.2.0';
+const SW_VERSION = '1.3.0';
 const CACHE_NAME = `xidlz-v${SW_VERSION}`;
 const RUNTIME_CACHE = `xidlz-runtime-v${SW_VERSION}`;
 
-// Admin and Firebase assets must stay fresh; stale cached copies break order actions.
+// Admin, checkout, and payment assets must stay fresh; stale cached copies break live actions.
 const NETWORK_FIRST_PATTERNS = [
     /\/admin-firebase\.html$/,
     /\/admin-login\.html$/,
     /\/firebase-client-new\.js$/,
-    /\/shiprocket-client\.js$/
+    /\/shiprocket-client\.js$/,
+    /\/cart\.js$/,
+    /\/checkout\.js$/,
+    /\/checkout-direct\.js$/,
+    /\/razorpay-config\.js$/
 ];
 
 // Critical assets to cache immediately
