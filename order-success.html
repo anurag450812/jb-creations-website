@@ -149,7 +149,7 @@
 
         .hero-copy h1 {
             margin-top: 20px;
-            max-width: 10ch;
+            max-width: 12ch;
             font-family: 'Fraunces', serif;
             font-size: clamp(2.9rem, 6vw, 4.8rem);
             line-height: 0.94;
@@ -482,47 +482,39 @@
             word-break: break-word;
         }
 
-        .timeline-list {
+        .next-grid {
             display: grid;
-            gap: 14px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
         }
 
-        .timeline-item {
+        .next-card {
+            padding: 16px;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #ffffff, #f8fbfa);
+            border: 1px solid var(--border);
             display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 14px;
-            align-items: flex-start;
-            padding-top: 14px;
-            border-top: 1px dashed rgba(15, 92, 99, 0.14);
+            gap: 8px;
         }
 
-        .timeline-item:first-child {
-            padding-top: 0;
-            border-top: none;
-        }
-
-        .timeline-icon {
-            width: 46px;
-            height: 46px;
-            border-radius: 16px;
-            display: grid;
-            place-items: center;
-            background: linear-gradient(135deg, rgba(15, 92, 99, 0.12), rgba(72, 159, 181, 0.16));
-            color: var(--deep-teal);
-            font-size: 1rem;
-        }
-
-        .timeline-copy strong {
+        .next-card span {
             display: block;
-            margin-bottom: 6px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(18, 47, 55, 0.54);
+        }
+
+        .next-card strong {
             color: var(--ink);
             font-size: 0.98rem;
         }
 
-        .timeline-copy p {
+        .next-card p {
             color: var(--muted);
-            font-size: 0.92rem;
-            line-height: 1.65;
+            font-size: 0.88rem;
+            line-height: 1.55;
         }
 
         .quick-actions {
@@ -575,6 +567,10 @@
                 grid-template-columns: 1fr;
             }
 
+            .next-grid {
+                grid-template-columns: 1fr;
+            }
+
             .hero-copy h1 {
                 max-width: none;
             }
@@ -598,7 +594,8 @@
 
             .hero-highlight,
             .metric-grid,
-            .detail-grid {
+            .detail-grid,
+            .next-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -627,13 +624,13 @@
                     <span class="eyebrow-dot"></span>
                     Order confirmed
                 </div>
-                <h1 id="heroHeading">Its official, Anurag.</h1>
-                <p class="hero-lead" id="heroSubcopy">Your payment is secured and your custom frame order is queued for production. Track it anytime from your account.</p>
+                <h1 id="heroHeading">Order confirmed</h1>
+                <p class="hero-lead" id="heroSubcopy">Payment received. Track updates anytime in My Orders.</p>
 
                 <div class="hero-highlight">
                     <div class="hero-stat">
                         <span>Payment</span>
-                        <strong>Paid and secured</strong>
+                        <strong>Confirmed</strong>
                     </div>
                     <div class="hero-stat">
                         <span>Total</span>
@@ -657,11 +654,11 @@
                 <header>
                     <div>
                         <div class="card-kicker">Order ID</div>
-                        <h2>Keep this handy</h2>
+                        <h2>Order at a glance</h2>
                     </div>
                     <div class="status-pill">
                         <i class="fas fa-circle-check"></i>
-                        <span id="statusLabel">In progress</span>
+                        <span id="statusLabel">Confirmed</span>
                     </div>
                 </header>
 
@@ -674,19 +671,19 @@
                         </button>
                     </div>
                     <strong id="orderNumber">Loading...</strong>
-                    <p class="token-caption">Use this to track your order or contact support anytime.</p>
+                    <p class="token-caption">Use this number for tracking or support.</p>
                 </div>
 
                 <div class="metric-grid">
                     <div class="metric-card">
                         <span>Current stage</span>
-                        <strong id="currentStage">Payment received</strong>
-                        <small id="stageNote">Your order is queued for artwork review.</small>
+                        <strong id="currentStage">Review queued</strong>
+                        <small id="stageNote">Next update appears in My Orders.</small>
                     </div>
                     <div class="metric-card">
                         <span>Confirmed on</span>
                         <strong id="orderDateHero">Loading...</strong>
-                        <small>This confirmation is saved to your account.</small>
+                        <small>Saved to your account.</small>
                     </div>
                 </div>
 
@@ -694,22 +691,22 @@
                     <div class="progress-card active">
                         <div class="progress-icon"><i class="fas fa-credit-card"></i></div>
                         <div class="progress-copy">
-                            <strong>Payment received</strong>
-                            <span>Your payment cleared and locked in.</span>
+                            <strong>Payment</strong>
+                            <span>Received</span>
                         </div>
                     </div>
                     <div class="progress-card">
                         <div class="progress-icon"><i class="fas fa-image"></i></div>
                         <div class="progress-copy">
-                            <strong>Artwork review</strong>
-                            <span>Photos and frame details preparing.</span>
+                            <strong>Review</strong>
+                            <span>Queued</span>
                         </div>
                     </div>
                     <div class="progress-card">
                         <div class="progress-icon"><i class="fas fa-truck"></i></div>
                         <div class="progress-copy">
-                            <strong>Production & shipping</strong>
-                            <span>Status updates in your orders.</span>
+                            <strong>Shipping</strong>
+                            <span>Updates in My Orders</span>
                         </div>
                     </div>
                 </div>
@@ -722,7 +719,7 @@
                     <div class="section-heading">
                         <div>
                             <div class="card-kicker">Order details</div>
-                            <h2>Your confirmation</h2>
+                            <h2>Order details</h2>
                         </div>
                     </div>
                     <div class="detail-grid">
@@ -748,31 +745,25 @@
                 <section class="panel info-card">
                     <div class="section-heading">
                         <div>
-                            <div class="card-kicker">What's next</div>
-                            <h2>Your order timeline</h2>
+                            <div class="card-kicker">Next</div>
+                            <h2>What happens now</h2>
                         </div>
                     </div>
-                    <div class="timeline-list">
-                        <div class="timeline-item">
-                            <div class="timeline-icon"><i class="fas fa-circle-check"></i></div>
-                            <div class="timeline-copy">
-                                <strong>Order confirmed</strong>
-                                <p>Your payment is processed and order is now in our system ready for the next steps.</p>
-                            </div>
+                    <div class="next-grid">
+                        <div class="next-card">
+                            <span>Step 1</span>
+                            <strong>Review</strong>
+                            <p>We check your photo and frame details.</p>
                         </div>
-                        <div class="timeline-item">
-                            <div class="timeline-icon"><i class="fas fa-sliders"></i></div>
-                            <div class="timeline-copy">
-                                <strong>Artwork review underway</strong>
-                                <p>Your photos and frame customizations are being prepared for production setup.</p>
-                            </div>
+                        <div class="next-card">
+                            <span>Step 2</span>
+                            <strong>Production</strong>
+                            <p>Your frame moves into production.</p>
                         </div>
-                        <div class="timeline-item">
-                            <div class="timeline-icon"><i class="fas fa-box"></i></div>
-                            <div class="timeline-copy">
-                                <strong>Production & shipment</strong>
-                                <p>Once complete, your order ships with tracking updates sent to your account.</p>
-                            </div>
+                        <div class="next-card">
+                            <span>Step 3</span>
+                            <strong>Shipping</strong>
+                            <p>Tracking appears in My Orders.</p>
                         </div>
                     </div>
                 </section>
@@ -782,8 +773,8 @@
                 <section class="panel info-card">
                     <div class="section-heading">
                         <div>
-                            <div class="card-kicker">Next actions</div>
-                            <h2>Where to go</h2>
+                            <div class="card-kicker">Quick links</div>
+                            <h2>Manage order</h2>
                         </div>
                     </div>
                     <div class="quick-actions">
@@ -892,8 +883,8 @@
             });
             const firstName = getMeaningfulFirstName(details.customerName);
             const heroHeading = firstName
-                ? `Its official, ${firstName}.`
-                : 'Its official, Anurag.';
+                ? `Thanks, ${firstName}`
+                : 'Order confirmed';
 
             document.title = `Order Confirmed - ${orderId} | Xidlz`;
             document.getElementById('heroHeading').textContent = heroHeading;

@@ -1778,17 +1778,107 @@
             }
 
             .processing-content {
-                padding: 18px;
-                border-radius: 24px;
+                padding: 16px;
+                border-radius: 26px;
+            }
+
+            .processing-layout {
+                gap: 14px;
             }
 
             .processing-content h3,
             .success-state h3 {
-                font-size: 1.95rem;
+                font-size: 1.55rem;
+                line-height: 1.08;
             }
 
             .processing-overline {
-                font-size: 14px;
+                max-width: none;
+                font-size: 13px;
+                line-height: 1.45;
+            }
+
+            .processing-badge {
+                padding: 8px 10px;
+                font-size: 11px;
+            }
+
+            .processing-visual {
+                grid-template-columns: 92px minmax(0, 1fr);
+                gap: 12px;
+                align-items: center;
+            }
+
+            .processing-spinner {
+                width: 92px;
+                height: 92px;
+            }
+
+            .processing-orbit.orbit-two {
+                inset: 8px;
+            }
+
+            .processing-orbit.orbit-three {
+                inset: 20px;
+            }
+
+            .processing-orbit::after {
+                right: -4px;
+                width: 8px;
+                height: 8px;
+                box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.25);
+            }
+
+            .processing-spinner-core {
+                width: 52px;
+                height: 52px;
+                border-radius: 18px;
+            }
+
+            .processing-spinner-core i {
+                font-size: 20px;
+            }
+
+            .processing-pulse-card {
+                padding: 12px 14px;
+                gap: 6px;
+                border-radius: 18px;
+            }
+
+            .processing-pulse-label {
+                font-size: 10px;
+            }
+
+            .processing-pulse-card strong {
+                font-size: 0.95rem;
+                line-height: 1.3;
+            }
+
+            .processing-pulse-card p {
+                display: none;
+            }
+
+            .processing-panel {
+                padding: 14px;
+                gap: 10px;
+            }
+
+            .processing-panel-header {
+                gap: 4px;
+            }
+
+            .processing-panel-header span {
+                font-size: 11px;
+            }
+
+            .processing-panel-header strong {
+                font-size: 12px;
+                line-height: 1.35;
+            }
+
+            .processing-steps {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 8px;
             }
 
             .processing-pulse-card,
@@ -1799,16 +1889,83 @@
             }
 
             .processing-trust-row {
-                grid-template-columns: 1fr;
+                display: none;
             }
 
             .processing-step {
                 grid-template-columns: 1fr;
+                justify-items: center;
+                text-align: center;
+                gap: 8px;
+                padding: 10px 8px;
+                min-height: 100%;
+            }
+
+            .processing-step.is-active {
+                transform: none;
             }
 
             .processing-step-index {
-                width: 36px;
-                height: 36px;
+                width: 32px;
+                height: 32px;
+                font-size: 0.82rem;
+            }
+
+            .processing-step-copy strong {
+                margin-bottom: 0;
+                font-size: 11px;
+                line-height: 1.3;
+            }
+
+            .processing-step-copy span {
+                display: none;
+            }
+
+            .processing-success-layout {
+                gap: 14px;
+            }
+
+            .success-checkmark {
+                width: 88px;
+                height: 88px;
+                padding: 8px;
+            }
+
+            .checkmark {
+                width: 72px;
+                height: 72px;
+            }
+
+            .success-state p {
+                max-width: 22ch;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+
+            .processing-success-summary {
+                gap: 10px;
+            }
+
+            .processing-summary-pill {
+                padding: 12px 14px;
+                border-radius: 16px;
+            }
+
+            .processing-summary-pill span {
+                margin-bottom: 6px;
+                font-size: 10px;
+            }
+
+            .processing-summary-pill strong {
+                font-size: 0.9rem;
+            }
+
+            .processing-success-timeline {
+                display: none;
+            }
+
+            .processing-success-note {
+                font-size: 12px;
             }
         }
 
@@ -3357,7 +3514,7 @@
                         </div>
                         <div class="processing-headline">
                             <h3 id="processingTitle">Preparing Secure Checkout<span class="loading-dots"></span></h3>
-                            <p class="processing-overline" id="processingSubtitle">We are reviewing your details before we move you into payment and final confirmation.</p>
+                            <p class="processing-overline" id="processingSubtitle">Reviewing your order details before payment and confirmation.</p>
                         </div>
                         <div class="processing-visual">
                             <div class="processing-spinner" aria-hidden="true">
@@ -3370,36 +3527,36 @@
                             </div>
                             <div class="processing-pulse-card">
                                 <span class="processing-pulse-label">Live update</span>
-                                <strong id="processingPulseTitle">Checking frame selections and delivery details</strong>
-                                <p>We’ll move you to your confirmation page as soon as the order is safely stored.</p>
+                                <strong id="processingPulseTitle">Checking frame selections</strong>
+                                <p>We’ll open your confirmation page as soon as the order is safely stored.</p>
                             </div>
                         </div>
                     </div>
                     <div class="processing-panel">
                         <div class="processing-panel-header">
-                            <span>Order pipeline</span>
-                            <strong>Please keep this screen open for a few seconds</strong>
+                            <span>Order progress</span>
+                            <strong>Please keep this open</strong>
                         </div>
                         <div class="processing-steps" id="processingSteps">
                             <div class="processing-step is-active" data-step="0">
                                 <div class="processing-step-index">01</div>
                                 <div class="processing-step-copy">
-                                    <strong>Checkout review</strong>
-                                    <span>Verifying your delivery info, frame choices, and artwork preferences.</span>
+                                    <strong>Details check</strong>
+                                    <span>Delivery info and frame choices.</span>
                                 </div>
                             </div>
                             <div class="processing-step" data-step="1">
                                 <div class="processing-step-index">02</div>
                                 <div class="processing-step-copy">
-                                    <strong>Order sync</strong>
-                                    <span>Saving payment details and your custom order configuration securely.</span>
+                                    <strong>Order save</strong>
+                                    <span>Payment and order details synced securely.</span>
                                 </div>
                             </div>
                             <div class="processing-step" data-step="2">
                                 <div class="processing-step-index">03</div>
                                 <div class="processing-step-copy">
-                                    <strong>Confirmation ready</strong>
-                                    <span>Generating your order number and preparing your next-step view.</span>
+                                    <strong>Confirmation</strong>
+                                    <span>Order ID and confirmation page loading.</span>
                                 </div>
                             </div>
                         </div>
@@ -3430,7 +3587,7 @@
                         Order locked in
                     </div>
                     <h3>Order Confirmed</h3>
-                    <p id="processingSuccessMessage">Your custom order is secured and your confirmation page is ready.</p>
+                    <p id="processingSuccessMessage">Your order is secured and your confirmation page is ready.</p>
                     <div class="processing-success-summary">
                         <div class="processing-summary-pill">
                             <span>Order ID</span>
@@ -3445,17 +3602,17 @@
                         <div class="processing-success-step">
                             <i class="fas fa-credit-card"></i>
                             <strong>Payment secured</strong>
-                            <span>Your payment is verified and attached to this order.</span>
+                            <span>Payment verified.</span>
                         </div>
                         <div class="processing-success-step">
                             <i class="fas fa-image"></i>
                             <strong>Artwork queued</strong>
-                            <span>Your custom frame details are ready for the next production step.</span>
+                            <span>Order queued for review.</span>
                         </div>
                         <div class="processing-success-step">
                             <i class="fas fa-arrow-right"></i>
-                            <strong>Next view loading</strong>
-                            <span>We’re taking you to the detailed confirmation page now.</span>
+                            <strong>Opening confirmation</strong>
+                            <span>Redirecting now.</span>
                         </div>
                     </div>
                     <p class="processing-success-note">Redirecting you to your order details...</p>
@@ -3886,7 +4043,7 @@
     
     <!-- Cache-busted checkout script to ensure latest version loads -->
     <script src="utils/notifications.js"></script>
-    <script src="checkout.js?v=9.7-payment-guard"></script>
+    <script src="checkout.js?v=9.8-compact-confirmation"></script>
     <script>
         (function() {
             function mirrorDesktopButtonState(sourceButton, desktopButton) {

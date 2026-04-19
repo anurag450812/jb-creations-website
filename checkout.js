@@ -5,7 +5,7 @@
  */
 
 // VERSION CHECK - Update this to force cache refresh
-const CHECKOUT_VERSION = '9.7-PAYMENT-GUARD';
+const CHECKOUT_VERSION = '9.8-COMPACT-CONFIRMATION';
 
 console.log('');
 console.log('%c╔═══════════════════════════════════════════════════════════════════════════╗', 'color: #00ff00; font-size: 16px; font-weight: bold;');
@@ -2551,6 +2551,9 @@ const PROCESSING_OVERLAY_STAGES = [
         title: 'Preparing Secure Checkout',
         subtitle: 'We are reviewing your details before we move you into payment and final confirmation.',
         pulse: 'Checking frame selections and delivery details',
+        mobileTitle: 'Checking details',
+        mobileSubtitle: 'Reviewing your order details.',
+        mobilePulse: 'Checking selections',
         activeStep: 0
     },
     {
@@ -2558,6 +2561,9 @@ const PROCESSING_OVERLAY_STAGES = [
         title: 'Saving Your Custom Order',
         subtitle: 'We are syncing your artwork, payment confirmation, and delivery preferences securely.',
         pulse: 'Creating a secure order record',
+        mobileTitle: 'Saving order',
+        mobileSubtitle: 'Securing payment and order details.',
+        mobilePulse: 'Saving order',
         activeStep: 1
     },
     {
@@ -2565,6 +2571,9 @@ const PROCESSING_OVERLAY_STAGES = [
         title: 'Preparing Your Confirmation',
         subtitle: 'We are reserving your order number and getting your next steps ready.',
         pulse: 'Building your confirmation experience',
+        mobileTitle: 'Loading confirmation',
+        mobileSubtitle: 'Generating your order number.',
+        mobilePulse: 'Almost done',
         activeStep: 2
     }
 ];
@@ -2573,6 +2582,7 @@ let processingOverlayTimer = null;
 
 function setProcessingOverlayStage(stageIndex = 0) {
     const stage = PROCESSING_OVERLAY_STAGES[Math.min(Math.max(stageIndex, 0), PROCESSING_OVERLAY_STAGES.length - 1)];
+    const useCompactCopy = window.innerWidth <= 640;
     const eyebrow = document.getElementById('processingEyebrow');
     const title = document.getElementById('processingTitle');
     const subtitle = document.getElementById('processingSubtitle');
@@ -2584,15 +2594,15 @@ function setProcessingOverlayStage(stageIndex = 0) {
     }
 
     if (title) {
-        title.innerHTML = `${stage.title}<span class="loading-dots"></span>`;
+        title.innerHTML = `${useCompactCopy && stage.mobileTitle ? stage.mobileTitle : stage.title}<span class="loading-dots"></span>`;
     }
 
     if (subtitle) {
-        subtitle.textContent = stage.subtitle;
+        subtitle.textContent = useCompactCopy && stage.mobileSubtitle ? stage.mobileSubtitle : stage.subtitle;
     }
 
     if (pulseTitle) {
-        pulseTitle.textContent = stage.pulse;
+        pulseTitle.textContent = useCompactCopy && stage.mobilePulse ? stage.mobilePulse : stage.pulse;
     }
 
     steps.forEach((step, index) => {
@@ -2680,10 +2690,11 @@ function showOrderSuccessAnimation(orderData = null) {
         const firstName = customerName && !/guest customer|valued customer/i.test(customerName)
             ? customerName.split(/\s+/)[0]
             : '';
+        const useCompactCopy = window.innerWidth <= 640;
 
         successMessage.textContent = firstName
-            ? `${firstName}, your custom frame order is locked in and ready for the next step.`
-            : 'Your custom frame order is locked in and ready for the next step.';
+            ? (useCompactCopy ? `${firstName}, order confirmed.` : `${firstName}, your custom frame order is locked in and ready for the next step.`)
+            : (useCompactCopy ? 'Order confirmed.' : 'Your custom frame order is locked in and ready for the next step.');
     }
     
     if (processingState && successState) {
