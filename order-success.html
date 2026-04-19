@@ -90,13 +90,6 @@
             gap: 22px;
         }
 
-        .hero-grid {
-            display: grid;
-            grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
-            gap: 22px;
-            align-items: stretch;
-        }
-
         .panel {
             position: relative;
             overflow: hidden;
@@ -107,21 +100,53 @@
             backdrop-filter: blur(12px);
         }
 
-        .hero-copy {
-            padding: clamp(28px, 5vw, 52px);
-            background: linear-gradient(145deg, rgba(15, 92, 99, 0.98), rgba(22, 105, 122, 0.96) 50%, rgba(72, 159, 181, 0.92));
-            color: white;
+        .combined-hero-order {
+            padding: 0;
+            background: white;
+            overflow: visible;
         }
 
-        .hero-copy::after {
+        .combined-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(340px, 0.9fr);
+            gap: 0;
+            align-items: stretch;
+            min-height: 100%;
+        }
+
+        .hero-section {
+            padding: clamp(32px, 5vw, 56px);
+            background: linear-gradient(145deg, rgba(15, 92, 99, 0.98), rgba(22, 105, 122, 0.96) 50%, rgba(72, 159, 181, 0.92));
+            color: white;
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--radius-xl) 0 0 var(--radius-xl);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .hero-section::after {
             content: '';
             position: absolute;
-            right: -60px;
-            bottom: -80px;
-            width: 260px;
-            height: 260px;
+            right: -80px;
+            bottom: -100px;
+            width: 300px;
+            height: 300px;
             border-radius: 50%;
             background: radial-gradient(circle, rgba(242, 184, 75, 0.22) 0%, rgba(242, 184, 75, 0) 72%);
+            pointer-events: none;
+        }
+
+        .order-section {
+            padding: 32px;
+            background: linear-gradient(180deg, rgba(255, 255, 253, 0.96), rgba(248, 244, 236, 0.98));
+            border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            border: 1px solid var(--border);
+            border-left: none;
         }
 
         .eyebrow {
@@ -245,6 +270,13 @@
             gap: 16px;
         }
 
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
         .card-kicker {
             font-size: 0.74rem;
             font-weight: 800;
@@ -335,42 +367,62 @@
             line-height: 1.65;
         }
 
-        .metric-grid {
+        .order-details {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
         }
 
-        .metric-card {
-            padding: 16px;
-            border-radius: 18px;
-            background: var(--card-strong);
-            border: 1px solid var(--border);
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
 
-        .metric-card span {
+        .detail-item .detail-label {
             display: block;
-            margin-bottom: 8px;
             font-size: 0.72rem;
             font-weight: 800;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: rgba(18, 47, 55, 0.54);
+            color: rgba(18, 47, 55, 0.56);
         }
 
-        .metric-card strong {
+        .detail-item strong {
+            display: block;
+            color: var(--ink);
+            font-size: 0.95rem;
+            font-weight: 700;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .detail-card {
+            padding: 16px;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #ffffff, #f8fbfa);
+            border: 1px solid var(--border);
+        }
+
+        .detail-label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(18, 47, 55, 0.56);
+        }
+
+        .detail-value {
             display: block;
             color: var(--ink);
             font-size: 1rem;
-            line-height: 1.45;
-        }
-
-        .metric-card small {
-            display: block;
-            margin-top: 8px;
-            color: var(--muted);
-            font-size: 0.86rem;
+            font-weight: 700;
             line-height: 1.55;
+            word-break: break-word;
         }
 
         .progress-grid {
@@ -456,32 +508,6 @@
             gap: 12px;
         }
 
-        .detail-card {
-            padding: 16px;
-            border-radius: 18px;
-            background: linear-gradient(180deg, #ffffff, #f8fbfa);
-            border: 1px solid var(--border);
-        }
-
-        .detail-label {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 0.72rem;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: rgba(18, 47, 55, 0.56);
-        }
-
-        .detail-value {
-            display: block;
-            color: var(--ink);
-            font-size: 1rem;
-            font-weight: 700;
-            line-height: 1.55;
-            word-break: break-word;
-        }
-
         .next-grid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -562,9 +588,17 @@
         }
 
         @media (max-width: 980px) {
-            .hero-grid,
-            .content-grid {
+            .combined-layout {
                 grid-template-columns: 1fr;
+            }
+
+            .hero-section {
+                border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+            }
+
+            .order-section {
+                border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+                border-left: 1px solid var(--border);
             }
 
             .next-grid {
@@ -586,17 +620,73 @@
                 padding: 18px 0 36px;
             }
 
-            .panel,
-            .info-card,
-            .order-card {
+            .panel {
                 border-radius: 24px;
             }
 
+            .combined-hero-order {
+                border-radius: 24px;
+            }
+
+            .hero-section {
+                border-radius: 24px 24px 0 0;
+                padding: 28px 20px;
+            }
+
+            .order-section {
+                border-radius: 0 0 24px 24px;
+                border-left: 1px solid var(--border);
+                padding: 20px;
+                gap: 14px;
+            }
+
             .hero-highlight,
-            .metric-grid,
             .detail-grid,
             .next-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .order-details {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                padding-top: 10px;
+            }
+
+            .hero-copy h1 {
+                font-size: clamp(1.8rem, 5vw, 2.9rem);
+            }
+
+            .hero-lead {
+                font-size: 0.95rem;
+            }
+
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .progress-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 8px;
+            }
+
+            .progress-card {
+                padding: 10px 12px;
+                gap: 8px;
+            }
+
+            .progress-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+
+            .progress-copy strong {
+                font-size: 0.85rem;
+            }
+
+            .progress-copy span {
+                font-size: 0.75rem;
             }
 
             .hero-actions {
@@ -607,9 +697,8 @@
                 width: 100%;
             }
 
-            .order-card header,
-            .section-heading {
-                flex-direction: column;
+            .hero-copy h1 {
+                max-width: none;
             }
         }
     </style>
@@ -618,181 +707,107 @@
     <div class="mobile-global-header-placeholder"></div>
 
     <main class="success-shell">
-        <section class="hero-grid">
-            <section class="panel hero-copy">
-                <div class="eyebrow">
-                    <span class="eyebrow-dot"></span>
-                    Order confirmed
-                </div>
-                <h1 id="heroHeading">Order confirmed</h1>
-                <p class="hero-lead" id="heroSubcopy">Payment received. Track updates anytime in My Orders.</p>
+        <section class="panel combined-hero-order">
+            <div class="combined-layout">
+                <div class="hero-section">
+                    <div class="eyebrow">
+                        <span class="eyebrow-dot"></span>
+                        Order confirmed
+                    </div>
+                    <h1 id="heroHeading">Order confirmed</h1>
+                    <p class="hero-lead" id="heroSubcopy">Payment received. Track updates anytime in My Orders.</p>
 
-                <div class="hero-highlight">
-                    <div class="hero-stat">
-                        <span>Payment</span>
-                        <strong>Confirmed</strong>
-                    </div>
-                    <div class="hero-stat">
-                        <span>Total</span>
-                        <strong id="totalAmountHero">Loading...</strong>
-                    </div>
-                </div>
-
-                <div class="hero-actions">
-                    <a id="primaryActionBtn" class="btn btn-primary" href="my-orders.html">
-                        <i class="fas fa-box-open"></i>
-                        Track Order
-                    </a>
-                    <a class="btn btn-secondary" href="index.html">
-                        <i class="fas fa-arrow-left"></i>
-                        Continue Shopping
-                    </a>
-                </div>
-            </section>
-
-            <aside class="panel order-card">
-                <header>
-                    <div>
-                        <div class="card-kicker">Order ID</div>
-                        <h2>Order at a glance</h2>
-                    </div>
-                    <div class="status-pill">
-                        <i class="fas fa-circle-check"></i>
-                        <span id="statusLabel">Confirmed</span>
-                    </div>
-                </header>
-
-                <div class="order-token">
-                    <div class="order-token-top">
-                        <span class="order-token-label">Order number</span>
-                        <button type="button" class="copy-btn" id="copyOrderIdBtn">
-                            <i class="fa-regular fa-clone"></i>
-                            Copy
-                        </button>
-                    </div>
-                    <strong id="orderNumber">Loading...</strong>
-                    <p class="token-caption">Use this number for tracking or support.</p>
-                </div>
-
-                <div class="metric-grid">
-                    <div class="metric-card">
-                        <span>Current stage</span>
-                        <strong id="currentStage">Review queued</strong>
-                        <small id="stageNote">Next update appears in My Orders.</small>
-                    </div>
-                    <div class="metric-card">
-                        <span>Confirmed on</span>
-                        <strong id="orderDateHero">Loading...</strong>
-                        <small>Saved to your account.</small>
-                    </div>
-                </div>
-
-                <div class="progress-grid">
-                    <div class="progress-card active">
-                        <div class="progress-icon"><i class="fas fa-credit-card"></i></div>
-                        <div class="progress-copy">
-                            <strong>Payment</strong>
-                            <span>Received</span>
+                    <div class="hero-highlight">
+                        <div class="hero-stat">
+                            <span>Payment</span>
+                            <strong>Confirmed</strong>
+                        </div>
+                        <div class="hero-stat">
+                            <span>Total</span>
+                            <strong id="totalAmountHero">Loading...</strong>
                         </div>
                     </div>
-                    <div class="progress-card">
-                        <div class="progress-icon"><i class="fas fa-image"></i></div>
-                        <div class="progress-copy">
-                            <strong>Review</strong>
-                            <span>Queued</span>
-                        </div>
-                    </div>
-                    <div class="progress-card">
-                        <div class="progress-icon"><i class="fas fa-truck"></i></div>
-                        <div class="progress-copy">
-                            <strong>Shipping</strong>
-                            <span>Updates in My Orders</span>
-                        </div>
+
+                    <div class="hero-actions">
+                        <a id="primaryActionBtn" class="btn btn-primary" href="my-orders.html">
+                            <i class="fas fa-box-open"></i>
+                            Track Order
+                        </a>
+                        <a class="btn btn-secondary" href="index.html">
+                            <i class="fas fa-arrow-left"></i>
+                            Continue Shopping
+                        </a>
                     </div>
                 </div>
-            </aside>
-        </section>
 
-        <section class="content-grid">
-            <div class="card-stack">
-                <section class="panel info-card">
-                    <div class="section-heading">
+                <div class="order-section">
+                    <div class="order-header">
                         <div>
-                            <div class="card-kicker">Order details</div>
-                            <h2>Order details</h2>
+                            <div class="card-kicker">Order ID</div>
+                            <h2>Order summary</h2>
+                        </div>
+                        <div class="status-pill">
+                            <i class="fas fa-circle-check"></i>
+                            <span id="statusLabel">Confirmed</span>
                         </div>
                     </div>
-                    <div class="detail-grid">
-                        <div class="detail-card">
+
+                    <div class="order-token">
+                        <div class="order-token-top">
+                            <span class="order-token-label">Order number</span>
+                            <button type="button" class="copy-btn" id="copyOrderIdBtn">
+                                <i class="fa-regular fa-clone"></i>
+                                Copy
+                            </button>
+                        </div>
+                        <strong id="orderNumber">Loading...</strong>
+                        <p class="token-caption">Use this number for tracking or support.</p>
+                    </div>
+
+                    <div class="order-details">
+                        <div class="detail-item">
                             <span class="detail-label">Name</span>
-                            <span class="detail-value" id="customerName">Loading...</span>
+                            <strong id="customerName">Loading...</strong>
                         </div>
-                        <div class="detail-card">
+                        <div class="detail-item">
                             <span class="detail-label">Email</span>
-                            <span class="detail-value" id="customerEmail">Loading...</span>
+                            <strong id="customerEmail">Loading...</strong>
                         </div>
-                        <div class="detail-card">
+                        <div class="detail-item">
                             <span class="detail-label">Total paid</span>
-                            <span class="detail-value" id="totalAmount">Loading...</span>
+                            <strong id="totalAmount">Loading...</strong>
                         </div>
-                        <div class="detail-card">
+                        <div class="detail-item">
                             <span class="detail-label">Date</span>
-                            <span class="detail-value" id="orderDate">Loading...</span>
+                            <strong id="orderDate">Loading...</strong>
                         </div>
                     </div>
-                </section>
 
-                <section class="panel info-card">
-                    <div class="section-heading">
-                        <div>
-                            <div class="card-kicker">Next</div>
-                            <h2>What happens now</h2>
+                    <div class="progress-grid">
+                        <div class="progress-card active">
+                            <div class="progress-icon"><i class="fas fa-credit-card"></i></div>
+                            <div class="progress-copy">
+                                <strong>Payment</strong>
+                                <span>Received</span>
+                            </div>
+                        </div>
+                        <div class="progress-card">
+                            <div class="progress-icon"><i class="fas fa-image"></i></div>
+                            <div class="progress-copy">
+                                <strong>Review</strong>
+                                <span>Queued</span>
+                            </div>
+                        </div>
+                        <div class="progress-card">
+                            <div class="progress-icon"><i class="fas fa-truck"></i></div>
+                            <div class="progress-copy">
+                                <strong>Shipping</strong>
+                                <span>Updates in My Orders</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="next-grid">
-                        <div class="next-card">
-                            <span>Step 1</span>
-                            <strong>Review</strong>
-                            <p>We check your photo and frame details.</p>
-                        </div>
-                        <div class="next-card">
-                            <span>Step 2</span>
-                            <strong>Production</strong>
-                            <p>Your frame moves into production.</p>
-                        </div>
-                        <div class="next-card">
-                            <span>Step 3</span>
-                            <strong>Shipping</strong>
-                            <p>Tracking appears in My Orders.</p>
-                        </div>
-                    </div>
-                </section>
+                </div>
             </div>
-
-            <aside class="sidebar-stack">
-                <section class="panel info-card">
-                    <div class="section-heading">
-                        <div>
-                            <div class="card-kicker">Quick links</div>
-                            <h2>Manage order</h2>
-                        </div>
-                    </div>
-                    <div class="quick-actions">
-                        <a class="action-link" id="trackOrderLink" href="my-orders.html">
-                            <span><i class="fas fa-location-dot"></i> Track this order</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </a>
-                        <a class="action-link" href="faq.html">
-                            <span><i class="fas fa-circle-question"></i> FAQs & support</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </a>
-                        <a class="action-link" href="index.html">
-                            <span><i class="fas fa-store"></i> Back to storefront</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                </section>
-            </aside>
         </section>
     </main>
 
