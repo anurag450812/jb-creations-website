@@ -12,3 +12,5 @@ build/
 
 # Local Netlify folder
 .netlify
+
+desktop.ini
